@@ -333,6 +333,7 @@ class Variant(models.Model):
     class Meta:
         managed = True
         db_table = 'Variant'
+        unique_together = (('chromosome', 'position', 'reference', 'alternative'),)
 
 
 class Transcript(models.Model):
@@ -342,10 +343,10 @@ class Transcript(models.Model):
     hgvs_p = models.CharField(max_length=200)
     transcript = models.CharField(max_length=255)
     gene = models.CharField(max_length=255)
-    strand  = models.CharField(max_length=255)
-    protein =  models.CharField(max_length=255)
-    effect  = models.CharField( max_length=255)
-    location  = models.CharField(max_length=255)
+    strand = models.CharField(max_length=255)
+    protein = models.CharField(max_length=255)
+    effect = models.CharField( max_length=255)
+    location = models.CharField(max_length=255)
     length = models.CharField(max_length=255)
 
     class Meta:
