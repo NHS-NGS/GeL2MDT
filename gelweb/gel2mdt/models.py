@@ -296,7 +296,7 @@ class Relative(models.Model):
     gel_id = models.IntegerField(unique=True)
     relation_to_proband = models.CharField(max_length=200)
     affected_status = models.CharField(max_length=200)
-    variant = models.ForeignKey(Proband, on_delete=models.CASCADE)
+    proband = models.ForeignKey(Proband, on_delete=models.CASCADE)
 
     def __str__(self):
         return str(self.gel_id)
