@@ -312,14 +312,6 @@ class Relative(models.Model):
         db_table = 'Relative'
 
 
-class VariantManager(models.Manager):
-    def get_tier(self, tier, report):
-        # postprocess a queryset
-        variants = Variant.objects.filter(interpretation_report=report)
-        tier_variants = [v for v in variants if v.max_tier() == tier]
-
-        return tier_variants
-
 
 class Variant(models.Model):
     """
@@ -327,14 +319,20 @@ class Variant(models.Model):
     """
     chromosome = models.CharField(max_length=2)
     position = models.IntegerField()
+    hgvs_g = models.CharField(max_length=255, unique=True)
+
+    gene = models.ForeignKey(Gene, on_delete=models.CASCADE)
+
     reference = models.CharField(max_length=200)
     alternate = models.CharField(max_length=200)
+
     db_snp_id = models.CharField(max_length=200)
+
     sift = models.CharField(max_length=200)
     polyphen = models.CharField(max_length=200)
     pathogenicity = models.CharField(max_length=200)
-    genome_build = models.CharField( max_length=255)
-    assembly = models.ForeignKey(
+
+    genome_assembly = models.ForeignKey(
         ToolOrAssemblyVersion,
         related_name='assembly',
         on_delete=models.CASCADE)
@@ -349,21 +347,34 @@ class Variant(models.Model):
 
 
 class Transcript(models.Model):
-    proband_variant = models.ForeignKey('ProbandVariant', on_delete=models.CASCADE)
-    hgvs_c = models.CharField(max_length=200)
-    hgvs_g = models.CharField(max_length=200)
-    hgvs_p = models.CharField(max_length=200)
-    transcript_name = models.CharField(max_length=255)
-    gene = models.ForeignKey(Gene, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
     strand = models.CharField(max_length=255)
     protein = models.CharField(max_length=255)
-    effect = models.CharField( max_length=255)
     location = models.CharField(max_length=255)
     length = models.CharField(max_length=255)
+
+    gene = models.ForeignKey(Gene, on_delete=models.CASCADE)
 
     class Meta:
         managed = True
         db_table = 'Transcript'
+
+
+class TranscriptVariant(models.Model):
+    transcript = models.OneToOneKey(Transcript)
+    variant = models.OneToOneKey(Variant)
+
+    hgvs_c = models.CharField(max_length=255)
+    hgvs_p = models.CharField(max_lenght=255)
+
+
+class ProbandVariantManager(models.Manager):
+    def get_tier(self, tier, report):
+        # postprocess a queryset
+        proband_variants = ProbandVariant.objects.filter(interpretation_report=report)
+        tier_variants = [pv for pv in proband_variants if pv.max_tier() == tier]
+
+        return tier_variants
 
 
 class ProbandVariant(models.Model):
@@ -385,11 +396,9 @@ class ProbandVariant(models.Model):
         ).values_list('tier', flat=True)
         return min(report_event_tiers)
 
-
     tools = models.ManyToManyField(
         ToolOrAssemblyVersion)
 
-    transcript = models.ForeignKey(Transcript, on_delete=models.CASCADE, null=True)
 
     zygosity = models.CharField(
         max_length=20,
@@ -403,7 +412,7 @@ class ProbandVariant(models.Model):
 
     discussion = models.TextField(db_column='Discussion', blank=True)
     action = models.TextField(db_column='Action', blank=True)
-    contribution_of_phenotype = models.CharField(db_column='Contribution_of_phenotype', max_length=2, choices=(
+    contribution_to_phenotype = models.CharField(db_column='Contribution_to_phenotype', max_length=2, choices=(
         ('UN', 'Uncertain'), ('No', 'Non'), ('FU', 'Full'), ('PA', 'Partial'), ('SE', 'Secondary'), ('NA', 'NA')
     ), default='NA')
     change_med = models.NullBooleanField(db_column='Change_med')
@@ -421,6 +430,13 @@ class ProbandVariant(models.Model):
     class Meta:
         managed = True
         db_table = 'ProbandVariant'
+
+
+class ProbandTranscriptVariant(models.Model):
+    transcipt = models.OneToOneField(Transcript)
+    proband_variant = models.OneToOneField(ProbandVariant)
+
+    effect = models.CharField(max_length=255)
 
 
 class ReportEvent(models.Model):
