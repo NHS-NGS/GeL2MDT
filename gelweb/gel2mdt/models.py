@@ -333,7 +333,7 @@ class Variant(models.Model):
     class Meta:
         managed = True
         db_table = 'Variant'
-        unique_together = (('chromosome', 'position', 'reference', 'alternative'),)
+        unique_together = (('chromosome', 'position', 'reference', 'alternate'),)
 
 
 class Transcript(models.Model):
@@ -341,8 +341,8 @@ class Transcript(models.Model):
     hgvs_c = models.CharField(max_length=200)
     hgvs_g = models.CharField(max_length=200)
     hgvs_p = models.CharField(max_length=200)
-    transcript = models.CharField(max_length=255)
-    gene = models.CharField(max_length=255)
+    transcript_name = models.CharField(max_length=255)
+    gene = models.ForeignKey(Gene, on_delete=models.CASCADE)
     strand = models.CharField(max_length=255)
     protein = models.CharField(max_length=255)
     effect = models.CharField( max_length=255)
@@ -379,7 +379,7 @@ class ProbandVariant(models.Model):
     tools = models.ManyToManyField(
         ToolOrAssemblyVersion)
 
-    transcript = models.ForeignKey(Transcript, on_delete=models.CASCADE)
+    transcript_id = models.ForeignKey(Transcript, on_delete=models.CASCADE)
 
     zygosity = models.CharField(
         max_length=20,
