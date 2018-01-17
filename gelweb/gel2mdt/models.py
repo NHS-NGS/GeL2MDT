@@ -75,7 +75,7 @@ class Family(models.Model):
     """
     Represents a family within the CIP API: proband and relatives (if present)
     link to a particular family. Holds information about which panels have been
-    applied to this case, which should be concordant with the phenotype of the
+o   applied to this case, which should be concordant with the phenotype of the
     proband.
     """
     class Meta:
@@ -335,6 +335,10 @@ class Variant(models.Model):
     polyphen = models.CharField(max_length=200)
     pathogenicity = models.CharField(max_length=200)
     genome_build = models.CharField( max_length=255)
+    assembly = models.ForeignKey(
+        ToolOrAssemblyVersion,
+        related_name='assembly',
+        on_delete=models.CASCADE)
 
     def __str__(self):
         pass
@@ -363,10 +367,7 @@ class ProbandVariant(models.Model):
         ).values_list('tier', flat=True)
         return min(report_event_tiers)
 
-    assembly = models.ForeignKey(
-        ToolOrAssemblyVersion,
-        related_name='assembly',
-        on_delete=models.CASCADE)
+
     tools = models.ManyToManyField(
         ToolOrAssemblyVersion)
 
@@ -415,7 +416,7 @@ class ReportEvent(models.Model):
     re_id = models.CharField(max_length=200)
     tier = models.PositiveIntegerField()
 
-    variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
+    proband_variant = models.ForeignKey(ProbandVariant, on_delete=models.CASCADE)
     panel = models.ForeignKey(PanelVersion, on_delete=models.CASCADE)
 
     mode_of_inheritance = models.CharField(
@@ -426,6 +427,8 @@ class ReportEvent(models.Model):
 
     gene = models.ForeignKey(Gene, on_delete=models.CASCADE)
     phenotype = models.ForeignKey(Phenotype, on_delete=models.CASCADE)
+
+    coverage = models.DecimalField(max_digits=8, decimal_places=3)
 
     def __str__(self):
         return str(self.variant.interpretation_report.ir_family.ir_family_id) + " " + self.re_id
