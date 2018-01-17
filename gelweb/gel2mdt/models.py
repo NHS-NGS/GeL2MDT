@@ -473,6 +473,18 @@ class VariantReport(models.Model):
         managed = True
         db_table = 'VariantReport'
 
+class OtherStaff(models.Model):
+    class Meta:
+        verbose_name_plural = "Other staff"
+    staff_name = models.CharField(max_length=200)
+
+    def __str__(self):
+        pass
+
+    class Meta:
+        managed = True
+        db_table = 'OtherStaff'
+
 
 class MDT(models.Model):
     date_of_mdt = models.DateTimeField()
@@ -482,6 +494,7 @@ class MDT(models.Model):
     clinicial_scientists = models.ForeignKey(
         ClinicalScientist, on_delete=models.CASCADE)
     clinicians = models.ForeignKey(Clinician, on_delete=models.CASCADE)
+    other_staff = models.ForeignKey(OtherStaff, on_delete=models.CASCADE)
 
     # outcome: should the variant be reported?
     to_report = models.BooleanField()
