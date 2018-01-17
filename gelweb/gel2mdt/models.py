@@ -283,6 +283,8 @@ class Proband(models.Model):
     pilot_case = models.NullBooleanField()
     outcome = models.TextField(blank=True)
     comment = models.TextField(blank=True)
+    discussion = models.TextField(blank=True)
+    action = models.TextField(blank=True)
     episode = models.CharField( max_length=255, blank=True)
     gmc = models.CharField( max_length=255)
     local_id = models.CharField(max_length=255)
@@ -310,7 +312,6 @@ class Relative(models.Model):
     class Meta:
         managed = True
         db_table = 'Relative'
-
 
 
 class Variant(models.Model):
