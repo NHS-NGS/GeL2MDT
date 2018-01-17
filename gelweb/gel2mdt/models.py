@@ -390,7 +390,7 @@ class ProbandVariant(models.Model):
     tools = models.ManyToManyField(
         ToolOrAssemblyVersion)
 
-    transcript_id = models.ForeignKey(Transcript, on_delete=models.CASCADE)
+    transcript = models.ForeignKey(Transcript, on_delete=models.CASCADE, null=True)
 
     zygosity = models.CharField(
         max_length=20,
