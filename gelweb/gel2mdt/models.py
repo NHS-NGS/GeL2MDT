@@ -334,6 +334,24 @@ class Variant(models.Model):
         managed = True
         db_table = 'Variant'
 
+
+class Transcript(models.Model):
+    proband_variant = models.ForeignKey('ProbandVariant', on_delete=models.CASCADE)
+    hgvs_c = models.CharField(max_length=200)
+    hgvs_g = models.CharField(max_length=200)
+    hgvs_p = models.CharField(max_length=200)
+    transcript = models.CharField(max_length=255)
+    gene = models.CharField(max_length=255)
+    strand  = models.CharField(max_length=255)
+    protein =  models.CharField(max_length=255)
+    effect  = models.CharField( max_length=255)
+    location  = models.CharField(max_length=255)
+    length = models.CharField(max_length=255)
+
+    class Meta:
+        managed = True
+        db_table = 'Transcript'
+
 class ProbandVariant(models.Model):
     objects = VariantManager()
 
@@ -360,8 +378,7 @@ class ProbandVariant(models.Model):
     tools = models.ManyToManyField(
         ToolOrAssemblyVersion)
 
-    hgvs_c = models.CharField(max_length=200)
-    hgvs_p = models.CharField(max_length=200)
+    transcript = models.ForeignKey(Transcript, on_delete=models.CASCADE)
 
     zygosity = models.CharField(
         max_length=20,
@@ -473,6 +490,7 @@ class VariantReport(models.Model):
         managed = True
         db_table = 'VariantReport'
 
+
 class OtherStaff(models.Model):
     class Meta:
         verbose_name_plural = "Other staff"
@@ -491,7 +509,7 @@ class MDT(models.Model):
     report = models.ForeignKey(VariantReport, on_delete=models.CASCADE)
 
     # attending staff
-    clinicial_scientists = models.ForeignKey(
+    clinical_scientists = models.ForeignKey(
         ClinicalScientist, on_delete=models.CASCADE)
     clinicians = models.ForeignKey(Clinician, on_delete=models.CASCADE)
     other_staff = models.ForeignKey(OtherStaff, on_delete=models.CASCADE)
