@@ -361,11 +361,11 @@ class Transcript(models.Model):
 
 
 class TranscriptVariant(models.Model):
-    transcript = models.OneToOneKey(Transcript)
-    variant = models.OneToOneKey(Variant)
+    transcript = models.OneToOneField(Transcript, on_delete=models.CASCADE)
+    variant = models.OneToOneField(Variant, on_delete=models.CASCADE)
 
     hgvs_c = models.CharField(max_length=255)
-    hgvs_p = models.CharField(max_lenght=255)
+    hgvs_p = models.CharField(max_length=255)
 
 
 class ProbandVariantManager(models.Manager):
@@ -378,7 +378,7 @@ class ProbandVariantManager(models.Manager):
 
 
 class ProbandVariant(models.Model):
-    objects = VariantManager()
+    objects = ProbandVariantManager()
 
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
 
@@ -433,8 +433,8 @@ class ProbandVariant(models.Model):
 
 
 class ProbandTranscriptVariant(models.Model):
-    transcipt = models.OneToOneField(Transcript)
-    proband_variant = models.OneToOneField(ProbandVariant)
+    transcipt = models.OneToOneField(Transcript, on_delete=models.CASCADE)
+    proband_variant = models.OneToOneField(ProbandVariant, on_delete=models.CASCADE)
 
     effect = models.CharField(max_length=255)
 
