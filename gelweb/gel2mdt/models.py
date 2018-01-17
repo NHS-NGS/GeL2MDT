@@ -279,12 +279,11 @@ class Proband(models.Model):
     forename = models.CharField(max_length=200)
     surname = models.CharField(max_length=200)
     date_of_birth = models.DateTimeField('date_of_birth')
-    gender = models.CharField(max_length=10)
+    sex = models.CharField(max_length=10, blank=True)
     pilot_case = models.NullBooleanField()
     outcome = models.TextField(blank=True)
     comment = models.TextField(blank=True)
     episode = models.CharField( max_length=255, blank=True)
-    sex = models.CharField( max_length=10, blank=True)
     gmc = models.CharField( max_length=255)
     local_id = models.CharField(max_length=255)
     status = models.CharField(db_column='Sample_status', max_length=50, choices=(
