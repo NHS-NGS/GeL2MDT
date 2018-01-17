@@ -70,6 +70,7 @@ class Clinician(models.Model):
         managed = True
         db_table = 'Clinician'
 
+
 class Family(models.Model):
     """
     Represents a family within the CIP API: proband and relatives (if present)
@@ -108,6 +109,7 @@ class Gene(models.Model):
         managed = True
         db_table = 'Gene'
 
+
 class Panel(models.Model):
     """
     Represents a panel from panelApp which should be the panels used by GeL.
@@ -124,6 +126,7 @@ class Panel(models.Model):
     class Meta:
         managed = True
         db_table = 'Panel'
+
 
 class PanelVersion(models.Model):
     """
@@ -143,6 +146,7 @@ class PanelVersion(models.Model):
         managed = True
         db_table = 'PanelVersion'
 
+
 class ToolOrAssembly(models.Model):
     """
     Represents a tool used or genome build used in several use cases within the
@@ -158,6 +162,7 @@ class ToolOrAssembly(models.Model):
 
     def __str__(self):
         return str(self.tool_name)
+
 
 class ToolOrAssemblyVersion(models.Model):
     """
@@ -248,6 +253,7 @@ class GELInterpretationReport(models.Model):
         managed = True
         db_table = 'GELInterpretationReport'
 
+
 class ClinicalScientist(models.Model):
     cs_name = models.CharField(max_length=200)
     email = models.EmailField()
@@ -292,6 +298,7 @@ class Proband(models.Model):
         managed = True
         db_table = 'Proband'
 
+
 class Relative(models.Model):
     gel_id = models.IntegerField(unique=True)
     relation_to_proband = models.CharField(max_length=200)
@@ -305,6 +312,7 @@ class Relative(models.Model):
         managed = True
         db_table = 'Relative'
 
+
 class VariantManager(models.Manager):
     def get_tier(self, tier, report):
         # postprocess a queryset
@@ -312,6 +320,7 @@ class VariantManager(models.Manager):
         tier_variants = [v for v in variants if v.max_tier() == tier]
 
         return tier_variants
+
 
 class Variant(models.Model):
     """
@@ -333,6 +342,7 @@ class Variant(models.Model):
     class Meta:
         managed = True
         db_table = 'Variant'
+
 
 class ProbandVariant(models.Model):
     objects = VariantManager()
@@ -394,6 +404,7 @@ class ProbandVariant(models.Model):
         managed = True
         db_table = 'ProbandVariant'
 
+
 class ReportEvent(models.Model):
     """
     Represents a reported variant from the CIP. For each variant, there will
@@ -423,6 +434,7 @@ class ReportEvent(models.Model):
         managed = True
         db_table = 'ReportEvent'
 
+
 class Primer(models.Model):
     tool = models.ForeignKey(ToolOrAssemblyVersion, on_delete=models.CASCADE)
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
@@ -439,6 +451,7 @@ class Primer(models.Model):
     class Meta:
         managed = True
         db_table = 'Primer'
+
 
 class VariantReport(models.Model):
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
