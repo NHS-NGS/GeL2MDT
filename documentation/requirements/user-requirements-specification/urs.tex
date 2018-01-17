@@ -1,0 +1,144 @@
+\documentclass[a4paper, 10pt]{article}
+\usepackage[a4paper,top=3cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+\usepackage{geometry}
+\usepackage{fullpage}
+\usepackage{enumitem}
+
+\usepackage{tabularx}
+\usepackage[table,xcdraw]{xcolor}
+
+\usepackage{booktabs}
+\usepackage[hidelinks=true]{hyperref}
+
+\renewcommand*\rmdefault{phv}
+\begin{document}
+\noindent
+\large\textbf{User Requirements Specification} \hfill \textbf{TC} \\
+\normalsize Software Documentation: \texttt{gel2mdt }\hfill Version 0.92 (\today) \\
+
+\tableofcontents
+
+\section{Introduction}
+\subsection{Purpose}
+This is the User Requirements Specification (URS) document for the \texttt{gel2mdt} project. The project aims to create a database to store data from the GeL CIP-API alongside patient demographic information and information about clinical workflow steps then subsequently display this data to clinical scientists thereby facilitating the reporting of variants.
+
+\subsection{Scope}
+This document outlines the requirements identified by proposed users of \texttt{gel2mdt}. The intended readership is West Midlands Regional Genetics Laboratories (WMRGL) clinical scientists, Great Ormond Street Hospital (GOSH) clinical scientists, and the project developers.
+
+\subsection{Definitions \& Abbreviations}
+\begin{description}[align=right,labelwidth=2cm]
+\setlength\itemsep{-0.3em}
+\item [FRS] Functional Requirements Specification
+\item [GOSH] Great Ormond Street Hospital
+\item [RTM] Requirement Traceability Matrix
+\item [URS] User Requirements Specification
+\item [WMRGL] West Midlands Regional Genetics Laboratories
+\end{description}
+
+\subsection{Named people}
+\begin{description}[align=right,labelwidth=2cm]
+\setlength\itemsep{-0.3em}
+\item [HA]  Helena Ahlfors --- Project Lead
+\item [SC]  Samuel Clokie --- Project Lead
+\item [ES]  Edward Stone --- Developer
+\item [PL]  Patrick Lombard --- Developer
+\item [TC]  Theo Cole --- Developer
+\end{description}
+
+
+\section{User Requirements Specification}
+See Table 1 for requirements captured from proposed users. Technical requirements can be found in the functional requirement specification (FRS) document. The requirement traceability matrix (RTM) document details how the software has been designed to these requirements.
+
+\renewcommand*{\arraystretch}{1.3}
+\begin{table}[h]
+\centering
+\label{tab:urs}
+\begin{tabularx}{\textwidth}{@{}l>{\hsize=.66\hsize}X>{\hsize=1.33\hsize}Xl@{}}
+\rowcolor[HTML]{333333} 
+{\color[HTML]{FFFFFF} \#} & {\color[HTML]{FFFFFF} Requirement Title} & {\color[HTML]{FFFFFF} Requirement Details}                                                                                            & {\color[HTML]{FFFFFF} Trust} \\
+\rowcolor[HTML]{C0C0C0} 
+Functional
+&
+&
+&
+\\
+1.1.1
+& Storage and display of all patients within the GeL CIP-API.
+& Data stored should include proband ID, family ID, interpretation ID, date last updated, CIP name, and the site code.
+& Both
+\\
+1.1.2
+& Storage and display of case data for all with certain status types.
+& If the status type of a patient is `sent to gmcs', `report generated', or `report sent' then case data should also be retrieved from GeL CIP-API.
+& Both
+\\
+1.1.3
+& Demographic information should be stored.
+& (i) For patients described in 1.1.2, demographic information should also be pulled from LabKey or the the Trust's LIMS. (ii) Users need to be able to manually specifiy a lab ID number.
+& Both
+\\
+1.1.4
+& Flag high priority cases.
+& Cases with Tier 1, Tier 2, or Promoted variants should be flagged for review by clinical scientists.
+& Both
+\\
+1.1.5
+& Facilitate variant review
+& Details required for variant review should be pulled from GeL CIP-API and other necessary sources to facilate the review of variants.
+& Both
+\\
+1.1.6
+& Confirm and report variants 
+& (i) When reviewing variants, users need to be able to set a variant as `confirmed'. (ii) Additionally, users need to be able to set a variant as `reported'. (iii) Once a variant has been reviewed, a second clinical scientist user should be able to perform and record the results from a second check.
+& WMRGL
+\\
+1.1.7
+& Assign cases for MDT
+& Users should be able to assign particular patients for MDT then choose variants for discussion.
+& Both
+\\
+1.1.8
+& View list of patients requiring MDT
+& Users should be able to quickly get a list of all patients who have been flagged for MDT and have yet to go through the MDT process.
+& Both
+\\
+1.1.9
+& Manage MDT cases
+& Users should be able to view an MDT screen for each patient requiring MDT, where they can input decisions made at each MDT and record attendees of the MDT.
+& Both
+\\
+1.1.10
+& Design primers
+& When viewing any particular variant, users should be able to press a button to design primers for that variant.
+& WMRGL
+\\
+\rowcolor[HTML]{C0C0C0} 
+Non-functional
+&
+&                                                                                                                           &
+\\
+1.2.1
+& Availibility
+& The webapp should be available for use at all times during standard working hours.
+& Both
+\\
+1.2.2
+& Accessibility
+& The webapp should be accessible from any trust computer without the need for installation of any software.
+& Both
+\\
+\rowcolor[HTML]{C0C0C0}
+Constraints
+&
+&                                                                                                                           &
+\\
+1.3.3
+& Deployment
+& The webapp and database should be fully deployable following standard deployment procedures at both GOSH and WMRGL.   
+& Both
+\\ 
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\end{document}
