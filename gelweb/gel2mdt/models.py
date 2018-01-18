@@ -368,6 +368,10 @@ class TranscriptVariant(models.Model):
     hgvs_c = models.CharField(max_length=255)
     hgvs_p = models.CharField(max_length=255)
 
+    class Meta:
+        managed = True
+        db_table = 'TranscriptVariant'
+
 
 class ProbandVariantManager(models.Manager):
     def get_tier(self, tier, report):
@@ -437,6 +441,10 @@ class ProbandTranscriptVariant(models.Model):
     proband_variant = models.OneToOneField(ProbandVariant, on_delete=models.CASCADE)
 
     effect = models.CharField(max_length=255)
+
+    class Meta:
+        managed = True
+        db_table = 'ProbandTranscriptVariant'
 
 
 class ReportEvent(models.Model):
