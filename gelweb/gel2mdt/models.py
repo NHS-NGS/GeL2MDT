@@ -3,40 +3,6 @@ from django.utils import timezone
 
 from .model_utils.choices import ChoiceEnum
 
-# TODO: add str stresentations for all models
-# TODO: add docstrings
-
-
-# classes for choice
-class ModesOfInheritance(ChoiceEnum):
-    """
-    A list of choices for modes of inheritance that each variant can possibly
-    have. These are taken from the panelApp API, where they are an attribute
-    of each gene. Used in the Variant model.
-    """
-    monoallelic_not_imprinted = "monoallelic_not_imprinted"
-    monoallelic_maternally_imprinted = "monoallelic_maternally_imprinted"
-    monoallelic_paternally_imprinted = "monoallelic_paternally_imprinted"
-    monoallelic = "monoallelic"
-    biallelic = "biallelic"
-    monoallelic_and_biallelic = "monoallelic_and_biallelic"
-    monoallelic_and_more_severe_biallelic = "monoallelic_and_more_severe_biallelic"
-    xlinked_biallelic = "xlinked_biallelic"
-    xlinked_monoallelic = "xlinked_monoallelic"
-    mitochondrial = "mitochondrial"
-    unknown = "unknown"
-
-
-class Zygosities(ChoiceEnum):
-    """
-    A list of choices of zygosity that a variant can possibly have, used in the
-    Variant model.
-    """
-    heterozygous = "heterozygous"
-    reference_homozygous = "reference_homozygous"
-    alternate_homozygous = "alternate_homozygous"
-    unknown = "unknown"
-
 
 class ListUpdate(models.Model):
     """
@@ -382,6 +348,17 @@ class ProbandVariantManager(models.Manager):
         return tier_variants
 
 
+class Zygosities(ChoiceEnum):
+    """
+    A list of choices of zygosity that a variant can possibly have, used in the
+    Variant model.
+    """
+    heterozygous = "heterozygous"
+    reference_homozygous = "reference_homozygous"
+    alternate_homozygous = "alternate_homozygous"
+    unknown = "unknown"
+
+
 class ProbandVariant(models.Model):
     objects = ProbandVariantManager()
 
@@ -445,6 +422,26 @@ class ProbandTranscriptVariant(models.Model):
     class Meta:
         managed = True
         db_table = 'ProbandTranscriptVariant'
+
+
+# classes for choice
+class ModesOfInheritance(ChoiceEnum):
+    """
+    A list of choices for modes of inheritance that each variant can possibly
+    have. These are taken from the panelApp API, where they are an attribute
+    of each gene. Used in the Variant model.
+    """
+    monoallelic_not_imprinted = "monoallelic_not_imprinted"
+    monoallelic_maternally_imprinted = "monoallelic_maternally_imprinted"
+    monoallelic_paternally_imprinted = "monoallelic_paternally_imprinted"
+    monoallelic = "monoallelic"
+    biallelic = "biallelic"
+    monoallelic_and_biallelic = "monoallelic_and_biallelic"
+    monoallelic_and_more_severe_biallelic = "monoallelic_and_more_severe_biallelic"
+    xlinked_biallelic = "xlinked_biallelic"
+    xlinked_monoallelic = "xlinked_monoallelic"
+    mitochondrial = "mitochondrial"
+    unknown = "unknown"
 
 
 class ReportEvent(models.Model):
