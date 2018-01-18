@@ -285,7 +285,8 @@ class Variant(models.Model):
     Variant Info
     """
     chromosome = models.CharField(max_length=2)
-    position = models.IntegerField()
+    start_position = models.IntegerField()
+    stop_position = models.IntegerField()
     hgvs_g = models.CharField(max_length=255, unique=True)
 
     gene = models.ForeignKey(Gene, on_delete=models.CASCADE)
