@@ -409,7 +409,6 @@ class ProbandVariant(models.Model):
     # TODO: find where to get these from
 
     af_max = models.CharField(max_length=200)
-    depth = models.IntegerField(default=0)
 
     discussion = models.TextField(db_column='Discussion', blank=True)
     action = models.TextField(db_column='Action', blank=True)
