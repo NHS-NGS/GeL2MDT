@@ -72,8 +72,11 @@ class PollAPI(object):
         """
         Asks user for username and password and sets these as environment variables to be accessed later.
         """
-        os.environ["cip_api_username"] = input("Enter username: ")
-        os.environ["cip_api_password"] = getpass.getpass("Enter password: ")
+        try:
+            print("User known: " + os.environ["cip_api_username"])
+        except KeyError as e:
+            os.environ["cip_api_username"] = input("Enter username: ")
+            os.environ["cip_api_password"] = getpass.getpass("Enter password: ")
 
     def get_auth_headers(self):
         """
