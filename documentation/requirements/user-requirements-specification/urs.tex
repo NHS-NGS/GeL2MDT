@@ -13,7 +13,7 @@
 \begin{document}
 \noindent
 \large\textbf{User Requirements Specification} \hfill \textbf{TC} \\
-\normalsize Software Documentation: \texttt{gel2mdt }\hfill Version 0.92 (\today) \\
+\normalsize Software Documentation: \texttt{gel2mdt }\hfill Version 0.94 (\today) \\
 
 \tableofcontents
 
@@ -51,9 +51,8 @@ This document outlines the requirements identified by proposed users of \texttt{
 \newgeometry{top=1cm,bottom=1cm,left=1cm,right=1cm}
 \pagenumbering{gobble}
 \section{User Requirements Specification}
-
 \renewcommand*{\arraystretch}{1.3}
-\begin{table}[h]
+\begin{table}[h!]
     \centering
     \label{tab:urs}
     \begin{tabularx}{\textwidth}{@{}l>{\hsize=.575\hsize}X>{\hsize=1.425\hsize}Xl@{}}
@@ -97,7 +96,7 @@ This document outlines the requirements identified by proposed users of \texttt{
         \\
         1.1.7
         & Assign cases for MDT
-        & Users should be able to assign particular patients for MDT then choose variants for discussion.
+        & Users should be able to assign each case an MDT value: `required', `not required', `in progress', `done'.
         & Both
         \\
         1.1.8
@@ -118,6 +117,11 @@ This document outlines the requirements identified by proposed users of \texttt{
         1.1.11
         & Provide audit trail
         & Any changes to information in the database should be recorded along with the user who made the change.
+        & Both
+        \\
+        1.1.12
+        & Provide monthly statistics
+        & At the end of each month, the following statistics should be generated and displayed: (i) no. cases total/by status: returned to GMC, to review, to close, archived; (ii) no. cases not started review; (iii) no. cases awaiting MDT (MDT required but not complete); (iv) no. patients with variants awaiting confirmation \& with confirmed variants; (v) no. cases to be reported; (vi) no. cases added to archive.
         & Both
         \\
         \rowcolor[HTML]{C0C0C0} 
@@ -145,6 +149,7 @@ This document outlines the requirements identified by proposed users of \texttt{
         & The webapp and database should be fully deployable following standard deployment procedures at both GOSH and WMRGL.   
         & Both
         \\ 
+
         \bottomrule
     \end{tabularx}
 \end{table}
@@ -155,25 +160,31 @@ This document outlines the requirements identified by proposed users of \texttt{
 \newgeometry{top=3cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm}
 \section{Version Changes}
 \begin{description}
-            \item [0.93] \begin{itemize}
+            \item [0.94] \begin{itemize}
                                 \renewcommand\labelitemi{--}
-                                        \item Added CS name, CGU number, and comments box requierment to 1.1.3(ii).
-                                                    \item Added variant information to 1.1.5.
-                                                                \item Renamed `confirm' and `report' to `Confirmed' and `Included in Report' in 1.1.6.
-                                                                            \item Added flagging of second checks to 1.1.6.
-                                                                                        \item Created 1.1.11 (Audit).
-                                                                                                \end{itemize}
-                                                                                                    \rule{\textwidth}{1pt}
-                                                                                                        \item [0.92] \begin{itemize}
-                                                                                                                            \renewcommand\labelitemi{--}
-                                                                                                                                    \item Reformatted document.
-                                                                                                                                                \item Moved technical requirements to FRS.
-                                                                                                                                                            \item Added Trust column.
-                                                                                                                                                                    \end{itemize}
-                                                                                                                                                                        \rule{\textwidth}{1pt}
-                                                                                                                                                                            \item [0.91] \begin{itemize}
-                                                                                                                                                                                                \renewcommand\labelitemi{--}
-                                                                                                                                                                                                        \item Initialised document
-                                                                                                                                                                                                                \end{itemize}
+                                        \item Added details of MDT statuses to 1.1.7.
+                                                    \item Created 1.1.12 (Monthly statistics)
+                                                            \end{itemize}
+                                                                \rule{\textwidth}{1pt}
+                                                                    \item [0.93] \begin{itemize}
+                                                                                        \renewcommand\labelitemi{--}
+                                                                                                \item Added CS name, CGU number, and comments box requierment to 1.1.3(ii).
+                                                                                                            \item Added variant information to 1.1.5.
+                                                                                                                        \item Renamed `confirm' and `report' to `Confirmed' and `Included in Report' in 1.1.6.
+                                                                                                                                    \item Added flagging of second checks to 1.1.6.
+                                                                                                                                                \item Created 1.1.11 (Audit).
+                                                                                                                                                        \end{itemize}
+                                                                                                                                                            \rule{\textwidth}{1pt}
+                                                                                                                                                                \item [0.92] \begin{itemize}
+                                                                                                                                                                                    \renewcommand\labelitemi{--}
+                                                                                                                                                                                            \item Reformatted document.
+                                                                                                                                                                                                        \item Moved technical requirements to FRS.
+                                                                                                                                                                                                                    \item Added Trust column.
+                                                                                                                                                                                                                            \end{itemize}
+                                                                                                                                                                                                                                \rule{\textwidth}{1pt}
+                                                                                                                                                                                                                                    \item [0.91] \begin{itemize}
+                                                                                                                                                                                                                                                        \renewcommand\labelitemi{--}
+                                                                                                                                                                                                                                                                \item Initialised document
+                                                                                                                                                                                                                                                                        \end{itemize}
 \end{description}
 \end{document}
