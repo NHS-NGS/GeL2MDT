@@ -75,7 +75,7 @@ class PollAPI(object):
         Asks user for username and password and sets these as environment variables to be accessed later.
         """
         try:
-            print("User known: " + os.environ["cip_api_username"])
+            user = os.environ["cip_api_username"]
         except KeyError as e:
             os.environ["cip_api_username"] = input("Enter username: ")
             os.environ["cip_api_password"] = getpass.getpass("Enter password: ")
@@ -89,7 +89,6 @@ class PollAPI(object):
         token_endpoint = token_endpoint_list[self.api]
 
         self.token_url = self.server.format(endpoint=token_endpoint)
-        print(self.token_url)
         self.get_credentials()
         token_response = requests.post(
             url=self.token_url,
@@ -101,7 +100,6 @@ class PollAPI(object):
 
         token_json = token_response.json()
 
-        print(token_json)
         self.headers = {
             "Accept": "application/json",
             "Authorization": "JWT {token}".format(
