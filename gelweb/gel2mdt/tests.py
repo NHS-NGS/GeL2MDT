@@ -27,4 +27,4 @@ class TestInterpretationList(TestCase):
         cases_to_poll = get_list.cases_to_poll
 
         for case in cases_to_poll:
-            print(case)
+            assert case["last_status"] in ["sent_to_gmcs","report_generated","report_sent"]
