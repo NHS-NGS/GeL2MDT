@@ -254,9 +254,12 @@ class Proband(models.Model):
     episode = models.CharField( max_length=255, blank=True)
     gmc = models.CharField( max_length=255)
     local_id = models.CharField(max_length=255)
-    status = models.CharField(db_column='Sample_status', max_length=50, choices=(
+    status = models.CharField( max_length=50, choices=(
         ('N', 'Not Started'), ('U', 'Under Review'), ('M', 'Awaiting MDT'), ('V', 'Awaiting Validation'),
         ('R', 'Awaiting Reporting'), ('P', 'Reported'), ('C', 'Completed'), ('E', 'External')), default='N')
+
+    mdt_status = models.CharField( max_length=50, choices=(
+        ('R', 'Required'), ('N', 'Not Required'), ('I', 'In Progress'), ('D', 'Done'),), default='R')
 
     def __str__(self):
         return str(self.gel_id)
