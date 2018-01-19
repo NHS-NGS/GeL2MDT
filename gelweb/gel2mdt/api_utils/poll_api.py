@@ -32,13 +32,14 @@ class PollAPI(object):
 
         self.server = self.server_list[api][0]
         self.url = self.server.format(endpoint=self.endpoint)
+        self.headers_required = self.server_list[api][1]
         self.headers = None  # headers will be set if required, denoted in server_list tuple
 
         self.token_url = None  # only need this if auth headers required
-        self.response = self.get_json_response(url=self.url, headers=self.server_list[api][1])
+        self.response_json = None  # set upon calling get_json_response()
         self.response_status = None
 
-    def get_json_response(self, url, headers):
+    def get_json_response(self):
         """
         Creates a session which polls the instance's API a maximum of 20 times
         for a json response, retrying if the poll fails.
@@ -51,20 +52,21 @@ class PollAPI(object):
             adapter = requests.adapters.HTTPAdapter(max_retries=MAX_RETRIES)
             session.mount("https://", adapter)
 
-            if (headers) and (self.headers is None):
+            if (self.headers_required) and (self.headers is None):
                 # get auth headers if we need them and they're not yet set
                 self.get_auth_headers()
                 continue
-            elif (headers) and (self.headers is not None):
+            elif (self.headers_required) and (self.headers is not None):
                 # auth headers required; have been set
                 response = session.get(
-                    url=url,
+                    url=self.url,
                     headers=self.headers)
-            elif headers is None:
+            elif self.headers_required is None:
                 # no headers required
                 response = session.get(
                     url=url)
 
+            self.response_json = response.json()
             self.response_status = response.status_code
             return response.json()
 
