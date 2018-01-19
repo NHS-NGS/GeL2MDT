@@ -20,3 +20,11 @@ class TestInterpretationList(TestCase):
 
     def test_only_get_raredisease(self):
         pass
+
+    def test_get_cases_of_interest(self):
+        get_list = add_cases.InterpretationList()
+        get_list.get_interpretation_list()
+        cases_to_poll = get_list.cases_to_poll
+
+        for case in cases_to_poll:
+            print(case)

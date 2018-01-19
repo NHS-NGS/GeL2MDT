@@ -45,4 +45,4 @@ class InterpretationList(object):
         self.cases_to_poll = [case for case in all_cases if case["last_status"] in [
             "sent_to_gmcs",
             "report_generated",
-            "report_sent"]
+            "report_sent"]]
