@@ -1,5 +1,72 @@
+import os
+import json
 from ..api_utils import poll_api
 
+
+class Case(object):
+    """
+    Representation of a single case which can be added to the database,
+    updated in the database, or skipped dependent on whether a matching
+    case/case family is found.
+    """
+    def __init__(self, case_json):
+        self.request_id = None
+        self.json = case_json
+        self.json_hash = None
+
+
+class MultipleCaseAdder(object):
+    """
+    Representation of the process of adding many cases to the database.
+    This class will handle the checking of cases already present, adding
+    required related instances to the database and reporting status and
+    errors during the process.
+    """
+    def __init__(self, test_data=False):
+        """
+        Initiliase an instance of a MultipleCaseAdder to start managing
+        a database update. This will get the list of cases available to
+        us, hash them all, check which need to be added/updated and then
+        manage the updating of the database.
+        :param test_data: Boolean. Use test data or not. Default = False
+        """
+        self.list_of_cases = None         # list of all cases to add
+        self.list_of_cases_hashed = None  # cases once hashed
+        self.cases_to_add = None          # new cases (no IRfamily)
+        self.cases_to_update = None       # cases w/ different hash (IRfamily exists)
+        self.update_errors = None         # holds errors that are raised during updates
+        self.test_data = test_data        # are we using test data files? defaults False (no)
+
+        if self.test_data:
+            self.fetch_test_data()
+        else:
+            interpretation_list_poll = InterpretationList()
+            self.list_of_cases = interpretation_list_poll.cases_to_poll
+        self.hash_cases()
+
+    def fetch_test_data(self):
+        """
+        This will run and convert our test data to a list of jsons if
+        self.test_data is set to True.
+        """
+        json_list = []
+        for filename in os.listdir(os.path.join(os.getcwd(), "gel2mdt/tests/test_files")):
+            file_path = os.path.join(
+                os.getcwd(), "gel2mdt/tests/test_files/{filename}".format(
+                    filename=filename))
+            with open(file_path) as json_file:
+                json_data = json.load(json_file)
+                json_list.append(json_data)
+
+        self.list_of_cases = json_list
+
+
+    def hash_cases(self):
+        """
+        Hashes the instance's list of cases then modifies the instance's
+        list_of_cases_hashed attribute accordingly.
+        """
+        pass
 
 class InterpretationList(object):
     """
@@ -10,6 +77,8 @@ class InterpretationList(object):
         self.all_cases = None
         self.all_cases_count = 0
         self.cases_to_poll = None  # 'sent_to_gmcs', 'report_generated', 'report_sent'
+
+        self.get_interpretation_list()
 
     def get_interpretation_list(self):
         """
@@ -30,9 +99,10 @@ class InterpretationList(object):
 
             all_cases += [{
                 "interpretation_request_id": result["interpretation_request_id"],
+                "sample_type": result["sample_type"],
                 "last_status": result["last_status"]}
-                for result in request_list_results \
-                if result["sample_type"] == "raredisease" \
+                for result in request_list_results
+                if result["sample_type"] == "raredisease"
                 and result["last_status"] != "blocked"]
 
             if request_list_poll.response_json["next"]:
@@ -46,3 +116,25 @@ class InterpretationList(object):
             "sent_to_gmcs",
             "report_generated",
             "report_sent"]]
+
+
+class CasesToPoll(object):
+    """
+    Representation of all the cases we need to poll (ie. of interest:
+        'sent_to_gmcs', 'report_generated', 'report_sent').
+    This will get the list from an instance of InterpretaionList.
+    """
+    def __init__(self):
+        """
+        Initalise to fetch a list of jsons that we are interested in.
+        This will invoke an instance of InterpretationList.
+        """
+        self.interpretation_list_poll = InterpretationList()
+        self.list_of_cases = self.interpretation_list_poll.cases_to_poll
+
+    def poll_for_jsons(self):
+        """
+        Uses the self.list_of_cases and polls for the given jsons,
+        then adding each to a list and setting this to self.json_list.
+        """
+        pass
