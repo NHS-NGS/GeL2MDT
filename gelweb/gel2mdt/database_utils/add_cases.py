@@ -10,8 +10,10 @@ class Case(object):
     case/case family is found.
     """
     def __init__(self, case_json):
-        self.request_id = None
         self.json = case_json
+        self.request_id = str(
+            self.json["interpretation_request_id"]) + "-" + str(self.json["version"])
+
         self.json_hash = None
 
 
@@ -31,7 +33,6 @@ class MultipleCaseAdder(object):
         :param test_data: Boolean. Use test data or not. Default = False
         """
         self.list_of_cases = None         # list of all cases to add
-        self.list_of_cases_hashed = None  # cases once hashed
         self.cases_to_add = None          # new cases (no IRfamily)
         self.cases_to_update = None       # cases w/ different hash (IRfamily exists)
         self.update_errors = None         # holds errors that are raised during updates
@@ -41,32 +42,45 @@ class MultipleCaseAdder(object):
             self.fetch_test_data()
         else:
             interpretation_list_poll = InterpretationList()
-            self.list_of_cases = interpretation_list_poll.cases_to_poll
-        self.hash_cases()
+            self.cases_to_poll = interpretation_list_poll.cases_to_poll
+            self.fetch_api_data()
 
     def fetch_test_data(self):
         """
         This will run and convert our test data to a list of jsons if
         self.test_data is set to True.
         """
-        json_list = []
+        list_of_cases = []
         for filename in os.listdir(os.path.join(os.getcwd(), "gel2mdt/tests/test_files")):
             file_path = os.path.join(
                 os.getcwd(), "gel2mdt/tests/test_files/{filename}".format(
                     filename=filename))
             with open(file_path) as json_file:
                 json_data = json.load(json_file)
-                json_list.append(json_data)
+                list_of_cases.append(Case(case_json=json_data))
 
-        self.list_of_cases = json_list
+        self.list_of_cases = list_of_cases
 
+    def fetch_api_data(self):
+        list_of_cases = [
+            Case(
+                case_json=self.get_case_json(case["interpretation_request_id"])
+            ) for case in self.cases_to_poll
+        ]
 
-    def hash_cases(self):
+    def get_case_json(self, interpretation_request_id):
         """
-        Hashes the instance's list of cases then modifies the instance's
-        list_of_cases_hashed attribute accordingly.
+        Take an interpretation request ID, then get the json for that case
+        using the PollAPI class defined in .database_utils
+        :param interpretation_request_id: an IR ID of the format XXXX-X
+        :returns: A case json associated with the given IR ID from CIP-API
         """
-        pass
+        request_poll = poll_api.PollAPI(
+            "cip_api", "interpretation-request/{id}/{version}".format(
+                id=interpretation_request_id.split("-")[0],
+                version=interpretation_request_id.split("-")[1]))
+        request_poll.get_json_response()
+
 
 class InterpretationList(object):
     """

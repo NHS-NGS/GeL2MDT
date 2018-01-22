@@ -1,9 +1,9 @@
+import unittest
 from django.test import TestCase
 from .api_utils import poll_api
 from .database_utils import add_cases
 
-import pprint
-
+import re
 
 class Poll_CIP_API_TestCase(TestCase):
     def test_returns_status_code(self):
@@ -11,6 +11,7 @@ class Poll_CIP_API_TestCase(TestCase):
         cip_api_poll.get_json_response()
 
 
+@unittest.skip("skip to avoid polling")
 class TestInterpretationList(TestCase):
     def setUp(self):
         self.case_list_handler = add_cases.InterpretationList()
@@ -34,10 +35,12 @@ class TestInterpretationList(TestCase):
                 "report_sent"]
 
 
-class TestGetCaseList(TestCase):
+class TestAddCases(TestCase):
     def setUp(self):
         self.case_update_handler = add_cases.MultipleCaseAdder(test_data=True)
 
-    def test_get_dummy_data(self):
-        pass
-
+    def test_request_id_format(self):
+        print(self.case_update_handler.list_of_cases)
+        for case in self.case_update_handler.list_of_cases:
+            print(case.request_id)
+            assert re.match("\d+-\d+", case.request_id)
