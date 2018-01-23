@@ -74,7 +74,7 @@ class MultipleCaseAdder(object):
 
         self.cases_to_add = self.check_cases_to_add()
         self.cases_to_update = self.check_cases_to_update()
-        self.update_errors = {}           # holds errors that are raised
+        self.update_errors = {}
 
     def fetch_test_data(self):
         """
@@ -83,6 +83,7 @@ class MultipleCaseAdder(object):
         """
         list_of_cases = []
         for filename in os.listdir(
+            # get list of test files then open and load to json
             os.path.join(
                 os.getcwd(), "gel2mdt/tests/test_files")):
             file_path = os.path.join(
@@ -95,7 +96,9 @@ class MultipleCaseAdder(object):
 
     def fetch_api_data(self):
         list_of_cases = [
+            # list comprehension, calling self.get_case_json each time for poll
             Case(
+                # instatiate a new case with the polled json
                 case_json=self.get_case_json(case["interpretation_request_id"])
             ) for case in self.cases_to_poll
         ]
@@ -109,6 +112,7 @@ class MultipleCaseAdder(object):
         :returns: A case json associated with the given IR ID from CIP-API
         """
         request_poll = poll_api.PollAPI(
+            # instantiate a poll of CIP API for a given case json
             "cip_api", "interpretation-request/{id}/{version}".format(
                 id=interpretation_request_id.split("-")[0],
                 version=interpretation_request_id.split("-")[1]))
@@ -190,6 +194,7 @@ class InterpretationList(object):
             request_list_results = request_list_poll.response_json["results"]
 
             all_cases += [{
+                # add the ir_id, sample type, and latest status to dict
                 "interpretation_request_id":
                     result["interpretation_request_id"],
                 "sample_type":
