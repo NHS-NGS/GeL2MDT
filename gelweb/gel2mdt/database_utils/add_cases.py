@@ -16,8 +16,7 @@ class Case(object):
         self.request_id = str(
             self.json["interpretation_request_id"]) + "-" + str(self.json["version"])
 
-        self.json_hash = None
-        self.hash_json()
+        self.json_hash = self.hash_json()
 
     def hash_json(self):
         """
@@ -46,18 +45,21 @@ class MultipleCaseAdder(object):
         manage the updating of the database.
         :param test_data: Boolean. Use test data or not. Default = False
         """
-        self.list_of_cases = None         # list of all cases to add
-        self.cases_to_add = None          # new cases (no IRfamily)
-        self.cases_to_update = None       # cases w/ different hash (IRfamily exists)
-        self.update_errors = None         # holds errors that are raised during updates
-        self.test_data = test_data        # are we using test data files? defaults False (no)
-
+        # are we using test data files? defaults False (no)
+        self.test_data = test_data
         if self.test_data:
-            self.fetch_test_data()
+            # set list_of_cases to test zoo
+            self.list_of_case = self.fetch_test_data()
+            self.cases_to_poll = None
         else:
+            # set list_of_cases to cases of interest from API
             interpretation_list_poll = InterpretationList()
             self.cases_to_poll = interpretation_list_poll.cases_to_poll
-            self.fetch_api_data()
+            self.list_of_case = self.fetch_api_data()
+
+        self.cases_to_add = None          # new cases (no IRfamily)
+        self.cases_to_update = None       # cases w/ different hash (IRfamily exists)
+        self.update_errors = {}           # holds errors that are raised during updates
 
     def fetch_test_data(self):
         """
@@ -73,7 +75,7 @@ class MultipleCaseAdder(object):
                 json_data = json.load(json_file)
                 list_of_cases.append(Case(case_json=json_data))
 
-        self.list_of_cases = list_of_cases
+        return list_of_cases
 
     def fetch_api_data(self):
         list_of_cases = [
@@ -81,6 +83,7 @@ class MultipleCaseAdder(object):
                 case_json=self.get_case_json(case["interpretation_request_id"])
             ) for case in self.cases_to_poll
         ]
+        return list_of_cases
 
     def get_case_json(self, interpretation_request_id):
         """
@@ -94,6 +97,22 @@ class MultipleCaseAdder(object):
                 id=interpretation_request_id.split("-")[0],
                 version=interpretation_request_id.split("-")[1]))
         request_poll.get_json_response()
+
+    def check_cases_to_add(self):
+        """
+        Go through list of cases and check family ID against database
+        entries for IRfamily. Return the list of cases for which no IRfamily
+        exists.
+        """
+        pass
+
+    def check_cases_to_update(self):
+        """
+        Go through list of cases that _do not_ need to be added and check
+        hashes against the latest case stored for corresponding IRfamily
+        entries.
+        """
+        pass
 
 
 class InterpretationList(object):
@@ -144,25 +163,3 @@ class InterpretationList(object):
             "sent_to_gmcs",
             "report_generated",
             "report_sent"]]
-
-
-class CasesToPoll(object):
-    """
-    Representation of all the cases we need to poll (ie. of interest:
-        'sent_to_gmcs', 'report_generated', 'report_sent').
-    This will get the list from an instance of InterpretaionList.
-    """
-    def __init__(self):
-        """
-        Initalise to fetch a list of jsons that we are interested in.
-        This will invoke an instance of InterpretationList.
-        """
-        self.interpretation_list_poll = InterpretationList()
-        self.list_of_cases = self.interpretation_list_poll.cases_to_poll
-
-    def poll_for_jsons(self):
-        """
-        Uses the self.list_of_cases and polls for the given jsons,
-        then adding each to a list and setting this to self.json_list.
-        """
-        pass
