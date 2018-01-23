@@ -77,6 +77,15 @@ WSGI_APPLICATION = 'gelweb.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
+# Testing
+# https://django-testing-docs.readthedocs.io/en/latest/coverage.html
+
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+NOSE_ARGS = [
+    '--with-coverage',
+    '--cover-package=gel2mdt'
+]
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators

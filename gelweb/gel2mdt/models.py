@@ -201,7 +201,6 @@ class GELInterpretationReport(models.Model):
         Overwrite the model's save method to auto-increment versions for
         duplicate ir_familys. Pass in a InterpretationReportFamily entry.
         """
-        print(type(self.ir_family))
         archived_reports = GELInterpretationReport.objects.filter(
             ir_family=self.ir_family)
         if archived_reports.exists():
