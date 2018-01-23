@@ -1,5 +1,7 @@
 import os
 import json
+import hashlib
+
 from ..api_utils import poll_api
 
 
@@ -15,6 +17,18 @@ class Case(object):
             self.json["interpretation_request_id"]) + "-" + str(self.json["version"])
 
         self.json_hash = None
+        self.hash_json()
+
+    def hash_json(self):
+        """
+        Hash the given json for this Case, sorting the keys to ensure
+        that order is preserved, or else different order -> different
+        hash.
+        """
+        hash_buffer = json.dumps(self.json, sort_keys=True).encode('utf-8')
+        hash_hex = hashlib.sha512(hash_buffer)
+        hash_digest = hash_hex.hexdigest()
+        self.json_hash = hash_digest
 
 
 class MultipleCaseAdder(object):
