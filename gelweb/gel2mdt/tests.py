@@ -3,20 +3,21 @@ from django.test import TestCase
 from .api_utils import poll_api
 from .database_utils import add_cases
 
+from .models import *
+
 import re
 import os
 import json
 import hashlib
+from datetime import datetime
 
 
-@unittest.skip("skipping to avoid polling")
 class Poll_CIP_API_TestCase(TestCase):
     def test_returns_status_code(self):
         cip_api_poll = poll_api.PollAPI("cip_api", "interpretation-request")
         cip_api_poll.get_json_response()
 
 
-@unittest.skip("skip to avoid polling")
 class TestInterpretationList(TestCase):
     def setUp(self):
         self.case_list_handler = add_cases.InterpretationList()
@@ -58,28 +59,9 @@ class TestAddCases(TestCase):
         """
         For each test case, assert that we reliably hash the json.
         """
-        test_json_hashes = {}
-        for filename in os.listdir(
-            os.path.join(
-                os.getcwd(),
-                "gel2mdt/tests/test_files"
-            )
-        ):
-            # get the jsons
-            file_path = os.path.join(
-                os.getcwd(), "gel2mdt/tests/test_files/{filename}".format(
-                    filename=filename))
-            with open(file_path) as json_file:
-                json_data = json.load(json_file)
-            # get the IR ID and hash the json into a dict
-            request_id = str(json_data["interpretation_request_id"]) + \
-                "-" + str(json_data["version"])
-            test_json_hashes[request_id] = hashlib.sha512(
-                json.dumps(json_data, sort_keys=True).encode('utf-8')
-            ).hexdigest()
-
+        test_cases = TestCaseOperations()
         for case in self.case_update_handler.list_of_cases:
-            assert case.json_hash == test_json_hashes[case.request_id]
+            assert case.json_hash == test_cases.json_hashes[case.request_id]
 
 
 class TestIdentifyCases(TestCase):
@@ -87,27 +69,127 @@ class TestIdentifyCases(TestCase):
     Tests to ensure that MultipleCaseAdder can correctly determine
     which cases should be added, updated, and skipped.
     """
-    def setUpClass(self):
-        pass
-
     def test_identify_cases_to_add(self):
         """
-        Test that MultipleCaseAdder recognises which cases are not
-        in the database and need to be fully added.
+        MultipleCaseAdder recognises which cases need to be added.
         """
         case_update_handler = add_cases.MultipleCaseAdder(test_data=True)
+        test_cases = TestCaseOperations()
+
+        for case in case_update_handler.cases_to_add:
+            # all the test cases should be flagged as 'to add' since none added
+            assert case.request_id in test_cases.request_id_list
+
+        assert not case_update_handler.cases_to_update
 
     def test_identify_cases_to_update(self):
         """
-        Test that MultipleCaseAdder recognises which cases are in the
-        database but have different hashes so need to be updated.
+        MultipleCaseAdder recognises hash differences to determine updates.
         """
+        # add all of our test cases first. change hashes to trick MCA into
+        # thinking the test files need to be updated in the database
+        test_cases = TestCaseOperations()
+        test_cases.add_cases_to_database(change_hash=True)
+
+        # now cases are added, MCA should recognise this when checking for updates
+        case_update_handler = add_cases.MultipleCaseAdder(test_data=True)
+
+        to_update = case_update_handler.cases_to_update
+        assert len(to_update) > 0
+        for case in to_update:
+            assert case.request_id in test_cases.request_id_list
 
     def test_identify_cases_to_skip(self):
         """
-        Test that MultipleCaseAdder recognises which cases are in the
-        database and have identical hashes on the latest version so the
-        case does not need to be added or updated, even when multiple
-        versions of the case exist with different hashes.
+        MultipleCaseAdder recognises when latest version hashes match current.
         """
         pass
+
+
+class TestCaseOperations(object):
+    """
+    Common operations on our test zoo.
+    """
+    def __init__(self):
+        self.file_path_list = [
+            # get the list of absolute file paths for the cases in test_files
+            os.path.join(
+                os.getcwd(),
+                "gel2mdt/tests/test_files/{filename}".format(
+                    filename=filename)
+            ) for filename in os.listdir(
+                os.path.join(
+                    os.getcwd(),
+                    "gel2mdt/tests/test_files"
+                )
+            )
+        ]
+
+        self.json_list = [
+            json.load(open(file_path)) for file_path in self.file_path_list
+        ]
+
+        self.request_id_list = [
+            str(x["interpretation_request_id"]) + "-" + str(x["version"])
+            for x in self.json_list]
+
+        self.json_hashes = {
+            str(x["interpretation_request_id"]) + "-" + str(x["version"]):
+                hashlib.sha512(
+                    json.dumps(x, sort_keys=True).encode('utf-8')
+                ).hexdigest() for x in self.json_list
+                }
+
+    def add_cases_to_database(self, change_hash=False):
+        """
+        For all the cases we have stored, add them all to the database.
+        :param change_hash: Default=False. If True, hashes will be changes for
+        GELInterpretationReport entries so that test cases in MCA get flagged
+        for update.
+        """
+        # make dummy related tables
+        clinician = Clinician.objects.create(
+            clinician_name="test_clinician",
+            email="test@email.com",
+            hospital="test_hospital"
+        )
+        family = Family.objects.create(
+            clinician=clinician,
+            gel_family_id=100
+        )
+
+        # convert our test data into IR and IRfamily model instances
+        ir_family_instances = [InterpretationReportFamily(
+            participant_family=family,
+            cip=json["cip"],
+            ir_family_id=str(json["interpretation_request_id"]) +
+            "-" + str(json["version"]),
+            priority=json["case_priority"]
+        ) for json in self.json_list]
+        InterpretationReportFamily.objects.bulk_create(ir_family_instances)
+
+        ir_instances = [GELInterpretationReport(
+            ir_family=InterpretationReportFamily.objects.get(
+                ir_family_id=str(json["interpretation_request_id"]) +
+                "-" + str(json["version"])),
+            polled_at_datetime=datetime.now(),
+            sha_hash=self.get_hash(json, change_hash),
+            status=json["status"][0]["status"],
+            updated=json["status"][0]["created_at"],
+            user=json["status"][0]["user"]
+        ) for json in self.json_list]
+        for ir in ir_instances:
+            ir.save()
+
+    def get_hash(self, json, change_hash):
+        """
+        Take a json and whether or not to change a hash, then return
+        the hash of that json. Changing hash may be required if testing
+        whether a case has mismatching hash values from the latest stored.
+        """
+        hash_digest = self.json_hashes[str(json["interpretation_request_id"]) +
+                                           "-" + str(json["version"])]
+        if change_hash:
+            hash_digest = hash_digest[::-1]
+
+        return hash_digest
