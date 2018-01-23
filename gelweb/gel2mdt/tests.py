@@ -12,12 +12,14 @@ import hashlib
 from datetime import datetime
 
 
+@unittest.skip('avoid unnecessarily polling')
 class Poll_CIP_API_TestCase(TestCase):
     def test_returns_status_code(self):
         cip_api_poll = poll_api.PollAPI("cip_api", "interpretation-request")
         cip_api_poll.get_json_response()
 
 
+@unittest.skip('avoid unnecessarily polling')
 class TestInterpretationList(TestCase):
     def setUp(self):
         self.case_list_handler = add_cases.InterpretationList()
@@ -103,7 +105,17 @@ class TestIdentifyCases(TestCase):
         """
         MultipleCaseAdder recognises when latest version hashes match current.
         """
-        pass
+        test_cases = TestCaseOperations()
+        # add all the test cases to db but retain hash so attempting to re-add
+        # should cause a skip
+        test_cases.add_cases_to_database()
+
+        case_update_handler = add_cases.MultipleCaseAdder(test_data=True)
+
+        to_skip = case_update_handler.cases_to_skip
+        assert len(to_skip) > 0
+        for case in to_skip:
+            assert case.request_id in test_cases.request_id_list
 
 
 class TestCaseOperations(object):
@@ -149,7 +161,7 @@ class TestCaseOperations(object):
         """
         # make dummy related tables
         clinician = Clinician.objects.create(
-            clinician_name="test_clinician",
+            name="test_clinician",
             email="test@email.com",
             hospital="test_hospital"
         )
