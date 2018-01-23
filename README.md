@@ -1,6 +1,7 @@
-# README #
+# GeL2MDT #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+GeL2MDT is an MDT management tool for dealing with NGS data retrieved from the GeL CIP-API.
+It provides functionality to review patients and their variants, assign them for review and MDT, and store and audit the reporting process stages.
 
 ### What is this repository for? ###
 
