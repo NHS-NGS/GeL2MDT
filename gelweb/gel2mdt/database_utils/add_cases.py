@@ -74,6 +74,8 @@ class MultipleCaseAdder(object):
 
         self.cases_to_add = self.check_cases_to_add()
         self.cases_to_update = self.check_cases_to_update()
+        self.cases_to_skip = set(self.list_of_cases) - set(self.cases_to_add) - \
+            set(self.cases_to_update)
         self.update_errors = {}
 
     def fetch_test_data(self):
