@@ -16,7 +16,6 @@ class Poll_CIP_API_TestCase(TestCase):
         cip_api_poll.get_json_response()
 
 
-@unittest.skip("skip to avoid polling")
 class TestInterpretationList(TestCase):
     def setUp(self):
         self.case_list_handler = add_cases.InterpretationList()
