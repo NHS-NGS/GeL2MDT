@@ -7,7 +7,7 @@ class UserForm(forms.ModelForm):
     """
     password = forms.CharField(widget=forms.PasswordInput())
     role_choices = (('Clinician', 'Clinician'), ('CS', 'Clinical Scientist'), ('Other', 'Other Staff'))
-    role = forms.MultipleChoiceField(choices=role_choices)
+    role = forms.ChoiceField(choices=role_choices)
 
     class Meta:
         model = User

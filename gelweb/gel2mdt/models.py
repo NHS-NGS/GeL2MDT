@@ -25,12 +25,12 @@ class Phenotype(models.Model):
 
 
 class Clinician(models.Model):
-    clinician_name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200)
     hospital = models.CharField(max_length=200)
     email = models.EmailField()
 
     def __str__(self):
-        return str(self.clinician_name)
+        return str(self.name)
 
     class Meta:
         managed = True
@@ -221,11 +221,12 @@ class GELInterpretationReport(models.Model):
 
 
 class ClinicalScientist(models.Model):
-    cs_name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200)
+    hospital = models.CharField(max_length=200)
     email = models.EmailField()
 
     def __str__(self):
-        return str(self.cs_name)
+        return str(self.name)
 
     class Meta:
         managed = True
@@ -534,7 +535,10 @@ class VariantReport(models.Model):
 class OtherStaff(models.Model):
     class Meta:
         verbose_name_plural = "Other staff"
-    staff_name = models.CharField(max_length=200)
+
+    name = models.CharField(max_length=200)
+    hospital = models.CharField(max_length=200)
+    email = models.EmailField()
 
     def __str__(self):
         pass
