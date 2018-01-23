@@ -12,12 +12,14 @@ import hashlib
 from datetime import datetime
 
 
+@unittest.skip('avoid unnecessarily polling')
 class Poll_CIP_API_TestCase(TestCase):
     def test_returns_status_code(self):
         cip_api_poll = poll_api.PollAPI("cip_api", "interpretation-request")
         cip_api_poll.get_json_response()
 
 
+@unittest.skip('avoid unnecessarily polling')
 class TestInterpretationList(TestCase):
     def setUp(self):
         self.case_list_handler = add_cases.InterpretationList()
@@ -149,7 +151,7 @@ class TestCaseOperations(object):
         """
         # make dummy related tables
         clinician = Clinician.objects.create(
-            clinician_name="test_clinician",
+            name="test_clinician",
             email="test@email.com",
             hospital="test_hospital"
         )
