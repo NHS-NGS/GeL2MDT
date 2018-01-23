@@ -2,6 +2,7 @@ import os
 import json
 import hashlib
 
+from ..models import *
 from ..api_utils import poll_api
 
 
@@ -29,6 +30,19 @@ class Case(object):
         hash_hex = hashlib.sha512(hash_buffer)
         hash_digest = hash_hex.hexdigest()
         return hash_digest
+
+    def add_case(self):
+        """
+        Add a new case that has no recorded IRfamily to the database.
+        """
+        pass
+
+    def update_case(self):
+        """
+        Update a case that has a recorded IRfamily but with a mismatching
+        hash value on the latest IR record.
+        """
+        pass
 
 
 class MultipleCaseAdder(object):
@@ -58,8 +72,8 @@ class MultipleCaseAdder(object):
             self.cases_to_poll = interpretation_list_poll.cases_to_poll
             self.list_of_cases = self.fetch_api_data()
 
-        self.cases_to_add = None          # new cases (no IRfamily)
-        self.cases_to_update = None       # cases w/ different hash
+        self.cases_to_add = self.check_cases_to_add()
+        self.cases_to_update = self.check_cases_to_update()
         self.update_errors = {}           # holds errors that are raised
 
     def fetch_test_data(self):
@@ -77,7 +91,6 @@ class MultipleCaseAdder(object):
             with open(file_path) as json_file:
                 json_data = json.load(json_file)
                 list_of_cases.append(Case(case_json=json_data))
-
         return list_of_cases
 
     def fetch_api_data(self):
@@ -107,7 +120,15 @@ class MultipleCaseAdder(object):
         entries for IRfamily. Return the list of cases for which no IRfamily
         exists.
         """
-        pass
+        database_cases = InterpretationReportFamily.objects.all().values_list(
+            'ir_family_id', flat=True
+        )
+
+        cases_to_add = []
+        for case in self.list_of_cases:
+            if case.request_id not in database_cases:
+                cases_to_add.append(case)
+        return cases_to_add
 
     def check_cases_to_update(self):
         """
@@ -115,7 +136,30 @@ class MultipleCaseAdder(object):
         hashes against the latest case stored for corresponding IRfamily
         entries.
         """
-        pass
+        cases_to_update = []
+        # use set subtraction to get only cases that haven't already been added
+        cases_to_check = set(self.list_of_cases) - set(self.cases_to_add)
+        try:
+            latest_report_list = [
+                GELInterpretationReport.objects.filter(
+                    ir_family=InterpretationReportFamily.objects.get(
+                        ir_family_id=case.request_id
+                    )).latest("updated") for case in cases_to_check]
+
+            latest_hashes = {
+                ir.ir_family.ir_family_id: ir.sha_hash
+                for ir in latest_report_list
+            }
+
+            for case in cases_to_check:
+                if case.json_hash != latest_hashes[case.request_id]:
+                    cases_to_update.append(case)
+
+        except GELInterpretationReport.DoesNotExist as e:
+            # no such cases.
+            pass
+
+        return cases_to_update
 
 
 class InterpretationList(object):
