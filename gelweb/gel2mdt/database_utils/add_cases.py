@@ -121,22 +121,18 @@ class InterpretationList(object):
     a list of case numbers by status along with the hash of the current case data.
     """
     def __init__(self):
-        self.all_cases = None
-        self.all_cases_count = 0
-        self.cases_to_poll = None  # 'sent_to_gmcs', 'report_generated', 'report_sent'
+        self.all_cases = self.get_all_cases()
+        self.cases_to_poll = self.get_poll_cases()
 
-        self.get_interpretation_list()
-
-    def get_interpretation_list(self):
+    def get_all_cases(self):
         """
         Invokes PollAPI to retrieve a list of all the cases available to a
-        given user, then sets them to the corresponding class attributes.
+        given user, then returns a list of cases which are raredsease and not
+        blocked.
         """
+        all_cases = []
         last_page = False
         page = 1
-
-        all_cases = []
-
         while not last_page:
             request_list_poll = poll_api.PollAPI(
                 "cip_api", "interpretation-request?page={page}".format(page=page)
@@ -158,8 +154,16 @@ class InterpretationList(object):
                 last_page = True
 
         self.all_cases_count = request_list_poll.response_json["count"]
-        self.all_cases = all_cases
-        self.cases_to_poll = [case for case in all_cases if case["last_status"] in [
+        return all_cases
+
+    def get_poll_cases(self):
+        """
+        Removes cases from self.all_cases which are not of interest, ie. keep
+        only 'sent_to_gmcs', 'report_generated', 'report_sent'.
+        """
+        cases_to_poll = [case for case in self.all_cases if case["last_status"] in [
             "sent_to_gmcs",
             "report_generated",
             "report_sent"]]
+
+        return cases_to_poll
