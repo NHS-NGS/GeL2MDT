@@ -80,3 +80,25 @@ class TestAddCases(TestCase):
 
         for case in self.case_update_handler.list_of_cases:
             assert case.json_hash == test_json_hashes[case.request_id]
+
+    def test_identify_cases_to_add(self):
+        """
+        Test that MultipleCaseAdder recognises which cases are not
+        in the database and need to be fully added.
+        """
+        pass
+
+    def test_identify_cases_to_update(self):
+        """
+        Test that MultipleCaseAdder recognises which cases are in the
+        database but have different hashes so need to be updated.
+        """
+
+    def test_identify_cases_to_skip(self):
+        """
+        Test that MultipleCaseAdder recognises which cases are in the
+        database and have identical hashes on the latest version so the
+        case does not need to be added or updated, even when multiple
+        versions of the case exist with different hashes.
+        """
+        pass
