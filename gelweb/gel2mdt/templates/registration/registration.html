@@ -2,6 +2,7 @@
 {% load bootstrap3 %}
 
 {% block content %}
+ <div class="container-fluid" >
   <h2>Register</h2>
 {% if registered %}
       <strong>Thank you for registering!</strong><br />
@@ -9,13 +10,14 @@
       Your Username is <h3>{{username}}</h3>. Please take note of this.<br /><br />
 
       <a href="/">Return to the homepage.</a><br />
-
+ </div>
       {% else %}
-
+ <div class="container-fluid" >
   <form method="post">
     {% csrf_token %}
     {% bootstrap_form user_form %}
     <button type="submit">Register</button>
   </form>
+ </div>
 {% endif %}
 {% endblock %}
