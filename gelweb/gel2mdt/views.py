@@ -2,6 +2,7 @@ from django.shortcuts import render
 from .forms import *
 from django.http import HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
+from .database_utils import add_cases
 
 # Create your views here.
 def register(request):
@@ -33,4 +34,6 @@ def register(request):
                   {'user_form': user_form, 'registered': registered, 'username': username})
 
 def index(request):
+    #m = add_cases.InterpretationList()
+    #print(m.all_cases_count)
     return render(request, 'gel2mdt/index.html', {} )
