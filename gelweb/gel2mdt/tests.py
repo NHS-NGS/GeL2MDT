@@ -12,14 +12,12 @@ import hashlib
 from datetime import datetime
 
 
-@unittest.skip("skipping to avoid polling")
 class Poll_CIP_API_TestCase(TestCase):
     def test_returns_status_code(self):
         cip_api_poll = poll_api.PollAPI("cip_api", "interpretation-request")
         cip_api_poll.get_json_response()
 
 
-@unittest.skip("skip to avoid polling")
 class TestInterpretationList(TestCase):
     def setUp(self):
         self.case_list_handler = add_cases.InterpretationList()
