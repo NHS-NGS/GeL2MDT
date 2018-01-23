@@ -14,7 +14,8 @@ class Case(object):
     def __init__(self, case_json):
         self.json = case_json
         self.request_id = str(
-            self.json["interpretation_request_id"]) + "-" + str(self.json["version"])
+            self.json["interpretation_request_id"]) \
+            + "-" + str(self.json["version"])
 
         self.json_hash = self.hash_json()
 
@@ -27,7 +28,7 @@ class Case(object):
         hash_buffer = json.dumps(self.json, sort_keys=True).encode('utf-8')
         hash_hex = hashlib.sha512(hash_buffer)
         hash_digest = hash_hex.hexdigest()
-        self.json_hash = hash_digest
+        return hash_digest
 
 
 class MultipleCaseAdder(object):
@@ -49,17 +50,17 @@ class MultipleCaseAdder(object):
         self.test_data = test_data
         if self.test_data:
             # set list_of_cases to test zoo
-            self.list_of_case = self.fetch_test_data()
+            self.list_of_cases = self.fetch_test_data()
             self.cases_to_poll = None
         else:
             # set list_of_cases to cases of interest from API
             interpretation_list_poll = InterpretationList()
             self.cases_to_poll = interpretation_list_poll.cases_to_poll
-            self.list_of_case = self.fetch_api_data()
+            self.list_of_cases = self.fetch_api_data()
 
         self.cases_to_add = None          # new cases (no IRfamily)
-        self.cases_to_update = None       # cases w/ different hash (IRfamily exists)
-        self.update_errors = {}           # holds errors that are raised during updates
+        self.cases_to_update = None       # cases w/ different hash
+        self.update_errors = {}           # holds errors that are raised
 
     def fetch_test_data(self):
         """
@@ -67,7 +68,9 @@ class MultipleCaseAdder(object):
         self.test_data is set to True.
         """
         list_of_cases = []
-        for filename in os.listdir(os.path.join(os.getcwd(), "gel2mdt/tests/test_files")):
+        for filename in os.listdir(
+            os.path.join(
+                os.getcwd(), "gel2mdt/tests/test_files")):
             file_path = os.path.join(
                 os.getcwd(), "gel2mdt/tests/test_files/{filename}".format(
                     filename=filename))
@@ -118,7 +121,8 @@ class MultipleCaseAdder(object):
 class InterpretationList(object):
     """
     Represents the interpretation list from GeL CIP-API. Can be used to return
-    a list of case numbers by status along with the hash of the current case data.
+    a list of case numbers by status along with the hash of the current case
+    data.
     """
     def __init__(self):
         self.all_cases = self.get_all_cases()
@@ -135,15 +139,19 @@ class InterpretationList(object):
         page = 1
         while not last_page:
             request_list_poll = poll_api.PollAPI(
-                "cip_api", "interpretation-request?page={page}".format(page=page)
+                "cip_api",
+                "interpretation-request?page={page}".format(page=page)
             )
             request_list_poll.get_json_response()
             request_list_results = request_list_poll.response_json["results"]
 
             all_cases += [{
-                "interpretation_request_id": result["interpretation_request_id"],
-                "sample_type": result["sample_type"],
-                "last_status": result["last_status"]}
+                "interpretation_request_id":
+                    result["interpretation_request_id"],
+                "sample_type":
+                    result["sample_type"],
+                "last_status":
+                    result["last_status"]}
                 for result in request_list_results
                 if result["sample_type"] == "raredisease"
                 and result["last_status"] != "blocked"]
@@ -161,9 +169,10 @@ class InterpretationList(object):
         Removes cases from self.all_cases which are not of interest, ie. keep
         only 'sent_to_gmcs', 'report_generated', 'report_sent'.
         """
-        cases_to_poll = [case for case in self.all_cases if case["last_status"] in [
-            "sent_to_gmcs",
-            "report_generated",
-            "report_sent"]]
+        cases_to_poll = [
+            case for case in self.all_cases if case["last_status"] in [
+                "sent_to_gmcs",
+                "report_generated",
+                "report_sent"]]
 
         return cases_to_poll

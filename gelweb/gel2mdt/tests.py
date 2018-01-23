@@ -16,6 +16,7 @@ class Poll_CIP_API_TestCase(TestCase):
         cip_api_poll.get_json_response()
 
 
+@unittest.skip("skip to avoid polling")
 class TestInterpretationList(TestCase):
     def setUp(self):
         self.case_list_handler = add_cases.InterpretationList()
@@ -80,12 +81,21 @@ class TestAddCases(TestCase):
         for case in self.case_update_handler.list_of_cases:
             assert case.json_hash == test_json_hashes[case.request_id]
 
+
+class TestIdentifyCases(TestCase):
+    """
+    Tests to ensure that MultipleCaseAdder can correctly determine
+    which cases should be added, updated, and skipped.
+    """
+    def setUpClass(self):
+        pass
+
     def test_identify_cases_to_add(self):
         """
         Test that MultipleCaseAdder recognises which cases are not
         in the database and need to be fully added.
         """
-        pass
+        case_update_handler = add_cases.MultipleCaseAdder(test_data=True)
 
     def test_identify_cases_to_update(self):
         """
