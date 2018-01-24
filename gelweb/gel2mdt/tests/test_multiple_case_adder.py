@@ -227,6 +227,9 @@ class TestAddCases(TestCase):
         except Clinician.DoesNotExist as e:
             created = False
         assert created
+        # now check that we are refreshing clinician in the case models:
+        for case in case_list_handler.cases_to_add:
+            assert case.clinician.created is not False
 
     def test_add_or_get_phenotypes(self):
         """
