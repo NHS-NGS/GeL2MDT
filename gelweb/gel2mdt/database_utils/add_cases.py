@@ -294,12 +294,15 @@ class MultipleCaseAdder(object):
         # phenotypes
         # ---------
         # set phenotype values for each family
+        phenotypes = []
         for case in self.cases_to_add:
             case.get_phenotypes()
+            # first bulk update the phenotypes for each case
+            phenotypes += case.phenotypes.case_models
+        self.bulk_create_new(Phenotype, phenotypes)
         # bulk update the case <-M2M-> phenotype table
 
-    @staticmethod
-    def bulk_create_new(model_type, model_list):
+    def bulk_create_new(self, model_type, model_list):
         """
         Takes a list of CaseModel instances of a given model_type, then creates
         a list of unique attribute sets for that particular list of instances.
