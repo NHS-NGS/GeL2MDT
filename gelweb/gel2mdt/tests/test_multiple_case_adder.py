@@ -1,46 +1,14 @@
-<<<<<<< HEAD
 import unittest
 from django.test import TestCase
-from .api_utils import poll_api
-from .database_utils import add_cases
-from .models import *
-from django.urls import reverse
+from ..database_utils import add_cases
+
+from ..models import *
+
 import re
 import os
 import json
 import hashlib
 from datetime import datetime
-
-
-@unittest.skip('avoid unnecessarily polling')
-class Poll_CIP_API_TestCase(TestCase):
-    def test_returns_status_code(self):
-        cip_api_poll = poll_api.PollAPI("cip_api", "interpretation-request")
-        cip_api_poll.get_json_response()
-
-
-@unittest.skip('avoid unnecessarily polling')
-class TestInterpretationList(TestCase):
-    def setUp(self):
-        self.case_list_handler = add_cases.InterpretationList()
-        self.case_list = self.case_list_handler.all_cases
-        self.cases_to_poll = self.case_list_handler.cases_to_poll
-
-    def test_get_list_of_jsons(self):
-        assert isinstance(self.case_list, list)
-        for case in self.case_list:
-            assert isinstance(case, dict)
-
-    def test_only_get_raredisease(self):
-        for case in self.case_list:
-            assert case["sample_type"] == "raredisease"
-
-    def test_get_cases_of_interest(self):
-        for case in self.cases_to_poll:
-            assert case["last_status"] in [
-                "sent_to_gmcs",
-                "report_generated",
-                "report_sent"]
 
 
 class TestAddCases(TestCase):
@@ -205,25 +173,3 @@ class TestCaseOperations(object):
             hash_digest = hash_digest[::-1]
 
         return hash_digest
-
-class ViewTests(TestCase):
-    """
-    Testing the views
-    """
-    def login_test_user(self):
-        self.client.login(username='test@gmail.com', password='test')
-        return self
-
-    def logout_test_user(self):
-        self.client.logout()
-        return self
-
-    def test_registration(self):
-        response = self.client.post(reverse('register'), {'first_name': 'test',
-                                                          'last_name': 'test2',
-                                                          'email': 'test@gmail.com',
-                                                          'password': 'password',
-                                                          'role': 'CS',
-                                                          'hospital': 'GOSH'}, follow=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('Thank you for registering', response.content.decode())
