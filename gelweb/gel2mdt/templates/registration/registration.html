@@ -13,11 +13,19 @@
  </div>
       {% else %}
  <div class="container-fluid" >
-  <form method="post">
-    {% csrf_token %}
-    {% bootstrap_form user_form %}
-    <button type="submit">Register</button>
-  </form>
+     <div class="row">
+                <div class="col-md-7">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                          <form method="post">
+                            {% csrf_token %}
+                            {% bootstrap_form user_form %}
+                            <button type="submit">Register</button>
+                          </form>
+                        </div>
+                     </div>
+                </div>
+     </div>
  </div>
 {% endif %}
 {% endblock %}
