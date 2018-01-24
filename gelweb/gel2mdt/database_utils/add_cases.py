@@ -35,7 +35,12 @@ class Case(object):
         """
         Add a new case that has no recorded IRfamily to the database.
         """
-        pass
+        # TODO: add LabKey support!!
+        self.clinician = CaseModel(Clinician, {
+            "name": "unknown",
+            "email": "unknown",
+            "hospital": "unknown"
+        })
 
     def update_case(self):
         """
@@ -43,6 +48,31 @@ class Case(object):
         hash value on the latest IR record.
         """
         pass
+
+
+class CaseModel(object):
+    """
+    A handler for an instance of a model that belongs to a case. Holds an
+    instance of a model (pre-creation or post-creation) and whether it
+    requires creation in the database.
+    """
+    def __init__(self, model_type, model_attributes):
+        self.model_type = model_type
+        self.model_attributes = model_attributes
+        self.created = self.check_found_in_db()
+
+    def check_found_in_db(self):
+        """
+        Queries the database for a model of the given type with the given
+        attributes. Returns True if found, False if not.
+        """
+        try:
+            created = self.model_type.objects.get(
+            **self.model_attributes
+        )  # returns True if corresponding instance exists
+        except self.model_type.DoesNotExist as e:
+            created = False
+        return created
 
 
 class MultipleCaseAdder(object):
@@ -60,6 +90,9 @@ class MultipleCaseAdder(object):
         manage the updating of the database.
         :param test_data: Boolean. Use test data or not. Default = False
         """
+
+        # fetch and identify cases to add or update
+        # -----------------------------------------
         # are we using test data files? defaults False (no)
         self.test_data = test_data
         if self.test_data:
@@ -76,6 +109,9 @@ class MultipleCaseAdder(object):
         self.cases_to_update = self.check_cases_to_update()
         self.cases_to_skip = set(self.list_of_cases) - set(self.cases_to_add) - \
             set(self.cases_to_update)
+
+        # begin update process
+        # --------------------
         self.update_errors = {}
 
     def fetch_test_data(self):
