@@ -55,6 +55,7 @@ class Case(object):
             "clinician": self.clinician.entry,
             "gel_family_id": int(self.json["family_id"])
         })
+        return family
 
     def update_case(self):
         """
@@ -230,6 +231,14 @@ class MultipleCaseAdder(object):
         for clinician in clinicians:
             if clinician.entry is False:
                 clinician.entry = clinician.check_found_in_db()
+                # above sets the CaseModel attribute, now refresh family attrs
+
+        # family
+        families = [case.family for case in self.cases_to_add]
+        self.bulk_create_new(Family, families)
+        for family in families:
+            if family.entry is False:
+                family.entry = family.check_found_in_db()
 
     def bulk_create_new(self, model_type, model_list):
         """
