@@ -24,6 +24,7 @@ def register(request):
             password = user_form.cleaned_data['password']
             email = user_form.cleaned_data['email']
             role = user_form.cleaned_data['role']
+            hospital = user_form.cleaned_data['hospital']
             try:
                 user = User(username=username, first_name=first_name, last_name=last_name, password=password,
                             email=email, is_active=False)
@@ -32,17 +33,19 @@ def register(request):
                 user.save()
                 registered = True
                 if role == 'CS':
-                    cs = ClinicalScientist(cs_name=first_name + ' ' + last_name,
-                                           email=email)
+                    cs = ClinicalScientist(name=first_name + ' ' + last_name,
+                                           email=email,
+                                           hospital=hospital)
                     cs.save()
                 elif role == 'Clinician':
-                    clinician = Clinician(clinician_name=first_name + ' ' + last_name,
-                                          hospital='test',
-                                          email=email)
+                    clinician = Clinician(name=first_name + ' ' + last_name,
+                                          email=email,
+                                          hospital=hospital)
                     clinician.save()
                 elif role == 'Other':
-                    other = OtherStaff(staff_name=first_name + ' ' + last_name,
-                                       email=email)
+                    other = OtherStaff(name=first_name + ' ' + last_name,
+                                       email=email,
+                                       hospital=hospital)
                     other.save()
             except IntegrityError as e:
                 messages.error(request, 'If you have already registered, '
