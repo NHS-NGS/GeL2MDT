@@ -76,6 +76,19 @@ class Case(object):
         ])
         self.phenotypes = phenotypes
 
+    def get_ir_family(self):
+        """
+        Create a CaseModel for the new IRFamily Model to be added to the
+        database (unlike before it is impossible that this alreay exists).
+        """
+        ir_family = CaseModel(InterpretationReportFamily, {
+            "participant_family": self.family,
+            "cip": self.json["cip"],
+            "ir_family_id": self.request_id,
+            "priority": self.json["case_priority"]
+        })
+        return ir_family
+
     def update_case(self):
         """
         Update a case that has a recorded IRfamily but with a mismatching
