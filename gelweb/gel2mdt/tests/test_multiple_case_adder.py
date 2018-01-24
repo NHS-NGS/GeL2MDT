@@ -188,7 +188,7 @@ class TestCaseModel(TestCase):
             "email": "test",
             "hospital": "test"
         })
-        assert clinician.created is False  # checking for a literal False
+        assert clinician.entry is False  # checking for a literal False
 
     def test_existing_clinician(self):
         """
@@ -204,7 +204,7 @@ class TestCaseModel(TestCase):
         )
 
         test_clinician = add_cases.CaseModel(Clinician, clinician_attributes)
-        assert test_clinician.created.id == archived_clinician.id
+        assert test_clinician.entry.id == archived_clinician.id
 
 
 class TestAddCases(TestCase):
@@ -229,7 +229,7 @@ class TestAddCases(TestCase):
         assert created
         # now check that we are refreshing clinician in the case models:
         for case in case_list_handler.cases_to_add:
-            assert case.clinician.created is not False
+            assert case.clinician.entry is not False
 
     def test_add_or_get_phenotypes(self):
         """
