@@ -231,6 +231,21 @@ class TestAddCases(TestCase):
         for case in case_list_handler.cases_to_add:
             assert case.clinician.entry is not False
 
+    def test_add_family(self):
+        case_list_handler = add_cases.MultipleCaseAdder(test_data=True)
+        test_cases = TestCaseOperations()
+        try:
+            for test_case in test_cases.json_list:
+                Family.objects.get(
+                    **{
+                        "gel_family_id": int(test_case["family_id"])
+                    }
+                )
+            created = True
+        except Family.DoesNotExist as e:
+            created = False
+        assert created
+
     def test_add_or_get_phenotypes(self):
         """
         All phenotypes in json added with HPO & description.
