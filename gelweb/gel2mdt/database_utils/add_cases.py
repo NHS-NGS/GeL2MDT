@@ -20,6 +20,10 @@ class Case(object):
 
         self.json_hash = self.hash_json()
 
+        # tables in database, each represented by a CaseModel at this point
+        self.clinician = self.get_clinician()
+        self.family = self.get_family()
+
     def hash_json(self):
         """
         Hash the given json for this Case, sorting the keys to ensure
@@ -31,15 +35,25 @@ class Case(object):
         hash_digest = hash_hex.hexdigest()
         return hash_digest
 
-    def add_case(self):
+    def get_clinician(self):
         """
-        Add a new case that has no recorded IRfamily to the database.
+        Create a case model to handle adding/getting the clinician for case.
         """
         # TODO: add LabKey support!!
-        self.clinician = CaseModel(Clinician, {
+        clinician = CaseModel(Clinician, {
             "name": "unknown",
             "email": "unknown",
             "hospital": "unknown"
+        })
+        return clinician
+
+    def get_family(self):
+        """
+        Create case model to handle adding/getting family for this case.
+        """
+        family = CaseModel(Family, {
+            "clinician": self.clinician.created,
+            "gel_family_id": int(self.json["family_id"])
         })
 
     def update_case(self):
@@ -113,6 +127,8 @@ class MultipleCaseAdder(object):
         # begin update process
         # --------------------
         self.update_errors = {}
+        self.add_cases()
+        self.update_cases()
 
     def fetch_test_data(self):
         """
@@ -203,6 +219,45 @@ class MultipleCaseAdder(object):
 
         return cases_to_update
 
+    def add_cases(self):
+        """
+        Adds the cases to the database which required adding.
+        """
+        # get a list of new clinician attributes
+        clinicians = [case.clinician for case in self.cases_to_add]
+        self.bulk_create_new(Clinician, clinicians)
+        # ensure case.clinician is refreshed for ones with new-created clins
+        for clinician in clinicians:
+            if clinician.created is False:
+                clinician.created = clinician.check_found_in_db()
+
+    def bulk_create_new(self, model_type, model_list):
+        """
+        Takes a list of CaseModel instances of a given model_type, then creates
+        a list of unique attribute sets for that particular list of instances.
+        This list of unique attributes can then be passed to a bulk_create
+        function to update the database.
+        """
+        # get the attribute dicts for ModelCases which have no database entry
+        new_attributes = [case_model.model_attributes
+                            for case_model in model_list
+                            if case_model.created == False]
+        # use sets and tuples to remove duplicate dictionaries
+        new_attributes = [dict(attribute_tuple)
+                            for attribute_tuple
+                            in set([tuple(attribute_dict.items())
+                                        for attribute_dict
+                                        in new_attributes])]
+        # bulk create database entries from the list of unique new attributes
+        model_type.objects.bulk_create([
+            model_type(**attributes)
+        for attributes in new_attributes])
+
+    def update_cases(self):
+        """
+        Updates the cases to the database which required updating.
+        """
+        pass
 
 class InterpretationList(object):
     """

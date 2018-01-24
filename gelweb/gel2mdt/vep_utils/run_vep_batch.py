@@ -1,5 +1,8 @@
 import os
 import csv
+from ..config import load_config
+from . import parse_vep
+#from ..config import load_config
 #from gel2mdt.models import *
 
 class TargetVariant:
@@ -20,7 +23,7 @@ class TargetTranscript:
 def get_variants():
     target_variants = []
     # TODO: for variants not linked to transcript, create variant object and add to list
-    # target_variants = V
+    # target_variants = Variants
     # temp solution makes 3 target variants for testing purposes:
     tv1 = TargetVariant(20, 14370, "id-001", "G", "A")
     tv2 = TargetVariant(20, 17330, "id-002", "T", "A")
@@ -36,9 +39,10 @@ def generate_vcf(variants):
             f.writerow([variant.chromosome, variant.position, variant.variant_id, variant.ref, variant.alt])
 
 def run_vep():
+    config_dict = load_config.LoadConfig().load()
     # builds command from locations supplied in config file
-    cmd = "{vep} --cache --dir_cache {cache} --fasta {fasta_loc} --hgvs --offline --symbol --sift b \
-                   --polyphen b --fork 4 -q --no_stats -i temp.vcf -o temp.vep".format(
+    cmd = "{vep} -i temp.vcf -o temp.vep.vcf --cache --dir_cache {cache} --fork 4 --vcf --flag_pick \
+            --exclude_predicted --everything --dont_skip --total_length --offline --fasta {fasta_loc}".format(
         vep=config_dict['vep'],
         cache=config_dict['cache'],
         fasta_loc=config_dict['fasta_loc'],
@@ -46,7 +50,9 @@ def run_vep():
     os.system(cmd)
 
 def parse_vep_annotations():
-    pass
+    annotated_vartiants_dict = parse_vep.ParseVep().read_file('temp.vep.vcf')
+    print(annotated_vartiants_dict)
+    # TODO: create variant and transript objects to then be added into the models
 
 def populate_transcript_table(vep):
     pass
@@ -54,14 +60,9 @@ def populate_transcript_table(vep):
 def remove_temp_files():
     os.system("rm temp.vcf temp.vep")
 
-# read in config file
-config_dict = {}
-with open("config.txt", 'r') as config_file:
-    for line in config_file:
-        line = line.strip().split('=', 1)
-        config_dict[line[0]] = line[1]
-
-variants = get_variants()
-generate_vcf(variants)
-run_vep()
-remove_temp_files()
+def genetate_transcipts():
+    variants = get_variants()
+    generate_vcf(variants)
+    run_vep()
+    parse_vep_annotations()
+    #remove_temp_files()

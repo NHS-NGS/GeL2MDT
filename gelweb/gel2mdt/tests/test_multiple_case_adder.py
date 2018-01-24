@@ -188,7 +188,7 @@ class TestCaseModel(TestCase):
             "email": "test",
             "hospital": "test"
         })
-        assert clinician.created is False
+        assert clinician.created is False  # checking for a literal False
 
     def test_existing_clinician(self):
         """
@@ -212,11 +212,21 @@ class TestAddCases(TestCase):
     Test that a case has been faithfully added to the database along with
     all of the required related tables when needed.
     """
-    def test_add_or_get_clinician(self):
+    def test_add_clinician(self):
         """
         Clinician has been fetched or added that matches the json
         """
-        pass
+        case_list_handler = add_cases.MultipleCaseAdder(test_data=True)
+        try:
+            Clinician.objects.get(**{
+                "name": "unknown",
+                "email": "unknown",
+                "hospital": "unknown"
+            })
+            created = True
+        except Clinician.DoesNotExist as e:
+            created = False
+        assert created
 
     def test_add_or_get_phenotypes(self):
         """
