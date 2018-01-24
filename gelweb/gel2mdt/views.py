@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from .database_utils import add_cases
 from django.contrib import messages
 from django.db import IntegrityError
+from .tests import test_setup
 
 # Create your views here.
 def register(request):
@@ -59,6 +60,5 @@ def register(request):
                   {'user_form': user_form, 'registered': registered, 'username': username})
 
 def index(request):
-    # m = add_cases.InterpretationList()
-    # print(m.all_cases_count)
+    test_setup.create_dummy_sample()
     return render(request, 'gel2mdt/index.html', {} )
