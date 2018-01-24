@@ -258,6 +258,12 @@ class TestAddCases(TestCase):
             for phenotype in case.phenotypes.case_models:
                 assert phenotype.entry is not False
 
+    def test_associated_family_and_phenotypes(self):
+        """
+        Once phenotypes have been added, ensure M2M creation with Family.
+        """
+        pass
+
     def test_add_ir_family(self):
         """
         Family matching json data has been added/fetched
