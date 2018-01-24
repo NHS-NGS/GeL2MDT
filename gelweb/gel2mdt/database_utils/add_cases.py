@@ -22,6 +22,7 @@ class Case(object):
 
         # tables in database, each represented by a CaseModel at this point
         self.clinician = self.get_clinician()
+        self.family = self.get_family()
 
     def hash_json(self):
         """
@@ -36,7 +37,7 @@ class Case(object):
 
     def get_clinician(self):
         """
-        Add a new case that has no recorded IRfamily to the database.
+        Create a case model to handle adding/getting the clinician for case.
         """
         # TODO: add LabKey support!!
         clinician = CaseModel(Clinician, {
@@ -45,6 +46,15 @@ class Case(object):
             "hospital": "unknown"
         })
         return clinician
+
+    def get_family(self):
+        """
+        Create case model to handle adding/getting family for this case.
+        """
+        family = CaseModel(Family, {
+            "clinician": self.clinician.created,
+            "gel_family_id": int(self.json["family_id"])
+        })
 
     def update_case(self):
         """
@@ -216,6 +226,10 @@ class MultipleCaseAdder(object):
         # get a list of new clinician attributes
         clinicians = [case.clinician for case in self.cases_to_add]
         self.bulk_create_new(Clinician, clinicians)
+        # ensure case.clinician is refreshed for ones with new-created clins
+        for clinician in clinicians:
+            if clinician.created is False:
+                clinician.created = clinician.check_found_in_db()
 
     def bulk_create_new(self, model_type, model_list):
         """
