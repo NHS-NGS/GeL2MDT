@@ -9,6 +9,7 @@ import os
 import json
 import hashlib
 from datetime import datetime
+from django.utils import timezone
 
 
 class TestCaseOperations(object):
@@ -77,7 +78,7 @@ class TestCaseOperations(object):
             ir_family=InterpretationReportFamily.objects.get(
                 ir_family_id=str(json["interpretation_request_id"]) +
                 "-" + str(json["version"])),
-            polled_at_datetime=datetime.now(),
+            polled_at_datetime=timezone.make_aware(datetime.now()),
             sha_hash=self.get_hash(json, change_hash),
             status=json["status"][0]["status"],
             updated=json["status"][0]["created_at"],
@@ -246,11 +247,14 @@ class TestAddCases(TestCase):
             created = False
         assert created
 
-    def test_add_or_get_phenotypes(self):
+    def test_add_phenotypes(self):
         """
         All phenotypes in json added with HPO & description.
         """
-        pass
+        case_list_handler = add_cases.MultipleCaseAdder(test_data=True)
+        test_cases = TestCaseOperations()
+        print(Phenotype.objects.values_list())
+        assert False
 
     def test_add_or_get_family(self):
         """
