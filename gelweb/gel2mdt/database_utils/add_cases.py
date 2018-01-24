@@ -14,11 +14,13 @@ class Case(object):
     """
     def __init__(self, case_json):
         self.json = case_json
+        self.json_case_data = self.json["interpretation_request_data"]
         self.request_id = str(
             self.json["interpretation_request_id"]) \
             + "-" + str(self.json["version"])
 
         self.json_hash = self.hash_json()
+        self.proband = self.get_proband_json()
 
     def hash_json(self):
         """
@@ -30,6 +32,15 @@ class Case(object):
         hash_hex = hashlib.sha512(hash_buffer)
         hash_digest = hash_hex.hexdigest()
         return hash_digest
+
+    def get_proband_json(self):
+        participant_jsons = \
+            self.json_case_data["json_request"]["pedigree"]["participants"]
+        proband_json = None
+        for participant in participant_jsons:
+            if participant["isProband"]:
+                proband_json = participant
+        return proband_json
 
     def get_clinician(self):
         """
@@ -57,6 +68,13 @@ class Case(object):
         """
         Create a list of CaseModels for phenotypes for this case.
         """
+        phenotypes = ManyCaseModel(Phenotype, [
+            {"hpo_terms": phenotype["term"],
+             "description": "unknown"}
+            for phenotype in self.proband["hpoTermList"]
+            if phenotype["termPresence"] is True
+        ])
+        self.phenotypes = phenotypes
 
     def update_case(self):
         """
@@ -98,7 +116,7 @@ class ManyCaseModel(object):
     'through' tables.
     """
     def __init__(self, model_type, model_attributes_list):
-        self.model_type == model_type
+        self.model_type = model_type
         self.model_attributes_list = model_attributes_list
 
         self.case_models = [
@@ -109,7 +127,7 @@ class ManyCaseModel(object):
 
     def get_entry_list(self):
         entries = []
-        for case_model in case_models:
+        for case_model in self.case_models:
             entries.append(case_model.entry)
         return entries
 
@@ -276,8 +294,12 @@ class MultipleCaseAdder(object):
         # phenotypes
         # ---------
         # set phenotype values for each family
+        for case in self.cases_to_add:
+            case.get_phenotypes()
+        # bulk update the case <-M2M-> phenotype table
 
-    def bulk_create_new(self, model_type, model_list):
+    @staticmethod
+    def bulk_create_new(model_type, model_list):
         """
         Takes a list of CaseModel instances of a given model_type, then creates
         a list of unique attribute sets for that particular list of instances.
