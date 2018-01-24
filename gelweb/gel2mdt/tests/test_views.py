@@ -1,6 +1,6 @@
 import unittest
 from django.test import TestCase
-from .models import *
+from ..models import *
 from django.urls import reverse
 
 class ViewTests(TestCase):
@@ -14,6 +14,9 @@ class ViewTests(TestCase):
     def logout_test_user(self):
         self.client.logout()
         return self
+
+    def setup(self):
+        pass
 
     def test_registration(self):
         response = self.client.post(reverse('register'), {'first_name': 'test',
