@@ -253,10 +253,12 @@ class TestAddCases(TestCase):
         """
         case_list_handler = add_cases.MultipleCaseAdder(test_data=True)
         test_cases = TestCaseOperations()
-        print(Phenotype.objects.values_list())
-        assert False
 
-    def test_add_or_get_family(self):
+        for case in case_list_handler.cases_to_add:
+            for phenotype in case.phenotypes.case_models:
+                assert phenotype.entry is not False
+
+    def test_add_ir_family(self):
         """
         Family matching json data has been added/fetched
         """
