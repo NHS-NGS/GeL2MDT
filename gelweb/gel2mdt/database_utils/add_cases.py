@@ -20,10 +20,6 @@ class Case(object):
 
         self.json_hash = self.hash_json()
 
-        # tables in database, each represented by a CaseModel at this point
-        self.clinician = self.get_clinician()
-        self.family = self.get_family()
-
     def hash_json(self):
         """
         Hash the given json for this Case, sorting the keys to ensure
@@ -45,7 +41,7 @@ class Case(object):
             "email": "unknown",
             "hospital": "unknown"
         })
-        return clinician
+        self.clinician = clinician
 
     def get_family(self):
         """
@@ -55,7 +51,12 @@ class Case(object):
             "clinician": self.clinician.entry,
             "gel_family_id": int(self.json["family_id"])
         })
-        return family
+        self.family = family
+
+    def get_phenotypes(self):
+        """
+        Create a list of CaseModels for phenotypes for this case.
+        """
 
     def update_case(self):
         """
@@ -89,6 +90,28 @@ class CaseModel(object):
             entry = False
         return entry
 
+
+class ManyCaseModel(object):
+    """
+    Class to deal with situations where we need to extend on CaseModel to allow
+    for ManyToMany field population, as the bulk update must be handled using
+    'through' tables.
+    """
+    def __init__(self, model_type, model_attributes_list):
+        self.model_type == model_type
+        self.model_attributes_list = model_attributes_list
+
+        self.case_models = [
+            CaseModel(model_type, model_attributes)
+            for model_attributes in model_attributes_list
+        ]
+        self.entries = self.get_entry_list()
+
+    def get_entry_list(self):
+        entries = []
+        for case_model in case_models:
+            entries.append(case_model.entry)
+        return entries
 
 class MultipleCaseAdder(object):
     """
@@ -224,7 +247,12 @@ class MultipleCaseAdder(object):
         """
         Adds the cases to the database which required adding.
         """
-        # get a list of new clinician attributes
+        # clinicians
+        # ----------
+        # set the values for each clinician
+        for case in self.cases_to_add:
+            case.get_clinician()
+        # get the clinicians, find new ones, bulk update these
         clinicians = [case.clinician for case in self.cases_to_add]
         self.bulk_create_new(Clinician, clinicians)
         # ensure case.clinician is refreshed for ones with new-created clins
@@ -234,11 +262,20 @@ class MultipleCaseAdder(object):
                 # above sets the CaseModel attribute, now refresh family attrs
 
         # family
+        # ------
+        # set the values for each family
+        for case in self.cases_to_add:
+            case.get_family()
+        # bulk update new families
         families = [case.family for case in self.cases_to_add]
         self.bulk_create_new(Family, families)
         for family in families:
             if family.entry is False:
                 family.entry = family.check_found_in_db()
+
+        # phenotypes
+        # ---------
+        # set phenotype values for each family
 
     def bulk_create_new(self, model_type, model_list):
         """
