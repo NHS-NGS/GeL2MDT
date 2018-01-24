@@ -52,7 +52,7 @@ class Case(object):
         Create case model to handle adding/getting family for this case.
         """
         family = CaseModel(Family, {
-            "clinician": self.clinician.created,
+            "clinician": self.clinician.entry,
             "gel_family_id": int(self.json["family_id"])
         })
 
@@ -73,7 +73,7 @@ class CaseModel(object):
     def __init__(self, model_type, model_attributes):
         self.model_type = model_type
         self.model_attributes = model_attributes
-        self.created = self.check_found_in_db()
+        self.entry = self.check_found_in_db()
 
     def check_found_in_db(self):
         """
@@ -81,12 +81,12 @@ class CaseModel(object):
         attributes. Returns True if found, False if not.
         """
         try:
-            created = self.model_type.objects.get(
+            entry = self.model_type.objects.get(
             **self.model_attributes
         )  # returns True if corresponding instance exists
         except self.model_type.DoesNotExist as e:
-            created = False
-        return created
+            entry = False
+        return entry
 
 
 class MultipleCaseAdder(object):
@@ -228,8 +228,8 @@ class MultipleCaseAdder(object):
         self.bulk_create_new(Clinician, clinicians)
         # ensure case.clinician is refreshed for ones with new-created clins
         for clinician in clinicians:
-            if clinician.created is False:
-                clinician.created = clinician.check_found_in_db()
+            if clinician.entry is False:
+                clinician.entry = clinician.check_found_in_db()
 
     def bulk_create_new(self, model_type, model_list):
         """
@@ -241,7 +241,7 @@ class MultipleCaseAdder(object):
         # get the attribute dicts for ModelCases which have no database entry
         new_attributes = [case_model.model_attributes
                             for case_model in model_list
-                            if case_model.created == False]
+                            if case_model.entry == False]
         # use sets and tuples to remove duplicate dictionaries
         new_attributes = [dict(attribute_tuple)
                             for attribute_tuple
