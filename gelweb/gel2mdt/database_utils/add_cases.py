@@ -313,7 +313,12 @@ class MultipleCaseAdder(object):
             # first bulk update the phenotypes for each case
             phenotypes += case.phenotypes.case_models
         self.bulk_create_new(Phenotype, phenotypes)
-        # bulk update the case <-M2M-> phenotype table
+        # ensure ManyCaseModel instances are aware of newly created phenotypes
+        for case in self.cases_to_add:
+            for phenotype in case.phenotypes.case_models:
+                if phenotype.entry is False:
+                    phenotype.entry = phenotype.check_found_in_db
+            case.phenotypes.entries = case.phenotypes.get_entry_list()
 
     def bulk_create_new(self, model_type, model_list):
         """
