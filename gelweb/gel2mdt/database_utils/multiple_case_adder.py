@@ -150,6 +150,7 @@ class MultipleCaseAdder(object):
             (Phenotype, True),
             (Panel, True),
             (PanelVersion, True),
+            (Gene, True),
         )
         for model_type, many in update_order:
             for case in self.cases_to_add:
