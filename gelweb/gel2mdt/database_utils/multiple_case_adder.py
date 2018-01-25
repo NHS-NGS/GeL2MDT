@@ -4,7 +4,7 @@ import json
 from ..models import *
 from ..api_utils.poll_api import PollAPI
 from ..api_utils.cip_utils import InterpretationList
-from .case_handler import Case
+from .case_handler import Case, CaseAttributeManager
 
 
 class MultipleCaseAdder(object):
@@ -142,47 +142,41 @@ class MultipleCaseAdder(object):
         """
         Adds the cases to the database which required adding.
         """
-        # clinicians
-        # ----------
-        # set the values for each clinician
-        for case in self.cases_to_add:
-            case.get_clinician()
-        # get the clinicians, find new ones, bulk update these
-        clinicians = [case.clinician for case in self.cases_to_add]
-        self.bulk_create_new(Clinician, clinicians)
-        # ensure case.clinician is refreshed for ones with new-created clins
-        for clinician in clinicians:
-            if clinician.entry is False:
-                clinician.entry = clinician.check_found_in_db()
-                # above sets the CaseModel attribute, now refresh family attrs
-
-        # family
-        # ------
-        # set the values for each family
-        for case in self.cases_to_add:
-            case.get_family()
-        # bulk update new families
-        families = [case.family for case in self.cases_to_add]
-        self.bulk_create_new(Family, families)
-        for family in families:
-            if family.entry is False:
-                family.entry = family.check_found_in_db()
-
-        # phenotypes
-        # ---------
-        # set phenotype values for each family
-        phenotypes = []
-        for case in self.cases_to_add:
-            case.get_phenotypes()
-            # first bulk update the phenotypes for each case
-            phenotypes += case.phenotypes.case_models
-        self.bulk_create_new(Phenotype, phenotypes)
-        # ensure ManyCaseModel instances are aware of newly created phenotypes
-        for case in self.cases_to_add:
-            for phenotype in case.phenotypes.case_models:
-                if phenotype.entry is False:
-                    phenotype.entry = phenotype.check_found_in_db
-            case.phenotypes.entries = case.phenotypes.get_entry_list()
+        update_order = (
+            # tuple of tuples to preserve update order. each sub-tuple is the
+            # key to access the attribute manager and whether is has many objs
+            (Clinician, False),
+            (Family, False),
+            (Phenotype, True),
+        )
+        for model_type, many in update_order:
+            for case in self.cases_to_add:
+                # create a CaseAttributeManager for the case
+                case.attribute_managers[model_type] = CaseAttributeManager(
+                    case, model_type)
+                # use thea attribute manager to set the case models
+                attribute_manager = case.attribute_managers[model_type]
+                attribute_manager.get_case_model()
+            if not many:
+                # get a list of CaseModels
+                model_list = [
+                    case.attribute_managers[model_type].case_model
+                    for case in self.cases_to_add
+                ]
+                print(model_list)
+            elif many:
+                model_list = []
+                for case in self.cases_to_add:
+                    attribute_manager = case.attribute_managers[model_type]
+                    many_case_model = attribute_manager.case_model
+                    for case_model in many_case_model.case_models:
+                        model_list.append(case_model)
+            # now create the required new Model instances from CaseModel lists
+            self.bulk_create_new(model_type, model_list)
+            # refresh CaseAttributeManagers with new CaseModels
+            for model in model_list:
+                if model.entry is False:
+                    model.entry = model.check_found_in_db()
 
     def bulk_create_new(self, model_type, model_list):
         """
