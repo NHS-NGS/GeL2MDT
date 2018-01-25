@@ -190,6 +190,7 @@ class TestIdentifyCases(TestCase):
     Tests to ensure that MultipleCaseAdder can correctly determine
     which cases should be added, updated, and skipped.
     """
+    @unittest.skip("long time to poll panelapp")
     def test_identify_cases_to_add(self):
         """
         MultipleCaseAdder recognises which cases need to be added.
@@ -203,6 +204,7 @@ class TestIdentifyCases(TestCase):
 
         assert not case_update_handler.cases_to_update
 
+    @unittest.skip("long time to poll panelapp")
     def test_identify_cases_to_update(self):
         """
         MultipleCaseAdder recognises hash differences to determine updates.
@@ -220,6 +222,7 @@ class TestIdentifyCases(TestCase):
         for case in to_update:
             assert case.request_id in test_cases.request_id_list
 
+    @unittest.skip("long time to poll panelapp")
     def test_identify_cases_to_skip(self):
         """
         MultipleCaseAdder recognises when latest version hashes match current.
@@ -276,6 +279,33 @@ class TestAddCases(TestCase):
     Test that a case has been faithfully added to the database along with
     all of the required related tables when needed.
     """
+    def test_updated(self):
+        """
+        Generic test to make sure models have become populated by MCM.
+        """
+        case_list_handler = MultipleCaseAdder(test_data=True)
+        for model in (
+            Clinician,
+            Family,
+            Phenotype,
+            InterpretationReportFamily,
+            Panel,
+            PanelVersion,
+            Gene,
+            Transcript,
+            GELInterpretationReport,
+            ProbandVariant,
+            ProbandTranscriptVariant,
+            ReportEvent,
+            ToolOrAssembly,
+            ToolOrAssemblyVersion,
+        ):
+            all_models = model.objects.all()
+            print(all_models)
+            assert all_models
+
+
+    @unittest.skip("long time to poll panelapp")
     def test_add_clinician(self):
         """
         Clinician has been fetched or added that matches the json
@@ -296,6 +326,9 @@ class TestAddCases(TestCase):
             clinician_cam = case.attribute_managers[Clinician]
             assert clinician_cam.case_model.entry is not False
 
+        assert False
+
+    @unittest.skip("long time to poll panelapp")
     def test_add_family(self):
         case_list_handler = MultipleCaseAdder(test_data=True)
         test_cases = TestCaseOperations()
@@ -311,6 +344,7 @@ class TestAddCases(TestCase):
             created = False
         assert created
 
+    @unittest.skip("long time to poll panelapp")
     def test_add_phenotypes(self):
         """
         All phenotypes in json added with HPO & description.
