@@ -156,13 +156,34 @@ class TestAddCases(TestCase):
                     proband = participant
             assert case.proband["gelId"] == proband["gelId"]
 
-    def test_extraxt_latest_status(self):
+    def test_extract_latest_status(self):
         """
         Test that the status extracted has the latest date and most progressed
         status of all the statuses.
         """
-        pass
+        test_cases = TestCaseOperations()
+        case_mapping = test_cases.get_case_mapping(case_update_handler)
 
+        for case, test_case in case_mapping:
+            status_list = test_case["status"]
+            max_date = None
+            max_progress = None
+            for status in status_list:
+                if max_date is None:
+                    max_date = timezone.make_aware(status["created_at"])
+                elif max_date < timezone.make_aware(status["created_at"]):
+                    max_date = timezone.make_aware(status["created_at"])
+                if max_progress is None:
+                    max_progress = status["status"]
+                elif status["status"] == "report_sent":
+                    max_progress = "report_sent"
+                elif status["status"] == "report_generated":
+                    max_progress = "report_generated"
+                elif status["status"] == "sent_to_gmcs":
+                    max_progress = "sent_to_gmcs"
+            assert case.status["status"] == max_progress
+            assert timezone.make_aware(case.status["created_at"]) \
+                == max_date
 
 class TestIdentifyCases(TestCase):
     """

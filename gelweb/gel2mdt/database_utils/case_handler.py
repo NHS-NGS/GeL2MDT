@@ -21,6 +21,7 @@ class Case(object):
 
         self.json_hash = self.hash_json()
         self.proband = self.get_proband_json()
+        self.status = self.get_status_json()
 
         self.case_attributes = {
             # CaseModels for each of the required Models, to be set by MCA
@@ -69,9 +70,7 @@ class Case(object):
         JSON has a list of statuses. Extract only the latest.
         """
         status_jsons = self.json["status"]
-        status_keys = list(status_json.keys())
-        max_key = max(status_keys)
-        return status_jsons[max_key]  # assuming GeL will always work upwards..
+        return status_jsons[-1]  # assuming GeL will always work upwards..
 
     def get_clinician(self):
         """
