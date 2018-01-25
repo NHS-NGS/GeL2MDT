@@ -152,6 +152,7 @@ class MultipleCaseAdder(object):
             (PanelVersion, True),
             (Gene, True),
             (InterpretationReportFamily, False),
+            (GELInterpretationReport, False),
         )
         for model_type, many in update_order:
             for case in self.cases_to_add:
@@ -167,7 +168,6 @@ class MultipleCaseAdder(object):
                     case.attribute_managers[model_type].case_model
                     for case in self.cases_to_add
                 ]
-                print(model_list)
             elif many:
                 model_list = []
                 for case in self.cases_to_add:
@@ -176,11 +176,40 @@ class MultipleCaseAdder(object):
                     for case_model in many_case_model.case_models:
                         model_list.append(case_model)
             # now create the required new Model instances from CaseModel lists
-            self.bulk_create_new(model_type, model_list)
+            if model_type == GELInterpretationReport:
+                self.save_new(model_type, model_list)
+            else:
+                self.bulk_create_new(model_type, model_list)
             # refresh CaseAttributeManagers with new CaseModels
             for model in model_list:
                 if model.entry is False:
                     model.entry = model.check_found_in_db()
+
+    def save_new(self, model_type, model_list):
+        """
+        Takes a list of CaseModel isntances of a given type, then saves any
+        that are new into the database. This function is for models such as
+        GELInterpretationReport which require preprocessing and so cannot be
+        bulk created (which does not call the object.save() function)
+        """
+        # get the attribute dicts for ModelCases which have no database entry
+        new_attributes = [
+            case_model.model_attributes
+            for case_model in model_list
+            if case_model.entry is False]
+        # use sets and tuples to remove duplicate dictionaries
+        new_attributes = [
+            dict(attribute_tuple)
+            for attribute_tuple
+            in set([
+                tuple(attribute_dict.items())
+                for attribute_dict
+                in new_attributes])]
+        # save database entries from the list of unique new attributes
+        for attributes in new_attributes:
+            model_type.objects.create(
+                **attributes
+            )
 
     def bulk_create_new(self, model_type, model_list):
         """
@@ -189,8 +218,8 @@ class MultipleCaseAdder(object):
         This list of unique attributes can then be passed to a bulk_create
         function to update the database.
         """
+
         # get the attribute dicts for ModelCases which have no database entry
-        print("Bulk creating", model_type, "entries:", model_list)
         new_attributes = [
             case_model.model_attributes
             for case_model in model_list
