@@ -283,6 +283,7 @@ class TestAddCases(TestCase):
         """
         Generic test to make sure models have become populated by MCM.
         """
+        check_cases = True
         case_list_handler = MultipleCaseAdder(test_data=True)
         for model in (
             Clinician,
@@ -291,6 +292,7 @@ class TestAddCases(TestCase):
             Panel,
             PanelVersion,
             Gene,
+            Transcript,
             InterpretationReportFamily,
             GELInterpretationReport,
             ProbandVariant,
@@ -300,8 +302,11 @@ class TestAddCases(TestCase):
             ToolOrAssemblyVersion,
         ):
             all_models = model.objects.all()
-            print(all_models)
-            assert all_models
+            print(model, all_models)
+            if not all_models:
+                check_cases = False
+
+        assert check_cases
 
 
     @unittest.skip("long time to poll panelapp")

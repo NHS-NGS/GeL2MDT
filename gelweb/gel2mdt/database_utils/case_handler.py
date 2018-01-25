@@ -1,6 +1,7 @@
 import os
 import json
 import hashlib
+from datetime import datetime
 
 from ..models import *
 from ..api_utils.poll_api import PollAPI
@@ -235,7 +236,6 @@ class CaseAttributeManager(object):
             "ir_family_id": self.case.request_id,
             "priority": self.case.json["case_priority"]
         })
-        print(ir_family.entry)
         return ir_family
 
     def get_ir(self):
@@ -243,14 +243,23 @@ class CaseAttributeManager(object):
         Get json information about an Interpretation Report and create a
         CaseModel from it.
         """
+        case_attribute_managers = self.case.attribute_managers
+        irf_manager = case_attribute_managers[InterpretationReportFamily]
+        ir_family = irf_manager.case_model
+
         ir = CaseModel(GELInterpretationReport, {
             "ir_family": ir_family.entry,
             "polled_at_datetime": timezone.now(),
             "sha_hash": self.case.json_hash,
             "status": self.case.status["status"],
-            "updated": timezone.make_aware(self.case.status["created_at"]),
+            "updated": timezone.make_aware(
+                datetime.strptime(
+                    self.case.status["created_at"][:19],
+                    '%Y-%m-%dT%H:%M:%S'
+                )),
             "user": self.case.status["user"]
         })
+        return ir
 
     def get_proband_variants(self):
         pass
