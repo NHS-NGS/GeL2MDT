@@ -3,6 +3,7 @@ import json
 import hashlib
 
 from ..models import *
+from ..api_utils import poll_api
 
 
 class Case(object):
@@ -21,6 +22,25 @@ class Case(object):
         self.json_hash = self.hash_json()
         self.proband = self.get_proband_json()
 
+        self.case_attributes = {
+            # CaseModels for each of the required Models, to be set by MCA
+            "clinician": None,
+            "family": None,
+            "phenotypes": None,
+            "ir_family": None,
+            "panels": None,
+            "panel_versions": None,
+            "genes": None,
+            "transcripts": None,
+            "ir": None,
+            "proband_variants": None,
+            "proband_transcript_variants": None,
+            "report_events": None,
+            "tools_and_assemblies": None,
+            "tool_and_assembly_versions": None
+
+        }
+
     def hash_json(self):
         """
         Hash the given json for this Case, sorting the keys to ensure
@@ -33,6 +53,9 @@ class Case(object):
         return hash_digest
 
     def get_proband_json(self):
+        """
+        Get the proband from the list of partcipants in the JSON.
+        """
         participant_jsons = \
             self.json_case_data["json_request"]["pedigree"]["participants"]
         proband_json = None
@@ -40,6 +63,15 @@ class Case(object):
             if participant["isProband"]:
                 proband_json = participant
         return proband_json
+
+    def get_status_json(self):
+        """
+        JSON has a list of statuses. Extract only the latest.
+        """
+        status_jsons = self.json["status"]
+        status_keys = status_json.keys()
+        max_key = max(status_keys)
+        return status_jsons[max_key]  # assuming GeL will always work upwards..
 
     def get_clinician(self):
         """
@@ -114,8 +146,8 @@ class CaseModel(object):
         """
         try:
             entry = self.model_type.objects.get(
-            **self.model_attributes
-        )  # returns True if corresponding instance exists
+                **self.model_attributes
+            )  # returns True if corresponding instance exists
         except self.model_type.DoesNotExist as e:
             entry = False
         return entry
