@@ -61,10 +61,10 @@ class PollAPI(object):
                 response = session.get(
                     url=self.url,
                     headers=self.headers)
-            elif self.headers_required is None:
+            elif not self.headers_required:
                 # no headers required
                 response = session.get(
-                    url=url)
+                    url=self.url)
 
             self.response_json = response.json()
             self.response_status = response.status_code
