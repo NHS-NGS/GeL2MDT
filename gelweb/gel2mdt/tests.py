@@ -26,6 +26,10 @@ class TestInterpretationList(TestCase):
         self.cases_to_poll = self.case_list_handler.cases_to_poll
 
     def test_get_list_of_jsons(self):
+        """
+        Test that what we get from InterpretationList is a list of jsons, which
+        is the required input for MCA.
+        """
         assert isinstance(self.case_list, list)
         for case in self.case_list:
             assert isinstance(case, dict)

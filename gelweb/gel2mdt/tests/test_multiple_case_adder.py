@@ -293,7 +293,8 @@ class TestAddCases(TestCase):
         assert created
         # now check that we are refreshing clinician in the case models:
         for case in case_list_handler.cases_to_add:
-            assert case.clinician.entry is not False
+            clinician_cam = case.attribute_managers[Clinician]
+            assert clinician_cam.case_model.entry is not False
 
     def test_add_family(self):
         case_list_handler = MultipleCaseAdder(test_data=True)
@@ -318,7 +319,8 @@ class TestAddCases(TestCase):
         test_cases = TestCaseOperations()
 
         for case in case_list_handler.cases_to_add:
-            for phenotype in case.phenotypes.case_models:
+            phenotype_cam = case.attribute_managers[Phenotype]
+            for phenotype in phenotype_cam.case_model.case_models:
                 assert phenotype.entry is not False
 
     def test_associated_family_and_phenotypes(self):

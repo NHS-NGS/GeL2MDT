@@ -23,24 +23,10 @@ class Case(object):
         self.proband = self.get_proband_json()
         self.status = self.get_status_json()
 
-        self.case_attributes = {
-            # CaseModels for each of the required Models, to be set by MCA
-            "clinician": None,
-            "family": None,
-            "phenotypes": None,
-            "ir_family": None,
-            "panels": None,
-            "panel_versions": None,
-            "genes": None,
-            "transcripts": None,
-            "ir": None,
-            "proband_variants": None,
-            "proband_transcript_variants": None,
-            "report_events": None,
-            "tools_and_assemblies": None,
-            "tool_and_assembly_versions": None
-
-        }
+        # initialise a dict to contain the AttributeManagers for this case,
+        # which will be set by the MCA as they are required (otherwise there
+        # are missing dependencies)
+        self.attribute_managers = {}
 
     def hash_json(self):
         """
@@ -72,6 +58,59 @@ class Case(object):
         status_jsons = self.json["status"]
         return status_jsons[-1]  # assuming GeL will always work upwards..
 
+
+class CaseAttributeManager(object):
+    """
+    Handler for managing each different type of case attribute.
+    Holds get/refresh functions to be called by MCA, as well as pointing to
+    CaseModels and ManyCaseModels for access by MCA.bulk_create_new().
+    """
+    def __init__(self, case, model_type, many=False):
+        """
+        Initialise with CaseModel or ManyCaseModel, dependent on many param.
+        """
+        self.case = case  # for accessing related table entries
+        self.model_type = model_type
+        self.many = many
+        self.case_model = self.get_case_model()
+
+    def get_case_model(self):
+        """
+        Call the corresponding function to update the case model within the
+        AttributeManager.
+        """
+        print("creating a case model for", self.model_type, "CAM of case", self.case)
+        if self.model_type == Clinician:
+            case_model = self.get_clinician()
+        elif self.model_type == Family:
+            case_model = self.get_family()
+        elif self.model_type == Phenotype:
+            case_model = self.get_phenotypes()
+        elif self.model_type == InterpretationReportFamily:
+            case_model = self.get_ir_family()
+        elif self.model_type == Panel:
+            case_model = self.get_panels()
+        elif self.model_type == PanelVersion:
+            case_model = self.get_panel_versions()
+        elif self.model_type == Gene:
+            case_model = self.get_genes()
+        elif self.model_type == Transcript:
+            case_model = self.get_transcripts()
+        elif self.model_type == GELInterpretationReport:
+            case_model = self.get_ir()
+        elif self.model_type == ProbandVariant:
+            case_model = self.get_proband_variants()
+        elif self.model_type == ProbandTranscriptVariant:
+            case_model = self.get_proband_transcript_variants()
+        elif self.model_type == ReportEvent:
+            case_model = self.get_report_events()
+        elif self.model_type == ToolOrAssembly:
+            case_model = self.get_tools_and_assemblies()
+        elif self.model_type == ToolOrAssemblyVersion:
+            case_model = self.get_tool_and_assembly_versions()
+
+        return case_model
+
     def get_clinician(self):
         """
         Create a case model to handle adding/getting the clinician for case.
@@ -82,17 +121,18 @@ class Case(object):
             "email": "unknown",
             "hospital": "unknown"
         })
-        self.clinician = clinician
+        return clinician
 
     def get_family(self):
         """
         Create case model to handle adding/getting family for this case.
         """
+        clinician = self.case.attribute_managers[Clinician].case_model
         family = CaseModel(Family, {
-            "clinician": self.clinician.entry,
-            "gel_family_id": int(self.json["family_id"])
+            "clinician": clinician.entry,
+            "gel_family_id": int(self.case.json["family_id"])
         })
-        self.family = family
+        return family
 
     def get_phenotypes(self):
         """
@@ -101,29 +141,50 @@ class Case(object):
         phenotypes = ManyCaseModel(Phenotype, [
             {"hpo_terms": phenotype["term"],
              "description": "unknown"}
-            for phenotype in self.proband["hpoTermList"]
+            for phenotype in self.case.proband["hpoTermList"]
             if phenotype["termPresence"] is True
         ])
-        self.phenotypes = phenotypes
+        return phenotypes
 
     def get_ir_family(self):
         """
         Create a CaseModel for the new IRFamily Model to be added to the
         database (unlike before it is impossible that this alreay exists).
         """
+        family = self.case.attribute_managers["family"].case_model
         ir_family = CaseModel(InterpretationReportFamily, {
-            "participant_family": self.family,
-            "cip": self.json["cip"],
-            "ir_family_id": self.request_id,
-            "priority": self.json["case_priority"]
+            "participant_family": family.entry,
+            "cip": self.case.json["cip"],
+            "ir_family_id": self.case.request_id,
+            "priority": self.case.json["case_priority"]
         })
         return ir_family
 
-    def update_case(self):
-        """
-        Update a case that has a recorded IRfamily but with a mismatching
-        hash value on the latest IR record.
-        """
+    def get_panels(self):
+        pass
+
+    def get_panel_versions(self):
+        pass
+
+    def get_transcripts(self):
+        pass
+
+    def get_ir(self):
+        pass
+
+    def get_proband_variants(self):
+        pass
+
+    def get_proband_transcript_variants(self):
+        pass
+
+    def get_report_events(self):
+        pass
+
+    def get_tools_and_assemblies(self):
+        pass
+
+    def get_tool_and_assembly_versions(self):
         pass
 
 
