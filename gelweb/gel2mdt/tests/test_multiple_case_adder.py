@@ -1,7 +1,8 @@
 import unittest
 from django.test import TestCase
-from ..database_utils import add_cases
 
+from ..database_utils.multiple_case_adder import MultipleCaseAdder
+from ..database_utils.case_handler import Case, CaseModel, ManyCaseModel
 from ..models import *
 
 import re
@@ -93,18 +94,21 @@ class TestCaseOperations(object):
         the hash of that json. Changing hash may be required if testing
         whether a case has mismatching hash values from the latest stored.
         """
-        hash_digest = self.json_hashes[str(json["interpretation_request_id"]) +
-                                           "-" + str(json["version"])]
+        hash_digest = self.json_hashes[
+            str(json["interpretation_request_id"]) +
+            "-" + str(json["version"])]
         if change_hash:
             hash_digest = hash_digest[::-1]
 
         return hash_digest
+
+
 class TestAddCases(TestCase):
     def setUp(self):
         """
         Instantiate a MultipleCaseAdder for the zoo of test cases.
         """
-        self.case_update_handler = add_cases.MultipleCaseAdder(test_data=True)
+        self.case_update_handler = MultipleCaseAdder(test_data=True)
 
     def test_request_id_format(self):
         """
@@ -121,6 +125,27 @@ class TestAddCases(TestCase):
         for case in self.case_update_handler.list_of_cases:
             assert case.json_hash == test_cases.json_hashes[case.request_id]
 
+    def test_extract_proband(self):
+        """
+        Test that we can get the proband out of the json as a dict-type.
+        """
+        test_cases = TestCaseOperations()
+        for case in self.case_update_handler.list_of_cases:
+            ir_data = case.json["interpretation_request_data"]["json_request"]
+            particicpants = ir_data["pedigree"]["participants"]
+            proband = None
+            for participant in participants:
+                if participant["isProband"]:
+                    proband = participant
+            assert case.proband["gelId"] == proband["gelId"]
+
+    def test_extraxt_latest_status(self):
+        """
+        Test that the status extracted has the latest date and most progressed
+        status of all the statuses.
+        """
+        pass
+
 
 class TestIdentifyCases(TestCase):
     """
@@ -131,7 +156,7 @@ class TestIdentifyCases(TestCase):
         """
         MultipleCaseAdder recognises which cases need to be added.
         """
-        case_update_handler = add_cases.MultipleCaseAdder(test_data=True)
+        case_update_handler = MultipleCaseAdder(test_data=True)
         test_cases = TestCaseOperations()
 
         for case in case_update_handler.cases_to_add:
@@ -149,8 +174,8 @@ class TestIdentifyCases(TestCase):
         test_cases = TestCaseOperations()
         test_cases.add_cases_to_database(change_hash=True)
 
-        # now cases are added, MCA should recognise this when checking for updates
-        case_update_handler = add_cases.MultipleCaseAdder(test_data=True)
+        # now cases are added, MCA should recognise this when checking
+        case_update_handler = MultipleCaseAdder(test_data=True)
 
         to_update = case_update_handler.cases_to_update
         assert len(to_update) > 0
@@ -166,7 +191,7 @@ class TestIdentifyCases(TestCase):
         # should cause a skip
         test_cases.add_cases_to_database()
 
-        case_update_handler = add_cases.MultipleCaseAdder(test_data=True)
+        case_update_handler = MultipleCaseAdder(test_data=True)
 
         to_skip = case_update_handler.cases_to_skip
         assert len(to_skip) > 0
@@ -184,7 +209,7 @@ class TestCaseModel(TestCase):
         """
         Return created=False when a Clinician is not known to the db.
         """
-        clinician = add_cases.CaseModel(Clinician, {
+        clinician = CaseModel(Clinician, {
             "name": "test",
             "email": "test",
             "hospital": "test"
@@ -204,7 +229,7 @@ class TestCaseModel(TestCase):
             **clinician_attributes
         )
 
-        test_clinician = add_cases.CaseModel(Clinician, clinician_attributes)
+        test_clinician = CaseModel(Clinician, clinician_attributes)
         assert test_clinician.entry.id == archived_clinician.id
 
 
@@ -217,7 +242,7 @@ class TestAddCases(TestCase):
         """
         Clinician has been fetched or added that matches the json
         """
-        case_list_handler = add_cases.MultipleCaseAdder(test_data=True)
+        case_list_handler = MultipleCaseAdder(test_data=True)
         try:
             Clinician.objects.get(**{
                 "name": "unknown",
@@ -233,7 +258,7 @@ class TestAddCases(TestCase):
             assert case.clinician.entry is not False
 
     def test_add_family(self):
-        case_list_handler = add_cases.MultipleCaseAdder(test_data=True)
+        case_list_handler = MultipleCaseAdder(test_data=True)
         test_cases = TestCaseOperations()
         try:
             for test_case in test_cases.json_list:
@@ -251,7 +276,7 @@ class TestAddCases(TestCase):
         """
         All phenotypes in json added with HPO & description.
         """
-        case_list_handler = add_cases.MultipleCaseAdder(test_data=True)
+        case_list_handler = MultipleCaseAdder(test_data=True)
         test_cases = TestCaseOperations()
 
         for case in case_list_handler.cases_to_add:

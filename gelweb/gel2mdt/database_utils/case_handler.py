@@ -69,7 +69,7 @@ class Case(object):
         JSON has a list of statuses. Extract only the latest.
         """
         status_jsons = self.json["status"]
-        status_keys = status_json.keys()
+        status_keys = list(status_json.keys())
         max_key = max(status_keys)
         return status_jsons[max_key]  # assuming GeL will always work upwards..
 
