@@ -161,7 +161,7 @@ class TestAddCases(TestCase):
         Test that the status extracted has the latest date and most progressed
         status of all the statuses.
         """
-        test_cases = TestCaseOperations()
+        pass
 
 
 class TestIdentifyCases(TestCase):
