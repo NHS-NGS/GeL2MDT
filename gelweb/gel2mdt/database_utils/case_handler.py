@@ -3,7 +3,7 @@ import json
 import hashlib
 
 from ..models import *
-from ..api_utils import poll_api
+from ..api_utils.poll_api import PollAPI
 
 
 class Case(object):
@@ -22,6 +22,8 @@ class Case(object):
         self.json_hash = self.hash_json()
         self.proband = self.get_proband_json()
         self.status = self.get_status_json()
+
+        self.panels = self.get_panels_json()
 
         # initialise a dict to contain the AttributeManagers for this case,
         # which will be set by the MCA as they are required (otherwise there
@@ -58,6 +60,13 @@ class Case(object):
         status_jsons = self.json["status"]
         return status_jsons[-1]  # assuming GeL will always work upwards..
 
+    def get_panels_json(self):
+        """
+        Get the list of panels from the json
+        """
+        json_request = self.json_case_data["json_request"]
+        return json_request["pedigree"]["analysisPanels"]
+
 
 class CaseAttributeManager(object):
     """
@@ -79,7 +88,6 @@ class CaseAttributeManager(object):
         Call the corresponding function to update the case model within the
         AttributeManager.
         """
-        print("creating a case model for", self.model_type, "CAM of case", self.case)
         if self.model_type == Clinician:
             case_model = self.get_clinician()
         elif self.model_type == Family:
@@ -161,10 +169,49 @@ class CaseAttributeManager(object):
         return ir_family
 
     def get_panels(self):
-        pass
+        """
+        Poll panelApp to fetch information about a panel, then create a
+        ManyCaseModel with this information.
+        """
+        for panel in self.case.panels:
+            panelapp_poll = PollAPI(
+                "panelapp", "get_panel/{panelapp_id}".format(
+                    panelapp_id=panel["panelName"])
+            )
+            panelapp_poll.get_json_response()
+            panel["panelapp_results"] = panelapp_poll.response_json["result"]
+
+        panels = ManyCaseModel(Panel, [{
+            "panelapp_id": panel["panelName"],
+            "panel_name": panel["panelapp_results"]["SpecificDiseaseName"],
+            "disease_group": panel["panelapp_results"]["DiseaseGroup"],
+            "disease_subgroup": panel["panelapp_results"]["DiseaseSubGroup"]
+        } for panel in self.case.panels])
+        return panels
 
     def get_panel_versions(self):
-        pass
+        """
+        Add the panel model to description in case.panel then set values
+        for the ManyCaseModel.
+        """
+        panel_models = [
+            # get all the panel models from the attribute manager
+            case_model.entry
+            for case_model
+            in self.case.attribute_managers[Panel].case_model.case_models]
+
+        for panel in self.case.panels:
+            # set self.case.panels["model"] to the correct model
+            for panel_model in panel_models:
+                if panel["panelName"] == panel_model.panelapp_id:
+                    panel["model"] = panel_model
+
+        panel_versions = ManyCaseModel(PanelVersion, [{
+            # create the MCM
+            "version_number": panel["panelapp_results"]["version"],
+            "panel": panel["model"]
+        } for panel in self.case.panels])
+        return panel_versions
 
     def get_transcripts(self):
         pass
