@@ -1,18 +1,18 @@
 import unittest
 from django.test import TestCase
 from ..api_utils.poll_api import PollAPI
+from ..api_utils.cip_utils import InterpretationList
 
-@unittest.skip('avoid unnecessarily polling')
+
 class Poll_CIP_API_TestCase(TestCase):
     def test_returns_status_code(self):
         cip_api_poll = PollAPI("cip_api", "interpretation-request")
         cip_api_poll.get_json_response()
 
 
-@unittest.skip('avoid unnecessarily polling')
 class TestInterpretationList(TestCase):
     def setUp(self):
-        self.case_list_handler = add_cases.InterpretationList()
+        self.case_list_handler = InterpretationList()
         self.case_list = self.case_list_handler.all_cases
         self.cases_to_poll = self.case_list_handler.cases_to_poll
 
