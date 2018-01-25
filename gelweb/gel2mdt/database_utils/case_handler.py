@@ -154,20 +154,6 @@ class CaseAttributeManager(object):
         ])
         return phenotypes
 
-    def get_ir_family(self):
-        """
-        Create a CaseModel for the new IRFamily Model to be added to the
-        database (unlike before it is impossible that this alreay exists).
-        """
-        family = self.case.attribute_managers["family"].case_model
-        ir_family = CaseModel(InterpretationReportFamily, {
-            "participant_family": family.entry,
-            "cip": self.case.json["cip"],
-            "ir_family_id": self.case.request_id,
-            "priority": self.case.json["case_priority"]
-        })
-        return ir_family
-
     def get_panels(self):
         """
         Poll panelApp to fetch information about a panel, then create a
@@ -237,8 +223,34 @@ class CaseAttributeManager(object):
     def get_transcripts(self):
         pass
 
+    def get_ir_family(self):
+        """
+        Create a CaseModel for the new IRFamily Model to be added to the
+        database (unlike before it is impossible that this alreay exists).
+        """
+        family = self.case.attribute_managers[Family].case_model
+        ir_family = CaseModel(InterpretationReportFamily, {
+            "participant_family": family.entry,
+            "cip": self.case.json["cip"],
+            "ir_family_id": self.case.request_id,
+            "priority": self.case.json["case_priority"]
+        })
+        print(ir_family.entry)
+        return ir_family
+
     def get_ir(self):
-        pass
+        """
+        Get json information about an Interpretation Report and create a
+        CaseModel from it.
+        """
+        ir = CaseModel(GELInterpretationReport, {
+            "ir_family": ir_family.entry,
+            "polled_at_datetime": timezone.now(),
+            "sha_hash": self.case.json_hash,
+            "status": self.case.status["status"],
+            "updated": timezone.make_aware(self.case.status["created_at"]),
+            "user": self.case.status["user"]
+        })
 
     def get_proband_variants(self):
         pass
