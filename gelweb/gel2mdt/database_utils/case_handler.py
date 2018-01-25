@@ -213,6 +213,27 @@ class CaseAttributeManager(object):
         } for panel in self.case.panels])
         return panel_versions
 
+    def get_genes(self):
+        """
+        Create gene objects from the genes from panelapp.
+        """
+        panels = self.case.panels
+        # get the list of genes from the panelapp_result
+        gene_list = []
+        for panel in panels:
+            genes = panel["panelapp_results"]["Genes"]
+            gene_list += genes
+
+        for gene in gene_list:
+            if len(gene["EnsembleGeneIds"]) == 0:
+                gene["EnsembleGeneIds"] = [None,]
+
+        genes = ManyCaseModel(Gene, [{
+            "ensembl_id": gene["EnsembleGeneIds"][0],  # TODO: which ID to use?!
+            "hgnc_name": gene["GeneSymbol"]
+        } for gene in gene_list])
+        return genes
+
     def get_transcripts(self):
         pass
 
