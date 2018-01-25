@@ -151,6 +151,7 @@ class MultipleCaseAdder(object):
             (Panel, True),
             (PanelVersion, True),
             (Gene, True),
+            (InterpretationReportFamily, False),
         )
         for model_type, many in update_order:
             for case in self.cases_to_add:
@@ -189,6 +190,7 @@ class MultipleCaseAdder(object):
         function to update the database.
         """
         # get the attribute dicts for ModelCases which have no database entry
+        print("Bulk creating", model_type, "entries:", model_list)
         new_attributes = [
             case_model.model_attributes
             for case_model in model_list

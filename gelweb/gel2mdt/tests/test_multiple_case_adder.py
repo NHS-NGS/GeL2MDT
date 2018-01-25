@@ -291,7 +291,6 @@ class TestAddCases(TestCase):
             Panel,
             PanelVersion,
             Gene,
-            Transcript,
             InterpretationReportFamily,
             GELInterpretationReport,
             ProbandVariant,
