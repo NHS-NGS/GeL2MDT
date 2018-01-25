@@ -148,6 +148,8 @@ class MultipleCaseAdder(object):
             (Clinician, False),
             (Family, False),
             (Phenotype, True),
+            (Panel, True),
+            (PanelVersion, True),
         )
         for model_type, many in update_order:
             for case in self.cases_to_add:
