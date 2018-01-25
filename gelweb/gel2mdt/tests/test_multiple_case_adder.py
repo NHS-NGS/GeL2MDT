@@ -47,6 +47,21 @@ class TestCaseOperations(object):
                 ).hexdigest() for x in self.json_list
                 }
 
+    def get_case_mapping(self, multiple_case_adder):
+        """
+        Return a tuple mapping of case, test_case for all of the newly
+        created cases.
+        """
+        test_cases = self.json_list
+        cases = multiple_case_adder.list_of_cases
+        case_mapping = []
+        for case in cases:
+            for test_case in test_cases:
+                if case.request_id \
+                    == str(test_case["interpretation_request_id"]) + "-" \
+                        + str(test_case["version"]):
+                    case_mapping.append(case, test_case)
+
     def add_cases_to_database(self, change_hash=False):
         """
         For all the cases we have stored, add them all to the database.
@@ -130,15 +145,7 @@ class TestAddCases(TestCase):
         Test that we can get the proband out of the json as a dict-type.
         """
         test_cases = TestCaseOperations()
-        test_cases = test_cases.json_list
-        cases = self.case_update_handler.list_of_cases
-        case_mapping = []
-        for case in cases:
-            for test_case in test_cases:
-                if case.request_id \
-                    == str(test_case["interpretation_request_id"]) + "-" \
-                        + str(test_case["version"]):
-                    case_mapping.append(case, test_case)
+        case_mapping = test_cases.get_case_mapping(case_update_handler)
 
         for case, test_case in case_mapping:
             ir_data = test_case["interpretation_request_data"]["json_request"]
