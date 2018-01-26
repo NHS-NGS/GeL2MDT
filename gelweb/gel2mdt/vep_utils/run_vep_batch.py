@@ -86,7 +86,7 @@ def parse_vep_annotations():
 #     pass
 
 def remove_temp_files():
-    os.system("rm temp.vcf temp.vep")
+    os.system("rm temp.vcf temp.vep.vcf")
 
 def generate_transcripts(variant_list):
     #variant_list = get_variants()
