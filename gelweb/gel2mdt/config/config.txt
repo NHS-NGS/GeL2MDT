@@ -1,3 +1,3 @@
 vep=/opt/programs/ensembl-vep/vep
-cache=/media/sf_S_DRIVE/VEP_cache/
+cache=/media/sf_S_DRIVE/VEP_cache
 fasta_loc=/opt/genome/

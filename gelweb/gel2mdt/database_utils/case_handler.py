@@ -84,16 +84,16 @@ class Case(object):
         # go through each variant in the json
         for variant in json_variants:
             # check if it has any Tier1 or Tier2 Report Events
-            variant_max_tier = None
+            variant_min_tier = None
             for report_event in variant["reportEvents"]:
                 tier = int(report_event["tier"][-1])
-                if variant_max_tier is None:
-                    variant_max_tier = tier
-                elif tier > variant_max_tier:
-                    variant_max_tier = tier
-            variant["max_tier"] = variant_max_tier
+                if variant_min_tier is None:
+                    variant_min_tier = tier
+                elif tier < variant_min_tier:
+                    variant_min_tier = tier
+            variant["max_tier"] = variant_min_tier
 
-            if variant["max_tier"] > 3:
+            if variant["max_tier"] < 3:
                 case_variant = CaseVariant(
                     chromosome=variant["chromosome"],
                     position=variant["position"],
