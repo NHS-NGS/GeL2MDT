@@ -5,6 +5,7 @@ from . import parse_vep
 
 class CaseVariant:
     def __init__(self, chromosome, position, case_id, ref, alt):
+        print("Creating case variant!")
         self.chromosome = chromosome
         self.position = position
         self.variant_id = case_id
