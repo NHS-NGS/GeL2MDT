@@ -12916,7 +12916,7 @@
               "score": 0,
               "reportEventId": "RE17",
               "phenotype": "Malformations of cortical development",
-              "tier": "TIER3",
+              "tier": "TIER2",
               "panelVersion": "1.116",
               "groupOfVariants": 233,
               "modeOfInheritance": "biallelic"
