@@ -302,7 +302,7 @@ class TestAddCases(TestCase):
             ToolOrAssembly,
             ToolOrAssemblyVersion,
         ):
-            all_models = model.objects.all().values()
+            all_models = model.objects.all()
             pprint.pprint(list(all_models))
             if not all_models:
                 check_cases = False
