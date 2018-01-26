@@ -8,14 +8,15 @@ class CaseVariant:
         print("Creating case variant!")
         self.chromosome = chromosome
         self.position = position
-        self.variant_id = case_id
+        self.case_id = case_id
         self.ref = ref
         self.alt = alt
 
 class CaseTranscript:
-    def __init__(self, gene_ensembl_id, gene_hgnc_name, transcript_name, transcript_canonical, transcript_strand,
-                 proband_transcript_variant_effect, proband_variant_af_max, variant_polyphen, variant_sift,
-                 transcript_variant_hgvs_c, transcript_variant_hgvs_p):
+    def __init__(self, case_id, gene_ensembl_id, gene_hgnc_name, transcript_name, transcript_canonical,
+                 transcript_strand, proband_transcript_variant_effect, proband_variant_af_max, variant_polyphen,
+                 variant_sift, transcript_variant_hgvs_c, transcript_variant_hgvs_p):
+        self.case_id = case_id
         self.gene_ensembl_id = gene_ensembl_id
         self.gene_hgnc_name = gene_hgnc_name
         self.transcript_name = transcript_name
@@ -44,7 +45,7 @@ def generate_vcf(variants):
     with open('temp.vcf', 'w') as vcffile:
         f = csv.writer(vcffile, delimiter='\t')
         for variant in variants:
-            f.writerow([variant.chromosome, variant.position, variant.variant_id, variant.ref, variant.alt])
+            f.writerow([variant.chromosome, variant.position, variant.case_id, variant.ref, variant.alt])
 
 def run_vep():
     config_dict = load_config.LoadConfig().load()
@@ -61,6 +62,7 @@ def parse_vep_annotations():
     variants = parse_vep.ParseVep().read_file('temp.vep.vcf')
     transcripts_list = []
     for variant in variants:
+        case_id = variant['id']
         for transcript in variant['transcript_data']:
             gene_id = variant['transcript_data'][transcript]['Gene']
             gene_name = variant['transcript_data'][transcript]['SYMBOL']
@@ -76,7 +78,7 @@ def parse_vep_annotations():
             variant_sift = variant['transcript_data'][transcript]['SIFT']
             transcript_variant_hgvs_c = variant['transcript_data'][transcript]['HGVSc']
             transcript_variant_hgvs_p = variant['transcript_data'][transcript]['HGVSp']
-            case_transcript = CaseTranscript(gene_id, gene_name, transcript_name, canonical, transcript_strand,
+            case_transcript = CaseTranscript(case_id, gene_id, gene_name, transcript_name, canonical, transcript_strand,
                                              proband_transcript_variant_effect, proband_variant_af_max,
                                              variant_polyphen, variant_sift, transcript_variant_hgvs_c,
                                              transcript_variant_hgvs_p)
@@ -94,6 +96,6 @@ def generate_transcripts(variant_list):
     generate_vcf(variant_list)
     run_vep()
     transcript_list = parse_vep_annotations()
-    remove_temp_files()
+    #remove_temp_files()
     return transcript_list
 

@@ -75,6 +75,7 @@ class ParseVep:
             variant_data_dict['format'] = rec.format.keys()
             variant_data_dict['alt_alleles'] = rec.alts
             variant_data_dict['quality'] = rec.qual
+            variant_data_dict['id'] = rec.id
             filter_status = rec.filter
             if len(filter_status.keys()) == 0:
                 variant_data_dict['filter_status'] = "."
