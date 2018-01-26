@@ -163,8 +163,10 @@ class MultipleCaseAdder(object):
             case_id_map[case.request_id] = case
             variants += case.variants
 
+        # fetch the transcripts
         transcripts = generate_transcripts(variants)
 
+        # assign transcripts
         i = 0
         while i < len(transcripts):  # keep going until no transcripts left
             transcript = transcripts.pop(0)

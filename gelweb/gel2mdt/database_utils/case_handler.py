@@ -24,6 +24,8 @@ class Case(object):
         self.json_hash = self.hash_json()
         self.proband = self.get_proband_json()
         self.status = self.get_status_json()
+        self.json_variants \
+            = self.json_case_data["json_request"]["TieredVariants"]
 
         self.panels = self.get_panels_json()
         self.variants = self.get_case_variants()
@@ -77,21 +79,19 @@ class Case(object):
         then return a list of all CaseVariants for construction of
         CaseTranscripts using VEP.
         """
-        json_reqest = self.json_case_data["json_request"]
-        json_variants = json_request["TieredVariants"]
-
-        variant_detail_list = [{
-            # list comprehension to create a dictionary of info for each varian
-            "chromosome": variant["chromosome"],
-            "position": variant["position"],
-            "ref": variant["reference"],
-            "alt": variant["alternate"],
-            "case_id": self.request_id
-        } for variant in json_variants]
-
-        case_variant_list = [CaseVariant(
-            **details
-        ) for details in variant_detail_list]
+        json_variants = self.json_variants
+        case_variant_list = []
+        for variant in json_variants:
+            case_variant = CaseVariant(
+                chromosome=variant["chromosome"],
+                position=variant["position"],
+                ref=variant["reference"],
+                alt=variant["alternate"],
+                case_id=self.request_id
+            )
+            case_variant_list.append(case_variant)
+            # also add it to the dict within self.json_variants
+            variant["case_variant"] = case_variant
 
         return case_variant_list
 
@@ -317,31 +317,45 @@ class CaseAttributeManager(object):
         Get the variant information (genetic position) for the variants in this
         case and return a matching ManyCaseModel with model_type = Variant.
         """
-        # get the list of gene models to set variants correctly without db call
-
-        # for each gene model, add it to correct variant in case.vep_result
-
         # set and return the MCM
         variants = ManyCaseModel(Variant, [{
-            "gene": None,
-            "genome_assembly": None,
-            "alternate": None,
-            "chromosome": None,
-            "db_snp_id": None,
-            "hgvs_g": None,
-            "pathogenicity": None,
-            "polyphen": None,
-            "position": None,
-            "reference": None,
-            "sift": None
-        } for variant in self.case.vep_result])
+            "genome_assembly": self.case.json["assembly"],
+            "alternate": variant["case_variant"].alt,
+            "chromosome": variant["case_variant"].chromosome,
+            "db_snp_id": variant["dbSNPid"],
+            "reference": variant["case_variant"].ref,
+        } for variant in self.case.json_variants])
         return variants
 
     def get_transcript_variants(self):
         pass
 
     def get_proband_variants(self):
-        pass
+        """
+        Get proband variant information from VEP and the JSON and create MCM.
+        """
+        ir_manager = self.case.attribute_managers[GELInterpretationReport]
+
+        # match up created variants to corresponding dict in json_variants:
+        variant_entrys = [
+            variant.entry
+            for variant
+            in self.case.attribute_managers[Variant].case_model.case_models
+        ]
+        for json_variant in self.case.json_variants:
+            for variant in variant_entrys:
+                if (
+                    json_variant["position"] == variant.position and
+                    json_variant["reference"] == variant.reference and
+                    json_variant["alternate"] == variant.alternate
+                ):
+                    json_variant["variant_entry"] = variant
+
+        proband_variants = ManyCaseModel(ProbandVariant, [{
+            "interpretation_report": ir_manager.case_model.entry,
+            "variant": variant["variant_entry"]
+        } for variant in self.case.json_variants])
+        return proband_variants
 
     def get_proband_transcript_variants(self):
         pass
