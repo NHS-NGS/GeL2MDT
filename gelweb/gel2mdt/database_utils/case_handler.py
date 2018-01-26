@@ -5,6 +5,7 @@ from datetime import datetime
 
 from ..models import *
 from ..api_utils.poll_api import PollAPI
+from ..vep_utils.run_vep_batch import CaseVariant, CaseTranscript
 
 
 class Case(object):
@@ -25,6 +26,8 @@ class Case(object):
         self.status = self.get_status_json()
 
         self.panels = self.get_panels_json()
+        self.variants = self.get_case_variants()
+        self.transcripts = []  # set by MCM with a call to vep_utils
 
         # initialise a dict to contain the AttributeManagers for this case,
         # which will be set by the MCA as they are required (otherwise there
@@ -68,6 +71,30 @@ class Case(object):
         json_request = self.json_case_data["json_request"]
         return json_request["pedigree"]["analysisPanels"]
 
+    def get_case_variants(self):
+        """
+        Create CaseVariant models for each variant listed in the json,
+        then return a list of all CaseVariants for construction of
+        CaseTranscripts using VEP.
+        """
+        json_reqest = self.json_case_data["json_request"]
+        json_variants = json_request["TieredVariants"]
+
+        variant_detail_list = [{
+            # list comprehension to create a dictionary of info for each varian
+            "chromosome": variant["chromosome"],
+            "position": variant["position"],
+            "ref": variant["reference"],
+            "alt": variant["alternate"],
+            "case_id": self.request_id
+        } for variant in json_variants]
+
+        case_variant_list = [CaseVariant(
+            **details
+        ) for details in variant_detail_list]
+
+        return case_variant_list
+
 
 class CaseAttributeManager(object):
     """
@@ -107,6 +134,10 @@ class CaseAttributeManager(object):
             case_model = self.get_transcripts()
         elif self.model_type == GELInterpretationReport:
             case_model = self.get_ir()
+        elif self.model_type == Variant:
+            case_model = self.get_variants()
+        elif self.model_type == TranscriptVariant:
+            case_model = self.get_transcript_variants()
         elif self.model_type == ProbandVariant:
             case_model = self.get_proband_variants()
         elif self.model_type == ProbandTranscriptVariant:
@@ -213,16 +244,36 @@ class CaseAttributeManager(object):
 
         for gene in gene_list:
             if len(gene["EnsembleGeneIds"]) == 0:
-                gene["EnsembleGeneIds"] = [None,]
+                gene["EnsembleGeneIds"] = [None, ]
 
         genes = ManyCaseModel(Gene, [{
-            "ensembl_id": gene["EnsembleGeneIds"][0],  # TODO: which ID to use?!
+            "ensembl_id": gene["EnsembleGeneIds"][0],  # TODO: which ID to use?
             "hgnc_name": gene["GeneSymbol"]
         } for gene in gene_list])
         return genes
 
     def get_transcripts(self):
-        pass
+        """
+        Create a ManyCaseModel for transcripts based on information returned
+        from VEP.
+        """
+        # get list of gene case models
+        genes = self.case.attribute_managers[Gene].case_model.case_models
+        case_transcripts = self.case.transcripts
+        for transcript in case_transcripts:
+            for gene in genes:
+                if gene.entry.ensembl_id == transcript.gene_ensembl_id:
+                    transcript.gene_model = gene.entry
+
+        transcripts = ManyCaseModel(Transcript, [{
+            "gene": transcript.gene_model,
+            "length": transcript.transcript_length,
+            "location": transcript.variant.location,
+            "name": transcript.transcript_name,
+            "protein": transcript.protein,
+            "strand": transcript.strand
+        } for transcript in case_transcripts])
+        return transcripts
 
     def get_ir_family(self):
         """
@@ -260,6 +311,34 @@ class CaseAttributeManager(object):
             "user": self.case.status["user"]
         })
         return ir
+
+    def get_variants(self):
+        """
+        Get the variant information (genetic position) for the variants in this
+        case and return a matching ManyCaseModel with model_type = Variant.
+        """
+        # get the list of gene models to set variants correctly without db call
+
+        # for each gene model, add it to correct variant in case.vep_result
+
+        # set and return the MCM
+        variants = ManyCaseModel(Variant, [{
+            "gene": None,
+            "genome_assembly": None,
+            "alternate": None,
+            "chromosome": None,
+            "db_snp_id": None,
+            "hgvs_g": None,
+            "pathogenicity": None,
+            "polyphen": None,
+            "position": None,
+            "reference": None,
+            "sift": None
+        } for variant in self.case.vep_result])
+        return variants
+
+    def get_transcript_variants(self):
+        pass
 
     def get_proband_variants(self):
         pass

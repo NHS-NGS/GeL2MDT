@@ -4,6 +4,7 @@ import json
 from ..models import *
 from ..api_utils.poll_api import PollAPI
 from ..api_utils.cip_utils import InterpretationList
+from ..vep_utils.run_vep_batch import generate_transcripts
 from .case_handler import Case, CaseAttributeManager
 
 
@@ -154,6 +155,23 @@ class MultipleCaseAdder(object):
             (InterpretationReportFamily, False),
             (GELInterpretationReport, False),
         )
+        # we need vep results for all cases, which needs to be done in batch
+        variants = []
+        case_id_map = {}
+        for case in self.cases_to_add:
+            # map case id to cases to easily assign transcripts from variant
+            case_id_map[case.request_id] = case
+            variants += case.variants
+
+        transcripts = generate_transcripts(variants)
+
+        i = 0
+        while i < len(transcripts):  # keep going until no transcripts left
+            transcript = transcripts.pop(0)
+            case_id = transcript.case_id
+            case = case_id_map[case_id]
+            case.transcripts.append(transcript)
+
         for model_type, many in update_order:
             for case in self.cases_to_add:
                 # create a CaseAttributeManager for the case
