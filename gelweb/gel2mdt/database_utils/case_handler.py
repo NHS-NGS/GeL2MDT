@@ -81,17 +81,29 @@ class Case(object):
         """
         json_variants = self.json_variants
         case_variant_list = []
+        # go through each variant in the json
         for variant in json_variants:
-            case_variant = CaseVariant(
-                chromosome=variant["chromosome"],
-                position=variant["position"],
-                ref=variant["reference"],
-                alt=variant["alternate"],
-                case_id=self.request_id
-            )
-            case_variant_list.append(case_variant)
-            # also add it to the dict within self.json_variants
-            variant["case_variant"] = case_variant
+            # check if it has any Tier1 or Tier2 Report Events
+            variant_max_tier = None
+            for report_event in variant["reportEvents"]:
+                tier = int(report_event["tier"][-1])
+                if variant_max_tier is None:
+                    variant_max_tier = tier
+                elif tier > variant_max_tier:
+                    variant_max_tier = tier
+            variant["max_tier"] = variant_max_tier
+
+            if variant["max_tier"] > 3:
+                case_variant = CaseVariant(
+                    chromosome=variant["chromosome"],
+                    position=variant["position"],
+                    ref=variant["reference"],
+                    alt=variant["alternate"],
+                    case_id=self.request_id
+                )
+                case_variant_list.append(case_variant)
+                # also add it to the dict within self.json_variants
+                variant["case_variant"] = case_variant
 
         return case_variant_list
 
