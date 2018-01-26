@@ -289,18 +289,12 @@ class Variant(models.Model):
     """
     chromosome = models.CharField(max_length=2)
     position = models.IntegerField()
-    hgvs_g = models.CharField(max_length=255, unique=True)
-
-    gene = models.ForeignKey(Gene, on_delete=models.CASCADE)
+    hgvs_g = models.CharField(max_length=255, unique=True, null=True)
 
     reference = models.CharField(max_length=200)
     alternate = models.CharField(max_length=200)
 
     db_snp_id = models.CharField(max_length=200)
-
-    sift = models.CharField(max_length=200)
-    polyphen = models.CharField(max_length=200)
-    pathogenicity = models.CharField(max_length=200)
 
     genome_assembly = models.ForeignKey(
         ToolOrAssemblyVersion,
@@ -318,10 +312,10 @@ class Variant(models.Model):
 
 class Transcript(models.Model):
     name = models.CharField(max_length=255)
+    canonical_transcript = models.CharField(max_length=255)
     strand = models.CharField(max_length=255)
     protein = models.CharField(max_length=255)
     location = models.CharField(max_length=255)
-    length = models.CharField(max_length=255)
 
     gene = models.ForeignKey(Gene, on_delete=models.CASCADE)
 
@@ -336,6 +330,10 @@ class TranscriptVariant(models.Model):
 
     hgvs_c = models.CharField(max_length=255)
     hgvs_p = models.CharField(max_length=255)
+
+    sift = models.CharField(max_length=200, null=True)
+    polyphen = models.CharField(max_length=200, null=True)
+    pathogenicity = models.CharField(max_length=200, null=True)
 
     class Meta:
         managed = True
