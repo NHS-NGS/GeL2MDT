@@ -9,6 +9,7 @@ import re
 import os
 import json
 import hashlib
+import pprint
 from datetime import datetime
 from django.utils import timezone
 
@@ -301,8 +302,8 @@ class TestAddCases(TestCase):
             ToolOrAssembly,
             ToolOrAssemblyVersion,
         ):
-            all_models = model.objects.all()
-            print(model, all_models)
+            all_models = model.objects.all().values()
+            pprint.pprint(list(all_models))
             if not all_models:
                 check_cases = False
 
