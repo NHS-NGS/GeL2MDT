@@ -93,9 +93,9 @@ def remove_temp_files():
 
 def generate_transcripts(variant_list):
     #variant_list = get_variants()
-    generate_vcf(variant_list)
-    run_vep()
+    #generate_vcf(variant_list)
+    #run_vep()
     transcript_list = parse_vep_annotations()
-    remove_temp_files()
+    #remove_temp_files()
     return transcript_list
 
