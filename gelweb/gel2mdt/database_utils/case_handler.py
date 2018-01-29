@@ -272,19 +272,22 @@ class CaseAttributeManager(object):
         # get list of gene case models
         genes = self.case.attribute_managers[Gene].case_model.case_models
         case_transcripts = self.case.transcripts
+        # for each transcript, add an FK to the gene with matching ensg ID
         for transcript in case_transcripts:
+            if not transcript.gene_ensembl_id:
+                # if the transcript has no recognised gene associated
+                continue  # don't bother checking genes
             for gene in genes:
                 if gene.entry.ensembl_id == transcript.gene_ensembl_id:
                     transcript.gene_model = gene.entry
 
         transcripts = ManyCaseModel(Transcript, [{
             "gene": transcript.gene_model,
-            "length": transcript.transcript_length,
-            "location": transcript.variant.location,
             "name": transcript.transcript_name,
-            "protein": transcript.protein,
-            "strand": transcript.strand
-        } for transcript in case_transcripts])
+            "canonical_transcript": transcript.transcript_canonical,
+            "strand": transcript.transcript_strand
+        # add all transcripts except those without associated genes
+        } for transcript in case_transcripts if transcript.gene_ensembl_id])
         return transcripts
 
     def get_ir_family(self):
