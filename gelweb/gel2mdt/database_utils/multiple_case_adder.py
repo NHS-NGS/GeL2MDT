@@ -155,6 +155,8 @@ class MultipleCaseAdder(object):
             (Transcript, True),
             (InterpretationReportFamily, False),
             (GELInterpretationReport, False),
+            (Variant, True),
+            (ProbandVariant, True),
         )
         # we need vep results for all cases, which needs to be done in batch
         variants = []

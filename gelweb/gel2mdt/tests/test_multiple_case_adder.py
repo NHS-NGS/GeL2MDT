@@ -296,6 +296,7 @@ class TestAddCases(TestCase):
             Transcript,
             InterpretationReportFamily,
             GELInterpretationReport,
+            Variant,
             ProbandVariant,
             ProbandTranscriptVariant,
             ReportEvent,
