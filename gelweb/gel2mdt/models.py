@@ -324,6 +324,7 @@ class Transcript(models.Model):
 class TranscriptVariant(models.Model):
     transcript = models.OneToOneField(Transcript, on_delete=models.CASCADE)
     variant = models.OneToOneField(Variant, on_delete=models.CASCADE)
+    af_max = models.CharField(max_length=200)
 
     hgvs_c = models.CharField(max_length=255)
     hgvs_p = models.CharField(max_length=255)
@@ -349,8 +350,6 @@ class Zygosities(ChoiceEnum):
 
 
 class ProbandVariant(models.Model):
-    objects = ProbandVariantManager()
-
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
     max_tier = models.IntegerField()
 
@@ -369,7 +368,6 @@ class ProbandVariant(models.Model):
 
     # TODO: find where to get these from
 
-    af_max = models.CharField(max_length=200)
 
     discussion = models.TextField(db_column='Discussion', blank=True)
     action = models.TextField(db_column='Action', blank=True)
