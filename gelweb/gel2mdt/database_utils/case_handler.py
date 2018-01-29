@@ -104,6 +104,10 @@ class Case(object):
                 case_variant_list.append(case_variant)
                 # also add it to the dict within self.json_variants
                 variant["case_variant"] = case_variant
+            else:
+                # if the variant is Tier 3, assign False to the dict within
+                # self.json_variants so we don't add a variant later
+                variant["case_variant"] = False
 
         return case_variant_list
 
@@ -339,7 +343,10 @@ class CaseAttributeManager(object):
             "chromosome": variant["case_variant"].chromosome,
             "db_snp_id": variant["dbSNPid"],
             "reference": variant["case_variant"].ref,
-        } for variant in self.case.json_variants])
+            "position": variant["case_variant"].position,
+        # loop through all variants and check that they have a case_variant
+        # (all variants Tier1 and Tier2 do, Tier3 variants do not
+        } for variant in self.case.json_variants if variant["case_variant"]])
         return variants
 
     def get_transcript_variants(self):
@@ -352,24 +359,29 @@ class CaseAttributeManager(object):
         ir_manager = self.case.attribute_managers[GELInterpretationReport]
 
         # match up created variants to corresponding dict in json_variants:
-        variant_entrys = [
+        variant_entries = [
             variant.entry
             for variant
             in self.case.attribute_managers[Variant].case_model.case_models
         ]
         for json_variant in self.case.json_variants:
-            for variant in variant_entrys:
+            # some json_variants won't have an entry (T3), so:
+            json_variant["variant_entry"] = None
+            # for those that do, fetch from list of entries:
+            for variant in variant_entries:
                 if (
                     json_variant["position"] == variant.position and
                     json_variant["reference"] == variant.reference and
                     json_variant["alternate"] == variant.alternate
                 ):
+                    print("Found matching json_variant matching entry")
                     json_variant["variant_entry"] = variant
 
         proband_variants = ManyCaseModel(ProbandVariant, [{
             "interpretation_report": ir_manager.case_model.entry,
             "variant": variant["variant_entry"]
-        } for variant in self.case.json_variants])
+        # only adding T1/2
+        } for variant in self.case.json_variants if variant["variant_entry"]])
         return proband_variants
 
     def get_proband_transcript_variants(self):

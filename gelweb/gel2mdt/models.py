@@ -296,13 +296,10 @@ class Variant(models.Model):
 
     db_snp_id = models.CharField(max_length=200)
 
-    genome_assembly = models.ForeignKey(
-        ToolOrAssemblyVersion,
-        related_name='assembly',
-        on_delete=models.CASCADE)
+    genome_assembly = models.CharField(max_length=200)
 
     def __str__(self):
-        pass
+        return str(self.chromosome + str(self.position) + self.reference + ">" + self.alternate)
 
     class Meta:
         managed = True
@@ -407,7 +404,7 @@ class ProbandVariant(models.Model):
     ), default='NA')
 
     def __str__(self):
-        pass
+        return str(self.interpretation_report) + " " + str(self.variant)
 
     class Meta:
         managed = True
