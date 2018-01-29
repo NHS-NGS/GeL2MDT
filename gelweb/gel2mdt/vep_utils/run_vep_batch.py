@@ -14,7 +14,7 @@ class CaseVariant:
 
 class CaseTranscript:
     def __init__(self, case_id, gene_ensembl_id, gene_hgnc_name, transcript_name, transcript_canonical,
-                 transcript_strand, proband_transcript_variant_effect, proband_variant_af_max, variant_polyphen,
+                 transcript_strand, proband_transcript_variant_effect, transcript_variant_af_max, variant_polyphen,
                  variant_sift, transcript_variant_hgvs_c, transcript_variant_hgvs_p):
         self.case_id = case_id
         self.gene_ensembl_id = gene_ensembl_id
@@ -23,7 +23,7 @@ class CaseTranscript:
         self.transcript_canonical = transcript_canonical
         self.transcript_strand = transcript_strand
         self.proband_transcript_variant_effect = proband_transcript_variant_effect
-        self.proband_variant_af_max = proband_variant_af_max
+        self.transcript_variant_af_max = transcript_variant_af_max
         self.variant_polyphen = variant_polyphen
         self.variant_sift = variant_sift
         self.transcript_variant_hgvs_c = transcript_variant_hgvs_c
@@ -73,13 +73,13 @@ def parse_vep_annotations():
             transcript_name = variant['transcript_data'][transcript]['Feature']
             transcript_strand = variant['transcript_data'][transcript]['STRAND']
             proband_transcript_variant_effect = variant['transcript_data'][transcript]['Consequence']
-            proband_variant_af_max = variant['transcript_data'][transcript]['MAX_AF']
+            transcript_variant_af_max = variant['transcript_data'][transcript]['MAX_AF']
             variant_polyphen = variant['transcript_data'][transcript]['PolyPhen']
             variant_sift = variant['transcript_data'][transcript]['SIFT']
             transcript_variant_hgvs_c = variant['transcript_data'][transcript]['HGVSc']
             transcript_variant_hgvs_p = variant['transcript_data'][transcript]['HGVSp']
             case_transcript = CaseTranscript(case_id, gene_id, gene_name, transcript_name, canonical, transcript_strand,
-                                             proband_transcript_variant_effect, proband_variant_af_max,
+                                             proband_transcript_variant_effect, transcript_variant_af_max,
                                              variant_polyphen, variant_sift, transcript_variant_hgvs_c,
                                              transcript_variant_hgvs_p)
             transcripts_list.append(case_transcript)
