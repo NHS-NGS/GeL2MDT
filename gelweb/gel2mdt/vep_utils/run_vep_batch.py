@@ -89,13 +89,13 @@ def parse_vep_annotations():
 #     pass
 
 def remove_temp_files():
-    os.system("rm temp.vcf temp.vep.vcf")
+    os.system("rm temp.vcf temp.vep.vcf temp.vep.vcf_summary.txt")
 
 def generate_transcripts(variant_list):
     #variant_list = get_variants()
     generate_vcf(variant_list)
     run_vep()
     transcript_list = parse_vep_annotations()
-    #remove_temp_files()
+    remove_temp_files()
     return transcript_list
 
