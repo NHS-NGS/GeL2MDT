@@ -337,15 +337,6 @@ class TranscriptVariant(models.Model):
         db_table = 'TranscriptVariant'
 
 
-class ProbandVariantManager(models.Manager):
-    def get_tier(self, tier, report):
-        # postprocess a queryset
-        proband_variants = ProbandVariant.objects.filter(interpretation_report=report)
-        tier_variants = [pv for pv in proband_variants if pv.max_tier() == tier]
-
-        return tier_variants
-
-
 class Zygosities(ChoiceEnum):
     """
     A list of choices of zygosity that a variant can possibly have, used in the
@@ -361,20 +352,11 @@ class ProbandVariant(models.Model):
     objects = ProbandVariantManager()
 
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
+    max_tier = models.IntegerField()
 
     interpretation_report = models.ForeignKey(
         GELInterpretationReport, on_delete=models.CASCADE)
 
-    def max_tier(self):
-        """
-        Get all of the report events associated with this variant and then
-        return the minimum (or most significant) tier of all of these to
-        allow filtering of variants within the webapp.
-        """
-        report_event_tiers = ReportEvent.objects.filter(
-            variant=self
-        ).values_list('tier', flat=True)
-        return min(report_event_tiers)
 
     tools = models.ManyToManyField(
         ToolOrAssemblyVersion)
