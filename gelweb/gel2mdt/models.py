@@ -314,8 +314,8 @@ class Transcript(models.Model):
     name = models.CharField(max_length=255)
     canonical_transcript = models.CharField(max_length=255)
     strand = models.CharField(max_length=255)
-    protein = models.CharField(max_length=255)
-    location = models.CharField(max_length=255)
+    protein = models.CharField(max_length=255, null=True)
+    location = models.CharField(max_length=255, null=True)
 
     gene = models.ForeignKey(Gene, on_delete=models.CASCADE)
 
