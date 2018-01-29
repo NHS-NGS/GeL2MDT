@@ -1,4 +1,4 @@
-from ..database_utils import add_cases
+from ..database_utils import multiple_case_adder
 from ..models import *
 from .test_multiple_case_adder import TestCaseOperations
 from datetime import datetime
@@ -9,7 +9,7 @@ def create_dummy_sample():
     :return:
     """
     # Initialising with ir_family and ir_instance
-    add_cases.MultipleCaseAdder(test_data=True)
+    multiple_case_adder.MultipleCaseAdder(test_data=True)
     Family.objects.filter(gel_family_id=100).delete()  # Have to delete previous version
     test_cases = TestCaseOperations()
     test_cases.add_cases_to_database()

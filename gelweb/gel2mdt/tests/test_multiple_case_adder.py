@@ -150,7 +150,7 @@ class TestAddCases(TestCase):
 
         for case, test_case in case_mapping:
             ir_data = test_case["interpretation_request_data"]["json_request"]
-            particicpants = ir_data["pedigree"]["participants"]
+            participants = ir_data["pedigree"]["participants"]
             proband = None
             for participant in participants:
                 if participant["isProband"]:
