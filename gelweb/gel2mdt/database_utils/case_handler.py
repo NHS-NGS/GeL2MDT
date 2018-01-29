@@ -350,7 +350,42 @@ class CaseAttributeManager(object):
         return variants
 
     def get_transcript_variants(self):
-        pass
+        """
+        Get all variant transcripts. This is essentialy a 'through' table for
+        the M2M relationship between Variant and Transcript, but with extra
+        information.
+        """
+        # get all Transcript and Variant entries
+        case_attribute_managers = self.case.attribute_managers
+        transcript_manager = case_attribute_managers[Transcript]
+        transcript_entries = [transcript.entry
+                       for transcript in transcript_manager.case_models]
+        variant_manager = case_attribute_managers[Variant]
+        variant_entries = [variant.entry
+                           for variant in variant_manager.case_models]
+
+        # TODO: need some sort of way to link up Transcripts to the Variant
+        # which they originate from in VEP
+        # for each CaseTranscript (which contains necessary info):
+        for case_transcript in self.case.case_transcripts:
+            # add the corresponding Transcript entry
+            for variant_entry in variant_entries:
+                pass
+            # add the corresponding Variant entry
+            for transcript_entry in transcript_entries:
+                pass
+
+        # use the updated CaseTranscript instances to create an MCM
+        transcript_variants = ManyCaseModel(TranscriptVariant, [{
+            "transcript": None,
+            "variant": None,
+            "af_max": transcript.transcript_variant_af_max,
+            "hgvs_c": transcript.transcript_variant_hgvs_c,
+            "hgvs_p": transcript.transcript_variant_hgvs_p,
+            "sift": transcript.variant_sift,
+            "polyphen": transcript.variant_polyphen,
+        } for transcript in case_transcripts])
+
 
     def get_proband_variants(self):
         """
@@ -389,7 +424,35 @@ class CaseAttributeManager(object):
         pass
 
     def get_report_events(self):
-        pass
+       """
+       Get all the report events for each case from the json and populate an
+       MCM with this information.
+       """
+       # get gene and panel entries
+       genes = [gene.entry for gene
+                in self.case.attribute_managers[Gene].case_model.case_models]
+       panels = [panel.entry for panel
+                 in self.case.attribute_managers[Panel].case_model.case_models]
+       # get list of dicts of each report event
+       json_report_events = []
+       for variant in self.case.json_variants:
+           for report_event in variant["reportEvents"]:
+                json_report_events.append({
+                    # TODO: fetch coverage info from elsewhere in json
+                    "coverage": None,
+                    # TODO: add information about RE from json
+                    "gene": None,
+                    "mode_of_inheritance": report_event["modeOfInheritance"],
+                    "panel": None,
+                    "penetrance": report_event["penetrance"],
+                    "phenotype": None,
+                    "proband_variant": None,
+                    "re_id": report_event["reportEventId"],
+                    "tier": report_event["tier"]
+                })
+
+       report_events = ManyCaseModel(ReportEvent, json_report_events)
+       return report_events
 
     def get_tools_and_assemblies(self):
         pass
