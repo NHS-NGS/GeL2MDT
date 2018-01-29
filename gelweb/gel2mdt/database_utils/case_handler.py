@@ -379,6 +379,7 @@ class CaseAttributeManager(object):
 
         proband_variants = ManyCaseModel(ProbandVariant, [{
             "interpretation_report": ir_manager.case_model.entry,
+            "max_tier": variant["max_tier"],
             "variant": variant["variant_entry"]
         # only adding T1/2
         } for variant in self.case.json_variants if variant["variant_entry"]])
