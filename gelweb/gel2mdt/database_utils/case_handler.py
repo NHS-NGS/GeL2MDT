@@ -448,7 +448,7 @@ class CaseAttributeManager(object):
                     "phenotype": None,
                     "proband_variant": None,
                     "re_id": report_event["reportEventId"],
-                    "tier": report_event["tier"]
+                    "tier": int(report_event["tier"][-1:])
                 })
 
        report_events = ManyCaseModel(ReportEvent, json_report_events)

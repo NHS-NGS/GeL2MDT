@@ -432,8 +432,8 @@ class ReportEvent(models.Model):
     re_id = models.CharField(max_length=200)
     tier = models.PositiveIntegerField()
 
-    proband_variant = models.ForeignKey(ProbandVariant, on_delete=models.CASCADE)
-    panel = models.ForeignKey(PanelVersion, on_delete=models.CASCADE)
+    proband_variant = models.ForeignKey(ProbandVariant, on_delete=models.CASCADE, null=True) #made nullable
+    panel = models.ForeignKey(PanelVersion, on_delete=models.CASCADE, null=True) #made nullable
 
     mode_of_inheritance = models.CharField(
         max_length=40,
@@ -441,10 +441,10 @@ class ReportEvent(models.Model):
         default=ModesOfInheritance.unknown)
     penetrance = models.CharField(max_length=200)
 
-    gene = models.ForeignKey(Gene, on_delete=models.CASCADE)
-    phenotype = models.ForeignKey(Phenotype, on_delete=models.CASCADE)
+    gene = models.ForeignKey(Gene, on_delete=models.CASCADE, null=True) #made nullable
+    phenotype = models.ForeignKey(Phenotype, on_delete=models.CASCADE, null=True) #made nullable
 
-    coverage = models.DecimalField(max_digits=8, decimal_places=3)
+    coverage = models.DecimalField(max_digits=8, decimal_places=3, null=True) #made nullable
 
     def __str__(self):
         return str(self.variant.interpretation_report.ir_family.ir_family_id) + " " + self.re_id
