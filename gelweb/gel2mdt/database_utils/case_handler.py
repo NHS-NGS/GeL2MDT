@@ -75,13 +75,14 @@ class Case(object):
 
     def get_case_variants(self):
         """
-        Create CaseVariant models for each variant listed in the json,
+        Create CaseVariant objects for each variant listed in the json,
         then return a list of all CaseVariants for construction of
         CaseTranscripts using VEP.
         """
         json_variants = self.json_variants
         case_variant_list = []
         # go through each variant in the json
+        variant_object_count = 0
         for variant in json_variants:
             # check if it has any Tier1 or Tier2 Report Events
             variant_min_tier = None
@@ -94,12 +95,14 @@ class Case(object):
             variant["max_tier"] = variant_min_tier
 
             if variant["max_tier"] < 3:
+                variant_object_count += 1
                 case_variant = CaseVariant(
                     chromosome=variant["chromosome"],
                     position=variant["position"],
                     ref=variant["reference"],
                     alt=variant["alternate"],
-                    case_id=self.request_id
+                    case_id=self.request_id,
+                    variant_count=str(variant_object_count)
                 )
                 case_variant_list.append(case_variant)
                 # also add it to the dict within self.json_variants
