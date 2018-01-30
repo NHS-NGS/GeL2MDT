@@ -59,6 +59,33 @@ def register(request):
     return render(request, 'registration/registration.html',
                   {'user_form': user_form, 'registered': registered, 'username': username})
 
+
 def index(request):
-    test_setup.create_dummy_sample()
-    return render(request, 'gel2mdt/index.html', {} )
+    '''
+    Gives the user the choice between rare disease and cancer
+    :param request:
+    :return:
+    '''
+    # We want this to be a choice between cancer and rare disease
+    return render(request, 'gel2mdt/index.html', {})
+
+
+def cancer_main(request):
+    '''
+    Shows all the Cancer cases the user has access to and allows easy searching of cases
+    :param request:
+    :return:
+    '''
+
+    return render(request, 'gel2mdt/cancer_main.html', {})
+
+
+def rare_disease_main(request):
+    '''
+    Shows all the RD cases the user has access to and allows easy searching of cases
+    :param request:
+    :return:
+    '''
+    # test_setup.create_dummy_sample()
+    return render(request, 'gel2mdt/rare_disease_main.html', {})
+
