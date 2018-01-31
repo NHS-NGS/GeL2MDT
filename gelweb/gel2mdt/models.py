@@ -314,7 +314,7 @@ class Transcript(models.Model):
     protein = models.CharField(max_length=255, null=True)
     location = models.CharField(max_length=255, null=True)
 
-    gene = models.ForeignKey(Gene, on_delete=models.CASCADE)
+    gene = models.ForeignKey(Gene, on_delete=models.CASCADE, null=True)
 
     class Meta:
         managed = True

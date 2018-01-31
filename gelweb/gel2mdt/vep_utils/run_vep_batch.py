@@ -1,4 +1,6 @@
 import os
+import tempfile
+import subprocess
 import csv
 from ..config import load_config
 from . import parse_vep
@@ -16,7 +18,7 @@ class CaseVariant:
 class CaseTranscript:
     def __init__(self, case_id, variant_count, gene_ensembl_id, gene_hgnc_name, transcript_name, transcript_canonical,
                  transcript_strand, proband_transcript_variant_effect, transcript_variant_af_max, variant_polyphen,
-                 variant_sift, transcript_variant_hgvs_c, transcript_variant_hgvs_p):
+                 variant_sift, transcript_variant_hgvs_c, transcript_variant_hgvs_p, transcript_variant_hgvs_g):
         self.case_id = case_id
         self.variant_count = variant_count
         self.gene_ensembl_id = gene_ensembl_id
@@ -30,39 +32,63 @@ class CaseTranscript:
         self.variant_sift = variant_sift
         self.transcript_variant_hgvs_c = transcript_variant_hgvs_c
         self.transcript_variant_hgvs_p = transcript_variant_hgvs_p
-
-# def get_variants():
-#     target_variants = []
-#     # TODO: for variants not linked to transcript, create variant object and add to list
-#     # target_variants = Variants
-#     # temp solution makes 3 target variants for testing purposes:
-#     tv1 = CaseVariant(20, 14370, "id-001", "G", "A")
-#     tv2 = CaseVariant(20, 17330, "id-002", "T", "A")
-#     tv3 = CaseVariant(22, 51135978, "id-003", "A", "C")
-#     target_variants = [tv1,tv2,tv3]
-#     return target_variants
+        self.transcript_variant_hgvs_g = transcript_variant_hgvs_g
+        self.gene_model = None
 
 
+# old version without using tempfile:
+# def generate_vcf(variants):
+#     with open('temp.vcf', 'w') as vcffile:
+#         f = csv.writer(vcffile, delimiter='\t')
+#         for variant in variants:
+#             f.writerow([variant.chromosome, variant.position, variant.case_id + ":" + variant.variant_count,
+#                         variant.ref, variant.alt])
+
+# new version using tempfile:
 def generate_vcf(variants):
-    with open('temp.vcf', 'w') as vcffile:
-        f = csv.writer(vcffile, delimiter='\t')
-        for variant in variants:
-            f.writerow([variant.chromosome, variant.position, variant.case_id + ":" + variant.variant_count,
-                        variant.ref, variant.alt])
+    tmpvcf = tempfile.NamedTemporaryFile(mode='w+t', delete=False)
+    for variant in variants:
+        row_to_write = str(variant.chromosome) + '\t' + str(variant.position) + '\t' + str(variant.case_id) + ":" + \
+                       str(variant.variant_count) + '\t' + variant.ref + '\t' + variant.alt + '\n'
+        tmpvcf.writelines(row_to_write)
+    print(tmpvcf.name)
+    return tmpvcf.name
 
-def run_vep():
+#old version without using tempfile
+# def run_vep():
+#     config_dict = load_config.LoadConfig().load()
+#     # builds command from locations supplied in config file
+#     cmd = "{vep} -i temp.vcf -o temp.vep.vcf --cache --dir_cache {cache} --fork 4 --vcf --flag_pick \
+#             --exclude_predicted --everything --dont_skip --total_length --offline --fasta {fasta_loc}".format(
+#         vep=config_dict['vep'],
+#         cache=config_dict['cache'],
+#         fasta_loc=config_dict['fasta_loc'],
+#     )
+#     os.system(cmd)
+
+# new version using tempfile
+def run_vep(infile):
     config_dict = load_config.LoadConfig().load()
+    outfile = tempfile.NamedTemporaryFile(mode='w+t', delete=False)
     # builds command from locations supplied in config file
-    cmd = "{vep} -i temp.vcf -o temp.vep.vcf --cache --dir_cache {cache} --fork 4 --vcf --flag_pick \
-            --exclude_predicted --everything --dont_skip --total_length --offline --fasta {fasta_loc}".format(
+    cmd = "{vep} -i {infile} -o {outfile} --force_overwrite --cache --dir_cache {cache} --fork 4 --vcf --flag_pick \
+            --exclude_predicted --everything --hgvsg --dont_skip --total_length --offline --fasta {fasta_loc}".format(
         vep=config_dict['vep'],
+        infile=infile,
+        outfile=outfile.name,
         cache=config_dict['cache'],
         fasta_loc=config_dict['fasta_loc'],
     )
-    os.system(cmd)
+    subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell=True).wait()
+    print(outfile.name)
+    return outfile.name
 
-def parse_vep_annotations():
-    variants = parse_vep.ParseVep().read_file('temp.vep.vcf')
+def parse_vep_annotations(infile=None):
+    if infile is not None:
+        variants = parse_vep.ParseVep().read_file(infile)
+    else:
+        #reads in the local file saved in root folder for testing purposes
+        variants = parse_vep.ParseVep().read_file('temp.vep.vcf')
     transcripts_list = []
     for variant in variants:
         case_id = variant['id'].split(":")[0]
@@ -82,24 +108,28 @@ def parse_vep_annotations():
             variant_sift = variant['transcript_data'][transcript]['SIFT']
             transcript_variant_hgvs_c = variant['transcript_data'][transcript]['HGVSc']
             transcript_variant_hgvs_p = variant['transcript_data'][transcript]['HGVSp']
+            transcript_variant_hgvs_g = variant['transcript_data'][transcript]['HGVSg']
             case_transcript = CaseTranscript(case_id, variant_count, gene_id, gene_name, transcript_name, canonical,
                                              transcript_strand, proband_transcript_variant_effect,
                                              transcript_variant_af_max, variant_polyphen, variant_sift,
-                                             transcript_variant_hgvs_c, transcript_variant_hgvs_p)
+                                             transcript_variant_hgvs_c, transcript_variant_hgvs_p,
+                                             transcript_variant_hgvs_g)
             transcripts_list.append(case_transcript)
     return transcripts_list
 
-# def populate_transcript_table(vep):
-#     pass
-
+# likely wont be needed when using tempfile
 def remove_temp_files():
     os.system("rm temp.vcf temp.vep.vcf temp.vep.vcf_summary.txt")
 
 def generate_transcripts(variant_list):
     #variant_list = get_variants()
-    #generate_vcf(variant_list)
-    #run_vep()
+    # variant_file = generate_vcf(variant_list)
+    # annotated_file = run_vep(variant_file)
+    # transcript_list = parse_vep_annotations(annotated_file)
+
+    # bypassing running VEP
     transcript_list = parse_vep_annotations()
+
     #remove_temp_files()
     return transcript_list
 
