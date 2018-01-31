@@ -79,6 +79,13 @@
         </div>
 
 {% block head-javascript %}
+<script>
+    $(document).ready(function() {
+        $('#dataTables-rd_cases').DataTable({
+            responsive: true
+        });
+    });
+    </script>
 
 {% endblock %}
 

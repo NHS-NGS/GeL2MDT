@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from .database_utils import add_cases
 from django.contrib import messages
 from django.db import IntegrityError
-from .tests import test_setup
+from .for_me_testing import create_dummy_sample
 
 # Create your views here.
 def register(request):
@@ -59,7 +59,7 @@ def register(request):
     return render(request, 'registration/registration.html',
                   {'user_form': user_form, 'registered': registered, 'username': username})
 
-
+@login_required
 def index(request):
     '''
     Gives the user the choice between rare disease and cancer
@@ -69,23 +69,31 @@ def index(request):
     # We want this to be a choice between cancer and rare disease
     return render(request, 'gel2mdt/index.html', {})
 
-
+@login_required
 def cancer_main(request):
     '''
     Shows all the Cancer cases the user has access to and allows easy searching of cases
     :param request:
     :return:
     '''
-
     return render(request, 'gel2mdt/cancer_main.html', {})
 
-
+@login_required
 def rare_disease_main(request):
     '''
     Shows all the RD cases the user has access to and allows easy searching of cases
     :param request:
     :return:
     '''
-    # test_setup.create_dummy_sample()
-    return render(request, 'gel2mdt/rare_disease_main.html', {})
+    # create_dummy_sample()
+    rd_cases = Proband.objects.all()
+    return render(request, 'gel2mdt/rare_disease_main.html', {'rd_cases': rd_cases})
 
+@login_required
+def proband_view(request):
+    '''
+    Shows details about a particular proband, some fields may be editable
+    :param request:
+    :return:
+    '''
+    
