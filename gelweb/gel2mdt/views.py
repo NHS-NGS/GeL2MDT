@@ -90,10 +90,28 @@ def rare_disease_main(request):
     return render(request, 'gel2mdt/rare_disease_main.html', {'rd_cases': rd_cases})
 
 @login_required
-def proband_view(request):
+def proband_view(request, gel_id):
     '''
     Shows details about a particular proband, some fields may be editable
     :param request:
     :return:
     '''
-    
+    proband = Proband.objects.get(gel_id=gel_id)
+    relatives = Relative.objects.filter(proband=proband)
+    proband_form = ProbandForm(instance=proband)
+    return render(request, 'gel2mdt/proband.html', {'proband': proband,
+                                                    'relatives': relatives,
+                                                    'proband_form': proband_form})
+
+@login_required
+def update_proband(request, gel_id):
+    proband = Proband.objects.get(gel_id=gel_id)
+    if request.method == "POST":
+        proband_form = ProbandForm(request.POST, instance=proband)
+
+        if proband_form.is_valid():
+            proband_form.save()
+            messages.add_message(request, 25, 'Proband Updated')
+            return HttpResponseRedirect('/proband/{}'.format(gel_id))
+
+

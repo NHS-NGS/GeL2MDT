@@ -15,13 +15,13 @@
                 <table width="100%" class="table table-striped table-bordered table-hover" id="dataTables-rd_cases">
                         <thead>
                             <tr>
+                                <th>GEL ID </th>
                                 <th>CIP ID</th>
                                 <th>Forename</th>
                                 <th>Surname</th>
                                 <th>DOB</th>
                                 <th>Clinician</th>
                                 <th>GMC</th>
-                                <th>Participant ID </th>
                                 <th>Case Status</th>
                                 <th>MDT Status</th>
                                 <th>Pilot</th>
@@ -30,13 +30,13 @@
                         <tbody>
                                 {% for sample in rd_cases %}
                                 <tr>
-                                    <td><a href="/proband/{{sample.cip_id}}">{{sample.cip_id}}</a></td>
+                                     <td> <a href="/proband/{{sample.gel_id}}">{{sample.gel_id}}</a></td>
+                                    <td>{{sample.cip_id}}</td>
                                     <td>{{sample.forename}}</td>
                                     <td>{{sample.surname}}</td>
                                     <td>{{sample.date_of_birth|date}}</td>
                                     <td>{{sample.family.clinician.name}}</td>
                                     <td>{{sample.gmc}}</td>
-                                    <td>{{sample.gel_id}}</td>
                                      <td>{{sample.get_status_display}}</td>
                                     <td>{{sample.get_mdt_status_display}}</td>
                                     {% if sample.pilot_case %}
