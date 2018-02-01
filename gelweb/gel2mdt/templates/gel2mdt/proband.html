@@ -131,7 +131,6 @@
         </form>
      <div class="row">
          <div class="col-md-12">
-
                     <div class="panel panel-default">
                         <div class="panel-heading">MDT History</div>
                         <div class="panel-body">
@@ -204,15 +203,14 @@
     </div>
     </div>
 
-
-        <div id="variants" class="tab-pane fade">
+<div id="variants" class="tab-pane fade">
  <div class="container-fluid" >
         <h1> {{ proband.gel_id }}</h1>
 
         <div class="panel-body">
 
             <div class="table-responsive">
-            <table width="100%" class="table table-striped table-bordered table-hover"  id="samplevariant-table">
+            <table width="100%" class="table table-striped table-bordered table-hover" id="dataTables-generic">
                 <thead style='font-size: 75%'>
                     <tr>
                         <th>Variant ID</th>
@@ -234,19 +232,61 @@
                     </tr>
                 </thead>
                 <tbody style='font-size: 75%'>
+
+                {% for variant in probandtranscriptvariants %}
+                    <tr >
+                        <td><a href="/variants/{{variant.id }}">{{ variant.proband_variant.variant.id }}</a></td>
+                        <td><a href="/update_transcript/{{variant.id }}" class="btn btn-primary">Link</a></td>
+                        <td>{{ variant.transcript.gene }}</td>
+                        <td>{{ variant.transcript.name }}</td>
+                        <td style="word-wrap: break-word; min-width: 100px;max-width: 100px;">{{variant.transcript.hgvs_c}}</td>
+                        <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{variant.transcript.hgvs_p}}</td>
+                        <td>{{variant.proband_variant.zygosity}}</td>
+                        <td>{{variant.proband_variant.classification}}</td>
+                        <td>{{variant.proband_variant.contribution_of_phenotype}}</td>
+                        <td style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{variant.proband_variant.discussion}}</td>
+                        <td style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{variant.proband_variant.action}}</td>
+                        <td>{% if variant.proband_variant.change_med == True %}
+                            <span class="glyphicon glyphicon-ok"></span>
+                            {% else %}
+                            <span class="glyphicon glyphicon-remove"></span>
+                            {% endif %}
+                        </td>
+                        <td>{% if variant.proband_variant.surgical_option == True %}
+                            <span class="glyphicon glyphicon-ok"></span>
+                            {% else %}
+                            <span class="glyphicon glyphicon-remove"></span>
+                            {% endif %}
+                        </td>
+                        <td>{% if variant.proband_variant.add_surveillance_for_relatives == True %}
+                            <span class="glyphicon glyphicon-ok"></span>
+                            {% else %}
+                            <span class="glyphicon glyphicon-remove"></span>
+                            {% endif %}
+                        </td>
+                        <td>{% if variant.proband_variant.clinical_trial == True %}
+                            <span class="glyphicon glyphicon-ok"></span>
+                            {% else %}
+                            <span class="glyphicon glyphicon-remove"></span>
+                            {% endif %}
+                        </td>
+                        <td>{% if variant.proband_variant.inform_reproductive_choice == True %}
+                            <span class="glyphicon glyphicon-ok"></span>
+                            {% else %}
+                            <span class="glyphicon glyphicon-remove"></span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+
                 </tbody>
             </table>
-                <div class="modal fade" id="modal-sample">
-                    <div class="modal-dialog">
-                      <div class="modal-content">
-                      </div>
-                    </div>
-                </div>
         </div>
 
         </div>
     </div>
 </div>
 </div>
+
 
 {% endblock %}

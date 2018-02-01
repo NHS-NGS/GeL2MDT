@@ -99,9 +99,12 @@ def proband_view(request, gel_id):
     proband = Proband.objects.get(gel_id=gel_id)
     relatives = Relative.objects.filter(proband=proband)
     proband_form = ProbandForm(instance=proband)
+    gel_ir = GELInterpretationReport.objects.get(ir_family__participant_family=proband.family)
+    probandtranscriptvariants = ProbandTranscriptVariant.objects.filter(proband_variant__interpretation_report=gel_ir)
     return render(request, 'gel2mdt/proband.html', {'proband': proband,
                                                     'relatives': relatives,
-                                                    'proband_form': proband_form})
+                                                    'proband_form': proband_form,
+                                                    'probandtranscriptvariants':probandtranscriptvariants})
 
 @login_required
 def update_proband(request, gel_id):

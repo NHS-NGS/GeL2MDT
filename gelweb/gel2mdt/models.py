@@ -357,10 +357,8 @@ class ProbandVariant(models.Model):
     interpretation_report = models.ForeignKey(
         GELInterpretationReport, on_delete=models.CASCADE)
 
-
     tools = models.ManyToManyField(
         ToolOrAssemblyVersion)
-
 
     zygosity = models.CharField(
         max_length=20,
@@ -368,7 +366,6 @@ class ProbandVariant(models.Model):
         default=Zygosities.unknown)
 
     # TODO: find where to get these from
-
 
     discussion = models.TextField(db_column='Discussion', blank=True)
     action = models.TextField(db_column='Action', blank=True)
