@@ -10,4 +10,6 @@ urlpatterns = [
 
     path('proband/<int:gel_id>', views.proband_view, name='proband-view'),
     path('update_proband/<int:gel_id>', views.update_proband, name='update-proband'),
+
+    path('edit_mdt/<int:id>', views.edit_mdt, name='edit-mdt'),
 ]
