@@ -7,6 +7,8 @@ from .database_utils import add_cases
 from django.contrib import messages
 from django.db import IntegrityError
 from .for_me_testing import create_dummy_sample
+from django.forms import modelformset_factory
+
 
 # Create your views here.
 def register(request):
@@ -21,7 +23,10 @@ def register(request):
         if user_form.is_valid():
             first_name = user_form.cleaned_data['first_name']
             last_name = user_form.cleaned_data['last_name']
-            username = user_form.cleaned_data['email']
+            if len(last_name) >= 6:
+                username = (last_name[:5] + first_name[0]).lower()
+            else:
+                username = (last_name + first_name[0]).lower()
             password = user_form.cleaned_data['password']
             email = user_form.cleaned_data['email']
             role = user_form.cleaned_data['role']
@@ -59,6 +64,7 @@ def register(request):
     return render(request, 'registration/registration.html',
                   {'user_form': user_form, 'registered': registered, 'username': username})
 
+
 @login_required
 def index(request):
     '''
@@ -69,6 +75,7 @@ def index(request):
     # We want this to be a choice between cancer and rare disease
     return render(request, 'gel2mdt/index.html', {})
 
+
 @login_required
 def cancer_main(request):
     '''
@@ -77,6 +84,7 @@ def cancer_main(request):
     :return:
     '''
     return render(request, 'gel2mdt/cancer_main.html', {})
+
 
 @login_required
 def rare_disease_main(request):
@@ -88,6 +96,7 @@ def rare_disease_main(request):
     # create_dummy_sample()
     rd_cases = Proband.objects.all()
     return render(request, 'gel2mdt/rare_disease_main.html', {'rd_cases': rd_cases})
+
 
 @login_required
 def proband_view(request, gel_id):
@@ -106,6 +115,7 @@ def proband_view(request, gel_id):
                                                     'proband_form': proband_form,
                                                     'probandtranscriptvariants':probandtranscriptvariants})
 
+
 @login_required
 def update_proband(request, gel_id):
     proband = Proband.objects.get(gel_id=gel_id)
@@ -116,5 +126,61 @@ def update_proband(request, gel_id):
             proband_form.save()
             messages.add_message(request, 25, 'Proband Updated')
             return HttpResponseRedirect('/proband/{}'.format(gel_id))
+
+
+@login_required
+def start_mdt_view(request):
+    """Select Samples for MDT instance
+    """
+    mdt_instance = MDT(creator=request.user.username)
+    mdt_instance.save()
+
+    return HttpResponseRedirect('/edit_mdt/{}'.format(mdt_instance.id))
+
+
+@login_required
+def edit_mdt(request, id):
+    """
+    Allows users to Add/Remove samples from MDT instance
+    """
+    proband_list = Proband.objects.all().exclude(sample_status='C')
+    # somehow need a list of samples to check whether they are in MDT
+    return render(request, '/mdt_sample_select.html', {'proband_list': proband_list})
+                                                             #'sample_list': sample_list})
+
+#
+# @login_required
+# def add_samples_mdt(request, pk, sid):
+#     """
+#     :param request:
+#     :param pk: MDT ID
+#     :param sid: Sample  Gel Participant ID
+#     :return: Add this sample to the MDT
+#     """
+#     if request.method=='POST':
+#         mdt_instance = Gel_Mdt.objects.get(id=pk)
+#         sample_instance = Gel_Sample_Info.objects.get(gel_participant_id=sid)
+#         linkage_instance = Gel_Mdt_linkage(gel_sample_id=sample_instance,
+#                  gel_mdt_id=mdt_instance)
+#         linkage_instance.save()
+#         return HttpResponseRedirect('/gel2me/edit_mdt/{}'.format(pk))
+#
+#
+# @login_required
+# def remove_samples_mdt(request, pk, sid):
+#     """
+#     :param request:
+#     :param pk: MDT ID
+#     :param sid: Sample Gel Participant ID
+#     :return: Removes this sample from the MDT
+#     """
+#     if request.method=='POST':
+#         mdt_instance = Gel_Mdt.objects.get(id=pk)
+#         sample_instance = Gel_Sample_Info.objects.get(gel_participant_id=sid)
+#
+#         Gel_Mdt_linkage.objects.filter(gel_mdt_id=mdt_instance, gel_sample_id=sample_instance).delete()
+#         return HttpResponseRedirect('/gel2me/edit_mdt/{}'.format(pk))
+#
+
 
 
