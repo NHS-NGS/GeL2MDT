@@ -1,0 +1,252 @@
+{% extends 'gel2mdt/base.html' %}
+{% load bootstrap3 %}
+{% load static %}
+{% block content %}
+
+<ul class="nav nav-tabs">
+    <li class="active"><a data-toggle="tab" href="#proband">Proband</a></li>
+    <li><a data-toggle="tab" href="#variants">Variants</a></li>
+</ul>
+
+<div class="tab-content">
+    <div id="proband" class="tab-pane fade in active">
+         <div class="container-fluid" >
+        <h1>{{proband.gel_id}}</h1>
+             <form role="form" method="post" enctype="multipart/form-data" action="/update_proband/{{ proband.gel_id }}">
+            {% csrf_token %}
+            <div class="row">
+
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Participant Information</div>
+                        <div class="panel-body">
+
+                            <div class="col-md-3">
+                                {% bootstrap_label "NHS Number" %}
+                                <div class="block">
+                                    {{proband.nhs_number}}
+                                </div>
+                                </br>
+                                {% bootstrap_label "Date of Birth" %}
+                                <div class="block">
+                                    {{proband.date_of_birth|date}}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                {% bootstrap_label "Forename" %}
+                                <div class="block">
+                                    {{proband.forename}}
+                                </div>
+                                </br>
+                                {% bootstrap_label "Sex" %}
+                                <div class="block">
+                                    {{proand.sex}}
+                                </div>
+                                </br>
+
+                            </div>
+
+
+                            <div class="col-md-3">
+
+                                {% bootstrap_label "Surname" %}
+                                <div class="block">
+                                    {{proband.surname}}
+                                </div>
+
+                                </br>
+                                {% bootstrap_label "Clinician" %}
+                                <div class="block">
+                                    {{proband.family.clinician}}
+                                </div>
+                                </br>
+                            </div>
+                            <div class="col-md-3">
+                            {% bootstrap_label "CIP ID" %}
+                                <div class="block">
+                                    {{proband.cip_id}}
+                                </div>
+                                </br>
+                                {% bootstrap_label "GEL Family ID" %}
+                                <div class="block">
+                                    {{proband.family.id}}
+                                </div>
+                            </br>
+                                {% bootstrap_label "GMC" %}
+                                <div class="block">
+                                    {{proband.gmc}}
+                                </div>
+                                </br>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+
+            <div class=row>
+                <div class="col-md-7">
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Proband Tracking</div>
+                        <div class="panel-body">
+                            <div class="col-md-6">
+
+                                 {% bootstrap_field proband_form.outcome %}
+                                {% bootstrap_field proband_form.episode %}
+
+                            </div>
+                            <div class="col-md-6">
+
+                                 {% bootstrap_field proband_form.comment %}
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="col-md-5">
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Status</div>
+                        <div class="panel-body">
+                            <div class="col-md-12">
+                                {% bootstrap_field proband_form.status %}
+                                {% bootstrap_field proband_form.mdt_status %}
+                                {% bootstrap_field proband_form.case_sent %}
+                                {% bootstrap_field proband_form.pilot_case %}
+                            </div>
+                                </br>
+                            </br>
+                                {% if sample_form.sample_status.value != "C" %}
+                                </br>
+                                <button type="submit" name="variant_update" class="btn btn-primary btn-lg">Save</button> {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </form>
+     <div class="row">
+         <div class="col-md-12">
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading">MDT History</div>
+                        <div class="panel-body">
+                            <div class="col-md-15">
+                                <table width="100%" class="table table-striped table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>MDT Name</th>
+                                            <th>MDT Date</th>
+                                            <th>Attendees</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                        <tr>
+                                            <td><a href="/gel2me/mdt_view/{{ mdt.gel_mdt_id }}">{{ mdt.gel_mdt_id }}</a></td>
+                                            <td>{{mdt.gel_mdt_id.date}}</td>
+                                            <td>{{mdt.gel_mdt_id.attendees}}</td>
+                                        </tr>
+
+
+                            </tbody>
+                        </table>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+     </div>
+
+        <div class=row>
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Relatives</div>
+                    <div class="panel-body">
+                        <table width="100%" class="table table-striped table-bordered table-hover">
+                            <thead>
+                                <tr>
+
+                                    <th>Relationship</th>
+                                    <th>Forename</th>
+                                    <th>Surname</th>
+                                    <th>DOB</th>
+                                    <th>NHS number</th>
+                                    <th>ID</th>
+                                    <th>Affection_status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for relative in relatives %}
+                                <tr>
+
+                                    <td>{{relative.relation_to_proband}}</td>
+                                    <td>{{relative.forename}}</td>
+                                    <td>{{relative.surname}}</td>
+                                    <td>{{relative.dob}}</td>
+                                    <td>{{relative.nhs_number}}</td>
+                                    <td>{{relative.gel_id}}</td>
+                                    <td>{{relative.affected_status}}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    </div>
+
+
+        <div id="variants" class="tab-pane fade">
+ <div class="container-fluid" >
+        <h1> {{ proband.gel_id }}</h1>
+
+        <div class="panel-body">
+
+            <div class="table-responsive">
+            <table width="100%" class="table table-striped table-bordered table-hover"  id="samplevariant-table">
+                <thead style='font-size: 75%'>
+                    <tr>
+                        <th>Variant ID</th>
+                        <th>Select Trancript</th>
+                        <th>Gene</th>
+                        <th>Transcript</th>
+                        <th>HGVSc</th>
+                        <th>HGVSp</th>
+                        <th>Genotype</th>
+                        <th>Class</th>
+                        <th>CP</th>
+                        <th>Discussion</th>
+                        <th>Actions</th>
+                        <th>CM</th>
+                        <th>SO</th>
+                        <th>ASR</th>
+                        <th>CT</th>
+                        <th>IRC</th>
+                    </tr>
+                </thead>
+                <tbody style='font-size: 75%'>
+                </tbody>
+            </table>
+                <div class="modal fade" id="modal-sample">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                      </div>
+                    </div>
+                </div>
+        </div>
+
+        </div>
+    </div>
+</div>
+</div>
+
+{% endblock %}

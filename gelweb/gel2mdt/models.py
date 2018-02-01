@@ -254,6 +254,7 @@ class Proband(models.Model):
     episode = models.CharField( max_length=255, blank=True)
     gmc = models.CharField( max_length=255)
     local_id = models.CharField(max_length=255)
+    case_sent = models.NullBooleanField()
     status = models.CharField( max_length=50, choices=(
         ('N', 'Not Started'), ('U', 'Under Review'), ('M', 'Awaiting MDT'), ('V', 'Awaiting Validation'),
         ('R', 'Awaiting Reporting'), ('P', 'Reported'), ('C', 'Completed'), ('E', 'External')), default='N')
