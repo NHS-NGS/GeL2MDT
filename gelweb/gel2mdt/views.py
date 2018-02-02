@@ -8,7 +8,9 @@ from django.contrib import messages
 from django.db import IntegrityError
 from .for_me_testing import create_dummy_sample
 from django.forms import modelformset_factory
-
+from .database_utils import multiple_case_adder
+from django.db.models import Max
+from datetime import datetime
 
 # Create your views here.
 def register(request):
@@ -108,7 +110,7 @@ def proband_view(request, gel_id):
     proband = Proband.objects.get(gel_id=gel_id)
     relatives = Relative.objects.filter(proband=proband)
     proband_form = ProbandForm(instance=proband)
-    gel_ir = GELInterpretationReport.objects.get(ir_family__participant_family=proband.family)
+    gel_ir = GELInterpretationReport.objects.filter(ir_family__participant_family=proband.family).order_by('-polled_at_datetime')[0]
     probandtranscriptvariants = ProbandTranscriptVariant.objects.filter(proband_variant__interpretation_report=gel_ir)
     return render(request, 'gel2mdt/proband.html', {'proband': proband,
                                                     'relatives': relatives,
@@ -132,7 +134,7 @@ def update_proband(request, gel_id):
 def start_mdt_view(request):
     """Select Samples for MDT instance
     """
-    mdt_instance = MDT(creator=request.user.username)
+    mdt_instance = MDT(creator=request.user.username, date_of_mdt=datetime.now())
     mdt_instance.save()
 
     return HttpResponseRedirect('/edit_mdt/{}'.format(mdt_instance.id))
@@ -143,9 +145,9 @@ def edit_mdt(request, id):
     """
     Allows users to Add/Remove samples from MDT instance
     """
-    proband_list = Proband.objects.all().exclude(sample_status='C')
+    gel_ir_list = GELInterpretationReport.objects.all().values('ir_family').annotate(Max('archived_version'))
     # somehow need a list of samples to check whether they are in MDT
-    return render(request, '/mdt_sample_select.html', {'proband_list': proband_list})
+    return render(request, 'gel2mdt/mdt_ir_select.html', {'gel_ir_list': gel_ir_list})
                                                              #'sample_list': sample_list})
 
 #

@@ -471,7 +471,7 @@ class Primer(models.Model):
 
 
 class VariantReport(models.Model):
-    proband_variant = models.ForeignKey(ProbandVariant, on_delete=models.CASCADE)
+    proband_variant = models.OneToOneField(ProbandVariant, on_delete=models.CASCADE)
 
     primary_cs = models.ForeignKey(
         ClinicalScientist,
@@ -522,16 +522,16 @@ class OtherStaff(models.Model):
 
 class MDT(models.Model):
     date_of_mdt = models.DateTimeField()
-    interpretation_report = models.ForeignKey(GELInterpretationReport, on_delete=models.CASCADE)
+    report = models.ForeignKey(VariantReport, on_delete=models.CASCADE, null=True)
 
     # attending staff
     clinical_scientists = models.ForeignKey(
-        ClinicalScientist, on_delete=models.CASCADE)
-    clinicians = models.ForeignKey(Clinician, on_delete=models.CASCADE)
-    other_staff = models.ForeignKey(OtherStaff, on_delete=models.CASCADE)
+        ClinicalScientist, on_delete=models.CASCADE, null=True)
+    clinicians = models.ForeignKey(Clinician, on_delete=models.CASCADE, null=True)
+    other_staff = models.ForeignKey(OtherStaff, on_delete=models.CASCADE, null=True)
 
     # outcome: should the variant be reported?
-    to_report = models.BooleanField()
+    to_report = models.NullBooleanField()
     creator = models.CharField(db_column='Creator', max_length=255)  # Change to user foreignkey?
     status = models.CharField(db_column='Status', max_length=50, choices=(
         ('A', 'Active'), ('C', 'Completed')), default='A')
