@@ -3,7 +3,6 @@ from .forms import *
 from .models import *
 from django.http import HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
-from .database_utils import add_cases
 from django.contrib import messages
 from django.db import IntegrityError
 from .for_me_testing import create_dummy_sample
@@ -141,48 +140,59 @@ def start_mdt_view(request):
 
 
 @login_required
-def edit_mdt(request, id):
+def edit_mdt(request, mdt_id):
     """
     Allows users to Add/Remove samples from MDT instance
     """
-    gel_ir_list = GELInterpretationReport.objects.all().values('ir_family').annotate(Max('archived_version'))
-    # somehow need a list of samples to check whether they are in MDT
-    return render(request, 'gel2mdt/mdt_ir_select.html', {'gel_ir_list': gel_ir_list})
-                                                             #'sample_list': sample_list})
+    # Gets the max version of each report
+    gel_ir_queryset = GELInterpretationReport.objects.all()
 
-#
-# @login_required
-# def add_samples_mdt(request, pk, sid):
-#     """
-#     :param request:
-#     :param pk: MDT ID
-#     :param sid: Sample  Gel Participant ID
-#     :return: Add this sample to the MDT
-#     """
-#     if request.method=='POST':
-#         mdt_instance = Gel_Mdt.objects.get(id=pk)
-#         sample_instance = Gel_Sample_Info.objects.get(gel_participant_id=sid)
-#         linkage_instance = Gel_Mdt_linkage(gel_sample_id=sample_instance,
-#                  gel_mdt_id=mdt_instance)
-#         linkage_instance.save()
-#         return HttpResponseRedirect('/gel2me/edit_mdt/{}'.format(pk))
-#
-#
-# @login_required
-# def remove_samples_mdt(request, pk, sid):
-#     """
-#     :param request:
-#     :param pk: MDT ID
-#     :param sid: Sample Gel Participant ID
-#     :return: Removes this sample from the MDT
-#     """
-#     if request.method=='POST':
-#         mdt_instance = Gel_Mdt.objects.get(id=pk)
-#         sample_instance = Gel_Sample_Info.objects.get(gel_participant_id=sid)
-#
-#         Gel_Mdt_linkage.objects.filter(gel_mdt_id=mdt_instance, gel_sample_id=sample_instance).delete()
-#         return HttpResponseRedirect('/gel2me/edit_mdt/{}'.format(pk))
-#
+    # somehow need a list of samples to check whether they are in MDT
+    report_in_mdt = MDTReport.objects.filter(MDT=MDT.objects.get(id=mdt_id)).values('report')
+    reports_currently_in_mdt = []
+    for report in report_in_mdt:
+        reports_currently_in_mdt.append(report.proband_variant.interpretation_report.id)
+
+    report_list = []
+    for gel_ir in gel_ir_queryset:
+        if hasattr(gel_ir.ir_family.participant_family, 'proband'):
+            report_list.append(gel_ir)
+    return render(request, 'gel2mdt/mdt_ir_select.html', {'report_list': report_list,
+                                                          'reports_currently_in_mdt': reports_currently_in_mdt})
+
+
+@login_required
+def add_ir_to_mdt(request, mdt_id, sid):
+    """
+    :param request:
+    :param pk: MDT ID
+    :param sid: Gel Participant ID
+    :return: Add this sample to the MDT
+    """
+    if request.method == 'POST':
+        mdt_instance = MDT.objects.get(id=mdt_id)
+        sample_instance = Gel_Sample_Info.objects.get(gel_participant_id=sid)
+        linkage_instance = Gel_Mdt_linkage(gel_sample_id=sample_instance,
+                 gel_mdt_id=mdt_instance)
+        linkage_instance.save()
+        return HttpResponseRedirect('/gel2me/edit_mdt/{}'.format(pk))
+
+
+@login_required
+def remove_ir_from_mdt(request, mdt_id, sid):
+    """
+    :param request:
+    :param pk: MDT ID
+    :param sid: Sample Gel Participant ID
+    :return: Removes this sample from the MDT
+    """
+    if request.method=='POST':
+        mdt_instance = Gel_Mdt.objects.get(id=pk)
+        sample_instance = Gel_Sample_Info.objects.get(gel_participant_id=sid)
+
+        Gel_Mdt_linkage.objects.filter(gel_mdt_id=mdt_instance, gel_sample_id=sample_instance).delete()
+        return HttpResponseRedirect('/gel2me/edit_mdt/{}'.format(pk))
+
 
 
 

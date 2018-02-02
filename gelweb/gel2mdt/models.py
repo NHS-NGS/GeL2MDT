@@ -528,7 +528,6 @@ class OtherStaff(models.Model):
 
 class MDT(models.Model):
     date_of_mdt = models.DateTimeField()
-    report = models.ForeignKey(VariantReport, on_delete=models.CASCADE, null=True)
 
     # attending staff
     clinical_scientists = models.ForeignKey(
@@ -548,3 +547,11 @@ class MDT(models.Model):
     class Meta:
         managed = True
         db_table = 'MDT'
+
+class MDTReport(models.Model):
+    report = models.OneToOneField(VariantReport, on_delete=models.CASCADE)
+    MDT = models.OneToOneField(MDT, on_delete=models.CASCADE)
+
+    class Meta:
+        managed = True
+        db_table = 'MDTReport'
