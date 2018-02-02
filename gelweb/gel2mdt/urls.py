@@ -11,5 +11,6 @@ urlpatterns = [
     path('proband/<int:gel_id>', views.proband_view, name='proband-view'),
     path('update_proband/<int:gel_id>', views.update_proband, name='update-proband'),
 
+    path('start_mdt/', views.start_mdt_view, name='start-mdt'),
     path('edit_mdt/<int:id>', views.edit_mdt, name='edit-mdt'),
 ]
