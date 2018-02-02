@@ -153,6 +153,7 @@ class MultipleCaseAdder(object):
             (PanelVersion, True),
             (Gene, True),
             (Transcript, True),
+            (Family, False),
             (InterpretationReportFamily, False),
             (GELInterpretationReport, False),
             (Variant, True),
