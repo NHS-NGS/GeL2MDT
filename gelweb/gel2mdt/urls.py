@@ -12,5 +12,8 @@ urlpatterns = [
     path('update_proband/<int:gel_id>', views.update_proband, name='update-proband'),
 
     path('start_mdt/', views.start_mdt_view, name='start-mdt'),
-    path('edit_mdt/<int:id>', views.edit_mdt, name='edit-mdt'),
+    path('edit_mdt/<int:mdt_id>', views.edit_mdt, name='edit-mdt'),
+
+    path('add_ir_to_mdt/<int:mdt_id>/<int:irreport_id>', views.add_ir_to_mdt, name='add-ir-to-mdt'),
+    path('remove_ir_from_mdt/<int:mdt_id>/<int:irreport_id>', views.remove_ir_from_mdt, name='remove-ir-from-mdt'),
 ]
