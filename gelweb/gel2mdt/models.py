@@ -370,7 +370,7 @@ class ProbandVariant(models.Model):
     discussion = models.TextField(db_column='Discussion', blank=True)
     action = models.TextField(db_column='Action', blank=True)
     contribution_to_phenotype = models.CharField(db_column='Contribution_to_phenotype', max_length=2, choices=(
-        ('UN', 'Uncertain'), ('No', 'Non'), ('FU', 'Full'), ('PA', 'Partial'), ('SE', 'Secondary'), ('NA', 'NA')
+        ('UN', 'Uncertain'), ('No', 'None'), ('FU', 'Full'), ('PA', 'Partial'), ('SE', 'Secondary'), ('NA', 'NA')
     ), default='NA')
     change_med = models.NullBooleanField(db_column='Change_med')
     surgical_option = models.NullBooleanField(db_column='Surgical_Option')
@@ -471,7 +471,7 @@ class Primer(models.Model):
 
 
 class VariantReport(models.Model):
-    variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
+    proband_variant = models.ForeignKey(ProbandVariant, on_delete=models.CASCADE)
 
     primary_cs = models.ForeignKey(
         ClinicalScientist,
@@ -522,7 +522,7 @@ class OtherStaff(models.Model):
 
 class MDT(models.Model):
     date_of_mdt = models.DateTimeField()
-    report = models.ForeignKey(VariantReport, on_delete=models.CASCADE)
+    interpretation_report = models.ForeignKey(GELInterpretationReport, on_delete=models.CASCADE)
 
     # attending staff
     clinical_scientists = models.ForeignKey(
