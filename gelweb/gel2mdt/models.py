@@ -543,7 +543,7 @@ class MDT(models.Model):
         db_table = 'MDT'
 
 class MDTReport(models.Model):
-    report = models.OneToOneField(VariantReport, on_delete=models.CASCADE)
+    interpretation_report = models.OneToOneField(GELInterpretationReport, on_delete=models.CASCADE)
     MDT = models.OneToOneField(MDT, on_delete=models.CASCADE)
 
     class Meta:
