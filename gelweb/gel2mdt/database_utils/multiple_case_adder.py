@@ -30,7 +30,6 @@ class MultipleCaseAdder(object):
         manage the updating of the database.
         :param test_data: Boolean. Use test data or not. Default = False
         """
-        logger.info("Initialising a MultipleCaseAdder")
 
         # fetch and identify cases to add or update
         # -----------------------------------------

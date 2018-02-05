@@ -549,8 +549,8 @@ class MDT(models.Model):
         db_table = 'MDT'
 
 class MDTReport(models.Model):
-    interpretation_report = models.OneToOneField(GELInterpretationReport, on_delete=models.CASCADE)
-    MDT = models.OneToOneField(MDT, on_delete=models.CASCADE)
+    interpretation_report = models.ForeignKey(GELInterpretationReport, on_delete=models.CASCADE)
+    MDT = models.ForeignKey(MDT, on_delete=models.CASCADE)
 
     class Meta:
         managed = True
