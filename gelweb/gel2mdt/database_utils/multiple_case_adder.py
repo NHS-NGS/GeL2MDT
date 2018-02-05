@@ -272,10 +272,6 @@ class MultipleCaseAdder(object):
                 for attribute_dict
                 in new_attributes])]
 
-        if model_type is TranscriptVariant:
-            for attributes in new_attributes:
-                pprint.pprint(attributes)
-
         # bulk create database entries from the list of unique new attributes
         model_type.objects.bulk_create([
             model_type(**attributes)
