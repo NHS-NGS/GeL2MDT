@@ -329,8 +329,8 @@ class Transcript(models.Model):
 
 
 class TranscriptVariant(models.Model):
-    transcript = models.OneToOneField(Transcript, on_delete=models.CASCADE)
-    variant = models.OneToOneField(Variant, on_delete=models.CASCADE)
+    transcript = models.ForeignKey(Transcript, on_delete=models.CASCADE)
+    variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
     af_max = models.CharField(max_length=200)
 
     hgvs_c = models.CharField(max_length=255)
