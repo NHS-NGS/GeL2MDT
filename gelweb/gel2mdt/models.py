@@ -329,8 +329,8 @@ class Transcript(models.Model):
 
 
 class TranscriptVariant(models.Model):
-    transcript = models.OneToOneField(Transcript, on_delete=models.CASCADE)
-    variant = models.OneToOneField(Variant, on_delete=models.CASCADE)
+    transcript = models.ForeignKey(Transcript, on_delete=models.CASCADE)
+    variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
     af_max = models.CharField(max_length=200)
 
     hgvs_c = models.CharField(max_length=255)
@@ -451,7 +451,7 @@ class ReportEvent(models.Model):
     coverage = models.DecimalField(max_digits=8, decimal_places=3, null=True) #made nullable
 
     def __str__(self):
-        return str(self.variant.interpretation_report.ir_family.ir_family_id) + " " + self.re_id
+        return str(self.proband_variant.interpretation_report.ir_family.ir_family_id) + " " + self.re_id
 
     class Meta:
         managed = True
