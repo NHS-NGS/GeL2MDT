@@ -234,10 +234,8 @@ class ClinicalScientist(models.Model):
 
 class Proband(models.Model):
     # these set to null to allow creation then updating later
-
     gel_id = models.IntegerField(unique=True)
     family = models.OneToOneField(Family, on_delete=models.CASCADE)
-    cip_id = models.CharField(max_length=200, unique=True)
     nhs_number = models.CharField(max_length=200, unique=True, null=True)
     # must be unique, but can also be null if not known
     lab_number = models.CharField(
@@ -275,6 +273,14 @@ class Relative(models.Model):
     relation_to_proband = models.CharField(max_length=200)
     affected_status = models.CharField(max_length=200)
     proband = models.ForeignKey(Proband, on_delete=models.CASCADE)
+    nhs_number = models.CharField(max_length=200, unique=True, null=True)
+    # must be unique, but can also be null if not known
+    lab_number = models.CharField(
+        max_length=200, unique=True, blank=True, null=True)
+    forename = models.CharField(max_length=200)
+    surname = models.CharField(max_length=200)
+    date_of_birth = models.DateTimeField('date_of_birth')
+    sex = models.CharField(max_length=10, blank=True)
 
     def __str__(self):
         return str(self.gel_id)
