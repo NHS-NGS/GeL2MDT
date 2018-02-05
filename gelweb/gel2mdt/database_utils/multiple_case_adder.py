@@ -153,6 +153,7 @@ class MultipleCaseAdder(object):
             (PanelVersion, True),
             (Gene, True),
             (Transcript, True),
+            (Family, False),
             (InterpretationReportFamily, False),
             (GELInterpretationReport, False),
             (Variant, True),
@@ -178,6 +179,9 @@ class MultipleCaseAdder(object):
             case = case_id_map[case_id]
             case.transcripts.append(transcript)
 
+        # ------------------- #
+        # BULK UPDATE PROCESS #
+        # ------------------- #
         for model_type, many in update_order:
             for case in self.cases_to_add:
                 # create a CaseAttributeManager for the case
@@ -201,6 +205,8 @@ class MultipleCaseAdder(object):
                         model_list.append(case_model)
             # now create the required new Model instances from CaseModel lists
             if model_type == GELInterpretationReport:
+                # GEL_IR is a special case, preprocessing version no. means
+                # Model.objects.bulk_create() is not available
                 self.save_new(model_type, model_list)
             else:
                 self.bulk_create_new(model_type, model_list)
