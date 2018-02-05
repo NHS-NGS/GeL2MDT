@@ -584,24 +584,43 @@ class CaseAttributeManager(object):
         pass
 
     def get_report_events(self):
-       """
-       Get all the report events for each case from the json and populate an
-       MCM with this information.
-       """
-       # get gene and panel entries
-       genes = [gene.entry for gene
-                in self.case.attribute_managers[Gene].case_model.case_models]
-       panels = [panel.entry for panel
-                 in self.case.attribute_managers[Panel].case_model.case_models]
-       # get list of dicts of each report event
-       json_report_events = []
-       for variant in self.case.json_variants:
-           for report_event in variant["reportEvents"]:
+
+        """
+        Get all the report events for each case from the json and populate an
+        MCM with this information.
+        """
+        # get gene and panel entries
+        genes = [gene.entry for gene
+                    in self.case.attribute_managers[Gene].case_model.case_models]
+        panel_versions = [panel_version.entry for panel_version
+                    in self.case.attribute_managers[PanelVersion].case_model.case_models]
+        # get list of dicts of each report event
+        json_report_events = []
+
+        # modify report event dicts with gene and panel info
+        for variant in self.case.json_variants:
+            for report_event in variant["reportEvents"]:
+                found = False
+                re_genomic_info = report_event["genomicFeature"]
+                re_gene_ensembl_id = re_genomic_info["ensemblId"]
+                for gene in genes:
+                   if re_gene_ensembl_id == gene.ensembl_id:
+                        report_event["gene_entry"] = gene
+                        found = True
+                        break
+                    if not found:
+                        report_event["gene_entry"] = None
+                re_panel_name = report_event["panelName"]
+                re_panel_version = report_event["panelVersion"]
+                for panel in panel_versions:
+                    if (re_panel_name == panel_version.panel.panel_name and
+                        re_panel_version == panel_version.version_number
+                    ):
+                        report_event["panel_version_entry"] = panel
+
                 json_report_events.append({
-                    # TODO: fetch coverage info from elsewhere in json
                     "coverage": None,
-                    # TODO: add information about RE from json
-                    "gene": None,
+                    "gene": report_event["gene_entry"],
                     "mode_of_inheritance": report_event["modeOfInheritance"],
                     "panel": None,
                     "penetrance": report_event["penetrance"],
@@ -611,8 +630,8 @@ class CaseAttributeManager(object):
                     "tier": int(report_event["tier"][-1:])
                 })
 
-       report_events = ManyCaseModel(ReportEvent, json_report_events)
-       return report_events
+        report_events = ManyCaseModel(ReportEvent, json_report_events)
+        return report_events
 
     def get_tools_and_assemblies(self):
         pass

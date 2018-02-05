@@ -329,7 +329,7 @@ class Transcript(models.Model):
 
 
 class TranscriptVariant(models.Model):
-    transcript = models.ForeignKey(Transcript, on_delete=models.CASCADE)
+    transcript = models.ForeiggKey(Transcript, on_delete=models.CASCADE)
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
     af_max = models.CharField(max_length=200)
 
@@ -549,8 +549,8 @@ class MDT(models.Model):
         db_table = 'MDT'
 
 class MDTReport(models.Model):
-    interpretation_report = models.ForeignKey(GELInterpretationReport, on_delete=models.CASCADE)
-    MDT = models.ForeignKey(MDT, on_delete=models.CASCADE)
+    interpretation_report = models.OneToOneField(GELInterpretationReport, on_delete=models.CASCADE)
+    MDT = models.OneToOneField(MDT, on_delete=models.CASCADE)
 
     class Meta:
         managed = True
