@@ -183,9 +183,6 @@ class CaseAttributeManager(object):
         # load in site specific details from config file
         config_dict = load_config.LoadConfig().load()
         labkey_server_request = config_dict['labkey_server_request']
-        print(labkey_server_request)
-        print(type(labkey_server_request))
-
         server_context = lk.utils.create_server_context(
             'gmc.genomicsengland.nhs.uk',
             labkey_server_request,
