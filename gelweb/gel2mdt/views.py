@@ -148,50 +148,49 @@ def edit_mdt(request, mdt_id):
     gel_ir_queryset = GELInterpretationReport.objects.all()
 
     # somehow need a list of samples to check whether they are in MDT
-    report_in_mdt = MDTReport.objects.filter(MDT=MDT.objects.get(id=mdt_id)).values('report')
-    reports_currently_in_mdt = []
-    for report in report_in_mdt:
-        reports_currently_in_mdt.append(report.proband_variant.interpretation_report.id)
-
+    mdt_instance = MDT.objects.get(id=mdt_id)
+    reports_in_mdt = MDTReport.objects.filter(MDT=mdt_instance).values_list('interpretation_report', flat=True)
+    print(reports_in_mdt)
     report_list = []
     for gel_ir in gel_ir_queryset:
         if hasattr(gel_ir.ir_family.participant_family, 'proband'):
             report_list.append(gel_ir)
     return render(request, 'gel2mdt/mdt_ir_select.html', {'report_list': report_list,
-                                                          'reports_currently_in_mdt': reports_currently_in_mdt})
+                                                          'reports_in_mdt': reports_in_mdt,
+                                                          'mdt_id': mdt_id})
 
 
 @login_required
-def add_ir_to_mdt(request, mdt_id, sid):
+def add_ir_to_mdt(request, mdt_id, irreport_id):
     """
     :param request:
-    :param pk: MDT ID
-    :param sid: Gel Participant ID
-    :return: Add this sample to the MDT
+    :param mdt_id: MDT ID
+    :param irreport_id: GelIR ID
+    :return: Add this report to the MDT
     """
     if request.method == 'POST':
         mdt_instance = MDT.objects.get(id=mdt_id)
-        sample_instance = Gel_Sample_Info.objects.get(gel_participant_id=sid)
-        linkage_instance = Gel_Mdt_linkage(gel_sample_id=sample_instance,
-                 gel_mdt_id=mdt_instance)
+        report_instance = GELInterpretationReport.objects.get(id=irreport_id)
+        linkage_instance = MDTReport(interpretation_report=report_instance,
+                                     MDT=mdt_instance)
         linkage_instance.save()
-        return HttpResponseRedirect('/gel2me/edit_mdt/{}'.format(pk))
+        return HttpResponseRedirect('/edit_mdt/{}'.format(mdt_id))
 
 
 @login_required
-def remove_ir_from_mdt(request, mdt_id, sid):
+def remove_ir_from_mdt(request, mdt_id, irreport_id):
     """
     :param request:
-    :param pk: MDT ID
-    :param sid: Sample Gel Participant ID
-    :return: Removes this sample from the MDT
+    :param mdt_id: MDT ID
+    :param irreport_id: GELIR ID
+    :return: Removes this report from the MDT
     """
     if request.method=='POST':
-        mdt_instance = Gel_Mdt.objects.get(id=pk)
-        sample_instance = Gel_Sample_Info.objects.get(gel_participant_id=sid)
+        mdt_instance = MDT.objects.get(id=mdt_id)
+        report_instance = GELInterpretationReport.objects.get(id=irreport_id)
 
-        Gel_Mdt_linkage.objects.filter(gel_mdt_id=mdt_instance, gel_sample_id=sample_instance).delete()
-        return HttpResponseRedirect('/gel2me/edit_mdt/{}'.format(pk))
+        MDTReport.objects.filter(MDT=mdt_instance, interpretation_report=report_instance).delete()
+        return HttpResponseRedirect('/edit_mdt/{}'.format(mdt_id))
 
 
 
