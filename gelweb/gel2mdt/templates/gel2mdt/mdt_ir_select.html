@@ -30,17 +30,17 @@
                     <tr>
 
                         <td align="center">
-                            {% if gel_ir.id in reports_currently_in_mdt %}
-                             <form action="/remove_samples_mdt/{{ pk }}/{{gel_ir.ir_family.participant_family.proband.gel_id}}" role="form" method="post">
+                            {% if gel_ir.id in reports_in_mdt %}
+                                 <form action="/remove_ir_from_mdt/{{ mdt_id }}/{{gel_ir.id}}" role="form" method="post">
                                  {% csrf_token %}
                                  {% bootstrap_button "Remove" button_type="submit" button_class="btn-primary btn-danger"%}
-                                 </form>
-                                 {% else %}
-                                <form action="/add_samples_mdt/{{ pk }}/{{gel_ir.ir_family.participant_family.proband.gel_participant_id}}" role="form" method="post">
+                                </form>
+                            {% else %}
+                                <form action="/add_ir_to_mdt/{{ mdt_id }}/{{gel_ir.id}}" role="form" method="post">
                                  {% csrf_token %}
                                  {% bootstrap_button "Add" button_type="submit" button_class="btn-primary btn-info"%}
-                                 </form>
-                                 {% endif %}
+                                </form>
+                             {% endif %}
 
                         </td>
 
