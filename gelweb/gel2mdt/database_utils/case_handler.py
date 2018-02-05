@@ -25,6 +25,7 @@ class Case(object):
 
         self.json_hash = self.hash_json()
         self.proband = self.get_proband_json()
+        self.family_members = self.get_family_members()
         self.status = self.get_status_json()
         self.json_variants \
             = self.json_case_data["json_request"]["TieredVariants"]
@@ -60,6 +61,23 @@ class Case(object):
             if participant["isProband"]:
                 proband_json = participant
         return proband_json
+
+    def get_family_members(self):
+        '''
+        Gets the family member details from the JSON.
+        :return: A list of dictionaries containing family member details
+        '''
+        family_members = []
+        participant_jsons = \
+            self.json_case_data["json_request"]["pedigree"]["participants"]
+        for participant in participant_jsons:
+            if not participant["isProband"]:
+                if "relation_to_proband" not in  participant["additionalInformation"]:
+                    continue
+                family_member = {'gel_id': participant["gelId"],
+                                 'relation_to_proband': participant["additionalInformation"]["relation_to_proband"]}
+                family_members.append(family_member)
+        return family_members
 
     def get_status_json(self):
         """
@@ -209,7 +227,7 @@ class CaseAttributeManager(object):
 
         clinician = CaseModel(Clinician, {
             "name": clinician_details['name'],
-            "email": "unknown", # clinicain email not on labkey
+            "email": "unknown",  # clinicain email not on labkey
             "hospital": clinician_details['hospital']
         })
         return clinician
@@ -466,35 +484,67 @@ class CaseAttributeManager(object):
         """
         # get all Transcript and Variant entries
         case_attribute_managers = self.case.attribute_managers
-        transcript_manager = case_attribute_managers[Transcript]
+        transcript_manager = case_attribute_managers[Transcript].case_model
         transcript_entries = [transcript.entry
                        for transcript in transcript_manager.case_models]
-        variant_manager = case_attribute_managers[Variant]
+        variant_manager = case_attribute_managers[Variant].case_model
         variant_entries = [variant.entry
                            for variant in variant_manager.case_models]
 
         # TODO: need some sort of way to link up Transcripts to the Variant
         # which they originate from in VEP
         # for each CaseTranscript (which contains necessary info):
-        for case_transcript in self.case.case_transcripts:
-            # add the corresponding Transcript entry
-            for variant_entry in variant_entries:
-                pass
+        for case_transcript in self.case.transcripts:
+            # get information to hook up transcripts with variants
+            case_id = case_transcript.case_id
+            variant_id = case_transcript.variant_count
+            for variant in self.case.variants:
+                if (
+                    case_id == variant.case_id and
+                    variant_id == variant.variant_count
+                ):
+                    case_variant = variant
+                    break
+
+            # name to hook up CaseTranscript with Transcript
+            transcript_name = case_transcript.transcript_name
+
             # add the corresponding Variant entry
+            for variant_entry in variant_entries:
+                # find the matching variant entry
+                if (
+                    variant_entry.chromosome == case_variant.chromosome and
+                    variant_entry.position == case_variant.position and
+                    variant_entry.reference == case_variant.ref and
+                    variant_entry.alternate == case_variant.alt
+                ):
+                    # add match to the case_transcript
+                    case_transcript.variant_entry = variant_entry
+
+            # add the corresponding Transcript entry
             for transcript_entry in transcript_entries:
-                pass
+                found = False
+                if transcript_entry.name == transcript_name:
+                    case_transcript.transcript_entry = transcript_entry
+                    found = True
+                    break
+                if not found:
+                    # we don't make entries for tx with no Gene
+                    case_transcript.transcript_entry = None
 
         # use the updated CaseTranscript instances to create an MCM
         transcript_variants = ManyCaseModel(TranscriptVariant, [{
-            "transcript": None,
-            "variant": None,
+            "transcript": transcript.transcript_entry,
+            "variant": transcript.variant_entry,
             "af_max": transcript.transcript_variant_af_max,
             "hgvs_c": transcript.transcript_variant_hgvs_c,
             "hgvs_p": transcript.transcript_variant_hgvs_p,
             "sift": transcript.variant_sift,
             "polyphen": transcript.variant_polyphen,
-        } for transcript in case_transcripts])
+        } for transcript in self.case.transcripts
+            if transcript.transcript_entry])
 
+        return transcript_variants
 
     def get_proband_variants(self):
         """
@@ -512,13 +562,14 @@ class CaseAttributeManager(object):
             # some json_variants won't have an entry (T3), so:
             json_variant["variant_entry"] = None
             # for those that do, fetch from list of entries:
+            # variant in json matches variant entry
             for variant in variant_entries:
                 if (
                     json_variant["position"] == variant.position and
                     json_variant["reference"] == variant.reference and
                     json_variant["alternate"] == variant.alternate
                 ):
-                    print("Found matching json_variant matching entry")
+                    # variant in json matches variant entry
                     json_variant["variant_entry"] = variant
 
         proband_variants = ManyCaseModel(ProbandVariant, [{
