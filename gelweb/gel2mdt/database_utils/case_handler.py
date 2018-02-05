@@ -25,6 +25,7 @@ class Case(object):
 
         self.json_hash = self.hash_json()
         self.proband = self.get_proband_json()
+        self.family_members = self.get_family_members()
         self.status = self.get_status_json()
         self.json_variants \
             = self.json_case_data["json_request"]["TieredVariants"]
@@ -60,6 +61,23 @@ class Case(object):
             if participant["isProband"]:
                 proband_json = participant
         return proband_json
+
+    def get_family_members(self):
+        '''
+        Gets the family member details from the JSON.
+        :return: A list of dictionaries containing family member details
+        '''
+        family_members = []
+        participant_jsons = \
+            self.json_case_data["json_request"]["pedigree"]["participants"]
+        for participant in participant_jsons:
+            if not participant["isProband"]:
+                if "relation_to_proband" not in  participant["additionalInformation"]:
+                    continue
+                family_member = {'gel_id': participant["gelId"],
+                                 'relation_to_proband': participant["additionalInformation"]["relation_to_proband"]}
+                family_members.append(family_member)
+        return family_members
 
     def get_status_json(self):
         """
