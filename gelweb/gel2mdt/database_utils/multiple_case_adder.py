@@ -8,6 +8,12 @@ from ..vep_utils.run_vep_batch import generate_transcripts
 from .case_handler import Case, CaseAttributeManager
 
 import pprint
+import logging
+
+
+# set up logging
+logger = logging.getLogger(__name__)
+
 
 class MultipleCaseAdder(object):
     """
@@ -24,6 +30,7 @@ class MultipleCaseAdder(object):
         manage the updating of the database.
         :param test_data: Boolean. Use test data or not. Default = False
         """
+        logger.info("Initialising a MultipleCaseAdder")
 
         # fetch and identify cases to add or update
         # -----------------------------------------
