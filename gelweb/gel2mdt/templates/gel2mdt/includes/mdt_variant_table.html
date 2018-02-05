@@ -1,0 +1,60 @@
+
+
+{% for variant in variant_queryset %}
+
+    <tr>
+        <td><a href="/proband/{{variant.interpretation_report.ir_family.participant_family.proband.gel_id}}">{{variant.interpretation_report.ir_family.participant_family.proband.gel_id}}</td>
+        <td>{{variant.interpretation_report.ir_family.ir_family_id}}</td>
+        <td  ><a href="/variant_view/{{svariant.gel_variant_id}}">{{variant.variant.id}}</a></td>
+        <td>
+            {% if mdt_form.status.value != "C" %}
+            <button type="button" class="btn btn-primary js-edit-mdt-variant"
+                    data-url="/edit_mdt_variant/{{variant.pk}}">
+              Edit
+            </button>
+
+        {% endif %}
+        </td>
+        <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;">{{variant.interpretation_report.ir_family.participant_family.proband.forename}}</td>
+        <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;">{{variant.interpretation_report.ir_family.participant_family.proband.surname}}</td>
+        <td>{{variant.interpretation_report.ir_family.participant_family.proband.date_of_birth}}</td>
+        <td>{{variant.probandtranscriptvariant.transcript.gene.hgnc_name}}</td>
+        <td style="word-wrap: break-word; min-width: 120px;max-width: 120px;">{{variant.probandtranscriptvariant.transcript.transcriptvariant.hgvs_c}}</td>
+        <td style="word-wrap: break-word; min-width: 120px;max-width: 120px;">{{variant.probandtranscriptvariant.transcript.transcriptvariant.hgvs_p}}</td>
+        <td style="word-wrap: break-word; min-width: 90px;max-width: 90px;">{{variant.zygosity}}</td>
+        <td>{{variant.classification}}</td>
+        <td>{{variant.contribution_to_phenotype}}</td>
+        <td style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{variant.discussion}}</td>
+        <td style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{variant.action}}</td>
+        <td>{% if variant.change_med == True %}
+            <span class="glyphicon glyphicon-ok"></span>
+            {% else %}
+            <span class="glyphicon glyphicon-remove"></span>
+            {% endif %}
+        </td>
+        <td>{% if variant.surgical_option == True %}
+            <span class="glyphicon glyphicon-ok"></span>
+            {% else %}
+            <span class="glyphicon glyphicon-remove"></span>
+            {% endif %}
+        </td>
+        <td>{% if variant.add_surveillance_for_relatives == True %}
+            <span class="glyphicon glyphicon-ok"></span>
+            {% else %}
+            <span class="glyphicon glyphicon-remove"></span>
+            {% endif %}
+        </td>
+        <td>{% if variant.clinical_trial == True %}
+            <span class="glyphicon glyphicon-ok"></span>
+            {% else %}
+            <span class="glyphicon glyphicon-remove"></span>
+            {% endif %}
+        </td>
+        <td>{% if variant.inform_reproductive_choice == True %}
+            <span class="glyphicon glyphicon-ok"></span>
+            {% else %}
+            <span class="glyphicon glyphicon-remove"></span>
+            {% endif %}
+        </td>
+    </tr>
+{% endfor %}

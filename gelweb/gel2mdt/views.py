@@ -5,11 +5,9 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import IntegrityError
-from .for_me_testing import create_dummy_sample
-from django.forms import modelformset_factory
-from .database_utils import multiple_case_adder
-from django.db.models import Max
 from datetime import datetime
+from django.template.loader import render_to_string
+from django.http import JsonResponse
 
 # Create your views here.
 def register(request):
@@ -150,7 +148,6 @@ def edit_mdt(request, mdt_id):
     # somehow need a list of samples to check whether they are in MDT
     mdt_instance = MDT.objects.get(id=mdt_id)
     reports_in_mdt = MDTReport.objects.filter(MDT=mdt_instance).values_list('interpretation_report', flat=True)
-    print(reports_in_mdt)
     report_list = []
     for gel_ir in gel_ir_queryset:
         if hasattr(gel_ir.ir_family.participant_family, 'proband'):
@@ -193,5 +190,104 @@ def remove_ir_from_mdt(request, mdt_id, irreport_id):
         return HttpResponseRedirect('/edit_mdt/{}'.format(mdt_id))
 
 
+@login_required
+def mdt_view(request, mdt_id):
+    """
+    :param request:
+    :param mdt_id: MDT ID
+    :return: Main MDT page
+    """
+    mdt_instance = MDT.objects.get(id=mdt_id)
+    report_list = MDTReport.objects.filter(MDT=mdt_instance).values_list('interpretation_report', flat=True)
+    reports = GELInterpretationReport.objects.filter(id__in=report_list)
 
+    variant_queryset = ProbandVariant.objects.filter(interpretation_report__in=report_list)
+
+    mdt_form = MdtForm(instance=mdt_instance)
+
+    if request.method == 'POST':
+        mdt_form = MdtForm(request.POST, instance=mdt_instance)
+
+        if mdt_form.is_valid():
+            mdt_form.save()
+            messages.add_message(request, 25, 'MDT Updated')
+
+        return HttpResponseRedirect('/mdt_view/{}'.format(mdt_id))
+    request.session['mdt_id'] = mdt_id
+    return render(request, 'gel2mdt/mdt_view2.html', {'variant_queryset': variant_queryset,
+                                                     'reports': reports,
+                                                     'mdt_form': mdt_form,
+                                                     'mdt_id': mdt_id})
+
+
+@login_required
+def edit_mdt_variant(request, pv_id):
+    """
+    :param request:
+    :param pv_id: Proband Variant ID
+    :return: Edits the proband variants in the MDT
+    """
+    data = {}
+    proband_variant = ProbandVariant.objects.get(id=pv_id)
+    mdt_id = request.session.get('mdt_id')
+    if request.method == 'POST':
+        modal_form = VariantMDTForm(request.POST, instance=proband_variant)
+        if modal_form.is_valid():
+            modal_form.save()
+            data['form_is_valid'] = True
+
+            report_list = MDTReport.objects.filter(MDT=mdt_id).values_list('interpretation_report', flat=True)
+
+            variant_queryset = ProbandVariant.objects.filter(interpretation_report__in=report_list)
+
+            data['html_mdt_list'] = render_to_string('gel2mdt/includes/mdt_variant_table.html', {
+                'variant_queryset': variant_queryset,
+            })
+        else:
+            data['form_is_valid'] = False
+    else:
+        modal_form = VariantMDTForm(instance=proband_variant)
+    context = {'modal_form': modal_form, 'pv_id': pv_id}
+    html_form = render_to_string('gel2mdt/modals/mdt_variant_form.html',
+                                 context,
+                                 request=request,
+                                 )
+    data['html_form'] = html_form
+    return JsonResponse(data)
+
+
+@login_required
+def edit_mdt_proband(request, proband_id):
+    """
+    :param request:
+    :param pk: Sample ID
+    :return: Edits the proband discussion and actions in the MDT
+    """
+    data = {}
+    proband = Proband.objects.get(id=proband_id)
+    if request.method == 'POST':
+        proband_form = ProbandMDTForm(request.POST, instance=proband)
+        mdt_id = request.session.get('mdt_id')
+        if proband_form.is_valid():
+            proband_form.save()
+            data['form_is_valid'] = True
+
+            report_list = MDTReport.objects.filter(MDT=mdt_id).values_list('interpretation_report', flat=True)
+            reports = GELInterpretationReport.objects.filter(id__in=report_list)
+
+            data['html_mdt_list'] = render_to_string('gel2mdt/includes/mdt_proband_table.html', {
+                'reports': reports
+            })
+        else:
+            data['form_is_valid'] = False
+    else:
+        proband_form = ProbandMDTForm(instance=proband)
+
+    context = {'proband_form': proband_form, 'proband_id': proband_id}
+    html_form = render_to_string('gel2mdt/modals/mdt_proband_form.html',
+                                 context,
+                                 request=request,
+                                 )
+    data['html_form'] = html_form
+    return JsonResponse(data)
 
