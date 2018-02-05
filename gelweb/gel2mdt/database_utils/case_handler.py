@@ -3,6 +3,7 @@ import json
 import hashlib
 import labkey as lk
 from datetime import datetime
+from django.utils.dateparse import parse_date
 
 from ..models import *
 from ..api_utils.poll_api import PollAPI
@@ -65,7 +66,7 @@ class Case(object):
     def get_family_members(self):
         '''
         Gets the family member details from the JSON.
-        :return: A list of dictionaries containing family member details
+        :return: A list of dictionaries containing family member details (gel ID, relationship and affection status)
         '''
         family_members = []
         participant_jsons = \
@@ -75,7 +76,9 @@ class Case(object):
                 if "relation_to_proband" not in  participant["additionalInformation"]:
                     continue
                 family_member = {'gel_id': participant["gelId"],
-                                 'relation_to_proband': participant["additionalInformation"]["relation_to_proband"]}
+                                 'relation_to_proband': participant["additionalInformation"]["relation_to_proband"],
+                                 'affection_status': participant["affectionStatus"]
+                                 }
                 family_members.append(family_member)
         return family_members
 
@@ -161,6 +164,8 @@ class CaseAttributeManager(object):
             case_model = self.get_proband()
         elif self.model_type == Family:
             case_model = self.get_family()
+        elif self.model_type == Relative:
+            case_model = self.get_relatives()
         elif self.model_type == Phenotype:
             case_model = self.get_phenotypes()
         elif self.model_type == InterpretationReportFamily:
@@ -230,6 +235,11 @@ class CaseAttributeManager(object):
         return clinician
 
     def get_paricipant_demographics(self, participant_id):
+        '''
+        Calls labkey to retrieve participant demographics
+        :param participant_id: GEL participant ID
+        :return: dict containing participant demographics
+        '''
         # load in site specific details from config file
         config_dict = load_config.LoadConfig().load()
         labkey_server_request = config_dict['labkey_server_request']
@@ -288,6 +298,9 @@ class CaseAttributeManager(object):
 
 
     def get_proband(self):
+        """
+        Create a case model to handle adding/getting the proband for case.
+        """
         participant_id = int(self.case.json["proband"])
         demographics = self.get_paricipant_demographics(participant_id)
         family = self.case.attribute_managers[Family].case_model
@@ -297,11 +310,45 @@ class CaseAttributeManager(object):
             "nhs_number": demographics['nhs_num'],
             "forename": demographics["forename"],
             "surname": demographics["surname"],
-            "date_of_birth": demographics["date_of_birth"],
+            "date_of_birth": datetime.strptime(demographics["date_of_birth"], "%Y/%m/%d").date(),
             "sex": demographics["sex"],
             "status": 'N' # initialised to not started? (N)
         })
         return proband
+
+    def get_relatives(self):
+        """
+        Creates entries for each relative. Calls labkey to retrieve demograhics
+        """
+        family_members = self.case.family_members
+        relative_list = []
+        for family_member in family_members:
+            demographics = self.get_paricipant_demographics(family_member['gel_id'])
+            proband = self.case.attribute_managers[Proband].case_model
+            relative = {
+                "gel_id": family_member['gel_id'],
+                "relation_to_proband": family_member["relation_to_proband"],
+                "affected_status": family_member["affection_status"],
+                "proband": proband.entry,
+                "nhs_number": demographics["nhs_num"],
+                "forename": demographics["forename"],
+                "surname":demographics["surname"],
+                "date_of_birth": demographics["date_of_birth"],
+                "sex": demographics["sex"],
+            }
+            relative_list.append(relative)
+        relatives = ManyCaseModel(Relative,[{
+            "gel_id": relative['gel_id'],
+            "relation_to_proband": relative["relation_to_proband"],
+            "affected_status": relative["affected_status"],
+            "proband": relative['proband'],
+            "nhs_number": relative["nhs_number"],
+            "forename": relative["forename"],
+            "surname": relative["surname"],
+            "date_of_birth": datetime.strptime(relative["date_of_birth"], "%Y/%m/%d").date(),
+            "sex": relative["sex"],
+        } for relative in relative_list])
+        return relatives
 
     def get_family(self):
         """
