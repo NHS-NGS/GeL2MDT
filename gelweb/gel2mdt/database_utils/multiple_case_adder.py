@@ -7,6 +7,7 @@ from ..api_utils.cip_utils import InterpretationList
 from ..vep_utils.run_vep_batch import generate_transcripts
 from .case_handler import Case, CaseAttributeManager
 
+import pprint
 
 class MultipleCaseAdder(object):
     """
@@ -157,6 +158,7 @@ class MultipleCaseAdder(object):
             (InterpretationReportFamily, False),
             (GELInterpretationReport, False),
             (Variant, True),
+            (TranscriptVariant, True),
             (ProbandVariant, True),
         )
         # we need vep results for all cases, which needs to be done in batch
@@ -208,6 +210,7 @@ class MultipleCaseAdder(object):
                 # Model.objects.bulk_create() is not available
                 self.save_new(model_type, model_list)
             else:
+                print("attempting to bulk create", model_type)
                 self.bulk_create_new(model_type, model_list)
             # refresh CaseAttributeManagers with new CaseModels
             for model in model_list:
@@ -261,6 +264,11 @@ class MultipleCaseAdder(object):
                 tuple(attribute_dict.items())
                 for attribute_dict
                 in new_attributes])]
+
+        if model_type is TranscriptVariant:
+            for attributes in new_attributes:
+                pprint.pprint(attributes)
+
         # bulk create database entries from the list of unique new attributes
         model_type.objects.bulk_create([
             model_type(**attributes)
