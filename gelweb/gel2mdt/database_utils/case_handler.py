@@ -10,6 +10,7 @@ from ..api_utils.poll_api import PollAPI
 from ..vep_utils.run_vep_batch import CaseVariant, CaseTranscript
 from ..config import load_config
 
+import pprint
 
 class Case(object):
     """
@@ -392,13 +393,15 @@ class CaseAttributeManager(object):
         """
         for panel in self.case.panels:
             panelapp_poll = PollAPI(
-                "panelapp", "get_panel/{panelapp_id}".format(
-                    panelapp_id=panel["panelName"])
+                "panelapp", "get_panel/{panelapp_id}/?version={v}".format(
+                    panelapp_id=panel["panelName"],
+                    v=panel["panelVersion"])
             )
             panelapp_poll.get_json_response()
             panel["panelapp_results"] = panelapp_poll.response_json["result"]
 
         panels = ManyCaseModel(Panel, [{
+            "panelapp_id": panel["panelName"],
             "panel_name": panel["panelapp_results"]["SpecificDiseaseName"],
             "disease_group": panel["panelapp_results"]["DiseaseGroup"],
             "disease_subgroup": panel["panelapp_results"]["DiseaseSubGroup"]
@@ -649,6 +652,9 @@ class CaseAttributeManager(object):
                     in self.case.attribute_managers[Gene].case_model.case_models]
         panel_versions = [panel_version.entry for panel_version
                     in self.case.attribute_managers[PanelVersion].case_model.case_models]
+
+        print(PanelVersion.objects.values_list('panel', 'version_number'))
+        print(Panel.objects.values_list('id','panel_name'))
         # get list of dicts of each report event
         json_report_events = []
 
@@ -685,15 +691,13 @@ class CaseAttributeManager(object):
                     # set the Panel entry
                     panel_found = False
                     re_panel_name = report_event["panelName"]
-                    # get panel_version info from elsewhere in json:
-                    re_analysis_panels = self.case.json_request_data["pedigree"]["analysisPanels"]
-                    for analysis_panel in re_analysis_panels:
-                        if analysis_panel["panelName"] == re_panel_name:
-                            re_panelapp_id = analysis_panel["panelVersion"]
+                    re_panel_version = report_event["panelVersion"]
 
                     for panel_version in panel_versions:
-                        if re_panelapp_id == panel_version.panelapp_id:
-                            report_event["panel_version_entry"] = panel
+                        if (re_panel_name == panel_version.panel.panel_name and
+                            re_panel_version == panel_version.version_number
+                        ):
+                            report_event["panel_version_entry"] = panel_version
                             panel_found = True
                             print("Panel found for case", self.case.request_id, report_event["reportEventId"])
                             break
@@ -705,7 +709,7 @@ class CaseAttributeManager(object):
                         "coverage": None,
                         "gene": report_event["gene_entry"],
                         "mode_of_inheritance": report_event["modeOfInheritance"],
-                        "panel": None,
+                        "panel": report_event["panel_version_entry"],
                         "penetrance": report_event["penetrance"],
                         "phenotype": None,
                         "proband_variant": None,
