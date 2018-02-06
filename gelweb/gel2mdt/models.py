@@ -106,18 +106,6 @@ class Panel(models.Model):
         db_table = 'Panel'
 
 
-class PanelVersionGene(models.Model):
-    """
-    Linkage table to relate Panels and Genes via a Many to Many relationship
-    which is still compatible with the MultipleCaseAdder.
-    """
-    class Meta:
-        managed = True
-
-    panel_version = models.ForeignKey(PanelVersion, on_delete=models.CASCADE)
-    gene = models.ForeignKey(Gene, on_delete=models.CASCADE)
-
-
 class PanelVersion(models.Model):
     """
     Represents a version of a panel: holds a version number and list of
@@ -135,6 +123,19 @@ class PanelVersion(models.Model):
     class Meta:
         managed = True
         db_table = 'PanelVersion'
+
+
+class PanelVersionGene(models.Model):
+    """
+    Linkage table to relate Panels and Genes via a Many to Many relationship
+    which is still compatible with the MultipleCaseAdder.
+    """
+    class Meta:
+        managed = True
+
+    panel_version = models.ForeignKey(PanelVersion, on_delete=models.CASCADE)
+    gene = models.ForeignKey(Gene, on_delete=models.CASCADE)
+
 
 
 class ToolOrAssembly(models.Model):
