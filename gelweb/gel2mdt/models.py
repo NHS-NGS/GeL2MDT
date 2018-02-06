@@ -51,10 +51,21 @@ o   applied to this case, which should be concordant with the phenotype of the
     gel_family_id = models.IntegerField(unique=True)
 
     clinician = models.ForeignKey(Clinician, on_delete=models.CASCADE)
-    phenotypes = models.ManyToManyField(Phenotype)
 
     def __str__(self):
         return str(self.gel_family_id)
+
+
+class FamilyPhenotype(models.Model):
+    """
+    A linkage table for Family and Phenotype.
+    """
+    class Meta:
+        managed = True
+        db_table='FamilyPhenotype'
+
+    family = models.ForeignKey(Family, on_delete=models.CASCADE)
+    phenotype = models.ForeignKey(Phenotype, on_delete=models.CASCADE)
 
 
 class Gene(models.Model):
@@ -103,8 +114,6 @@ class PanelVersion(models.Model):
     panel = models.ForeignKey(Panel, on_delete=models.CASCADE)
     version_number = models.CharField(max_length=200)
 
-    genes = models.ManyToManyField(Gene)
-
     def __str__(self):
         return str(self.panel.panel_name + ' v' + self.version_number)
 
@@ -112,6 +121,19 @@ class PanelVersion(models.Model):
         managed = True
         db_table = 'PanelVersion'
 
+
+class PanelVersionGene(models.Model):
+    """
+    Linkage table to relate Panels and Genes via a Many to Many relationship
+    which is still compatible with the MultipleCaseAdder.
+    """
+    class Meta:
+        managed = True
+
+    panel_version = models.ForeignKey(PanelVersion, on_delete=models.CASCADE)
+    gene = models.ForeignKey(Gene, on_delete=models.CASCADE)
+
+    level_of_confidence = models.CharField(max_length=200)
 
 class ToolOrAssembly(models.Model):
     """
@@ -162,7 +184,6 @@ class InterpretationReportFamily(models.Model):
         Family, on_delete=models.CASCADE, null=True)
 
     priority = models.CharField(max_length=200)
-    panels = models.ManyToManyField(PanelVersion)
     # some fields nullable to allow bulk saving before Panel and Family objects added
 
     # TODO: add choices once known. so far, I know of:
@@ -176,7 +197,31 @@ class InterpretationReportFamily(models.Model):
     # sha_hash = models.CharField(max_length=200)
 
     def __str__(self):
-        return str(self.ir_family_id)
+return str(self.ir_family_id)
+
+
+class InterpretationReportFamilyPanel(models.Model):
+    """
+    Linkages table to connect IRF with a Panel to allow M2M relationships
+    that are still amenable to addition via the MCA.
+    """
+    class Meta:
+        managed=True
+
+    ir_family = models.ForeignKey(InterpretationReportFamily, on_delete=models.CASCADE)
+    panel = models.ForeignKey(PanelVersion, on_delete=models.CASCADE)
+
+
+class InterpretationReportFamilyPanel(models.Model):
+    """
+    Linkages table to connect IRF with a Panel to allow M2M relationships
+    that are still amenable to addition via the MCA.
+    """
+    class Meta:
+        managed=True
+
+    ir_family = models.ForeignKey(InterpretationReportFamily, on_delete=models.CASCADE)
+    panel = models.ForeignKey(PanelVersion, on_delete=models.CASCADE)
 
 
 class GELInterpretationReport(models.Model):
@@ -434,7 +479,7 @@ class ReportEvent(models.Model):
     tier = models.PositiveIntegerField()
 
     proband_variant = models.ForeignKey(ProbandVariant, on_delete=models.CASCADE, null=True) #made nullable
-    panel = models.ForeignKey(Panel, on_delete=models.CASCADE, null=True) #made nullable
+    panel = models.ForeignKey(PanelVersion, on_delete=models.CASCADE, null=True) #made nullable
 
     mode_of_inheritance = models.CharField(
         max_length=40,
@@ -448,7 +493,7 @@ class ReportEvent(models.Model):
     coverage = models.DecimalField(max_digits=8, decimal_places=3, null=True) #made nullable
 
     def __str__(self):
-        return str(self.proband_variant.interpretation_report.ir_family.ir_family_id) + " " + self.re_id
+        return str(self.re_id)
 
     class Meta:
         managed = True
