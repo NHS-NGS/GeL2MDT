@@ -527,10 +527,10 @@ class MDT(models.Model):
     date_of_mdt = models.DateTimeField()
 
     # attending staff
-    clinical_scientists = models.ForeignKey(
-        ClinicalScientist, on_delete=models.CASCADE, null=True)
-    clinicians = models.ForeignKey(Clinician, on_delete=models.CASCADE, null=True)
-    other_staff = models.ForeignKey(OtherStaff, on_delete=models.CASCADE, null=True)
+    clinical_scientists = models.ManyToManyField(
+        ClinicalScientist)
+    clinicians = models.ManyToManyField(Clinician)
+    other_staff = models.ManyToManyField(OtherStaff)
 
     # outcome: should the variant be reported?
     to_report = models.NullBooleanField()
@@ -546,9 +546,10 @@ class MDT(models.Model):
         db_table = 'MDT'
 
 class MDTReport(models.Model):
-    interpretation_report = models.OneToOneField(GELInterpretationReport, on_delete=models.CASCADE)
-    MDT = models.OneToOneField(MDT, on_delete=models.CASCADE)
+    interpretation_report = models.ForeignKey(GELInterpretationReport, on_delete=models.CASCADE)
+    MDT = models.ForeignKey(MDT, on_delete=models.CASCADE)
 
     class Meta:
         managed = True
         db_table = 'MDTReport'
+

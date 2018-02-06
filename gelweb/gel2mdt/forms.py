@@ -2,7 +2,6 @@ from django import forms
 from .models import *
 from django.contrib.auth.models import User
 from django.forms import HiddenInput, Textarea, CheckboxInput
-import time
 
 class UserForm(forms.ModelForm):
     """ User registration form
@@ -28,6 +27,7 @@ class MdtForm(forms.ModelForm):
     class Meta:
         model = MDT
         fields = ['date_of_mdt', 'status']
+
 
 class ProbandMDTForm(forms.ModelForm):
     class Meta:
