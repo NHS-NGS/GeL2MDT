@@ -82,7 +82,6 @@ class Panel(models.Model):
     Holds information about the relevant diseases.
     """
     panel_name = models.CharField(max_length=200)
-    panelapp_id = models.CharField(max_length=200, unique=True)
     disease_group = models.CharField(max_length=200)
     disease_subgroup = models.CharField(max_length=200)
 
@@ -101,6 +100,7 @@ class PanelVersion(models.Model):
     version.
     """
     panel = models.ForeignKey(Panel, on_delete=models.CASCADE)
+    panelapp_id = models.CharField(max_length=200, unique=True)
     version_number = models.CharField(max_length=200)
 
     genes = models.ManyToManyField(Gene)
@@ -437,7 +437,7 @@ class ReportEvent(models.Model):
     tier = models.PositiveIntegerField()
 
     proband_variant = models.ForeignKey(ProbandVariant, on_delete=models.CASCADE, null=True) #made nullable
-    panel = models.ForeignKey(PanelVersion, on_delete=models.CASCADE, null=True) #made nullable
+    panel = models.ForeignKey(Panel, on_delete=models.CASCADE, null=True) #made nullable
 
     mode_of_inheritance = models.CharField(
         max_length=40,

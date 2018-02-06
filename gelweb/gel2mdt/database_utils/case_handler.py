@@ -20,6 +20,7 @@ class Case(object):
     def __init__(self, case_json):
         self.json = case_json
         self.json_case_data = self.json["interpretation_request_data"]
+        self.json_request_data = self.json_case_data["json_request"]
         self.request_id = str(
             self.json["interpretation_request_id"]) \
             + "-" + str(self.json["version"])
@@ -390,7 +391,6 @@ class CaseAttributeManager(object):
             panel["panelapp_results"] = panelapp_poll.response_json["result"]
 
         panels = ManyCaseModel(Panel, [{
-            "panelapp_id": panel["panelName"],
             "panel_name": panel["panelapp_results"]["SpecificDiseaseName"],
             "disease_group": panel["panelapp_results"]["DiseaseGroup"],
             "disease_subgroup": panel["panelapp_results"]["DiseaseSubGroup"]
@@ -661,11 +661,8 @@ class CaseAttributeManager(object):
                         if re_gene_ensembl_id == gene.ensembl_id:
                             report_event["gene_entry"] = gene
                             gene_found = True
-                            print("Gene found for case",
-                                self.case.request_id,
-                                report_event["reportEventId"],
-                                "-", gene)
                             break
+
                     if not gene_found:
                         # re-attempt with HGNC
                         re_gene_hgnc = re_genomic_info["HGNC"]
@@ -673,25 +670,21 @@ class CaseAttributeManager(object):
                             if re_gene_hgnc == gene.hgnc_name:
                                 report_event["gene_entry"] = gene
                                 gene_found = True
-                                print("Gene found for case",
-                                      self.case.request_id,
-                                      "-", gene)
+
                     if not gene_found:
                         report_event["gene_entry"] = None
-                        print("Gene not found for case",
-                            self.case.request_id,
-                            report_event["reportEventId"],
-                            re_gene_ensembl_id)
 
                     # set the Panel entry
                     panel_found = False
                     re_panel_name = report_event["panelName"]
-                    re_panel_version = report_event["panelVersion"]
-                    print(re_panel_name, re_panel_version)
+                    # get panel_version info from elsewhere in json:
+                    re_analysis_panels = self.case.json_request_data["pedigree"]["analysisPanels"]
+                    for analysis_panel in re_analysis_panels:
+                        if analysis_panel["panelName"] == re_panel_name:
+                            re_panelapp_id = analysis_panel["panelVersion"]
+
                     for panel_version in panel_versions:
-                        if (re_panel_name == panel_version.panel.panel_name and
-                            re_panel_version == panel_version.version_number
-                        ):
+                        if re_panelapp_id == panel_version.panelapp_id:
                             report_event["panel_version_entry"] = panel
                             panel_found = True
                             print("Panel found for case", self.case.request_id, report_event["reportEventId"])
