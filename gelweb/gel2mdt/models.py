@@ -57,6 +57,18 @@ o   applied to this case, which should be concordant with the phenotype of the
         return str(self.gel_family_id)
 
 
+class FamilyPhenotype(models.Model):
+    """
+    A linkage table for Family and Phenotype.
+    """
+    class Meta:
+        managed = True
+        db_table='FamilyPhenotype'
+
+    family = models.ForeignKey(Family, on_delete=models.CASCADE)
+    phenotype = models.ForeignKey(Phenotype, on_delete=models.CASCADE)
+
+
 class Gene(models.Model):
     """
     Represents an individual gene. Whilst HGNC names may change, use of the
@@ -434,7 +446,7 @@ class ReportEvent(models.Model):
     tier = models.PositiveIntegerField()
 
     proband_variant = models.ForeignKey(ProbandVariant, on_delete=models.CASCADE, null=True) #made nullable
-    panel = models.ForeignKey(Panel, on_delete=models.CASCADE, null=True) #made nullable
+    panel = models.ForeignKey(PanelVersion, on_delete=models.CASCADE, null=True) #made nullable
 
     mode_of_inheritance = models.CharField(
         max_length=40,
