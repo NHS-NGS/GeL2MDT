@@ -661,11 +661,8 @@ class CaseAttributeManager(object):
                         if re_gene_ensembl_id == gene.ensembl_id:
                             report_event["gene_entry"] = gene
                             gene_found = True
-                            print("Gene found for case",
-                                self.case.request_id,
-                                report_event["reportEventId"],
-                                "-", gene)
                             break
+
                     if not gene_found:
                         # re-attempt with HGNC
                         re_gene_hgnc = re_genomic_info["HGNC"]
@@ -673,15 +670,9 @@ class CaseAttributeManager(object):
                             if re_gene_hgnc == gene.hgnc_name:
                                 report_event["gene_entry"] = gene
                                 gene_found = True
-                                print("Gene found for case",
-                                      self.case.request_id,
-                                      "-", gene)
+
                     if not gene_found:
                         report_event["gene_entry"] = None
-                        print("Gene not found for case",
-                            self.case.request_id,
-                            report_event["reportEventId"],
-                            re_gene_ensembl_id)
 
                     # set the Panel entry
                     panel_found = False
