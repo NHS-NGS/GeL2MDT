@@ -8,6 +8,7 @@
   <script src="{% static 'js/custom.js' %}"></script>
 {% endblock %}
 
+
 <div style="text-align:center">
     <form action="/edit_mdt/{{ mdt_id }}" role="form">
         {% csrf_token %} {% bootstrap_button "Edit Samples in MDT" button_type="submit" button_class="btn-primary btn-warning" %}

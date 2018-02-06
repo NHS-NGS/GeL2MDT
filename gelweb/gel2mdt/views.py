@@ -11,8 +11,11 @@ from django.http import JsonResponse
 
 # Create your views here.
 def register(request):
-    """ Registration view for all new users
-    """
+    '''
+    Registers a new user
+    :param request:
+    :return:
+    '''
     registered = False
     username = ''
 
@@ -93,7 +96,7 @@ def rare_disease_main(request):
     :return:
     '''
     # create_dummy_sample()
-    rd_cases = Proband.objects.all()
+    rd_cases = GELInterpretationReport.objects.all()
     return render(request, 'gel2mdt/rare_disease_main.html', {'rd_cases': rd_cases})
 
 
@@ -109,6 +112,7 @@ def proband_view(request, gel_id):
     proband_form = ProbandForm(instance=proband)
     gel_ir = GELInterpretationReport.objects.filter(ir_family__participant_family=proband.family).order_by('-polled_at_datetime')[0]
     probandtranscriptvariants = ProbandTranscriptVariant.objects.filter(proband_variant__interpretation_report=gel_ir)
+    # proband_mdts = MDTReport.
     return render(request, 'gel2mdt/proband.html', {'proband': proband,
                                                     'relatives': relatives,
                                                     'proband_form': proband_form,
@@ -117,6 +121,12 @@ def proband_view(request, gel_id):
 
 @login_required
 def update_proband(request, gel_id):
+    '''
+    Updates the Proband page
+    :param request:
+    :param gel_id:
+    :return:
+    '''
     proband = Proband.objects.get(gel_id=gel_id)
     if request.method == "POST":
         proband_form = ProbandForm(request.POST, instance=proband)
@@ -129,8 +139,11 @@ def update_proband(request, gel_id):
 
 @login_required
 def start_mdt_view(request):
-    """Select Samples for MDT instance
-    """
+    '''
+    Creates a new MDT instance
+    :param request:
+    :return:
+    '''
     mdt_instance = MDT(creator=request.user.username, date_of_mdt=datetime.now())
     mdt_instance.save()
 
@@ -139,9 +152,12 @@ def start_mdt_view(request):
 
 @login_required
 def edit_mdt(request, mdt_id):
-    """
-    Allows users to Add/Remove samples from MDT instance
-    """
+    '''
+    Allows users to select which cases they want to bring to MDT
+    :param request:
+    :param mdt_id:
+    :return:
+    '''
     # Gets the max version of each report
     gel_ir_queryset = GELInterpretationReport.objects.all()
 
@@ -177,6 +193,7 @@ def add_ir_to_mdt(request, mdt_id, irreport_id):
 @login_required
 def remove_ir_from_mdt(request, mdt_id, irreport_id):
     """
+    Removes a proband from an MDT
     :param request:
     :param mdt_id: MDT ID
     :param irreport_id: GELIR ID
@@ -223,9 +240,10 @@ def mdt_view(request, mdt_id):
 @login_required
 def edit_mdt_variant(request, pv_id):
     """
+    Edits the proband variants in the MDT
     :param request:
     :param pv_id: Proband Variant ID
-    :return: Edits the proband variants in the MDT
+    :return: Back to MDT view
     """
     data = {}
     proband_variant = ProbandVariant.objects.get(id=pv_id)
@@ -290,4 +308,41 @@ def edit_mdt_proband(request, proband_id):
                                  )
     data['html_form'] = html_form
     return JsonResponse(data)
+
+@login_required
+def recent_mdts(request):
+    '''
+    Shows table of recent MDTs
+    :param request:
+    :return:
+    '''
+    recent_mdt = list(MDT.objects.all().order_by('-date_of_mdt'))
+
+    # Need to get which probands were in MDT
+    probands_in_mdt = {}
+    for mdt in recent_mdt:
+        probands_in_mdt[mdt.id] = []
+        report_list = MDTReport.objects.filter(MDT=mdt.id)
+        for report in report_list:
+            probands_in_mdt[mdt.id].append(report.interpretation_report.ir_family.participant_family.proband.gel_id)
+
+    return render(request, 'gel2mdt/recent_mdts.html', {'recent_mdt': recent_mdt,
+                                                        'probands_in_mdt': probands_in_mdt})
+
+
+@login_required
+def delete_mdt(request, mdt_id):
+    '''
+    Deletes a selected MDT
+    :param request:
+    :param mdt_id:
+    :return: Back to recent MDTs
+    '''
+    if request.method == "POST":
+        mdt_instance = MDT.objects.get(id=mdt_id)
+        # Delete existing entrys in MDTReport:
+        MDTReport.objects.filter(MDT=mdt_instance).delete()
+        mdt_instance.delete()
+        messages.error(request, 'MDT Deleted')
+    return HttpResponseRedirect('/recent_mdts')
 

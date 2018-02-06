@@ -127,6 +127,8 @@ STATIC_URL = '/static/'
 
 LOGIN_REDIRECT_URL = 'index'
 
+LOGIN_URL = '/login/'
+
 MESSAGE_TAGS = {
     messages.DEBUG: 'alert-info',
     messages.INFO: 'alert-info',
