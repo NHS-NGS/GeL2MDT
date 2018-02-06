@@ -20,4 +20,8 @@ urlpatterns = [
 
     path('edit_mdt_variant/<int:pv_id>', views.edit_mdt_variant, name='edit-mdt-variant'),
     path('edit_mdt_proband/<int:proband_id>', views.edit_mdt_proband, name='edit-mdt-proband'),
+
+    path('recent_mdts/', views.recent_mdts, name='recent-mdt'),
+
+    path('delete_mdt/<int:mdt_id>', views.delete_mdt, name='delete-mdt'),
 ]
