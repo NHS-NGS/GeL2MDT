@@ -28,6 +28,7 @@ class Case(object):
         self.json_hash = self.hash_json()
         self.proband = self.get_proband_json()
         self.family_members = self.get_family_members()
+        self.tools_and_versions = self.get_tools_and_versions()
         self.status = self.get_status_json()
         self.json_variants \
             = self.json_case_data["json_request"]["TieredVariants"]
@@ -82,6 +83,15 @@ class Case(object):
                                  }
                 family_members.append(family_member)
         return family_members
+
+    def get_tools_and_versions(self):
+        '''
+        Gets the genome build from the JSON. Details of other tools (VEP, Polyphen/SIFT) to be pulled from config file?
+        :return: A dictionary of tools and versions used for the case
+        '''
+        tools_dict = {'genome_build': self.json_request_data["genomeAssemblyVersion"]}
+        return tools_dict
+
 
     def get_status_json(self):
         """
@@ -207,8 +217,6 @@ class CaseAttributeManager(object):
         # load in site specific details from config file
         config_dict = load_config.LoadConfig().load()
         labkey_server_request = config_dict['labkey_server_request']
-        print(labkey_server_request)
-        print(type(labkey_server_request))
 
         server_context = lk.utils.create_server_context(
             'gmc.genomicsengland.nhs.uk',
@@ -709,7 +717,15 @@ class CaseAttributeManager(object):
         return report_events
 
     def get_tools_and_assemblies(self):
-        pass
+        '''
+        Create tool and assembly entries for the case
+        '''
+        tools_and_assemblies = ManyCaseModel(ToolOrAssembly, [{
+            "tool_name": tool,
+            "reference_link": 'unknown'
+        }for tool, version in self.case.tools_and_versions.items()])
+        return tools_and_assemblies
+
 
     def get_tool_and_assembly_versions(self):
         pass
