@@ -646,24 +646,46 @@ class CaseAttributeManager(object):
 
         # modify report event dicts with gene and panel info
         for variant in self.case.json_variants:
+            # TODO: exclude Tier 3s
             for report_event in variant["reportEvents"]:
+
+                # set the Gene entry
                 found = False
+                gene_found = False
                 re_genomic_info = report_event["genomicFeature"]
                 re_gene_ensembl_id = re_genomic_info["ensemblId"]
                 for gene in genes:
-                   if re_gene_ensembl_id == gene.ensembl_id:
+                    if re_gene_ensembl_id == gene.ensembl_id:
                         report_event["gene_entry"] = gene
-                        found = True
+                        gene_found = True
+                        print("Gene found for case",
+                              self.case.request_id,
+                              report_event["reportEventId"],
+                              "-", gene)
                         break
-                    if not found:
-                        report_event["gene_entry"] = None
+                if not gene_found:
+                    report_event["gene_entry"] = None
+                    print("Gene not found for case",
+                          self.case.request_id,
+                          report_event["reportEventId"],
+                          re_gene_ensembl_id)
+
+                # set the Panel entry
+                panel_found = False
                 re_panel_name = report_event["panelName"]
                 re_panel_version = report_event["panelVersion"]
-                for panel in panel_versions:
+                print(re_panel_name, re_panel_version)
+                for panel_version in panel_versions:
                     if (re_panel_name == panel_version.panel.panel_name and
                         re_panel_version == panel_version.version_number
                     ):
                         report_event["panel_version_entry"] = panel
+                        panel_found = True
+                        print("Panel found for case", self.case.request_id, report_event["reportEventId"])
+                        break
+                if not panel_found:
+                    print("Panel not found for case", self.case.request_id, report_event["reportEventId"])
+                    report_event["panel_version_entry"] = None
 
                 json_report_events.append({
                     "coverage": None,
