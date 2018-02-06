@@ -197,7 +197,19 @@ class InterpretationReportFamily(models.Model):
     # sha_hash = models.CharField(max_length=200)
 
     def __str__(self):
-        return str(self.ir_family_id)
+return str(self.ir_family_id)
+
+
+class InterpretationReportFamilyPanel(models.Model):
+    """
+    Linkages table to connect IRF with a Panel to allow M2M relationships
+    that are still amenable to addition via the MCA.
+    """
+    class Meta:
+        managed=True
+
+    ir_family = models.ForeignKey(InterpretationReportFamily, on_delete=models.CASCADE)
+    panel = models.ForeignKey(PanelVersion, on_delete=models.CASCADE)
 
 
 class InterpretationReportFamilyPanel(models.Model):
