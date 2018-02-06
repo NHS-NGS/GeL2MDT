@@ -56,3 +56,11 @@ class VariantMDTForm(forms.ModelForm):
                    'clinical_trial': CheckboxInput(),
                    'inform_reproductive_choice': CheckboxInput(),
                    }
+
+class AddNewAttendee(forms.Form):
+    name = forms.CharField()
+    hospital = forms.CharField()
+    email = forms.EmailField()
+    role = forms.ChoiceField(choices=(('Clinician', 'Clinician'),
+                                      ('Clinical Scientist', 'Clinical Scientist'),
+                                      ('Other Staff', 'Other Staff')))
