@@ -289,6 +289,8 @@ class TestAddCases(TestCase):
         for model in (
             Clinician,
             Family,
+            Proband,
+            Relative,
             Phenotype,
             Panel,
             PanelVersion,
