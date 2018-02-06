@@ -30,7 +30,7 @@
                         <tbody>
                                 {% for report in rd_cases %}
                                 <tr>
-                                     <td> <a href="/proband/{{report.ir_family.participant_family.proband.gel_id}}">{{report.ir_family.participant_family.proband.gel_id}}</a></td>
+                                     <td> <a href="/proband/{{report.id}}">{{report.ir_family.participant_family.proband.gel_id}}</a></td>
                                     <td>{{report.ir_family.ir_family_id}}</td>
                                     <td>{{report.ir_family.participant_family.proband.forename}}</td>
                                     <td>{{report.ir_family.participant_family.proband.surname}}</td>
