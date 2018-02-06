@@ -136,7 +136,7 @@ class PanelVersionGene(models.Model):
     panel_version = models.ForeignKey(PanelVersion, on_delete=models.CASCADE)
     gene = models.ForeignKey(Gene, on_delete=models.CASCADE)
 
-
+    level_of_confidence = models.CharField(max_length=200)
 
 class ToolOrAssembly(models.Model):
     """
