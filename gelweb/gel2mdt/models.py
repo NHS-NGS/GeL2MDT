@@ -363,9 +363,6 @@ class ProbandVariant(models.Model):
     interpretation_report = models.ForeignKey(
         GELInterpretationReport, on_delete=models.CASCADE)
 
-    tools = models.ManyToManyField(
-        ToolOrAssemblyVersion)
-
     zygosity = models.CharField(
         max_length=20,
         choices=Zygosities.choices(),
