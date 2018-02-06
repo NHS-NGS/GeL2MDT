@@ -106,7 +106,7 @@ class Panel(models.Model):
         db_table = 'Panel'
 
 
-class PanelGene(models.Model):
+class PanelVersionGene(models.Model):
     """
     Linkage table to relate Panels and Genes via a Many to Many relationship
     which is still compatible with the MultipleCaseAdder.
@@ -114,7 +114,7 @@ class PanelGene(models.Model):
     class Meta:
         managed = True
 
-    panel = models.ForeignKey(Panel, on_delete=models.CASCADE)
+    panel_version = models.ForeignKey(PanelVersion, on_delete=models.CASCADE)
     gene = models.ForeignKey(Gene, on_delete=models.CASCADE)
 
 
