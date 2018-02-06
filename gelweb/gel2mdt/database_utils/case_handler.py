@@ -395,8 +395,13 @@ class CaseAttributeManager(object):
 
 
     def get_family_phenotyes(self):
-        # TODO: implement M2M relationship
-        pass
+        # TODO
+        family_phenotypes = ManyCaseModel(FamilyPhenotype, [
+            {"family": None,
+             "phenotype": None}
+        ])
+
+        return family_phenotypes
 
     def get_panels(self):
         """
@@ -467,7 +472,12 @@ class CaseAttributeManager(object):
 
     def get_panel_version_genes(self):
         # TODO: implement M2M relationship
-        pass
+        panel_version_genes = ManyCaseModel(PanelVersionGenes, [{
+            "panel_version": None,
+            "gene": None
+        }])
+
+        return panel_version_genes
 
     def get_transcripts(self):
         """
@@ -511,7 +521,13 @@ class CaseAttributeManager(object):
 
     def get_ir_family_panels(self):
         # TODO: implement M2M relationship
-        pass
+
+        ir_family_panels = ManyCaseModel(InterpretationReportFamilyPanel, [{
+            "ir_family": None,
+            "panel": None
+        }])
+
+        return ir_family_panels
 
     def get_ir(self):
         """
