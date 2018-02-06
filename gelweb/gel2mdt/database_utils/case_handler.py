@@ -12,6 +12,7 @@ from ..config import load_config
 
 import pprint
 
+
 class Case(object):
     """
     Representation of a single case which can be added to the database,
@@ -180,14 +181,20 @@ class CaseAttributeManager(object):
             case_model = self.get_relatives()
         elif self.model_type == Phenotype:
             case_model = self.get_phenotypes()
+        elif self.model_type == FamilyPhenotype:
+            case_model = self.get_family_phenotypes()
         elif self.model_type == InterpretationReportFamily:
             case_model = self.get_ir_family()
         elif self.model_type == Panel:
             case_model = self.get_panels()
         elif self.model_type == PanelVersion:
             case_model = self.get_panel_versions()
+        elif self.model_type == InterpretationReportFamilyPanel:
+            case_model = self.get_ir_family_panel()
         elif self.model_type == Gene:
             case_model = self.get_genes()
+        elif self.model_type == PanelVersionGene:
+            case_model = self.get_panel_version_genes()
         elif self.model_type == Transcript:
             case_model = self.get_transcripts()
         elif self.model_type == GELInterpretationReport:
@@ -386,6 +393,11 @@ class CaseAttributeManager(object):
         ])
         return phenotypes
 
+
+    def get_family_phenotyes(self):
+        # TODO: implement M2M relationship
+        pass
+
     def get_panels(self):
         """
         Poll panelApp to fetch information about a panel, then create a
@@ -453,6 +465,10 @@ class CaseAttributeManager(object):
         } for gene in gene_list])
         return genes
 
+    def get_panel_version_genes(self):
+        # TODO: implement M2M relationship
+        pass
+
     def get_transcripts(self):
         """
         Create a ManyCaseModel for transcripts based on information returned
@@ -492,6 +508,10 @@ class CaseAttributeManager(object):
             "priority": self.case.json["case_priority"]
         })
         return ir_family
+
+    def get_ir_family_panels(self):
+        # TODO: implement M2M relationship
+        pass
 
     def get_ir(self):
         """
