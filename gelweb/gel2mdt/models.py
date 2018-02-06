@@ -51,7 +51,6 @@ o   applied to this case, which should be concordant with the phenotype of the
     gel_family_id = models.IntegerField(unique=True)
 
     clinician = models.ForeignKey(Clinician, on_delete=models.CASCADE)
-    phenotypes = models.ManyToManyField(Phenotype)
 
     def __str__(self):
         return str(self.gel_family_id)
@@ -114,8 +113,6 @@ class PanelVersion(models.Model):
     """
     panel = models.ForeignKey(Panel, on_delete=models.CASCADE)
     version_number = models.CharField(max_length=200)
-
-    genes = models.ManyToManyField(Gene)
 
     def __str__(self):
         return str(self.panel.panel_name + ' v' + self.version_number)
@@ -187,7 +184,6 @@ class InterpretationReportFamily(models.Model):
         Family, on_delete=models.CASCADE, null=True)
 
     priority = models.CharField(max_length=200)
-    panels = models.ManyToManyField(PanelVersion)
     # some fields nullable to allow bulk saving before Panel and Family objects added
 
     # TODO: add choices once known. so far, I know of:
@@ -202,6 +198,18 @@ class InterpretationReportFamily(models.Model):
 
     def __str__(self):
         return str(self.ir_family_id)
+
+
+class InterpretationReportFamilyPanel(models.Model):
+    """
+    Linkages table to connect IRF with a Panel to allow M2M relationships
+    that are still amenable to addition via the MCA.
+    """
+    class Meta:
+        managed=True
+
+    ir_family = models.ForeignKey(InterpretationReportFamily, on_delete=models.CASCADE)
+    panel = models.ForeignKey(PanelVersion, on_delete=models.CASCADE)
 
 
 class GELInterpretationReport(models.Model):
