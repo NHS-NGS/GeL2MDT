@@ -90,8 +90,36 @@
     });
     </script>
 
+     <script>
+    $(document).ready(function() {
+        $('#dataTables-generic1').DataTable({
+            responsive: true
+        });
+    });
+    </script>
+
+
+     <script>
+    $(document).ready(function() {
+        $('#dataTables-generic2').DataTable({
+            responsive: true
+        });
+    });
+    </script>
+
+    <script>
+    $(document).ready(function() {
+        $('#dataTables-recent_mdt').DataTable({
+            responsive: true,
+            "order": [[ 0, "desc" ]]
+        });
+    });
+    </script>
+
 
 {% endblock %}
 
+{% block footer %}
+{% endblock %}
 </body>
 </html>

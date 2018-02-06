@@ -1,0 +1,62 @@
+{% extends 'gel2mdt/base.html' %}
+{% load bootstrap3 %}
+{% load static %}
+
+{% block content %}
+<div style="text-align:center">
+    <h1>Select attendees for MDT
+        <form action="/mdt_view/{{ mdt_id }}" role="form" method="post">
+        {% csrf_token %} {% bootstrap_button "Go to MDT" button_type="submit" button_class="btn-primary btn-primary" %}
+        </form>
+    </h1>
+</div>
+
+         <div class="container-fluid" >
+            <div class="col-md-12">
+
+        <table width="100%" class="table table-striped table-bordered table-hover" id="dataTables-generic" >
+            <thead>
+             <tr>
+                 <th>Add/Remove</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Hospital</th>
+                 <th>Role</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            {% for attendee in attendees %}
+                    <tr>
+
+                        <td align="center">
+                            {% if attendee.email in currently_added_to_mdt %}
+                                 <form action="/remove_attendee_from_mdt/{{ mdt_id }}/{{attendee.id}}/{{attendee.role}}" role="form" method="post">
+                                 {% csrf_token %}
+                                 {% bootstrap_button "Remove" button_type="submit" button_class="btn-primary btn-danger"%}
+                                </form>
+                            {% else %}
+                                <form action="/add_attendee_to_mdt/{{ mdt_id }}/{{attendee.id}}/{{attendee.role}}" role="form" method="post">
+                                 {% csrf_token %}
+                                 {% bootstrap_button "Add" button_type="submit" button_class="btn-primary btn-info"%}
+                                </form>
+                             {% endif %}
+
+                        </td>
+
+                        <td>{{attendee.name }}</td>
+                        <td>{{attendee.email }}</td>
+                        <td>{{attendee.hospital }}</td>
+                        <td>{{attendee.role }}</td>
+
+                    </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+</div>
+</div>
+
+
+
+{% endblock %}
