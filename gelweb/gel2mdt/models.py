@@ -82,6 +82,7 @@ class Panel(models.Model):
     Holds information about the relevant diseases.
     """
     panel_name = models.CharField(max_length=200)
+    panelapp_id = models.CharField(max_length=200, unique=True)
     disease_group = models.CharField(max_length=200)
     disease_subgroup = models.CharField(max_length=200)
 
@@ -100,7 +101,6 @@ class PanelVersion(models.Model):
     version.
     """
     panel = models.ForeignKey(Panel, on_delete=models.CASCADE)
-    panelapp_id = models.CharField(max_length=200, unique=True)
     version_number = models.CharField(max_length=200)
 
     genes = models.ManyToManyField(Gene)
