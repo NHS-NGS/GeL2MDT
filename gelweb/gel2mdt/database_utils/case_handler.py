@@ -667,6 +667,16 @@ class CaseAttributeManager(object):
                                 "-", gene)
                             break
                     if not gene_found:
+                        # re-attempt with HGNC
+                        re_gene_hgnc = re_genomic_info["HGNC"]
+                        for gene in genes:
+                            if re_gene_hgnc == gene.hgnc_name:
+                                report_event["gene_entry"] = gene
+                                gene_found = True
+                                print("Gene found for case",
+                                      self.case.request_id,
+                                      "-", gene)
+                    if not gene_found:
                         report_event["gene_entry"] = None
                         print("Gene not found for case",
                             self.case.request_id,
