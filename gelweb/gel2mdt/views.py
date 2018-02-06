@@ -101,40 +101,39 @@ def rare_disease_main(request):
 
 
 @login_required
-def proband_view(request, gel_id):
+def proband_view(request, report_id):
     '''
     Shows details about a particular proband, some fields may be editable
     :param request:
+    :param report_id: GEL Report ID
     :return:
     '''
-    proband = Proband.objects.get(gel_id=gel_id)
-    relatives = Relative.objects.filter(proband=proband)
-    proband_form = ProbandForm(instance=proband)
-    gel_ir = GELInterpretationReport.objects.filter(ir_family__participant_family=proband.family).order_by('-polled_at_datetime')[0]
-    probandtranscriptvariants = ProbandTranscriptVariant.objects.filter(proband_variant__interpretation_report=gel_ir)
-    # proband_mdts = MDTReport.
-    return render(request, 'gel2mdt/proband.html', {'proband': proband,
+    report = GELInterpretationReport.objects.get(id=report_id)
+    relatives = Relative.objects.filter(proband=report.ir_family.participant_family.proband)
+    proband_form = ProbandForm(instance=report.ir_family.participant_family.proband)
+    probandtranscriptvariants = ProbandTranscriptVariant.objects.filter(proband_variant__interpretation_report=report)
+    return render(request, 'gel2mdt/proband.html', {'report': report,
                                                     'relatives': relatives,
                                                     'proband_form': proband_form,
                                                     'probandtranscriptvariants':probandtranscriptvariants})
 
 
 @login_required
-def update_proband(request, gel_id):
+def update_proband(request, report_id):
     '''
     Updates the Proband page
     :param request:
-    :param gel_id:
+    :param report_id: GEL Report ID
     :return:
     '''
-    proband = Proband.objects.get(gel_id=gel_id)
+    report = GELInterpretationReport.objects.get(id=report_id)
     if request.method == "POST":
-        proband_form = ProbandForm(request.POST, instance=proband)
+        proband_form = ProbandForm(request.POST, instance=report.ir_family.participant_family.proband)
 
         if proband_form.is_valid():
             proband_form.save()
             messages.add_message(request, 25, 'Proband Updated')
-            return HttpResponseRedirect('/proband/{}'.format(gel_id))
+            return HttpResponseRedirect('/proband/{}'.format(report_id))
 
 
 @login_required

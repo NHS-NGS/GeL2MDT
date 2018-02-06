@@ -12,7 +12,7 @@
     <div id="proband" class="tab-pane fade in active">
          <div class="container-fluid" >
         <h1>{{proband.gel_id}}</h1>
-             <form role="form" method="post" enctype="multipart/form-data" action="/update_proband/{{ proband.gel_id }}">
+             <form role="form" method="post" enctype="multipart/form-data" action="/update_proband/{{ report.id }}">
             {% csrf_token %}
             <div class="row">
 
@@ -24,23 +24,23 @@
                             <div class="col-md-3">
                                 {% bootstrap_label "NHS Number" %}
                                 <div class="block">
-                                    {{proband.nhs_number}}
+                                    {{report.ir_family.participant_family.proband.nhs_number}}
                                 </div>
                                 </br>
                                 {% bootstrap_label "Date of Birth" %}
                                 <div class="block">
-                                    {{proband.date_of_birth|date}}
+                                    {{report.ir_family.participant_family.proband.date_of_birth|date}}
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 {% bootstrap_label "Forename" %}
                                 <div class="block">
-                                    {{proband.forename}}
+                                    {{report.ir_family.participant_family.proband.forename}}
                                 </div>
                                 </br>
                                 {% bootstrap_label "Sex" %}
                                 <div class="block">
-                                    {{proand.sex}}
+                                    {{report.ir_family.participant_family.proband.sex}}
                                 </div>
                                 </br>
 
@@ -51,30 +51,30 @@
 
                                 {% bootstrap_label "Surname" %}
                                 <div class="block">
-                                    {{proband.surname}}
+                                    {{report.ir_family.participant_family.proband.surname}}
                                 </div>
 
                                 </br>
                                 {% bootstrap_label "Clinician" %}
                                 <div class="block">
-                                    {{proband.family.clinician}}
+                                    {{report.ir_family.participant_family.clinician}}
                                 </div>
                                 </br>
                             </div>
                             <div class="col-md-3">
                             {% bootstrap_label "CIP ID" %}
                                 <div class="block">
-                                    {{proband.cip_id}}
+                                    {{report.ir_family.ir_family_id}}
                                 </div>
                                 </br>
                                 {% bootstrap_label "GEL Family ID" %}
                                 <div class="block">
-                                    {{proband.family.id}}
+                                    {{report.ir_family.participant_family.id}}
                                 </div>
                             </br>
                                 {% bootstrap_label "GMC" %}
                                 <div class="block">
-                                    {{proband.gmc}}
+                                    {{report.ir_family.participant_family.proband.gmc}}
                                 </div>
                                 </br>
                             </div>
@@ -146,7 +146,7 @@
                                     <tbody>
 
                                         <tr>
-                                            <td><a href="/gel2me/mdt_view/{{ mdt.gel_mdt_id }}">{{ mdt.gel_mdt_id }}</a></td>
+                                            <td><a href="/mdt_view/{{ mdt.gel_mdt_id }}">{{ mdt.gel_mdt_id }}</a></td>
                                             <td>{{mdt.gel_mdt_id.date}}</td>
                                             <td>{{mdt.gel_mdt_id.attendees}}</td>
                                         </tr>

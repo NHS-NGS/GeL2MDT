@@ -8,8 +8,8 @@ urlpatterns = [
     path('rare-disease-main', views.rare_disease_main, name='rare-disease-main'),
     path('cancer-main', views.cancer_main, name='cancer-main'),
 
-    path('proband/<int:gel_id>', views.proband_view, name='proband-view'),
-    path('update_proband/<int:gel_id>', views.update_proband, name='update-proband'),
+    path('proband/<int:report_id>', views.proband_view, name='proband-view'),
+    path('update_proband/<int:report_id>', views.update_proband, name='update-proband'),
 
     path('start_mdt/', views.start_mdt_view, name='start-mdt'),
     path('edit_mdt/<int:mdt_id>', views.edit_mdt, name='edit-mdt'),
