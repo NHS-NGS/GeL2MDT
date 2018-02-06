@@ -19,35 +19,13 @@
     <form action="/export_mdt/{{ mdt_id }}" role="form" method="post">
         {% csrf_token %} {% bootstrap_button "Export MDT" button_type="submit" button_class="btn-primary btn-info" %}
     </form>
+    <form action="/select_attendees_for_mdt/{{ mdt_id }}" role="form">
+        {% csrf_token %} {% bootstrap_button "Add Attendees" button_type="submit" button_class="btn-primary" %}
+    </form>
 </div>
 
 <br>
-
 <div  class="container-fluid"   >
-     <form role="form" method="post" enctype="multipart/form-data">
-     {% csrf_token %}
-         <div class=row style="text-align:center">
-        <div class="col-md-6" style="text-align:center" >
-
-            <div class="panel panel-default">
-                <div class="panel-heading">MDT Information</div>
-                <div class="panel-body">
-
-                    <div class="col-md-4">
-                        {% bootstrap_field mdt_form.date_of_mdt %}
-                    </div>
-                    <div class="col-md-4">
-                        {% bootstrap_field mdt_form.status %}
-                    </div>
-                    <div class="col-md-4">
-                    <button type="submit" name="mdt_update" class="btn btn-default">Save</button>
-
-                </div>
-            </div>
-        </div>
-        </div>
-        </div>
-            </form>
 
 
     <div class=row>
@@ -69,16 +47,16 @@
                                         <thead style='font-size: 70%'>
                                             <tr>
                                                 <th>GEL ID</th>
-                                                <th>OPA ID</th>
+                                                <th>CIP ID</th>
                                                 <th>Variant ID</th>
                                                 <th>Edit</th>
                                                 <th>Forename</th>
                                                 <th>Surname</th>
                                                 <th>DOB</th>
                                                 <th>Gene</th>
-                                                <th>CNOM</th>
-                                                <th>PNOM</th>
-                                                <th>Genotype</th>
+                                                <th>HGVSc</th>
+                                                <th>HGVSp</th>
+                                                <th>Zygosity</th>
                                                 <th>Class</th>
                                                 <th>CP</th>
                                                 <th>Discussion</th>
@@ -144,5 +122,31 @@
 
     </div>
 </div>
+
+
+    <form role="form" method="post" enctype="multipart/form-data">
+     {% csrf_token %}
+         <div class=row style="text-align:center">
+        <div class="col-md-6" style="text-align:center" >
+
+            <div class="panel panel-default">
+                <div class="panel-heading">MDT Information</div>
+                <div class="panel-body">
+
+                    <div class="col-md-4">
+                        {% bootstrap_field mdt_form.date_of_mdt %}
+                    </div>
+                    <div class="col-md-4">
+                        {% bootstrap_field mdt_form.status %}
+                    </div>
+                    <div class="col-md-4">
+                    <button type="submit" name="mdt_update" class="btn btn-default">Save</button>
+
+                </div>
+            </div>
+        </div>
+        </div>
+        </div>
+    </form>
 </div>
 {% endblock %}
