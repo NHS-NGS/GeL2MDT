@@ -29,6 +29,7 @@ class Case(object):
         self.json_hash = self.hash_json()
         self.proband = self.get_proband_json()
         self.family_members = self.get_family_members()
+        self.tools_and_versions = self.get_tools_and_versions()
         self.status = self.get_status_json()
         self.json_variants \
             = self.json_case_data["json_request"]["TieredVariants"]
@@ -83,6 +84,15 @@ class Case(object):
                                  }
                 family_members.append(family_member)
         return family_members
+
+    def get_tools_and_versions(self):
+        '''
+        Gets the genome build from the JSON. Details of other tools (VEP, Polyphen/SIFT) to be pulled from config file?
+        :return: A dictionary of tools and versions used for the case
+        '''
+        tools_dict = {'genome_build': self.json_request_data["genomeAssemblyVersion"]}
+        return tools_dict
+
 
     def get_status_json(self):
         """
@@ -204,33 +214,31 @@ class CaseAttributeManager(object):
         Create a case model to handle adding/getting the clinician for case.
         """
         # family ID used to search for clinician details in labkey
-        family_id = int(self.case.json["family_id"])
-        # load in site specific details from config file
-        config_dict = load_config.LoadConfig().load()
-        labkey_server_request = config_dict['labkey_server_request']
-        print(labkey_server_request)
-        print(type(labkey_server_request))
-
-        server_context = lk.utils.create_server_context(
-            'gmc.genomicsengland.nhs.uk',
-            labkey_server_request,
-            '/labkey', use_ssl=True)
-
-        clinician_details = {'name': None, 'hospital': None}
-        search_results = lk.query.select_rows(
-            server_context=server_context,
-            schema_name='gel_rare_diseases',
-            query_name='rare_diseases_registration',
-            filter_array=[
-                lk.query.QueryFilter('family_id', family_id, 'contains')
-            ]
-        )
-        # The results contain multiple rows for each famliy member.
-        # This code just takes the first entry. May need refining.
-        clinician_details['name'] = search_results['rows'][0].get(
-            'consultant_details_full_name_of_responsible_consultant')
-        clinician_details['hospital'] = search_results['rows'][0].get(
-            'consultant_details_hospital_of_responsible_consultant')
+        # family_id = int(self.case.json["family_id"])
+        # # load in site specific details from config file
+        # config_dict = load_config.LoadConfig().load()
+        # labkey_server_request = config_dict['labkey_server_request']
+        #
+        # server_context = lk.utils.create_server_context(
+        #     'gmc.genomicsengland.nhs.uk',
+        #     labkey_server_request,
+        #     '/labkey', use_ssl=True)
+        #
+        clinician_details = {'name': 'unknown', 'hospital': 'unknown'}
+        # search_results = lk.query.select_rows(
+        #     server_context=server_context,
+        #     schema_name='gel_rare_diseases',
+        #     query_name='rare_diseases_registration',
+        #     filter_array=[
+        #         lk.query.QueryFilter('family_id', family_id, 'contains')
+        #     ]
+        # )
+        # # The results contain multiple rows for each famliy member.
+        # # This code just takes the first entry. May need refining.
+        # clinician_details['name'] = search_results['rows'][0].get(
+        #     'consultant_details_full_name_of_responsible_consultant')
+        # clinician_details['hospital'] = search_results['rows'][0].get(
+        #     'consultant_details_hospital_of_responsible_consultant')
 
         clinician = CaseModel(Clinician, {
             "name": clinician_details['name'],
@@ -255,49 +263,49 @@ class CaseAttributeManager(object):
             '/labkey', use_ssl=True)
 
         participant_demographics = {
-            "surname": None,
-            "forename": None,
-            "date_of_birth": None,
-            "nhs_num": None,
-            "sex": None,
+            "surname": 'unknown',
+            "forename": 'unknown',
+            "date_of_birth": '2011/01/01', # unknown but needs to be in date format
+            "nhs_num": 'unknown',
+            "sex": 'unknown',
             }
 
-        # API call to get participant name, DOB and NHS number
-        search_results = lk.query.select_rows(
-            server_context=server_context,
-            schema_name='gel_rare_diseases',
-            query_name='participant_identifier',
-            filter_array=[
-                lk.query.QueryFilter(
-                    'participant_id', participant_id, 'contains')
-            ]
-        )
-        participant_demographics["surname"] = search_results['rows'][0].get(
-            'surname')
-        participant_demographics["forename"] = search_results['rows'][0].get(
-            'forenames')
-        participant_demographics["date_of_birth"] = search_results['rows'][0].get(
-            'date_of_birth').split(' ')[0]
-        if search_results['rows'][0].get('person_identifier_type').upper() == "NHSNUMBER":
-            participant_demographics["nhs_num"] = search_results['rows'][0].get(
-                'person_identifier')
-
-        # API call to get participant sex
-        search_results = lk.query.select_rows(
-            server_context=server_context,
-            schema_name='gel_rare_diseases',
-            query_name='rare_diseases_registration',
-            filter_array=[
-                lk.query.QueryFilter('participant_identifiers_id', participant_id, 'contains')
-            ]
-        )
-        sex_id = search_results["rows"][0]["person_stated_gender_id"]
-        if sex_id == "1":
-            participant_demographics["sex"] = 'male'
-        elif sex_id == "2":
-            participant_demographics["sex"] = 'female'
-        else:
-            participant_demographics["sex"] = 'unknown'
+        # # API call to get participant name, DOB and NHS number
+        # search_results = lk.query.select_rows(
+        #     server_context=server_context,
+        #     schema_name='gel_rare_diseases',
+        #     query_name='participant_identifier',
+        #     filter_array=[
+        #         lk.query.QueryFilter(
+        #             'participant_id', participant_id, 'contains')
+        #     ]
+        # )
+        # participant_demographics["surname"] = search_results['rows'][0].get(
+        #     'surname')
+        # participant_demographics["forename"] = search_results['rows'][0].get(
+        #     'forenames')
+        # participant_demographics["date_of_birth"] = search_results['rows'][0].get(
+        #     'date_of_birth').split(' ')[0]
+        # if search_results['rows'][0].get('person_identifier_type').upper() == "NHSNUMBER":
+        #     participant_demographics["nhs_num"] = search_results['rows'][0].get(
+        #         'person_identifier')
+        #
+        # # API call to get participant sex
+        # search_results = lk.query.select_rows(
+        #     server_context=server_context,
+        #     schema_name='gel_rare_diseases',
+        #     query_name='rare_diseases_registration',
+        #     filter_array=[
+        #         lk.query.QueryFilter('participant_identifiers_id', participant_id, 'contains')
+        #     ]
+        # )
+        # sex_id = search_results["rows"][0]["person_stated_gender_id"]
+        # if sex_id == "1":
+        #     participant_demographics["sex"] = 'male'
+        # elif sex_id == "2":
+        #     participant_demographics["sex"] = 'female'
+        # else:
+        #     participant_demographics["sex"] = 'unknown'
 
         return participant_demographics
 
@@ -713,7 +721,15 @@ class CaseAttributeManager(object):
         return report_events
 
     def get_tools_and_assemblies(self):
-        pass
+        '''
+        Create tool and assembly entries for the case
+        '''
+        tools_and_assemblies = ManyCaseModel(ToolOrAssembly, [{
+            "tool_name": tool,
+            "reference_link": 'unknown'
+        }for tool, version in self.case.tools_and_versions.items()])
+        return tools_and_assemblies
+
 
     def get_tool_and_assembly_versions(self):
         pass
