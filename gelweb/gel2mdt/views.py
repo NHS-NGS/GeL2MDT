@@ -112,10 +112,12 @@ def proband_view(request, report_id):
     relatives = Relative.objects.filter(proband=report.ir_family.participant_family.proband)
     proband_form = ProbandForm(instance=report.ir_family.participant_family.proband)
     probandtranscriptvariants = ProbandTranscriptVariant.objects.filter(proband_variant__interpretation_report=report)
+    proband_mdt = MDTReport.objects.filter(interpretation_report=report)
     return render(request, 'gel2mdt/proband.html', {'report': report,
                                                     'relatives': relatives,
                                                     'proband_form': proband_form,
-                                                    'probandtranscriptvariants':probandtranscriptvariants})
+                                                    'probandtranscriptvariants':probandtranscriptvariants,
+                                                    'proband_mdt': proband_mdt})
 
 
 @login_required
@@ -345,3 +347,80 @@ def delete_mdt(request, mdt_id):
         messages.error(request, 'MDT Deleted')
     return HttpResponseRedirect('/recent_mdts')
 
+@login_required
+def select_attendees_for_mdt(request, mdt_id):
+    '''
+    Adds a CS/Clinician/Other to a MDT
+    :param request:
+    :param mdt_id:
+    :return: Table showing all users
+    '''
+    clinicians = Clinician.objects.all().values('name', 'email', 'hospital', 'id', 'mdt').distinct()
+    clinical_scientists = ClinicalScientist.objects.all().values('name', 'email', 'hospital', 'id', 'mdt').distinct()
+    other_staff = OtherStaff.objects.all().values('name', 'email', 'hospital', 'id', 'mdt').distinct()
+    for clinician in clinicians:
+        clinician['role'] = 'Clinician'
+    for cs in clinical_scientists:
+        cs['role'] = 'CS'
+    for other in other_staff:
+        other['role'] = 'other'
+    attendees = list(clinicians) + list(clinical_scientists) + list(other_staff)
+    currently_added_to_mdt = []
+    for attendee in attendees:
+        if attendee['mdt'] == mdt_id:
+            currently_added_to_mdt.append(attendee['email'])
+        attendee.pop('mdt')
+
+    # Uniquify the set of dicts
+    attendees = [dict(y) for y in set(tuple(x.items()) for x in attendees)]
+    return render(request, 'gel2mdt/select_attendee_for_mdt.html', {'attendees': attendees, 'mdt_id': mdt_id,
+                                                                    'currently_added_to_mdt': currently_added_to_mdt})
+
+@login_required
+def add_attendee_to_mdt(request, mdt_id, attendee_id, role):
+    '''
+
+    :param request:
+    :param mdt_id:
+    :param attendee_id:
+    :return:
+    '''
+    if request.method == 'POST':
+        mdt_instance = MDT.objects.get(id=mdt_id)
+
+        if role == 'Clinician':
+            clinician = Clinician.objects.get(id=attendee_id)
+            mdt_instance.clinicians.add(clinician)
+            print(mdt_instance)
+            mdt_instance.save()
+        elif role == 'CS':
+            clinical_scientist = ClinicalScientist.objects.get(id=attendee_id)
+            mdt_instance.clinical_scientists.add(clinical_scientist)
+            mdt_instance.save()
+        elif role == 'other':
+            other = OtherStaff.objects.get(id=attendee_id)
+            mdt_instance.other_staff.add(other)
+            mdt_instance.save()
+        return HttpResponseRedirect(f'/select_attendees_for_mdt/{mdt_id}')
+
+@login_required
+def remove_attendee_from_mdt(request, mdt_id, attendee_id, role):
+    '''
+
+    :param request:
+    :param mdt_id:
+    :param attendee_id:
+    :return:
+    '''
+    if request.method == 'POST':
+        mdt_instance = MDT.objects.get(id=mdt_id)
+        if role == 'Clinician':
+            clinician = Clinician.objects.get(id=attendee_id)
+            mdt_instance.clinicians.remove(clinician)
+        elif role == 'CS':
+            clinical_scientist = ClinicalScientist.objects.get(id=attendee_id)
+            mdt_instance.clinical_scientists.remove(clinical_scientist)
+        elif role == 'other':
+            other = OtherStaff.objects.get(id=attendee_id)
+            mdt_instance.other_staff.remove(other)
+        return HttpResponseRedirect(f'/select_attendees_for_mdt/{mdt_id}')

@@ -129,6 +129,8 @@
                     </div>
                 </div>
         </form>
+
+      {% if proband_mdt %}
      <div class="row">
          <div class="col-md-12">
                     <div class="panel panel-default">
@@ -140,16 +142,17 @@
                                         <tr>
                                             <th>MDT Name</th>
                                             <th>MDT Date</th>
-                                            <th>Attendees</th>
+                                            <th>Creator</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-
+                                        {% for mdt in proband_mdt %}
                                         <tr>
-                                            <td><a href="/mdt_view/{{ mdt.gel_mdt_id }}">{{ mdt.gel_mdt_id }}</a></td>
-                                            <td>{{mdt.gel_mdt_id.date}}</td>
-                                            <td>{{mdt.gel_mdt_id.attendees}}</td>
+                                            <td><a href="/mdt_view/{{ mdt.MDT.id }}">{{ mdt.MDT.id }}</a></td>
+                                            <td>{{mdt.MDT.date_of_mdt}}</td>
+                                            <td>{{mdt.MDT.creator}}</td>
                                         </tr>
+                                        {% endfor %}
 
 
                             </tbody>
@@ -160,7 +163,9 @@
                     </div>
                 </div>
      </div>
+             {% endif %}
 
+             {% if relatives %}
         <div class=row>
             <div class="col-md-12">
                 <div class="panel panel-default">
@@ -199,6 +204,7 @@
                 </div>
             </div>
         </div>
+             {% endif %}
 
     </div>
     </div>
