@@ -55,7 +55,7 @@ def register(request):
                                        email=email,
                                        hospital=hospital)
                     other.save()
-            except IntegrityError as e:
+            except IntegrityError:
                 messages.error(request, 'If you have already registered, '
                                         'please contact Bioinformatics to activate your account')
                 return HttpResponseRedirect('/register')
@@ -135,7 +135,7 @@ def update_proband(request, report_id):
         if proband_form.is_valid():
             proband_form.save()
             messages.add_message(request, 25, 'Proband Updated')
-            return HttpResponseRedirect('/proband/{}'.format(report_id))
+            return HttpResponseRedirect(f'/proband/{report_id}')
 
 
 @login_required
@@ -148,7 +148,7 @@ def start_mdt_view(request):
     mdt_instance = MDT(creator=request.user.username, date_of_mdt=datetime.now())
     mdt_instance.save()
 
-    return HttpResponseRedirect('/edit_mdt/{}'.format(mdt_instance.id))
+    return HttpResponseRedirect(f'/edit_mdt/{mdt_instance.id}')
 
 
 @login_required
@@ -188,7 +188,7 @@ def add_ir_to_mdt(request, mdt_id, irreport_id):
         linkage_instance = MDTReport(interpretation_report=report_instance,
                                      MDT=mdt_instance)
         linkage_instance.save()
-        return HttpResponseRedirect('/edit_mdt/{}'.format(mdt_id))
+        return HttpResponseRedirect(f'/edit_mdt/{mdt_id}')
 
 
 @login_required
@@ -205,7 +205,7 @@ def remove_ir_from_mdt(request, mdt_id, irreport_id):
         report_instance = GELInterpretationReport.objects.get(id=irreport_id)
 
         MDTReport.objects.filter(MDT=mdt_instance, interpretation_report=report_instance).delete()
-        return HttpResponseRedirect('/edit_mdt/{}'.format(mdt_id))
+        return HttpResponseRedirect(f'/edit_mdt/{mdt_id}')
 
 
 @login_required
@@ -230,7 +230,7 @@ def mdt_view(request, mdt_id):
             mdt_form.save()
             messages.add_message(request, 25, 'MDT Updated')
 
-        return HttpResponseRedirect('/mdt_view/{}'.format(mdt_id))
+        return HttpResponseRedirect(f'/mdt_view/{mdt_id}')
     request.session['mdt_id'] = mdt_id
     return render(request, 'gel2mdt/mdt_view2.html', {'variant_queryset': variant_queryset,
                                                      'reports': reports,
@@ -325,7 +325,7 @@ def recent_mdts(request):
         probands_in_mdt[mdt.id] = []
         report_list = MDTReport.objects.filter(MDT=mdt.id)
         for report in report_list:
-            probands_in_mdt[mdt.id].append(report.interpretation_report.ir_family.participant_family.proband.gel_id)
+            probands_in_mdt[mdt.id].append((report.interpretation_report.id, report.interpretation_report.ir_family.participant_family.proband.gel_id))
 
     return render(request, 'gel2mdt/recent_mdts.html', {'recent_mdt': recent_mdt,
                                                         'probands_in_mdt': probands_in_mdt})
@@ -361,9 +361,9 @@ def select_attendees_for_mdt(request, mdt_id):
     for clinician in clinicians:
         clinician['role'] = 'Clinician'
     for cs in clinical_scientists:
-        cs['role'] = 'CS'
+        cs['role'] = 'Clinical Scientist'
     for other in other_staff:
-        other['role'] = 'other'
+        other['role'] = 'Other Staff'
     attendees = list(clinicians) + list(clinical_scientists) + list(other_staff)
     currently_added_to_mdt = []
     for attendee in attendees:
@@ -371,8 +371,9 @@ def select_attendees_for_mdt(request, mdt_id):
             currently_added_to_mdt.append(attendee['email'])
         attendee.pop('mdt')
 
-    # Uniquify the set of dicts
+    # Uniquify the set of dicts, needed because of the mdt many relationship in the 3 models
     attendees = [dict(y) for y in set(tuple(x.items()) for x in attendees)]
+    request.session['mdt_id'] = mdt_id
     return render(request, 'gel2mdt/select_attendee_for_mdt.html', {'attendees': attendees, 'mdt_id': mdt_id,
                                                                     'currently_added_to_mdt': currently_added_to_mdt})
 
@@ -391,13 +392,12 @@ def add_attendee_to_mdt(request, mdt_id, attendee_id, role):
         if role == 'Clinician':
             clinician = Clinician.objects.get(id=attendee_id)
             mdt_instance.clinicians.add(clinician)
-            print(mdt_instance)
             mdt_instance.save()
-        elif role == 'CS':
+        elif role == 'Clinical Scientist':
             clinical_scientist = ClinicalScientist.objects.get(id=attendee_id)
             mdt_instance.clinical_scientists.add(clinical_scientist)
             mdt_instance.save()
-        elif role == 'other':
+        elif role == 'Other Staff':
             other = OtherStaff.objects.get(id=attendee_id)
             mdt_instance.other_staff.add(other)
             mdt_instance.save()
@@ -417,10 +417,44 @@ def remove_attendee_from_mdt(request, mdt_id, attendee_id, role):
         if role == 'Clinician':
             clinician = Clinician.objects.get(id=attendee_id)
             mdt_instance.clinicians.remove(clinician)
-        elif role == 'CS':
+        elif role == 'Clinical Scientist':
             clinical_scientist = ClinicalScientist.objects.get(id=attendee_id)
             mdt_instance.clinical_scientists.remove(clinical_scientist)
-        elif role == 'other':
+        elif role == 'Other Staff':
             other = OtherStaff.objects.get(id=attendee_id)
             mdt_instance.other_staff.remove(other)
         return HttpResponseRedirect(f'/select_attendees_for_mdt/{mdt_id}')
+
+
+def add_new_attendee(request):
+    '''
+    Add a new attendee to the 3 attendee models
+    :param request:
+    :return:
+    '''
+    if request.method == 'POST':
+
+        form = AddNewAttendee(request.POST)
+        if form.is_valid():
+            if form.cleaned_data['role'] == 'Clinician':
+                clinician = Clinician(name=form.cleaned_data['name'],
+                                      hospital=form.cleaned_data['hospital'],
+                                      email=form.cleaned_data['email'])
+                clinician.save()
+            elif form.cleaned_data['role'] == 'Clinical Scientist':
+                cs = ClinicalScientist(name=form.cleaned_data['name'],
+                                       hospital=form.cleaned_data['hospital'],
+                                       email=form.cleaned_data['email'])
+                cs.save()
+            elif form.cleaned_data['role'] == 'Other Staff':
+                other = OtherStaff(name=form.cleaned_data['name'],
+                                   hospital=form.cleaned_data['hospital'],
+                                   email=form.cleaned_data['email'])
+                other.save()
+            if 'mdt_id' in request.session:
+                return HttpResponseRedirect('/select_attendees_for_mdt/{}'.format(request.session.get('mdt_id')))
+            else:
+                return HttpResponseRedirect('/recent_mdts/')
+    else:
+        form = AddNewAttendee()
+    return render(request, 'gel2mdt/add_new_attendee.html', {'form': form})

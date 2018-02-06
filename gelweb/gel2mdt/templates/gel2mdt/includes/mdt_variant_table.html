@@ -3,7 +3,7 @@
 {% for variant in variant_queryset %}
 
     <tr>
-        <td><a href="/proband/{{variant.interpretation_report.ir_family.participant_family.proband.gel_id}}">{{variant.interpretation_report.ir_family.participant_family.proband.gel_id}}</td>
+        <td><a href="/proband/{{variant.interpretation_report.id}}">{{variant.interpretation_report.ir_family.participant_family.proband.gel_id}}</td>
         <td>{{variant.interpretation_report.ir_family.ir_family_id}}</td>
         <td  ><a href="/variant_view/{{svariant.gel_variant_id}}">{{variant.variant.id}}</a></td>
         <td>
