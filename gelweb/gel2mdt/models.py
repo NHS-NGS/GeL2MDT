@@ -209,20 +209,6 @@ class InterpretationReportFamilyPanel(models.Model):
         managed=True
 
     ir_family = models.ForeignKey(InterpretationReportFamily, on_delete=models.CASCADE)
-    panel = models.ForeignKey(PanelVersion, on_delete=models.CASCADE)
-
-
-class InterpretationReportFamilyPanel(models.Model):
-    """
-    Linkages table to connect IRF with a Panel to allow M2M relationships
-    that are still amenable to addition via the MCA.
-    """
-    class Meta:
-        managed=True
-
-    ir_family = models.ForeignKey(InterpretationReportFamily, on_delete=models.CASCADE)
-    panel = models.ForeignKey(PanelVersion, on_delete=models.CASCADE)
-
 
 class GELInterpretationReport(models.Model):
     ir_family = models.ForeignKey(
@@ -289,7 +275,7 @@ class Proband(models.Model):
     surname = models.CharField(max_length=200)
     date_of_birth = models.DateTimeField('date_of_birth')
     sex = models.CharField(max_length=10, blank=True)
-    pilot_case = models.NullBooleanField()
+    pilot_case = models.BooleanField(default=False)
     outcome = models.TextField(blank=True)
     comment = models.TextField(blank=True)
     discussion = models.TextField(blank=True)
@@ -297,7 +283,7 @@ class Proband(models.Model):
     episode = models.CharField( max_length=255, blank=True)
     gmc = models.CharField( max_length=255)
     local_id = models.CharField(max_length=255)
-    case_sent = models.NullBooleanField()
+    case_sent = models.BooleanField(default=False)
     status = models.CharField( max_length=50, choices=(
         ('N', 'Not Started'), ('U', 'Under Review'), ('M', 'Awaiting MDT'), ('V', 'Awaiting Validation'),
         ('R', 'Awaiting Reporting'), ('P', 'Reported'), ('C', 'Completed'), ('E', 'External')), default='N')
