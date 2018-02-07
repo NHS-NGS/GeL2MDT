@@ -487,6 +487,8 @@ class CaseAttributeManager(object):
         case_transcripts = self.case.transcripts
         # for each transcript, add an FK to the gene with matching ensg ID
         for transcript in case_transcripts:
+            # convert canonical to bools:
+            transcript.canonical = transcript.transcript_canonical == "YES"
             if not transcript.gene_ensembl_id:
                 # if the transcript has no recognised gene associated
                 continue  # don't bother checking genes
@@ -497,7 +499,7 @@ class CaseAttributeManager(object):
         transcripts = ManyCaseModel(Transcript, [{
             "gene": transcript.gene_model,
             "name": transcript.transcript_name,
-            "canonical_transcript": transcript.transcript_canonical,
+            "canonical_transcript": transcript.canonical,
             "strand": transcript.transcript_strand
         # add all transcripts except those without associated genes
         } for transcript in case_transcripts if transcript.gene_ensembl_id])
@@ -743,14 +745,30 @@ class CaseAttributeManager(object):
                         ):
                             report_event["panel_version_entry"] = panel_version
                             panel_found = True
-                            print("Panel found for case", self.case.request_id, report_event["reportEventId"])
                             break
                     if not panel_found:
-                        print("Panel not found for case", self.case.request_id, report_event["reportEventId"])
                         report_event["panel_version_entry"] = None
 
+                    panel = report_event["panel_version_entry"].panel
+                    panelapp_id = panel.panelapp_id
+                    # coverages is a dict of dicts: (1) access panel using hash
+                    panel_coverages = self.case.json_request_data["genePanelsCoverage"]
+                    panel_coverage = panel_coverages[panelapp_id]
+                    # (2) access coverage info using gene hgnc
+                    try:
+                        re_gene_hgnc = report_event["genomicFeature"]["HGNC"]
+                        re_gene_coverage = panel_coverage[re_gene_hgnc]
+                        # coverage info lists samples, get correct sample
+                        proband_sample = self.case.proband["samples"][0]
+                        proband_sample_avg = proband_sample + "_avg"
+                        gene_avg_coverage = re_gene_coverage[proband_sample_avg]
+                        report_event["gene_coverage"] = gene_avg_coverage
+                    except KeyError as e:
+                        print("Could not find", e, "coverage info for", panelapp_id)
+                        report_event["gene_coverage"] = None
+
                     json_report_events.append({
-                        "coverage": None,
+                        "coverage": report_event["gene_coverage"],
                         "gene": report_event["gene_entry"],
                         "mode_of_inheritance": report_event["modeOfInheritance"],
                         "panel": report_event["panel_version_entry"],
