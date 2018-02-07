@@ -311,8 +311,8 @@ class TestAddCases(TestCase):
                 check_cases = False
 
         for re in ReportEvent.objects.all():
-            if re.gene:
-                print(re.re_id, "\t", re.gene.hgnc_name, "\t", re.coverage, "\t",  re.panel.panel.panelapp_id)
+            if re.phenotype:
+                print(re.re_id, "\t", re.phenotype.description)
 
         assert check_cases
 

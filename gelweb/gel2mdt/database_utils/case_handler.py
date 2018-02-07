@@ -690,6 +690,8 @@ class CaseAttributeManager(object):
                     in self.case.attribute_managers[Gene].case_model.case_models]
         panel_versions = [panel_version.entry for panel_version
                     in self.case.attribute_managers[PanelVersion].case_model.case_models]
+        phenotypes = [phenotype.entry for phenotype
+                    in self.case.attribute_managers[Phenotype].case_model.case_models]
 
         print(PanelVersion.objects.values_list('panel', 'version_number'))
         print(Panel.objects.values_list('id','panel_name'))
@@ -756,8 +758,19 @@ class CaseAttributeManager(object):
                         gene_avg_coverage = re_gene_coverage[proband_sample_avg]
                         report_event["gene_coverage"] = gene_avg_coverage
                     except KeyError as e:
-                        print("Could not find", e, "coverage info for", panelapp_id)
                         report_event["gene_coverage"] = None
+
+                    # set the Phenotype entry
+                    re_phenotype_name = report_event["phenotype"]
+                    phenotype_found = False
+                    for phenotype in phenotypes:
+                        if phenotype.description == re_phenotype_name:
+                            report_event["phenotype_entry"] = phenotype
+                            phenotype_found = True
+                            break
+                    if not phenotype_found:
+                        report_event["phenotype_entry"] = None
+
 
                     json_report_events.append({
                         "coverage": report_event["gene_coverage"],
@@ -765,7 +778,7 @@ class CaseAttributeManager(object):
                         "mode_of_inheritance": report_event["modeOfInheritance"],
                         "panel": report_event["panel_version_entry"],
                         "penetrance": report_event["penetrance"],
-                        "phenotype": None,
+                        "phenotype": report_event["phenotype_entry"],
                         "proband_variant": None,
                         "re_id": report_event["reportEventId"],
                         "tier": int(report_event["tier"][-1:])
