@@ -127,12 +127,12 @@
     <form role="form" method="post" enctype="multipart/form-data">
      {% csrf_token %}
          <div class=row style="text-align:center">
-        <div class="col-md-6" style="text-align:center" >
+        <div class="col-md-12" style="text-align:center" >
 
             <div class="panel panel-default">
                 <div class="panel-heading">MDT Information</div>
                 <div class="panel-body">
-
+                <div class="row">
                     <div class="col-md-4">
                         {% bootstrap_field mdt_form.date_of_mdt %}
                     </div>
@@ -140,10 +140,17 @@
                         {% bootstrap_field mdt_form.status %}
                     </div>
                     <div class="col-md-4">
-                    <button type="submit" name="mdt_update" class="btn btn-default">Save</button>
-
+                        <h5>Current Attendees</h5>
+                        {% for attendee in attendees %}
+                            {{attendee}}
+                        {% endfor %}
+                    </div>
+                    </div>
+                    <div class="row" align="center">
+                        <button type="submit" name="mdt_update" class="btn btn-default">Save</button>
+                    </div>
                 </div>
-            </div>
+
         </div>
         </div>
         </div>

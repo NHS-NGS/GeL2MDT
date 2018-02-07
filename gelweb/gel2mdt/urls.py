@@ -8,6 +8,9 @@ urlpatterns = [
     path('rare-disease-main', views.rare_disease_main, name='rare-disease-main'),
     path('cancer-main', views.cancer_main, name='cancer-main'),
 
+    path('main_cases/', views.main_cases, name='main-cases'),
+    path('pilot_cases/', views.pilot_cases, name='pilot-cases'),
+
     path('proband/<int:report_id>', views.proband_view, name='proband-view'),
     path('update_proband/<int:report_id>', views.update_proband, name='update-proband'),
 
