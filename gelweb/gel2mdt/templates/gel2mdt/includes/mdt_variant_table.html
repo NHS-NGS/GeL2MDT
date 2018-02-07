@@ -3,7 +3,7 @@
 {% for variant in proband_transcript_variants %}
 
     <tr>
-        <td><a href="/proband/{{variant.proband_variant.interpretation_report.id}}">{{variant.proband_variant.interpretation_report.id}}</a></td>
+        <td><a href="/proband/{{variant.proband_variant.interpretation_report.id}}">{{variant.proband_variant.interpretation_report.ir_family.participant_family.proband.gel_id}}</a></td>
         <td>{{variant.proband_variant.interpretation_report.ir_family.ir_family_id}}</td>
         <td  ><a href="/variant_view/{{variant.proband_variant.variant.id}}">{{variant.proband_variant.variant.id}}</a></td>
         <td>
@@ -26,7 +26,7 @@
         <td>{{variant.proband_variant.contribution_to_phenotype}}</td>
         <td style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{variant.proband_variant.discussion}}</td>
         <td style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{variant.proband_variant.action}}</td>
-        <td>{% if variant.proband_variant.hange_med == True %}
+        <td>{% if variant.proband_variant.change_med == True %}
             <span class="glyphicon glyphicon-ok"></span>
             {% else %}
             <span class="glyphicon glyphicon-remove"></span>
