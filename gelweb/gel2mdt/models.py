@@ -347,7 +347,7 @@ class Variant(models.Model):
 
 class Transcript(models.Model):
     name = models.CharField(max_length=255)
-    canonical_transcript = models.BooleanField()
+    canonical_transcript = models.BooleanField(default=False)
     strand = models.CharField(max_length=255)
     protein = models.CharField(max_length=255, null=True)
     location = models.CharField(max_length=255, null=True)
@@ -418,27 +418,21 @@ class ProbandVariant(models.Model):
     def __str__(self):
         return str(self.interpretation_report) + " " + str(self.variant)
 
+    # Deselect the old transcript and select the provided one
+    def select_transcript(self, selected_transcript):
+        ProbandTranscriptVariant.objects.filter(proband_variant=self.id, selected=True).update(selected=False)
+        ProbandTranscriptVariant.objects.filter(proband_variant=self.id,
+                                                transcript_variant=selected_transcript).update(selected=True)
+
     class Meta:
         managed = True
         db_table = 'ProbandVariant'
 
-class ProbandTranscriptVariantManager(models.Manager):
-
-    def select_transcript(self, proband_variant, selected_transcript):
-        super().get_queryset().filter(proband_variant=proband_variant, selected=True).update(selected=False)
-        super().get_queryset().filter(proband_variant=proband_variant,
-                                      transcript_variant=selected_transcript).update(selected=True)
-
-
 class ProbandTranscriptVariant(models.Model):
-    transcipt = models.ForeignKey(Transcript, on_delete=models.CASCADE)
+    transcript_variant = models.ForeignKey(TranscriptVariant, on_delete=models.CASCADE)
     proband_variant = models.ForeignKey(ProbandVariant, on_delete=models.CASCADE)
-
     selected = models.BooleanField(default=False)
-
     effect = models.CharField(max_length=255)
-
-    selectManager = ProbandTranscriptVariantManager()
 
     class Meta:
         managed = True

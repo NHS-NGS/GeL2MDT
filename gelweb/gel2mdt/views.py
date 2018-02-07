@@ -176,6 +176,13 @@ def proband_view(request, report_id):
     relatives = Relative.objects.filter(proband=report.ir_family.participant_family.proband)
     proband_form = ProbandForm(instance=report.ir_family.participant_family.proband)
     proband_variants = ProbandVariant.objects.filter(interpretation_report=report)
+
+    # for pv in proband_variants:
+    #     ptv = ProbandTranscriptVariant.objects.filter(proband_variant=pv)
+    #     transcript = TranscriptVariant.objects.filter(variant=proband_variants[0].variant)
+    #     x = list(transcript)[0]
+    #     pv.select_transcript(selected_transcript=list(transcript)[0])
+
     proband_mdt = MDTReport.objects.filter(interpretation_report=report)
     return render(request, 'gel2mdt/proband.html', {'report': report,
                                                     'relatives': relatives,
