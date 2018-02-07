@@ -741,26 +741,22 @@ class CaseAttributeManager(object):
                     if not panel_found:
                         report_event["panel_version_entry"] = None
 
-                    # get coverage from panel within json
-                    if gene_found:
-                        panel = report_event["panel_version_entry"].panel
-                        panelapp_id = panel.panelapp_id
-                        # coverages is a dict of dicts: (1) access panel using hash
-                        panel_coverages = self.case.json_request_data["genePanelsCoverage"]
-                        panel_coverage = panel_coverages[panelapp_id]
-                        # (2) access coverage info using gene hgnc
-                        try:
-                            re_gene_hgnc = report_event["gene_entry"].hgnc_name
-                            re_gene_coverage = panel_coverage[re_gene_hgnc]
-                            # coverage info lists samples, get correct sample
-                            proband_sample = self.case.proband["samples"][0]
-                            proband_sample_avg = proband_sample + "_avg"
-                            gene_avg_coverage = re_gene_coverage[proband_sample_avg]
-                            report_event["gene_coverage"] = gene_avg_coverage
-                        except KeyError as e:
-                            print("Could not find", e, "coverage info for", panelapp_id)
-                            report_event["gene_coverage"] = None
-                    else:
+                    panel = report_event["panel_version_entry"].panel
+                    panelapp_id = panel.panelapp_id
+                    # coverages is a dict of dicts: (1) access panel using hash
+                    panel_coverages = self.case.json_request_data["genePanelsCoverage"]
+                    panel_coverage = panel_coverages[panelapp_id]
+                    # (2) access coverage info using gene hgnc
+                    try:
+                        re_gene_hgnc = report_event["genomicFeature"]["HGNC"]
+                        re_gene_coverage = panel_coverage[re_gene_hgnc]
+                        # coverage info lists samples, get correct sample
+                        proband_sample = self.case.proband["samples"][0]
+                        proband_sample_avg = proband_sample + "_avg"
+                        gene_avg_coverage = re_gene_coverage[proband_sample_avg]
+                        report_event["gene_coverage"] = gene_avg_coverage
+                    except KeyError as e:
+                        print("Could not find", e, "coverage info for", panelapp_id)
                         report_event["gene_coverage"] = None
 
                     json_report_events.append({

@@ -310,6 +310,10 @@ class TestAddCases(TestCase):
             if not all_models:
                 check_cases = False
 
+        for re in ReportEvent.objects.all():
+            if re.gene:
+                print(re.re_id, "\t", re.gene.hgnc_name, "\t", re.coverage, "\t",  re.panel.panel.panelapp_id)
+
         assert check_cases
 
 
