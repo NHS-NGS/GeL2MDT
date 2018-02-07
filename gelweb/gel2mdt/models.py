@@ -431,16 +431,11 @@ class ProbandTranscriptVariantManager(models.Manager):
 
 
 class ProbandTranscriptVariant(models.Model):
-<<<<<<< HEAD
-    transcipt_variant = models.OneToOneField(TranscriptVariant, on_delete=models.CASCADE)
-    proband_variant = models.OneToOneField(ProbandVariant, on_delete=models.CASCADE)
-=======
     transcipt = models.ForeignKey(Transcript, on_delete=models.CASCADE)
     proband_variant = models.ForeignKey(ProbandVariant, on_delete=models.CASCADE)
 
     selected = models.BooleanField(default=False)
 
->>>>>>> f01726b7ce8504a7100a2c1533f7801d2b3de31e
     effect = models.CharField(max_length=255)
 
     selectManager = ProbandTranscriptVariantManager()
