@@ -135,37 +135,22 @@ class PanelVersionGene(models.Model):
 
     level_of_confidence = models.CharField(max_length=200)
 
-class ToolOrAssembly(models.Model):
-    """
-    Represents a tool used or genome build used in several use cases within the
-    CIP workflow. Provides a link to the tool's webpage.
-    """
-    class Meta:
-        verbose_name_plural = "Tools and assemblies"
-        managed = True
-        db_table = 'ToolOrAssembly'
-
-    tool_name = models.CharField(max_length=200, unique=True)
-    reference_link = models.URLField(max_length=200)
-
-    def __str__(self):
-        return str(self.tool_name)
-
 
 class ToolOrAssemblyVersion(models.Model):
     """
-    Represents a version of a tool or assembly: holds a version number.
+    Represents a tool used or genome build and version used in several use cases
+    within the CIP workflow.
     """
     class Meta:
         verbose_name_plural = "Tool and assembly versions"
         managed = True
         db_table = 'ToolOrAssemblyVersion'
 
-    tool = models.ForeignKey(ToolOrAssembly, on_delete=models.CASCADE)
+    tool_name = models.CharField(max_length=200, unique=True)
     version_number = models.CharField(max_length=200)
 
     def __str__(self):
-        return str(self.tool.tool_name + ' v' + self.version_number)
+        return str(self.tool_name + ' v' + self.version_number)
 
 
 class InterpretationReportFamily(models.Model):
@@ -334,7 +319,7 @@ class Variant(models.Model):
 
     db_snp_id = models.CharField(max_length=200)
 
-    genome_assembly = models.CharField(max_length=200)
+    genome_assembly = models.ForeignKey(ToolOrAssemblyVersion, on_delete=models.CASCADE)
 
     def __str__(self):
         return str(self.chromosome + str(self.position) + self.reference + ">" + self.alternate)

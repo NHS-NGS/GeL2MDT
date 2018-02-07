@@ -209,8 +209,6 @@ class CaseAttributeManager(object):
             case_model = self.get_proband_transcript_variants()
         elif self.model_type == ReportEvent:
             case_model = self.get_report_events()
-        elif self.model_type == ToolOrAssembly:
-            case_model = self.get_tools_and_assemblies()
         elif self.model_type == ToolOrAssemblyVersion:
             case_model = self.get_tool_and_assembly_versions()
 
@@ -557,9 +555,19 @@ class CaseAttributeManager(object):
         Get the variant information (genetic position) for the variants in this
         case and return a matching ManyCaseModel with model_type = Variant.
         """
+        tool_models = [
+            case_model.entry
+            for case_model in self.case.attribute_managers[ToolOrAssemblyVersion].case_model.case_models]
+
+        genome_assembly = None
+
+        for tool in tool_models:
+            if tool.tool_name == 'genome_build':
+                genome_assembly = tool
+
         # set and return the MCM
         variants = ManyCaseModel(Variant, [{
-            "genome_assembly": self.case.json["assembly"],
+            "genome_assembly": genome_assembly,
             "alternate": variant["case_variant"].alt,
             "chromosome": variant["case_variant"].chromosome,
             "db_snp_id": variant["dbSNPid"],
@@ -756,19 +764,15 @@ class CaseAttributeManager(object):
         report_events = ManyCaseModel(ReportEvent, json_report_events)
         return report_events
 
-    def get_tools_and_assemblies(self):
+    def get_tool_and_assembly_versions(self):
         '''
         Create tool and assembly entries for the case
         '''
-        tools_and_assemblies = ManyCaseModel(ToolOrAssembly, [{
+        tools_and_assemblies = ManyCaseModel(ToolOrAssemblyVersion, [{
             "tool_name": tool,
-            "reference_link": 'unknown'
+            "version_number": version
         }for tool, version in self.case.tools_and_versions.items()])
         return tools_and_assemblies
-
-
-    def get_tool_and_assembly_versions(self):
-        pass
 
 
 class CaseModel(object):
