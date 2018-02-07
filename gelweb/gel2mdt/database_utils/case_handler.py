@@ -209,8 +209,6 @@ class CaseAttributeManager(object):
             case_model = self.get_proband_transcript_variants()
         elif self.model_type == ReportEvent:
             case_model = self.get_report_events()
-        elif self.model_type == ToolOrAssembly:
-            case_model = self.get_tools_and_assemblies()
         elif self.model_type == ToolOrAssemblyVersion:
             case_model = self.get_tool_and_assembly_versions()
 
@@ -559,9 +557,19 @@ class CaseAttributeManager(object):
         Get the variant information (genetic position) for the variants in this
         case and return a matching ManyCaseModel with model_type = Variant.
         """
+        tool_models = [
+            case_model.entry
+            for case_model in self.case.attribute_managers[ToolOrAssemblyVersion].case_model.case_models]
+
+        genome_assembly = None
+
+        for tool in tool_models:
+            if tool.tool_name == 'genome_build':
+                genome_assembly = tool
+
         # set and return the MCM
         variants = ManyCaseModel(Variant, [{
-            "genome_assembly": self.case.json["assembly"],
+            "genome_assembly": genome_assembly,
             "alternate": variant["case_variant"].alt,
             "chromosome": variant["case_variant"].chromosome,
             "db_snp_id": variant["dbSNPid"],
@@ -741,26 +749,22 @@ class CaseAttributeManager(object):
                     if not panel_found:
                         report_event["panel_version_entry"] = None
 
-                    # get coverage from panel within json
-                    if gene_found:
-                        panel = report_event["panel_version_entry"].panel
-                        panelapp_id = panel.panelapp_id
-                        # coverages is a dict of dicts: (1) access panel using hash
-                        panel_coverages = self.case.json_request_data["genePanelsCoverage"]
-                        panel_coverage = panel_coverages[panelapp_id]
-                        # (2) access coverage info using gene hgnc
-                        try:
-                            re_gene_hgnc = report_event["gene_entry"].hgnc_name
-                            re_gene_coverage = panel_coverage[re_gene_hgnc]
-                            # coverage info lists samples, get correct sample
-                            proband_sample = self.case.proband["samples"][0]
-                            proband_sample_avg = proband_sample + "_avg"
-                            gene_avg_coverage = re_gene_coverage[proband_sample_avg]
-                            report_event["gene_coverage"] = gene_avg_coverage
-                        except KeyError as e:
-                            print("Could not find", e, "coverage info for", panelapp_id)
-                            report_event["gene_coverage"] = None
-                    else:
+                    panel = report_event["panel_version_entry"].panel
+                    panelapp_id = panel.panelapp_id
+                    # coverages is a dict of dicts: (1) access panel using hash
+                    panel_coverages = self.case.json_request_data["genePanelsCoverage"]
+                    panel_coverage = panel_coverages[panelapp_id]
+                    # (2) access coverage info using gene hgnc
+                    try:
+                        re_gene_hgnc = report_event["genomicFeature"]["HGNC"]
+                        re_gene_coverage = panel_coverage[re_gene_hgnc]
+                        # coverage info lists samples, get correct sample
+                        proband_sample = self.case.proband["samples"][0]
+                        proband_sample_avg = proband_sample + "_avg"
+                        gene_avg_coverage = re_gene_coverage[proband_sample_avg]
+                        report_event["gene_coverage"] = gene_avg_coverage
+                    except KeyError as e:
+                        print("Could not find", e, "coverage info for", panelapp_id)
                         report_event["gene_coverage"] = None
 
                     json_report_events.append({
@@ -778,19 +782,15 @@ class CaseAttributeManager(object):
         report_events = ManyCaseModel(ReportEvent, json_report_events)
         return report_events
 
-    def get_tools_and_assemblies(self):
+    def get_tool_and_assembly_versions(self):
         '''
         Create tool and assembly entries for the case
         '''
-        tools_and_assemblies = ManyCaseModel(ToolOrAssembly, [{
+        tools_and_assemblies = ManyCaseModel(ToolOrAssemblyVersion, [{
             "tool_name": tool,
-            "reference_link": 'unknown'
+            "version_number": version
         }for tool, version in self.case.tools_and_versions.items()])
         return tools_and_assemblies
-
-
-    def get_tool_and_assembly_versions(self):
-        pass
 
 
 class CaseModel(object):
