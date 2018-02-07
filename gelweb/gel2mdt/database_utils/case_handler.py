@@ -489,6 +489,8 @@ class CaseAttributeManager(object):
         case_transcripts = self.case.transcripts
         # for each transcript, add an FK to the gene with matching ensg ID
         for transcript in case_transcripts:
+            # convert canonical to bools:
+            transcript.canonical = transcript.transcript_canonical == "YES"
             if not transcript.gene_ensembl_id:
                 # if the transcript has no recognised gene associated
                 continue  # don't bother checking genes
@@ -499,7 +501,7 @@ class CaseAttributeManager(object):
         transcripts = ManyCaseModel(Transcript, [{
             "gene": transcript.gene_model,
             "name": transcript.transcript_name,
-            "canonical_transcript": transcript.transcript_canonical,
+            "canonical_transcript": transcript.canonical,
             "strand": transcript.transcript_strand
         # add all transcripts except those without associated genes
         } for transcript in case_transcripts if transcript.gene_ensembl_id])

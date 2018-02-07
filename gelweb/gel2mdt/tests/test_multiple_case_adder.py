@@ -311,7 +311,7 @@ class TestAddCases(TestCase):
                 check_cases = False
 
         for re in ReportEvent.objects.all():
-            print(re.panel.panel.panel_name)
+            print(re.re_id,"\t",re.panel.panel.panel_name)
 
 
         assert check_cases
