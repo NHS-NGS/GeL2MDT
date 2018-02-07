@@ -123,14 +123,14 @@ def main_cases(request):
 
     reports_previously_in_mdt = MDTReport.objects.all().values_list('interpretation_report', flat=True).distinct()
     return render(request, 'gel2mdt/main_cases.html', {'not_started': not_started,
-                                                      'completed': completed,
-                                                      'awaiting_mdt': awaiting_mdt,
-                                                      'awaiting_validation': awaiting_validation,
-                                                      'awaiting_reporting': awaiting_reporting,
-                                                      'reported': reported,
-                                                      'under_review': under_review,
-                                                      'reports_previously_in_mdt': reports_previously_in_mdt,
-                                                      'external': external})
+                                                          'completed': completed,
+                                                          'awaiting_mdt': awaiting_mdt,
+                                                          'awaiting_validation': awaiting_validation,
+                                                          'awaiting_reporting': awaiting_reporting,
+                                                          'reported': reported,
+                                                          'under_review': under_review,
+                                                          'reports_previously_in_mdt': reports_previously_in_mdt,
+                                                          'external': external})
 
 
 @login_required
@@ -154,14 +154,14 @@ def pilot_cases(request):
 
     reports_previously_in_mdt = MDTReport.objects.all().values_list('interpretation_report', flat=True).distinct()
     return render(request, 'gel2mdt/pilot_cases.html', {'not_started': not_started,
-                                                       'completed': completed,
-                                                       'awaiting_mdt': awaiting_mdt,
-                                                       'awaiting_validation': awaiting_validation,
-                                                       'awaiting_reporting': awaiting_reporting,
-                                                       'reported': reported,
-                                                       'under_review': under_review,
-                                                       'reports_previously_in_mdt': reports_previously_in_mdt,
-                                                       'external': external})
+                                                           'completed': completed,
+                                                           'awaiting_mdt': awaiting_mdt,
+                                                           'awaiting_validation': awaiting_validation,
+                                                           'awaiting_reporting': awaiting_reporting,
+                                                           'reported': reported,
+                                                           'under_review': under_review,
+                                                           'reports_previously_in_mdt': reports_previously_in_mdt,
+                                                           'external': external})
 
 
 @login_required
@@ -175,12 +175,12 @@ def proband_view(request, report_id):
     report = GELInterpretationReport.objects.get(id=report_id)
     relatives = Relative.objects.filter(proband=report.ir_family.participant_family.proband)
     proband_form = ProbandForm(instance=report.ir_family.participant_family.proband)
-    probandtranscriptvariants = ProbandTranscriptVariant.objects.filter(proband_variant__interpretation_report=report)
+    proband_variants = ProbandVariant.objects.filter(interpretation_report=report)
     proband_mdt = MDTReport.objects.filter(interpretation_report=report)
     return render(request, 'gel2mdt/proband.html', {'report': report,
                                                     'relatives': relatives,
                                                     'proband_form': proband_form,
-                                                    'probandtranscriptvariants':probandtranscriptvariants,
+                                                    'proband_variants': proband_variants,
                                                     'proband_mdt': proband_mdt})
 
 
