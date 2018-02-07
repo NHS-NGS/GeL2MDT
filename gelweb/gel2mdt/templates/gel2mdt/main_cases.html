@@ -1,0 +1,479 @@
+{% extends 'gel2mdt/base.html' %}
+{% load bootstrap3 %}
+{% load static %}
+
+{% load gel2mdt_extras %}
+
+{% block tabs %}
+<div id="navbar" class="navbar-collapse collapse">
+
+                <ul class="nav navbar-nav" >
+                     <li><a href="/start_mdt/"  onclick="return confirm('Are you sure?')">Start MDT </a></li>
+                    </ul>
+                <ul class="nav navbar-nav">
+                     <li><a href="/recent_mdts/">Recent MDT's </a></li>
+                    </ul>
+                 <ul class="nav navbar-nav">
+                     <li class="active"><a href="/main_cases/">Main Cases</a></li>
+                    </ul>
+                <ul class="nav navbar-nav">
+                     <li><a href="/pilot_cases/">Pilot Cases</a></li>
+                    </ul>
+{% endblock %}
+
+{% block content %}
+<ul class="nav nav-tabs">
+    <li class="active"><a data-toggle="tab" href="#active">Not Started</a></li>
+    <li><a data-toggle="tab" href="#under">Under Review</a></li>
+    <li><a data-toggle="tab" href="#mdt">Awaiting MDT</a></li>
+    <li><a data-toggle="tab" href="#validation">Awaiting Validation</a></li>
+    <li><a data-toggle="tab" href="#reporting">Awaiting Reporting</a></li>
+    <li><a data-toggle="tab" href="#reported">Reported</a></li>
+    <li><a data-toggle="tab" href="#completed">Completed</a></li>
+    <li><a data-toggle="tab" href="#external">External</a></li>
+</ul>
+
+
+<div class="tab-content">
+    <div id="active" class="tab-pane fade in active">
+        <div  class="container-fluid"  >
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Not Started
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <table width="100%" class="table table-striped table-bordered table-hover" id="dataTables-not_started">
+
+                                <thead>
+                                    <tr>
+                                        <th>GEL ID</th>
+                                        <th>CIP ID</th>
+                                        <th>Forename</th>
+                                        <th>Surname</th>
+                                        <th>Date of Birth</th>
+                                        <th>Clinician</th>
+                                        <th>GMC</th>
+                                        <th>Previously in MDT</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                        {% for report in not_started %}
+                                        <tr >
+                                            <td><a href="/proband/{{report.id}}">{{report.ir_family.participant_family.proband.gel_id}}</a></td>
+                                            <td>{{report.ir_family.ir_family_id}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.forename}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.surname}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.date_of_birth|date}}</td>
+                                            <td>{{report.ir_family.participant_family.clinician}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.gmc}}</td>
+                                            <td>
+                                                {% if report.id in reports_previously_in_mdt %}
+                                                <p>Yes</p>
+                                                {% else %}
+                                                <p>No</p>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    <!-- /.panel-body -->
+                </div>
+                <!-- /.panel -->
+            </div>
+            <!-- /.col-lg-12 -->
+        </div>
+      </div>
+    </div>
+
+    <div id="under" class="tab-pane fade">
+         <div  class="container-fluid"  >
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Under Review
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <table width="100%" class="table table-striped table-bordered table-hover" id="dataTables-under_review">
+
+                                <thead>
+                                    <tr>
+                                        <th>GEL ID</th>
+                                        <th>CIP ID</th>
+                                        <th>Forename</th>
+                                        <th>Surname</th>
+                                        <th>Date of Birth</th>
+                                        <th>Clinician</th>
+                                        <th>GMC</th>
+                                        <th>Previously in MDT</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                        {% for report in under_review %}
+                                        <tr >
+                                            <td><a href="/proband/{{report.id}}">{{report.ir_family.participant_family.proband.gel_id}}</a></td>
+                                            <td>{{report.ir_family.ir_family_id}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.forename}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.surname}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.date_of_birth|date}}</td>
+                                            <td>{{report.ir_family.participant_family.clinician}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.gmc}}</td>
+                                            <td>
+                                                {% if report.id in reports_previously_in_mdt %}
+                                                <p>Yes</p>
+                                                {% else %}
+                                                <p>No</p>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    <!-- /.panel-body -->
+                </div>
+                <!-- /.panel -->
+            </div>
+            <!-- /.col-lg-12 -->
+        </div>
+      </div>
+    </div>
+
+     <div id="mdt" class="tab-pane fade" >
+          <div  class="container-fluid"  >
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Awaiting MDT
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <table width="100%" class="table table-striped table-bordered table-hover" id="dataTables-awaiting_mdt">
+
+                                    <thead>
+                                    <tr>
+                                        <th>GEL ID</th>
+                                        <th>CIP ID</th>
+                                        <th>Forename</th>
+                                        <th>Surname</th>
+                                        <th>Date of Birth</th>
+                                        <th>Clinician</th>
+                                        <th>GMC</th>
+                                        <th>Previously in MDT</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                        {% for report in awaiting_mdt %}
+                                        <tr >
+                                            <td><a href="/proband/{{report.id}}">{{report.ir_family.participant_family.proband.gel_id}}</a></td>
+                                            <td>{{report.ir_family.ir_family_id}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.forename}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.surname}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.date_of_birth|date}}</td>
+                                            <td>{{report.ir_family.participant_family.clinician}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.gmc}}</td>
+                                            <td>
+                                                {% if report.id in reports_previously_in_mdt %}
+                                                <p>Yes</p>
+                                                {% else %}
+                                                <p>No</p>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                </tbody>
+                                </table>
+                            </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+          </div>
+     </div>
+
+     <div id="validation" class="tab-pane fade" >
+         <div  class="container-fluid"  >
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Awaiting Validation
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <table width="100%" class="table table-striped table-bordered table-hover" id="dataTables-awaiting_validation">
+
+                                    <thead>
+                                    <tr>
+                                        <th>GEL ID</th>
+                                        <th>CIP ID</th>
+                                        <th>Forename</th>
+                                        <th>Surname</th>
+                                        <th>Date of Birth</th>
+                                        <th>Clinician</th>
+                                        <th>GMC</th>
+                                        <th>Previously in MDT</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                        {% for report in awaiting_validation %}
+                                        <tr >
+                                            <td><a href="/proband/{{report.id}}">{{report.ir_family.participant_family.proband.gel_id}}</a></td>
+                                            <td>{{report.ir_family.ir_family_id}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.forename}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.surname}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.date_of_birth|date}}</td>
+                                            <td>{{report.ir_family.participant_family.clinician}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.gmc}}</td>
+                                            <td>
+                                                {% if report.id in reports_previously_in_mdt %}
+                                                <p>Yes</p>
+                                                {% else %}
+                                                <p>No</p>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                </tbody>
+                                </table>
+                            </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+          </div>
+     </div>
+
+    <div id="reporting" class="tab-pane fade" >
+         <div  class="container-fluid"  >
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Awaiting Reporting
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <table width="100%" class="table table-striped table-bordered table-hover" id="dataTables-awaiting_reporting">
+
+                                    <thead>
+                                    <tr>
+                                        <th>GEL ID</th>
+                                        <th>CIP ID</th>
+                                        <th>Forename</th>
+                                        <th>Surname</th>
+                                        <th>Date of Birth</th>
+                                        <th>Clinician</th>
+                                        <th>GMC</th>
+                                        <th>Previously in MDT</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                        {% for report in awaiting_reporting %}
+                                        <tr >
+                                            <td><a href="/proband/{{report.id}}">{{report.ir_family.participant_family.proband.gel_id}}</a></td>
+                                            <td>{{report.ir_family.ir_family_id}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.forename}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.surname}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.date_of_birth|date}}</td>
+                                            <td>{{report.ir_family.participant_family.clinician}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.gmc}}</td>
+                                            <td>
+                                                {% if report.id in reports_previously_in_mdt %}
+                                                <p>Yes</p>
+                                                {% else %}
+                                                <p>No</p>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                </tbody>
+                                </table>
+                            </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+          </div>
+    </div>
+
+    <div id="reported" class="tab-pane fade" >
+         <div  class="container-fluid"  >
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Reported
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <table width="100%" class="table table-striped table-bordered table-hover" id="dataTables-reported">
+
+                                    <thead>
+                                    <tr>
+                                        <th>GEL ID</th>
+                                        <th>CIP ID</th>
+                                        <th>Forename</th>
+                                        <th>Surname</th>
+                                        <th>Date of Birth</th>
+                                        <th>Clinician</th>
+                                        <th>GMC</th>
+                                        <th>Previously in MDT</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                        {% for report in reported %}
+                                        <tr >
+                                            <td><a href="/proband/{{report.id}}">{{report.ir_family.participant_family.proband.gel_id}}</a></td>
+                                            <td>{{report.ir_family.ir_family_id}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.forename}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.surname}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.date_of_birth|date}}</td>
+                                            <td>{{report.ir_family.participant_family.clinician}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.gmc}}</td>
+                                            <td>
+                                                {% if report.id in reports_previously_in_mdt %}
+                                                <p>Yes</p>
+                                                {% else %}
+                                                <p>No</p>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                </tbody>
+                                </table>
+                            </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+          </div>
+    </div>
+
+    <div id="completed" class="tab-pane fade" >
+         <div  class="container-fluid"  >
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Completed
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <table width="100%" class="table table-striped table-bordered table-hover" id="dataTables-completed">
+
+                                    <thead>
+                                    <tr>
+                                        <th>GEL ID</th>
+                                        <th>CIP ID</th>
+                                        <th>Forename</th>
+                                        <th>Surname</th>
+                                        <th>Date of Birth</th>
+                                        <th>Clinician</th>
+                                        <th>GMC</th>
+                                        <th>Previously in MDT</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                        {% for report in completed %}
+                                        <tr >
+                                            <td><a href="/proband/{{report.id}}">{{report.ir_family.participant_family.proband.gel_id}}</a></td>
+                                            <td>{{report.ir_family.ir_family_id}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.forename}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.surname}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.date_of_birth|date}}</td>
+                                            <td>{{report.ir_family.participant_family.clinician}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.gmc}}</td>
+                                            <td>
+                                                {% if report.id in reports_previously_in_mdt %}
+                                                <p>Yes</p>
+                                                {% else %}
+                                                <p>No</p>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                </tbody>
+                                </table>
+                            </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+          </div>
+    </div>
+    <div id="external" class="tab-pane fade" >
+         <div  class="container-fluid"  >
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            External
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <table width="100%" class="table table-striped table-bordered table-hover" id="dataTables-external">
+
+                                    <thead>
+                                    <tr>
+                                        <th>GEL ID</th>
+                                        <th>CIP ID</th>
+                                        <th>Forename</th>
+                                        <th>Surname</th>
+                                        <th>Date of Birth</th>
+                                        <th>Clinician</th>
+                                        <th>GMC</th>
+                                        <th>Previously in MDT</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                        {% for report in external %}
+                                        <tr >
+                                            <td><a href="/proband/{{report.id}}">{{report.ir_family.participant_family.proband.gel_id}}</a></td>
+                                            <td>{{report.ir_family.ir_family_id}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.forename}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.surname}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.date_of_birth|date}}</td>
+                                            <td>{{report.ir_family.participant_family.clinician}}</td>
+                                            <td>{{report.ir_family.participant_family.proband.gmc}}</td>
+                                            <td>
+                                                {% if report.id in reports_previously_in_mdt %}
+                                                <p>Yes</p>
+                                                {% else %}
+                                                <p>No</p>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                </tbody>
+                                </table>
+                            </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+          </div>
+    </div>
+
+</div>
+
+{% endblock %}

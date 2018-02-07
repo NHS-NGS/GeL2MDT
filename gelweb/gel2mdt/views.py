@@ -8,6 +8,7 @@ from django.db import IntegrityError
 from datetime import datetime
 from django.template.loader import render_to_string
 from django.http import JsonResponse
+from django.db.models import Q
 
 # Create your views here.
 def register(request):
@@ -66,7 +67,6 @@ def register(request):
     return render(request, 'registration/registration.html',
                   {'user_form': user_form, 'registered': registered, 'username': username})
 
-
 @login_required
 def index(request):
     '''
@@ -77,7 +77,6 @@ def index(request):
     # We want this to be a choice between cancer and rare disease
     return render(request, 'gel2mdt/index.html', {})
 
-
 @login_required
 def cancer_main(request):
     '''
@@ -86,7 +85,6 @@ def cancer_main(request):
     :return:
     '''
     return render(request, 'gel2mdt/cancer_main.html', {})
-
 
 @login_required
 def rare_disease_main(request):
@@ -98,6 +96,72 @@ def rare_disease_main(request):
     # create_dummy_sample()
     rd_cases = GELInterpretationReport.objects.all()
     return render(request, 'gel2mdt/rare_disease_main.html', {'rd_cases': rd_cases})
+
+@login_required
+def main_cases(request):
+    '''
+    Shows breakdown of GEL main cases in database
+    :param request:
+    :return:
+    '''
+    not_started = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='N').\
+        filter(~Q(ir_family__participant_family__proband__pilot_case=True))
+    completed = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='C'). \
+        filter(~Q(ir_family__participant_family__proband__pilot_case=True))
+    awaiting_mdt = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='M'). \
+        filter(~Q(ir_family__participant_family__proband__pilot_case=True))
+    under_review = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='U'). \
+        filter(~Q(ir_family__participant_family__proband__pilot_case=True))
+    awaiting_reporting = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='R'). \
+        filter(~Q(ir_family__participant_family__proband__pilot_case=True))
+    awaiting_validation = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='V'). \
+        filter(~Q(ir_family__participant_family__proband__pilot_case=True))
+    reported = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='P'). \
+        filter(~Q(ir_family__participant_family__proband__pilot_case=True))
+    external = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='E'). \
+        filter(~Q(ir_family__participant_family__proband__pilot_case=True))
+
+    reports_previously_in_mdt = MDTReport.objects.all().values_list('interpretation_report', flat=True).distinct()
+    return render(request, 'gel2mdt/main_cases.html', {'not_started': not_started,
+                                                      'completed': completed,
+                                                      'awaiting_mdt': awaiting_mdt,
+                                                      'awaiting_validation': awaiting_validation,
+                                                      'awaiting_reporting': awaiting_reporting,
+                                                      'reported': reported,
+                                                      'under_review': under_review,
+                                                      'reports_previously_in_mdt': reports_previously_in_mdt,
+                                                      'external': external})
+
+
+@login_required
+def pilot_cases(request):
+    not_started = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='N'). \
+        filter(ir_family__participant_family__proband__pilot_case=True)
+    completed = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='C'). \
+        filter(ir_family__participant_family__proband__pilot_case=True)
+    awaiting_mdt = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='M'). \
+        filter(ir_family__participant_family__proband__pilot_case=True)
+    under_review = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='U'). \
+        filter(ir_family__participant_family__proband__pilot_case=True)
+    awaiting_reporting = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='R'). \
+        filter(ir_family__participant_family__proband__pilot_case=True)
+    awaiting_validation = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='V'). \
+        filter(ir_family__participant_family__proband__pilot_case=True)
+    reported = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='P'). \
+        filter(ir_family__participant_family__proband__pilot_case=True)
+    external = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='E'). \
+        filter(ir_family__participant_family__proband__pilot_case=True)
+
+    reports_previously_in_mdt = MDTReport.objects.all().values_list('interpretation_report', flat=True).distinct()
+    return render(request, 'gel2mdt/pilot_cases.html', {'not_started': not_started,
+                                                       'completed': completed,
+                                                       'awaiting_mdt': awaiting_mdt,
+                                                       'awaiting_validation': awaiting_validation,
+                                                       'awaiting_reporting': awaiting_reporting,
+                                                       'reported': reported,
+                                                       'under_review': under_review,
+                                                       'reports_previously_in_mdt': reports_previously_in_mdt,
+                                                       'external': external})
 
 
 @login_required
@@ -220,8 +284,12 @@ def mdt_view(request, mdt_id):
     reports = GELInterpretationReport.objects.filter(id__in=report_list)
 
     variant_queryset = ProbandVariant.objects.filter(interpretation_report__in=report_list)
-
     mdt_form = MdtForm(instance=mdt_instance)
+    clinicians = Clinician.objects.filter(mdt=mdt_id)
+    clinical_scientists = ClinicalScientist.objects.filter(mdt=mdt_id)
+    other_staff = OtherStaff.objects.filter(mdt=mdt_id)
+
+    attendees = list(clinicians) + list(clinical_scientists) + list(other_staff)
 
     if request.method == 'POST':
         mdt_form = MdtForm(request.POST, instance=mdt_instance)
@@ -233,10 +301,10 @@ def mdt_view(request, mdt_id):
         return HttpResponseRedirect(f'/mdt_view/{mdt_id}')
     request.session['mdt_id'] = mdt_id
     return render(request, 'gel2mdt/mdt_view2.html', {'variant_queryset': variant_queryset,
-                                                     'reports': reports,
-                                                     'mdt_form': mdt_form,
-                                                     'mdt_id': mdt_id})
-
+                                                      'reports': reports,
+                                                      'mdt_form': mdt_form,
+                                                      'mdt_id': mdt_id,
+                                                      'attendees': attendees})
 
 @login_required
 def edit_mdt_variant(request, pv_id):
