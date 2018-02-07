@@ -197,7 +197,7 @@ class InterpretationReportFamily(models.Model):
     # sha_hash = models.CharField(max_length=200)
 
     def __str__(self):
-return str(self.ir_family_id)
+        return str(self.ir_family_id)
 
 
 class InterpretationReportFamilyPanel(models.Model):
