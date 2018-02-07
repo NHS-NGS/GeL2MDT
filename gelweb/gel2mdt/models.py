@@ -209,8 +209,6 @@ class InterpretationReportFamilyPanel(models.Model):
         managed=True
 
     ir_family = models.ForeignKey(InterpretationReportFamily, on_delete=models.CASCADE)
-    panel = models.ForeignKey(PanelVersion, on_delete=models.CASCADE)
-
 
 class GELInterpretationReport(models.Model):
     ir_family = models.ForeignKey(
@@ -269,7 +267,7 @@ class Proband(models.Model):
     # these set to null to allow creation then updating later
     gel_id = models.IntegerField(unique=True)
     family = models.OneToOneField(Family, on_delete=models.CASCADE)
-    nhs_number = models.CharField(max_length=200, unique=True, null=True)
+    nhs_number = models.CharField(max_length=200, null=True)
     # must be unique, but can also be null if not known
     lab_number = models.CharField(
         max_length=200, unique=True, blank=True, null=True)
@@ -306,7 +304,7 @@ class Relative(models.Model):
     relation_to_proband = models.CharField(max_length=200)
     affected_status = models.CharField(max_length=200)
     proband = models.ForeignKey(Proband, on_delete=models.CASCADE)
-    nhs_number = models.CharField(max_length=200, unique=True, null=True)
+    nhs_number = models.CharField(max_length=200, null=True)
     # must be unique, but can also be null if not known
     lab_number = models.CharField(
         max_length=200, unique=True, blank=True, null=True)
