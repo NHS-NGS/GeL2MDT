@@ -175,21 +175,14 @@ def proband_view(request, report_id):
     report = GELInterpretationReport.objects.get(id=report_id)
     relatives = Relative.objects.filter(proband=report.ir_family.participant_family.proband)
     proband_form = ProbandForm(instance=report.ir_family.participant_family.proband)
-    proband_variants = ProbandVariant.objects.filter(interpretation_report=report)
-
-    # for pv in proband_variants:
-    #     ptv = ProbandTranscriptVariant.objects.filter(proband_variant=pv)
-    #     transcript = TranscriptVariant.objects.filter(variant=proband_variants[0].variant)
-    #     x = list(transcript)[0]
-    #     pv.select_transcript(selected_transcript=list(transcript)[0])
-
+    proband_transcript_variant = ProbandTranscriptVariant.objects.filter(proband_variant__interpretation_report=report,
+                                                                         selected=True)
     proband_mdt = MDTReport.objects.filter(interpretation_report=report)
     return render(request, 'gel2mdt/proband.html', {'report': report,
                                                     'relatives': relatives,
                                                     'proband_form': proband_form,
-                                                    'proband_variants': proband_variants,
+                                                    'proband_transcript_variant': proband_transcript_variant,
                                                     'proband_mdt': proband_mdt})
-
 
 @login_required
 def update_proband(request, report_id):
@@ -208,6 +201,32 @@ def update_proband(request, report_id):
             messages.add_message(request, 25, 'Proband Updated')
             return HttpResponseRedirect(f'/proband/{report_id}')
 
+@login_required
+def select_transcript(request, report_id, pv_id):
+    '''
+    Allows a user to select a different transcript
+    :param request:
+    :param pv_id:
+    :return:
+    '''
+    proband_transcript_variants = ProbandTranscriptVariant.objects.filter(proband_variant__id=pv_id)
+    report = GELInterpretationReport.objects.get(id=report_id)
+    return render(request, 'gel2mdt/select_transcript.html',
+                  {'proband_transcript_variants': proband_transcript_variants,
+                   'report': report})
+
+@login_required
+def update_transcript(request, report_id, pv_id, transcript_variant_id):
+    '''
+    Updates the selected transcript
+    :param request:
+    :param pv_id:
+    :return:
+    '''
+    transcript_variant = TranscriptVariant.objects.get(id=transcript_variant_id)
+    proband_variant = ProbandVariant.objects.get(id=pv_id)
+    proband_variant.select_transcript(selected_transcript=transcript_variant)
+    return HttpResponseRedirect(f'/select_transcript/{report_id}/{proband_variant.id}')
 
 @login_required
 def start_mdt_view(request):

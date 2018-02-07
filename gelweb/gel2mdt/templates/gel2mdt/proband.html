@@ -2,6 +2,7 @@
 {% load bootstrap3 %}
 {% load static %}
 {% block content %}
+{% load gel2mdt_extras %}
 
 <ul class="nav nav-tabs">
     <li class="active"><a data-toggle="tab" href="#proband">Proband</a></li>
@@ -244,44 +245,44 @@
                 </thead>
                 <tbody style='font-size: 75%'>
 
-                {% for proband_variant in proband_variants %}
+                {% for ptv in proband_transcript_variant %}
                     <tr >
-                        <td><a href="/variants/{{proband_variant.variant.id }}">{{ proband_variant.variant.id}}</a></td>
-                        <td><a href="/update_transcript/{{proband_variant.id }}" class="btn btn-primary">Link</a></td>
-                        <td>{{ proband_variant.probandvarianttranscript.transcript.gene }}</td>
-                        <td>{{ proband_variant.probandvarianttranscript.transcript.name }}</td>
-                        <td style="word-wrap: break-word; min-width: 100px;max-width: 100px;">{{proband_variant.probandvarianttranscript.transcript.hgvs_c}}</td>
-                        <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{proband_variant.transcript.hgvs_p}}</td>
-                        <td>{{proband_variant.proband_variant.zygosity}}</td>
-                        <td>{{proband_variant.proband_variant.classification}}</td>
-                        <td>{{proband_variant.proband_variant.contribution_of_phenotype}}</td>
-                        <td style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{proband_variant.proband_variant.discussion}}</td>
-                        <td style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{proband_variant.proband_variant.action}}</td>
-                        <td>{% if proband_variant.change_med == True %}
+                        <td><a href="/variants/{{proband_variant.variant.id }}">{{ ptv.proband_variant.variant.id}}</a></td>
+                        <td><a href="/select_transcript/{{report.id}}/{{ptv.proband_variant.id }}" class="btn btn-primary">Link</a></td>
+                        <td>{{ ptv.transcript_variant.transcript.gene }}</td>
+                        <td>{{ ptv.transcript_variant.transcript.name }}</td>
+                        <td style="word-wrap: break-word; min-width: 100px;max-width: 100px;">{{ptv.transcript_variant.hgvs_c}}</td>
+                        <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{ptv.transcript_variant.hgvs_p}}</td>
+                        <td>{{ptv.proband_variant.zygosity}}</td>
+                        <td>{{ptv.proband_variant.classification}}</td>
+                        <td>{{ptv.proband_variant.contribution_of_phenotype}}</td>
+                        <td style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{ptv.proband_variant.discussion}}</td>
+                        <td style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{ptv.proband_variant.action}}</td>
+                        <td>{% if ptv.proband_variant.change_med == True %}
                             <span class="glyphicon glyphicon-ok"></span>
                             {% else %}
                             <span class="glyphicon glyphicon-remove"></span>
                             {% endif %}
                         </td>
-                        <td>{% if proband_variant.surgical_option == True %}
+                        <td>{% if ptv.proband_variant.surgical_option == True %}
                             <span class="glyphicon glyphicon-ok"></span>
                             {% else %}
                             <span class="glyphicon glyphicon-remove"></span>
                             {% endif %}
                         </td>
-                        <td>{% if proband_variant.add_surveillance_for_relatives == True %}
+                        <td>{% if ptv.proband_variant.add_surveillance_for_relatives == True %}
                             <span class="glyphicon glyphicon-ok"></span>
                             {% else %}
                             <span class="glyphicon glyphicon-remove"></span>
                             {% endif %}
                         </td>
-                        <td>{% if proband_variant.clinical_trial == True %}
+                        <td>{% if ptv.proband_variant.clinical_trial == True %}
                             <span class="glyphicon glyphicon-ok"></span>
                             {% else %}
                             <span class="glyphicon glyphicon-remove"></span>
                             {% endif %}
                         </td>
-                        <td>{% if proband_variant.inform_reproductive_choice == True %}
+                        <td>{% if ptv.proband_variant.inform_reproductive_choice == True %}
                             <span class="glyphicon glyphicon-ok"></span>
                             {% else %}
                             <span class="glyphicon glyphicon-remove"></span>
