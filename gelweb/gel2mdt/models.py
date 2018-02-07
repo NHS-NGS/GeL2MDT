@@ -347,7 +347,7 @@ class Variant(models.Model):
 
 class Transcript(models.Model):
     name = models.CharField(max_length=255)
-    canonical_transcript = models.CharField(max_length=255)
+    canonical_transcript = models.BooleanField()
     strand = models.CharField(max_length=255)
     protein = models.CharField(max_length=255, null=True)
     location = models.CharField(max_length=255, null=True)
@@ -424,8 +424,10 @@ class ProbandVariant(models.Model):
 
 
 class ProbandTranscriptVariant(models.Model):
-    transcipt = models.OneToOneField(Transcript, on_delete=models.CASCADE)
-    proband_variant = models.OneToOneField(ProbandVariant, on_delete=models.CASCADE)
+    transcipt = models.ForeignKey(Transcript, on_delete=models.CASCADE)
+    proband_variant = models.ForeignKey(ProbandVariant, on_delete=models.CASCADE)
+
+    selected = models.BooleanField(default=False)
 
     effect = models.CharField(max_length=255)
 
