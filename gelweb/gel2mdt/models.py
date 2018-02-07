@@ -422,6 +422,13 @@ class ProbandVariant(models.Model):
         managed = True
         db_table = 'ProbandVariant'
 
+class ProbandTranscriptVariantManager(models.Manager):
+
+    def select_transcript(self, proband_variant, selected_transcript):
+        super().get_queryset().filter(proband_variant=proband_variant, selected=True).update(selected=False)
+        super().get_queryset().filter(proband_variant=proband_variant,
+                                      transcript_variant=selected_transcript).update(selected=True)
+
 
 class ProbandTranscriptVariant(models.Model):
     transcipt = models.ForeignKey(Transcript, on_delete=models.CASCADE)
@@ -431,10 +438,11 @@ class ProbandTranscriptVariant(models.Model):
 
     effect = models.CharField(max_length=255)
 
+    selectManager = ProbandTranscriptVariantManager()
+
     class Meta:
         managed = True
         db_table = 'ProbandTranscriptVariant'
-
 
 # classes for choice
 class ModesOfInheritance(ChoiceEnum):
