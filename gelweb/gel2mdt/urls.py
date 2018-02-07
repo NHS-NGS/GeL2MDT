@@ -14,6 +14,10 @@ urlpatterns = [
     path('proband/<int:report_id>', views.proband_view, name='proband-view'),
     path('update_proband/<int:report_id>', views.update_proband, name='update-proband'),
 
+    path('select_transcript/<int:report_id>/<int:pv_id>', views.select_transcript, name='select-transcript'),
+    path('update_transcript/<int:report_id>/<int:pv_id>/<int:transcript_variant_id>', views.update_transcript,
+         name='update-transcript'),
+
     path('start_mdt/', views.start_mdt_view, name='start-mdt'),
     path('edit_mdt/<int:mdt_id>', views.edit_mdt, name='edit-mdt'),
     path('mdt_view/<int:mdt_id>', views.mdt_view, name='mdt-view'),

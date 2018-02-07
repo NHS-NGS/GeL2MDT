@@ -297,13 +297,12 @@ class TestAddCases(TestCase):
             Transcript,
             InterpretationReportFamily,
             GELInterpretationReport,
+            ToolOrAssemblyVersion,
             Variant,
             TranscriptVariant,
             ProbandVariant,
             ProbandTranscriptVariant,
             ReportEvent,
-            ToolOrAssembly,
-            ToolOrAssemblyVersion,
         ):
             all_models = model.objects.all()
             pprint.pprint(list(all_models))

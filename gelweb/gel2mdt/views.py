@@ -100,7 +100,7 @@ def rare_disease_main(request):
 @login_required
 def main_cases(request):
     '''
-    Shows breakdown of GEL main cases in database
+    Shows breakdown of GEL main cases in database by proband status
     :param request:
     :return:
     '''
@@ -135,6 +135,11 @@ def main_cases(request):
 
 @login_required
 def pilot_cases(request):
+    '''
+    Split the pilot cases by proband status
+    :param request:
+    :return:
+    '''
     not_started = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='N'). \
         filter(ir_family__participant_family__proband__pilot_case=True)
     completed = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='C'). \
@@ -167,7 +172,7 @@ def pilot_cases(request):
 @login_required
 def proband_view(request, report_id):
     '''
-    Shows details about a particular proband, some fields may be editable
+    Shows details about a particular proband, some fields are editable by clinical scientists
     :param request:
     :param report_id: GEL Report ID
     :return:
@@ -175,21 +180,14 @@ def proband_view(request, report_id):
     report = GELInterpretationReport.objects.get(id=report_id)
     relatives = Relative.objects.filter(proband=report.ir_family.participant_family.proband)
     proband_form = ProbandForm(instance=report.ir_family.participant_family.proband)
-    proband_variants = ProbandVariant.objects.filter(interpretation_report=report)
-
-    # for pv in proband_variants:
-    #     ptv = ProbandTranscriptVariant.objects.filter(proband_variant=pv)
-    #     transcript = TranscriptVariant.objects.filter(variant=proband_variants[0].variant)
-    #     x = list(transcript)[0]
-    #     pv.select_transcript(selected_transcript=list(transcript)[0])
-
+    proband_transcript_variant = ProbandTranscriptVariant.objects.filter(proband_variant__interpretation_report=report,
+                                                                         selected=True)
     proband_mdt = MDTReport.objects.filter(interpretation_report=report)
     return render(request, 'gel2mdt/proband.html', {'report': report,
                                                     'relatives': relatives,
                                                     'proband_form': proband_form,
-                                                    'proband_variants': proband_variants,
+                                                    'proband_transcript_variant': proband_transcript_variant,
                                                     'proband_mdt': proband_mdt})
-
 
 @login_required
 def update_proband(request, report_id):
@@ -208,6 +206,32 @@ def update_proband(request, report_id):
             messages.add_message(request, 25, 'Proband Updated')
             return HttpResponseRedirect(f'/proband/{report_id}')
 
+@login_required
+def select_transcript(request, report_id, pv_id):
+    '''
+    Shows the transcript table and allows a user to select preferred transcript
+    :param request:
+    :param pv_id:
+    :return:
+    '''
+    proband_transcript_variants = ProbandTranscriptVariant.objects.filter(proband_variant__id=pv_id)
+    report = GELInterpretationReport.objects.get(id=report_id)
+    return render(request, 'gel2mdt/select_transcript.html',
+                  {'proband_transcript_variants': proband_transcript_variants,
+                   'report': report})
+
+@login_required
+def update_transcript(request, report_id, pv_id, transcript_variant_id):
+    '''
+    Updates the selected transcript
+    :param request:
+    :param pv_id:
+    :return:
+    '''
+    transcript_variant = TranscriptVariant.objects.get(id=transcript_variant_id)
+    proband_variant = ProbandVariant.objects.get(id=pv_id)
+    proband_variant.select_transcript(selected_transcript=transcript_variant)
+    return HttpResponseRedirect(f'/select_transcript/{report_id}/{proband_variant.id}')
 
 @login_required
 def start_mdt_view(request):
@@ -230,17 +254,12 @@ def edit_mdt(request, mdt_id):
     :param mdt_id:
     :return:
     '''
-    # Gets the max version of each report
-    gel_ir_queryset = GELInterpretationReport.objects.all()
 
-    # somehow need a list of samples to check whether they are in MDT
+    gel_ir_list = GELInterpretationReport.objects.all()
     mdt_instance = MDT.objects.get(id=mdt_id)
     reports_in_mdt = MDTReport.objects.filter(MDT=mdt_instance).values_list('interpretation_report', flat=True)
-    report_list = []
-    for gel_ir in gel_ir_queryset:
-        if hasattr(gel_ir.ir_family.participant_family, 'proband'):
-            report_list.append(gel_ir)
-    return render(request, 'gel2mdt/mdt_ir_select.html', {'report_list': report_list,
+
+    return render(request, 'gel2mdt/mdt_ir_select.html', {'gel_ir_list': gel_ir_list,
                                                           'reports_in_mdt': reports_in_mdt,
                                                           'mdt_id': mdt_id})
 
@@ -290,7 +309,8 @@ def mdt_view(request, mdt_id):
     report_list = MDTReport.objects.filter(MDT=mdt_instance).values_list('interpretation_report', flat=True)
     reports = GELInterpretationReport.objects.filter(id__in=report_list)
 
-    variant_queryset = ProbandVariant.objects.filter(interpretation_report__in=report_list)
+    proband_transcript_variants = ProbandTranscriptVariant.objects.filter(
+        proband_variant__interpretation_report__in=report_list, selected=True)
     mdt_form = MdtForm(instance=mdt_instance)
     clinicians = Clinician.objects.filter(mdt=mdt_id)
     clinical_scientists = ClinicalScientist.objects.filter(mdt=mdt_id)
@@ -307,7 +327,7 @@ def mdt_view(request, mdt_id):
 
         return HttpResponseRedirect(f'/mdt_view/{mdt_id}')
     request.session['mdt_id'] = mdt_id
-    return render(request, 'gel2mdt/mdt_view2.html', {'variant_queryset': variant_queryset,
+    return render(request, 'gel2mdt/mdt_view2.html', {'proband_transcript_variants': proband_transcript_variants,
                                                       'reports': reports,
                                                       'mdt_form': mdt_form,
                                                       'mdt_id': mdt_id,
@@ -332,13 +352,14 @@ def edit_mdt_variant(request, pv_id):
 
             report_list = MDTReport.objects.filter(MDT=mdt_id).values_list('interpretation_report', flat=True)
 
-            variant_queryset = ProbandVariant.objects.filter(interpretation_report__in=report_list)
-
+            proband_transcript_variants = ProbandTranscriptVariant.objects.filter(
+                proband_variant__interpretation_report__in=report_list, selected=True)
             data['html_mdt_list'] = render_to_string('gel2mdt/includes/mdt_variant_table.html', {
-                'variant_queryset': variant_queryset,
+                'proband_transcript_variants': proband_transcript_variants,
             })
         else:
             data['form_is_valid'] = False
+            print(modal_form.errors)
     else:
         modal_form = VariantMDTForm(instance=proband_variant)
     context = {'modal_form': modal_form, 'pv_id': pv_id}
