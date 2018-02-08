@@ -46,10 +46,12 @@ class MultipleCaseAdder(object):
             self.list_of_cases = self.fetch_api_data()
 
         self.cases_to_add = self.check_cases_to_add()
-        self.cases_to_update = self.check_cases_to_update()
+        self.cases_to_update = self.check_cases_to_update()#
         self.cases_to_skip = set(self.list_of_cases) - \
             set(self.cases_to_add) - \
             set(self.cases_to_update)
+
+
 
         # begin update process
         # --------------------
@@ -171,24 +173,26 @@ class MultipleCaseAdder(object):
             (ProbandTranscriptVariant, True),
             (ReportEvent, True)
         )
-        # we need vep results for all cases, which needs to be done in batch
-        variants = []
-        case_id_map = {}
-        for case in self.cases_to_add:
-            # map case id to cases to easily assign transcripts from variant
-            case_id_map[case.request_id] = case
-            variants += case.variants
 
-        # fetch the transcripts
-        transcripts = generate_transcripts(variants)
+        if self.cases_to_add:
+            # we need vep results for all cases, which needs to be done in batch
+            variants = []
+            case_id_map = {}
+            for case in self.cases_to_add:
+                # map case id to cases to easily assign transcripts from variant
+                case_id_map[case.request_id] = case
+                variants += case.variants
 
-        # assign transcripts
-        i = 0
-        while i < len(transcripts):  # keep going until no transcripts left
-            transcript = transcripts.pop(0)
-            case_id = transcript.case_id
-            case = case_id_map[case_id]
-            case.transcripts.append(transcript)
+            # fetch the transcripts
+            transcripts = generate_transcripts(variants)
+
+            # assign transcripts
+            i = 0
+            while i < len(transcripts):  # keep going until no transcripts left
+                transcript = transcripts.pop(0)
+                case_id = transcript.case_id
+                case = case_id_map[case_id]
+                case.transcripts.append(transcript)
 
         # ------------------- #
         # BULK UPDATE PROCESS #

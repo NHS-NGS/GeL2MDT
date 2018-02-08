@@ -9,7 +9,6 @@ from datetime import datetime
 from django.template.loader import render_to_string
 from django.http import JsonResponse
 from django.db.models import Q
-
 from .database_utils.multiple_case_adder import MultipleCaseAdder
 
 # Create your views here.
@@ -95,6 +94,8 @@ def rare_disease_main(request):
     :param request:
     :return:
     '''
+
+    #create_dummy_sample()
 
     if request.method == "POST":
         GELInterpretationReport.objects.all().delete()
