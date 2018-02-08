@@ -700,6 +700,8 @@ class CaseAttributeManager(object):
                     in self.case.attribute_managers[PanelVersion].case_model.case_models]
         phenotypes = [phenotype.entry for phenotype
                     in self.case.attribute_managers[Phenotype].case_model.case_models]
+        proband_variants = [proband_variant.entry for proband_variant
+                            in self.case.attribute_managers[ProbandVariant].case_model.case_models]
 
         print(PanelVersion.objects.values_list('panel', 'version_number'))
         print(Panel.objects.values_list('id','panel_name'))
@@ -768,16 +770,15 @@ class CaseAttributeManager(object):
                     except KeyError as e:
                         report_event["gene_coverage"] = None
 
-                    # set the Phenotype entry
-                    re_phenotype_name = report_event["phenotype"]
-                    phenotype_found = False
-                    for phenotype in phenotypes:
-                        if phenotype.description == re_phenotype_name:
-                            report_event["phenotype_entry"] = phenotype
-                            phenotype_found = True
+                    # set the ProbandVariant entry
+                    proband_variant_found = False
+                    for proband_variant in proband_variants:
+                        if proband_variant.variant == variant["variant_entry"]:
+                            report_event["proband_variant_entry"] = proband_variant
+                            proband_variant_found = True
                             break
-                    if not phenotype_found:
-                        report_event["phenotype_entry"] = None
+                    if not proband_variant_found:
+                        report_event["proband_variant_entry"] = None
 
 
                     json_report_events.append({
@@ -786,7 +787,6 @@ class CaseAttributeManager(object):
                         "mode_of_inheritance": report_event["modeOfInheritance"],
                         "panel": report_event["panel_version_entry"],
                         "penetrance": report_event["penetrance"],
-                        "phenotype": report_event["phenotype_entry"],
                         "proband_variant": None,
                         "re_id": report_event["reportEventId"],
                         "tier": int(report_event["tier"][-1:])
