@@ -414,7 +414,7 @@ class ProbandVariant(models.Model):
         db_table = 'ProbandVariant'
 
 class ProbandTranscriptVariant(models.Model):
-    transcript_variant = models.ForeignKey(TranscriptVariant, on_delete=models.CASCADE)
+    transcript = models.ForeignKey(Transcript, on_delete=models.CASCADE)
     proband_variant = models.ForeignKey(ProbandVariant, on_delete=models.CASCADE)
     selected = models.BooleanField(default=False)
     effect = models.CharField(max_length=255)

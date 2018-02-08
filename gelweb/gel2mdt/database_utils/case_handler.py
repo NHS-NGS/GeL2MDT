@@ -795,6 +795,30 @@ class CaseAttributeManager(object):
         report_events = ManyCaseModel(ReportEvent, json_report_events)
         return report_events
 
+    def get_proband_transcript_variants(self):
+        """
+        Get the ProbandTranscriptVariants associated with this case and return
+        a MCM containing them.
+        """
+
+        # associat a proband_variant
+        proband_variants = [proband_variant.entry for proband_variant
+                            in self.case.attribute_managers[ProbandVariant].case_model.case_models]
+        for transcript in self.case.transcripts:
+            for proband_variant in proband_variants:
+                if proband_variant.variant == transcript.variant_entry:
+                    transcript.proband_variant_entry = proband_variant
+
+        proband_transcript_variants = ManyCaseModel(ProbandTranscriptVariant, [{
+            "transcript": transcript.transcript_entry,
+            "proband_variant": transcript.proband_variant_entry,
+            # default is true if assoc. tx is canonical
+            "selected": transcript.transcript_entry.canonical_transcript,
+            "effect": transcript.proband_transcript_variant_effect
+        } for transcript in self.case.transcripts if transcript.transcript_entry and transcript.proband_variant_entry])
+
+        return proband_transcript_variants
+
     def get_tool_and_assembly_versions(self):
         '''
         Create tool and assembly entries for the case
