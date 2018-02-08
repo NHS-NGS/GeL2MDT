@@ -407,18 +407,22 @@ class ProbandVariant(models.Model):
     def select_transcript(self, selected_transcript):
         ProbandTranscriptVariant.objects.filter(proband_variant=self.id, selected=True).update(selected=False)
         ProbandTranscriptVariant.objects.filter(proband_variant=self.id,
-                                                transcript_variant=selected_transcript).update(selected=True)
+                                                transcript=selected_transcript).update(selected=True)
 
     class Meta:
         managed = True
         db_table = 'ProbandVariant'
 
 class ProbandTranscriptVariant(models.Model):
-    transcript_variant = models.ForeignKey(TranscriptVariant, on_delete=models.CASCADE)
+    transcript = models.ForeignKey(Transcript, on_delete=models.CASCADE)
     proband_variant = models.ForeignKey(ProbandVariant, on_delete=models.CASCADE)
     selected = models.BooleanField(default=False)
     effect = models.CharField(max_length=255)
 
+    def get_transcript_variant(self):
+        transcript_variant = TranscriptVariant.objects.get(transcript=self.transcript,
+                                                              variant=self.proband_variant.variant)
+        return transcript_variant
     class Meta:
         managed = True
         db_table = 'ProbandTranscriptVariant'

@@ -9,7 +9,7 @@ from datetime import datetime
 from django.template.loader import render_to_string
 from django.http import JsonResponse
 from django.db.models import Q
-
+from .database_utils.multiple_case_adder import MultipleCaseAdder
 
 # Create your views here.
 def register(request):
@@ -94,7 +94,21 @@ def rare_disease_main(request):
     :param request:
     :return:
     '''
+
     #create_dummy_sample()
+
+    if request.method == "POST":
+        GELInterpretationReport.objects.all().delete()
+        InterpretationReportFamily.objects.all().delete()
+        Gene.objects.all().delete()
+        Proband.objects.all().delete()
+        Variant.objects.all().delete()
+        Transcript.objects.all().delete()
+        TranscriptVariant.objects.all().delete()
+        ProbandTranscriptVariant.objects.all().delete()
+        ProbandVariant.objects.all().delete()
+        update = MultipleCaseAdder(test_data=True)
+
     rd_cases = GELInterpretationReport.objects.all()
     return render(request, 'gel2mdt/rare_disease_main.html', {'rd_cases': rd_cases})
 
@@ -183,6 +197,7 @@ def proband_view(request, report_id):
     proband_form = ProbandForm(instance=report.ir_family.participant_family.proband)
     proband_transcript_variant = ProbandTranscriptVariant.objects.filter(proband_variant__interpretation_report=report,
                                                                          selected=True)
+
     proband_mdt = MDTReport.objects.filter(interpretation_report=report)
     return render(request, 'gel2mdt/proband.html', {'report': report,
                                                     'relatives': relatives,
@@ -222,16 +237,16 @@ def select_transcript(request, report_id, pv_id):
                    'report': report})
 
 @login_required
-def update_transcript(request, report_id, pv_id, transcript_variant_id):
+def update_transcript(request, report_id, pv_id, transcript_id):
     '''
     Updates the selected transcript
     :param request:
     :param pv_id:
     :return:
     '''
-    transcript_variant = TranscriptVariant.objects.get(id=transcript_variant_id)
+    transcript = Transcript.objects.get(id=transcript_id)
     proband_variant = ProbandVariant.objects.get(id=pv_id)
-    proband_variant.select_transcript(selected_transcript=transcript_variant)
+    proband_variant.select_transcript(selected_transcript=transcript)
     return HttpResponseRedirect(f'/select_transcript/{report_id}/{proband_variant.id}')
 
 @login_required
