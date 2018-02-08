@@ -35,7 +35,7 @@
                         {% if ptv.selected %}
                                  <p>Currently Selected</p>
                             {% else %}
-                                <form action="/update_transcript/{{report.id}}/{{ptv.proband_variant.id}}/{{ptv.transcript_variant.id}}" role="form" method="post">
+                                <form action="/update_transcript/{{report.id}}/{{ptv.proband_variant.id}}/{{ptv.transcript.id}}" role="form" method="post">
                                  {% csrf_token %}
                                  {% bootstrap_button "Select" button_type="submit" button_class="btn-primary btn-info"%}
                                 </form>
@@ -45,15 +45,15 @@
                             <td>{{ptv.transcript.name}}</td>
                             <td>{{ptv.transcript.strand}}</td>
                             <td>{{ptv.effect}}</td>
-                            <td>{{ptv.transcript_variant.hgvs_c}}</td>
-                            <td>{{ptv.transcript_variant.hgvs_p}}</td>
+                            <td>{{ptv.get_transcript_variant.hgvs_c}}</td>
+                            <td>{{ptv.get_transcript_variant.hgvs_p}}</td>
                             <td>{{ptv.transcript.hgvs_g}}</td>
                             <td>{{ptv.transcript.location}}</td>
                             <td>{{ptv.transcript.protein}}</td>
-                            <td>{{ptv.transcript_variant.af_max}}</td>
-                            <td>{{ptv.transcript_variant.sift}}</td>
-                            <td>{{ptv.transcript_variant.polyphen}}</td>
-                            <td>{{ptv.transcript_variant.pathogenicity}}</td>
+                            <td>{{ptv.get_transcript_variant.af_max}}</td>
+                            <td>{{ptv.get_transcript_variant.sift}}</td>
+                            <td>{{ptv.get_transcript_variant.polyphen}}</td>
+                            <td>{{ptv.get_transcript_variant.pathogenicity}}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
