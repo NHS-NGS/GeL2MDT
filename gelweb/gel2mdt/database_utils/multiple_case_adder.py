@@ -42,6 +42,7 @@ class MultipleCaseAdder(object):
         else:
             # set list_of_cases to cases of interest from API
             interpretation_list_poll = InterpretationList()
+            print(interpretation_list_poll)
             self.cases_to_poll = interpretation_list_poll.cases_to_poll
             self.list_of_cases = self.fetch_api_data()
 
