@@ -42,7 +42,6 @@ class MultipleCaseAdder(object):
         else:
             # set list_of_cases to cases of interest from API
             interpretation_list_poll = InterpretationList()
-            print(interpretation_list_poll)
             self.cases_to_poll = interpretation_list_poll.cases_to_poll
             self.list_of_cases = self.fetch_api_data()
 
@@ -100,7 +99,7 @@ class MultipleCaseAdder(object):
             "cip_api", "interpretation-request/{id}/{version}".format(
                 id=interpretation_request_id.split("-")[0],
                 version=interpretation_request_id.split("-")[1]))
-        request_poll.get_json_response()
+        return request_poll.get_json_response()
 
     def check_cases_to_add(self):
         """
