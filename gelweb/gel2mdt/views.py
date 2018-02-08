@@ -10,6 +10,8 @@ from django.template.loader import render_to_string
 from django.http import JsonResponse
 from django.db.models import Q
 
+from .database_utils.multiple_case_adder import MultipleCaseAdder
+
 # Create your views here.
 def register(request):
     '''
@@ -94,6 +96,9 @@ def rare_disease_main(request):
     :return:
     '''
     # create_dummy_sample()
+    if request.method == "POST":
+        update = MultipleCaseAdder(test_data=True)
+
     rd_cases = GELInterpretationReport.objects.all()
     return render(request, 'gel2mdt/rare_disease_main.html', {'rd_cases': rd_cases})
 
