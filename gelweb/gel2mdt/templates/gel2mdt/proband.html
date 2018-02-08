@@ -247,7 +247,7 @@
 
                 {% for ptv in proband_transcript_variant %}
                     <tr >
-                        <td><a href="/variants/{{proband_variant.variant.id }}">{{ ptv.proband_variant.variant.id}}</a></td>
+                        <td><a href="/variant/{{ptv.proband_variant.variant.id }}">{{ ptv.proband_variant.variant.id}}</a></td>
                         <td><a href="/select_transcript/{{report.id}}/{{ptv.proband_variant.id }}" class="btn btn-primary">Link</a></td>
                         <td>{{ ptv.transcript.gene }}</td>
                         <td>{{ ptv.transcript.name }}</td>
