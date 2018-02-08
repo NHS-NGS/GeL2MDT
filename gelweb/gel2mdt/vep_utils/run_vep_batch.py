@@ -122,12 +122,12 @@ def remove_temp_files():
 
 def generate_transcripts(variant_list):
     #variant_list = get_variants()
-    # variant_file = generate_vcf(variant_list)
-    # annotated_file = run_vep(variant_file)
-    # transcript_list = parse_vep_annotations(annotated_file)
+    variant_file = generate_vcf(variant_list)
+    annotated_file = run_vep(variant_file)
+    transcript_list = parse_vep_annotations(annotated_file)
 
     # bypassing running VEP
-    transcript_list = parse_vep_annotations()
+    #transcript_list = parse_vep_annotations()
 
     #remove_temp_files()
     return transcript_list
