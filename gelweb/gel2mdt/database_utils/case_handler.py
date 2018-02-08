@@ -684,9 +684,6 @@ class CaseAttributeManager(object):
         } for variant in self.case.json_variants if variant["variant_entry"]])
         return proband_variants
 
-    def get_proband_transcript_variants(self):
-        pass
-
     def get_report_events(self):
 
         """
@@ -801,21 +798,43 @@ class CaseAttributeManager(object):
         a MCM containing them.
         """
 
-        # associat a proband_variant
+        # get the transcript_variants
+        transcript_variants = [transcript_variant for transcript_variant
+                               in self.case.attribute_managers[TranscriptVariant].case_model.case_models]
+
+        # get the transcripts with T and V entries
+        transcripts = [transcript for transcript in self.case.transcripts
+                       if transcript.transcript_entry and transcript.variant_entry]
+
+        # associat a proband_variant with a transcript
         proband_variants = [proband_variant.entry for proband_variant
                             in self.case.attribute_managers[ProbandVariant].case_model.case_models]
+
         for transcript in self.case.transcripts:
             for proband_variant in proband_variants:
                 if proband_variant.variant == transcript.variant_entry:
                     transcript.proband_variant_entry = proband_variant
 
+        # now add the transcript to transcript_variant
+        for transcript_variant in transcript_variants:
+            transcript_found = False
+            for transcript in transcripts:
+                if transcript_variant.entry.transcript == transcript.transcript_entry:
+                    transcript_variant.transcript = transcript
+                    transcript_found = True
+                    break
+            if not transcript_found:
+                transcript_variant.transcript = None
+
         proband_transcript_variants = ManyCaseModel(ProbandTranscriptVariant, [{
-            "transcript": transcript.transcript_entry,
-            "proband_variant": transcript.proband_variant_entry,
+            "transcript_variant": transcript_variant.entry,
+            "proband_variant": transcript_variant.transcript.proband_variant_entry,
             # default is true if assoc. tx is canonical
-            "selected": transcript.transcript_entry.canonical_transcript,
-            "effect": transcript.proband_transcript_variant_effect
-        } for transcript in self.case.transcripts if transcript.transcript_entry and transcript.proband_variant_entry])
+            "selected": transcript_variant.transcript.transcript_entry.canonical_transcript,
+            "effect": transcript_variant.transcript.proband_transcript_variant_effect
+        } for transcript_variant
+            in transcript_variants
+            if transcript_variant.transcript])
 
         return proband_transcript_variants
 
