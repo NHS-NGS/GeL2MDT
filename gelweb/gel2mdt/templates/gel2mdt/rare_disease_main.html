@@ -9,9 +9,18 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 Rare Disease Cases
-            </div>
+           </div>
             <!-- /.panel-heading -->
             <div class="panel-body">
+                <form action="{% url 'rare-disease-main' %}"
+                      method="POST">
+                    {% csrf_token %}
+                 <button class="btn btn-success pull-right"
+                    style="margin-bottom: 15px">
+                    Update
+                </button>
+                </form>
+                <br>
                 <table width="100%" class="table table-striped table-bordered table-hover" id="dataTables-generic">
                         <thead>
                             <tr>
