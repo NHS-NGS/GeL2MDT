@@ -9,7 +9,7 @@ def create_dummy_sample():
     :return:
     """
     # Initialising with ir_family and ir_instance
-    Family.objects.filter(gel_family_id=100).delete()
+    #Family.objects.filter(gel_family_id=100).delete()
     multiple_case_adder.MultipleCaseAdder(test_data=True)
     # Family.objects.filter(gel_family_id=100).delete()  # Have to delete previous version
     # test_cases = TestCaseOperations()

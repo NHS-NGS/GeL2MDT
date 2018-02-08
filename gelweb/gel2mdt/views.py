@@ -10,6 +10,7 @@ from django.template.loader import render_to_string
 from django.http import JsonResponse
 from django.db.models import Q
 
+
 # Create your views here.
 def register(request):
     '''
@@ -93,7 +94,7 @@ def rare_disease_main(request):
     :param request:
     :return:
     '''
-    # create_dummy_sample()
+    #create_dummy_sample()
     rd_cases = GELInterpretationReport.objects.all()
     return render(request, 'gel2mdt/rare_disease_main.html', {'rd_cases': rd_cases})
 
