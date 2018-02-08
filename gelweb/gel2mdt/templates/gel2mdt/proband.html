@@ -249,8 +249,8 @@
                     <tr >
                         <td><a href="/variants/{{proband_variant.variant.id }}">{{ ptv.proband_variant.variant.id}}</a></td>
                         <td><a href="/select_transcript/{{report.id}}/{{ptv.proband_variant.id }}" class="btn btn-primary">Link</a></td>
-                        <td>{{ ptv.transcript_variant.transcript.gene }}</td>
-                        <td>{{ ptv.transcript_variant.transcript.name }}</td>
+                        <td>{{ ptv.transcript.gene }}</td>
+                        <td>{{ ptv.transcript.name }}</td>
                         <td style="word-wrap: break-word; min-width: 100px;max-width: 100px;">{{ptv.transcript_variant.hgvs_c}}</td>
                         <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{ptv.transcript_variant.hgvs_p}}</td>
                         <td>{{ptv.proband_variant.zygosity}}</td>
