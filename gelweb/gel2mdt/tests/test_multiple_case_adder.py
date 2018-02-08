@@ -304,14 +304,11 @@ class TestAddCases(TestCase):
             ProbandTranscriptVariant,
             ReportEvent,
         ):
-            all_models = model.objects.all()
+            all_models = model.objects.all().values()
             pprint.pprint(list(all_models))
             if not all_models:
                 check_cases = False
 
-        for re in ReportEvent.objects.all():
-            if re.phenotype:
-                print(re.re_id, "\t", re.phenotype.description)
 
         assert check_cases
 
