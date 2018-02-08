@@ -206,6 +206,18 @@ def proband_view(request, report_id):
                                                     'proband_mdt': proband_mdt})
 
 @login_required
+def variant_view(request, variant_id):
+    '''
+    Shows details about a particular proband, some fields are editable by clinical scientists
+    :param request:
+    :param report_id: GEL Report ID
+    :return:
+    '''
+    variant = Variant.objects.get(id=variant_id)
+    return render(request, 'gel2mdt/variant.html', {'variant': variant})
+
+
+@login_required
 def update_proband(request, report_id):
     '''
     Updates the Proband page
