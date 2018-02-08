@@ -463,7 +463,6 @@ class ReportEvent(models.Model):
     penetrance = models.CharField(max_length=200)
 
     gene = models.ForeignKey(Gene, on_delete=models.CASCADE, null=True) #made nullable
-    phenotype = models.ForeignKey(Phenotype, on_delete=models.CASCADE, null=True) #made nullable
 
     coverage = models.DecimalField(max_digits=8, decimal_places=3, null=True) #made nullable
 
