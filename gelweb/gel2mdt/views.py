@@ -95,8 +95,17 @@ def rare_disease_main(request):
     :param request:
     :return:
     '''
-    # create_dummy_sample()
+
     if request.method == "POST":
+        GELInterpretationReport.objects.all().delete()
+        InterpretationReportFamily.objects.all().delete()
+        Gene.objects.all().delete()
+        Proband.objects.all().delete()
+        Variant.objects.all().delete()
+        Transcript.objects.all().delete()
+        TranscriptVariant.objects.all().delete()
+        ProbandTranscriptVariant.objects.all().delete()
+        ProbandVariant.objects.all().delete()
         update = MultipleCaseAdder(test_data=True)
 
     rd_cases = GELInterpretationReport.objects.all()
