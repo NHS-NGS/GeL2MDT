@@ -228,6 +228,9 @@ class GELInterpretationReport(models.Model):
     status = models.CharField(max_length=200)
     updated = models.DateTimeField()
 
+    sample_type = models.CharField(max_length=200, choices=(('cancer', 'cancer'),
+                                                            ('raredisease', 'raredisease')))
+
     # would be nice if this could link to the clinical scientist table
     # but wel also have "gel" and CIPs as users.
     user = models.CharField(max_length=200)
@@ -299,6 +302,7 @@ class Proband(models.Model):
 
     mdt_status = models.CharField( max_length=50, choices=(
         ('R', 'Required'), ('N', 'Not Required'), ('I', 'In Progress'), ('D', 'Done'),), default='R')
+    deceased = models.NullBooleanField()
 
     def __str__(self):
         return str(self.gel_id)
@@ -396,20 +400,7 @@ class Zygosities(ChoiceEnum):
     unknown = "unknown"
 
 
-class ProbandVariant(models.Model):
-    variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
-    max_tier = models.IntegerField()
-
-    interpretation_report = models.ForeignKey(
-        GELInterpretationReport, on_delete=models.CASCADE)
-
-    zygosity = models.CharField(
-        max_length=20,
-        choices=Zygosities.choices(),
-        default=Zygosities.unknown)
-
-    # TODO: find where to get these from
-
+class RareDiseaseReport(models.Model):
     discussion = models.TextField(db_column='Discussion', blank=True)
     action = models.TextField(db_column='Action', blank=True)
     contribution_to_phenotype = models.CharField(db_column='Contribution_to_phenotype', max_length=2, choices=(
@@ -423,6 +414,42 @@ class ProbandVariant(models.Model):
     classification = models.CharField(db_column='classification', max_length=2, choices=(
         ('NA', 'NA'), ('1', '1'), ('2', '2'), ('3', '3'), ('4', '4'), ('5', '5'),
     ), default='NA')
+
+    class Meta:
+        managed = True
+        db_table = 'RareDiseaseReport'
+
+
+class CancerReport(models.Model):
+    discussion = models.TextField(db_column='Discussion', blank=True)
+    action = models.TextField(db_column='Action', blank=True)
+    classification = models.CharField(db_column='classification', max_length=2, choices=(
+        ('NA', 'NA'), ('1', '1'), ('2', '2'), ('3', '3'), ('4', '4'), ('5', '5'),
+    ), default='NA')
+
+    class Meta:
+        managed = True
+        db_table = 'CancerReport'
+
+
+class ProbandVariant(models.Model):
+    variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
+    max_tier = models.IntegerField()
+    somatic = models.BooleanField()
+    vaf = models.DecimalField(max_digits=8, decimal_places=3, null=True)
+
+    interpretation_report = models.ForeignKey(
+        GELInterpretationReport, on_delete=models.CASCADE)
+    rare_disease_report = models.ForeignKey(RareDiseaseReport, on_delete=models.CASCADE)
+    cancer_report = models.ForeignKey(CancerReport, on_delete=models.CASCADE)
+
+    zygosity = models.CharField(
+        max_length=20,
+        choices=Zygosities.choices(),
+        default=Zygosities.unknown)
+
+    # TODO: find where to get these from
+
 
     def __str__(self):
         return str(self.interpretation_report) + " " + str(self.variant)
