@@ -208,7 +208,9 @@ def variant_view(request, variant_id):
     :return:
     '''
     variant = Variant.objects.get(id=variant_id)
-    return render(request, 'gel2mdt/variant.html', {'variant': variant})
+    proband_variants = ProbandVariant.objects.filter(variant=variant)
+    return render(request, 'gel2mdt/variant.html', {'variant': variant,
+                                                    'proband_variants': proband_variants})
 
 
 @login_required
