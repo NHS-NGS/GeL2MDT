@@ -254,35 +254,35 @@
                         <td style="word-wrap: break-word; min-width: 100px;max-width: 100px;">{{ptv.get_transcript_variant.hgvs_c}}</td>
                         <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{ptv.get_transcript_variant.hgvs_p}}</td>
                         <td>{{ptv.proband_variant.zygosity}}</td>
-                        <td>{{ptv.proband_variant.classification}}</td>
-                        <td>{{ptv.proband_variant.contribution_of_phenotype}}</td>
-                        <td style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{ptv.proband_variant.discussion}}</td>
-                        <td style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{ptv.proband_variant.action}}</td>
-                        <td>{% if ptv.proband_variant.change_med == True %}
+                        <td>{{ptv.proband_variant.rarediseasereport.classification}}</td>
+                        <td>{{ptv.proband_variant.rarediseasereport.ontribution_of_phenotype}}</td>
+                        <td style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{ptv.proband_variant.rarediseasereport.discussion}}</td>
+                        <td style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{ptv.proband_variant.rarediseasereport.action}}</td>
+                        <td>{% if ptv.proband_variant.rarediseasereport.change_med == True %}
                             <span class="glyphicon glyphicon-ok"></span>
                             {% else %}
                             <span class="glyphicon glyphicon-remove"></span>
                             {% endif %}
                         </td>
-                        <td>{% if ptv.proband_variant.surgical_option == True %}
+                        <td>{% if ptv.proband_variant.rarediseasereport.surgical_option == True %}
                             <span class="glyphicon glyphicon-ok"></span>
                             {% else %}
                             <span class="glyphicon glyphicon-remove"></span>
                             {% endif %}
                         </td>
-                        <td>{% if ptv.proband_variant.add_surveillance_for_relatives == True %}
+                        <td>{% if ptv.proband_variant.rarediseasereport.add_surveillance_for_relatives == True %}
                             <span class="glyphicon glyphicon-ok"></span>
                             {% else %}
                             <span class="glyphicon glyphicon-remove"></span>
                             {% endif %}
                         </td>
-                        <td>{% if ptv.proband_variant.clinical_trial == True %}
+                        <td>{% if ptv.proband_variant.rarediseasereport.clinical_trial == True %}
                             <span class="glyphicon glyphicon-ok"></span>
                             {% else %}
                             <span class="glyphicon glyphicon-remove"></span>
                             {% endif %}
                         </td>
-                        <td>{% if ptv.proband_variant.inform_reproductive_choice == True %}
+                        <td>{% if ptv.proband_variant.rarediseasereport.inform_reproductive_choice == True %}
                             <span class="glyphicon glyphicon-ok"></span>
                             {% else %}
                             <span class="glyphicon glyphicon-remove"></span>

@@ -39,9 +39,9 @@ class ProbandMDTForm(forms.ModelForm):
             'action': Textarea(attrs={'rows': '3'}),
         }
 
-class VariantMDTForm(forms.ModelForm):
+class RareDiseaseMDTForm(forms.ModelForm):
     class Meta:
-        model = ProbandVariant
+        model = RareDiseaseReport
         fields = ('contribution_to_phenotype', 'change_med',
                   'action', 'discussion', 'clinical_trial',
                   'inform_reproductive_choice', 'surgical_option',
