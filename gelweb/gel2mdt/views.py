@@ -302,6 +302,11 @@ def add_ir_to_mdt(request, mdt_id, irreport_id):
         linkage_instance = MDTReport(interpretation_report=report_instance,
                                      MDT=mdt_instance)
         linkage_instance.save()
+
+        proband_variants = ProbandVariant.objects.filter(interpretation_report=report_instance)
+        for pv in proband_variants:
+            pv.create_rare_disease_report()
+
         return HttpResponseRedirect(f'/edit_mdt/{mdt_id}')
 
 
@@ -369,7 +374,7 @@ def edit_mdt_variant(request, pv_id):
     proband_variant = ProbandVariant.objects.get(id=pv_id)
     mdt_id = request.session.get('mdt_id')
     if request.method == 'POST':
-        modal_form = VariantMDTForm(request.POST, instance=proband_variant)
+        modal_form = RareDiseaseMDTForm(request.POST, instance=proband_variant.rarediseasereport)
         if modal_form.is_valid():
             modal_form.save()
             data['form_is_valid'] = True
@@ -385,7 +390,7 @@ def edit_mdt_variant(request, pv_id):
             data['form_is_valid'] = False
             print(modal_form.errors)
     else:
-        modal_form = VariantMDTForm(instance=proband_variant)
+        modal_form = RareDiseaseMDTForm(instance=proband_variant.rarediseasereport)
     context = {'modal_form': modal_form, 'pv_id': pv_id}
     html_form = render_to_string('gel2mdt/modals/mdt_variant_form.html',
                                  context,

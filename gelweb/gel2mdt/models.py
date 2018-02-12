@@ -204,6 +204,9 @@ class GELInterpretationReport(models.Model):
     status = models.CharField(max_length=200)
     updated = models.DateTimeField()
 
+    sample_type = models.CharField(max_length=200, choices=(('cancer', 'cancer'),
+                                                            ('raredisease', 'raredisease')))
+
     # would be nice if this could link to the clinical scientist table
     # but wel also have "gel" and CIPs as users.
     user = models.CharField(max_length=200)
@@ -275,6 +278,7 @@ class Proband(models.Model):
 
     mdt_status = models.CharField( max_length=50, choices=(
         ('R', 'Required'), ('N', 'Not Required'), ('I', 'In Progress'), ('D', 'Done'),), default='R')
+    deceased = models.NullBooleanField()
 
     def __str__(self):
         return str(self.gel_id)
@@ -371,10 +375,11 @@ class Zygosities(ChoiceEnum):
     alternate_homozygous = "alternate_homozygous"
     unknown = "unknown"
 
-
 class ProbandVariant(models.Model):
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
     max_tier = models.IntegerField()
+    somatic = models.BooleanField()
+    vaf = models.DecimalField(max_digits=8, decimal_places=3, null=True)
 
     interpretation_report = models.ForeignKey(
         GELInterpretationReport, on_delete=models.CASCADE)
@@ -386,6 +391,27 @@ class ProbandVariant(models.Model):
 
     # TODO: find where to get these from
 
+
+    def __str__(self):
+        return str(self.interpretation_report) + " " + str(self.variant)
+
+    # Deselect the old transcript and select the provided one
+    def select_transcript(self, selected_transcript):
+        ProbandTranscriptVariant.objects.filter(proband_variant=self.id, selected=True).update(selected=False)
+        ProbandTranscriptVariant.objects.filter(proband_variant=self.id,
+                                                transcript=selected_transcript).update(selected=True)
+
+    def create_rare_disease_report(self):
+        if not hasattr(self, 'rarediseasereport'):
+            report = RareDiseaseReport(proband_variant=self)
+            report.save()
+
+    class Meta:
+        managed = True
+        db_table = 'ProbandVariant'
+
+
+class RareDiseaseReport(models.Model):
     discussion = models.TextField(db_column='Discussion', blank=True)
     action = models.TextField(db_column='Action', blank=True)
     contribution_to_phenotype = models.CharField(db_column='Contribution_to_phenotype', max_length=2, choices=(
@@ -399,19 +425,27 @@ class ProbandVariant(models.Model):
     classification = models.CharField(db_column='classification', max_length=2, choices=(
         ('NA', 'NA'), ('1', '1'), ('2', '2'), ('3', '3'), ('4', '4'), ('5', '5'),
     ), default='NA')
-
-    def __str__(self):
-        return str(self.interpretation_report) + " " + str(self.variant)
-
-    # Deselect the old transcript and select the provided one
-    def select_transcript(self, selected_transcript):
-        ProbandTranscriptVariant.objects.filter(proband_variant=self.id, selected=True).update(selected=False)
-        ProbandTranscriptVariant.objects.filter(proband_variant=self.id,
-                                                transcript=selected_transcript).update(selected=True)
+    proband_variant = models.OneToOneField(ProbandVariant, on_delete=models.CASCADE)
 
     class Meta:
         managed = True
-        db_table = 'ProbandVariant'
+        db_table = 'RareDiseaseReport'
+
+
+class CancerReport(models.Model):
+    discussion = models.TextField(db_column='Discussion', blank=True)
+    action = models.TextField(db_column='Action', blank=True)
+    classification = models.CharField(db_column='classification', max_length=2, choices=(
+        ('NA', 'NA'), ('1', '1'), ('2', '2'), ('3', '3'), ('4', '4'), ('5', '5'),
+    ), default='NA')
+    proband_variant = models.OneToOneField(ProbandVariant, on_delete=models.CASCADE)
+
+    class Meta:
+        managed = True
+        db_table = 'CancerReport'
+
+
+
 
 class ProbandTranscriptVariant(models.Model):
     transcript = models.ForeignKey(Transcript, on_delete=models.CASCADE)
@@ -423,6 +457,7 @@ class ProbandTranscriptVariant(models.Model):
         transcript_variant = TranscriptVariant.objects.get(transcript=self.transcript,
                                                               variant=self.proband_variant.variant)
         return transcript_variant
+
     class Meta:
         managed = True
         db_table = 'ProbandTranscriptVariant'
@@ -560,6 +595,7 @@ class MDT(models.Model):
     creator = models.CharField(db_column='Creator', max_length=255)  # Change to user foreignkey?
     status = models.CharField(db_column='Status', max_length=50, choices=(
         ('A', 'Active'), ('C', 'Completed')), default='A')
+    gatb = models.NullBooleanField()
 
     def __str__(self):
         return str(self.date_of_mdt)
