@@ -89,11 +89,11 @@ class MultipleCaseAdder(object):
             file_path = os.path.join(
                 os.getcwd(), "gel2mdt/tests/test_files/{filename}".format(
                     filename=filename))
-            logger.info("Found case json at", file_path, "for testing.")
+            logger.info("Found case json at " + file_path + " for testing.")
             with open(file_path) as json_file:
                 json_data = json.load(json_file)
                 list_of_cases.append(Case(case_json=json_data))
-        logger.info("Found", len(list_of_cases), "test cases.")
+        logger.info("Found " + str(len(list_of_cases)) +  " test cases.")
         return list_of_cases
 
     def fetch_api_data(self):
@@ -248,6 +248,7 @@ class MultipleCaseAdder(object):
                 print("attempting to bulk create", model_type)
                 self.bulk_create_new(model_type, model_list)
             # refresh CaseAttributeManagers with new CaseModels
+
             for model in model_list:
                 if model.entry is False:
                     model.entry = model.check_found_in_db()
@@ -302,9 +303,47 @@ class MultipleCaseAdder(object):
                 in new_attributes])]
 
         # bulk create database entries from the list of unique new attributes
+        lookups = get_prefetch_lookups(model_type)
+        if lookups:
+            model_objects = model_type.objects.all().prefetch_related(*lookups)
+        elif not lookups:
+            model_objects = model_type.objects.all()
+
         model_type.objects.bulk_create([
             model_type(**attributes)
             for attributes in new_attributes])
+
+    def get_prefetch_lookups(self, model_type):
+        """
+        Takes a model type and returns list of the ForeignKey fields which
+        need to be passed to prefetch_related() when creating a QuerySet to
+        quickly get related items.
+
+        When adding new tables to the database, add their FKs here.
+        """
+        lookup_dict = {
+            Clinician: None,
+            Phenotype: None,
+            Family: ["clinician"],
+            FamilyPhenotype: ["family", "phenotype"],
+            Gene: None,
+            Panel: None,
+            PanelVersion: ["panel"],
+            PanelVersionGene: ["panel_version", "gene"],
+            ToolOrAssemblyVersion: None,
+            InterpretationReportFamily: ["participant_family"],
+            InterpretationReportFamilyPanel: ["ir_family", "panel_version"],
+            GELInterpretationReport: ["ir_family"],
+            Proband: ["family"],
+            Relative: ["proband"],
+            Variant: ["genome_assembly"],
+            Transcript: ["gene"],
+            TranscriptVariant: ["transcript", "variant"],
+            ProbandVariant: ["variant", "interpretation_report"],
+            ProbandTranscriptVariant: ["transcript", "proband_variant"],
+            ReportEvent: ["proband_variant", "panel", "gene"],
+        }
+        return lookup_dict[model_type]
 
     def update_cases(self):
         """
