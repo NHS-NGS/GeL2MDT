@@ -13,6 +13,9 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 import os
 from django.contrib.messages import constants as messages
 
+from datetime import datetime
+
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -87,6 +90,48 @@ NOSE_ARGS = [
     '--with-coverage',
     '--cover-package=gel2mdt'
 ]
+
+
+# Logging
+# https://docs.djangoproject.com/en/2.0/topics/logging/
+datetime_str_format = datetime.strftime(datetime.now(), '%Y-%m-%d')
+LOGGING = {
+    'version': 1,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+                'level': 'DEBUG',
+                'class': 'logging.StreamHandler',
+                'formatter': 'simple'
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'logfile_{dt}.log'.format(
+                dt=datetime_str_format),
+            'formatter': 'simple'
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    }
+}
+
+if DEBUG:
+        # make all loggers use the console.
+            for logger in LOGGING['loggers']:
+                        LOGGING['loggers'][logger]['handlers'] = ['console']
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
