@@ -104,6 +104,7 @@ class MultipleCaseAdder(object):
                 case_json=self.get_case_json(case["interpretation_request_id"])
             ) for case in self.cases_to_poll
         ]
+        print("Successfully fetched", len(list_of_cases), "cases from CIP API.")
         return list_of_cases
 
     def get_case_json(self, interpretation_request_id):
@@ -113,6 +114,7 @@ class MultipleCaseAdder(object):
         :param interpretation_request_id: an IR ID of the format XXXX-X
         :returns: A case json associated with the given IR ID from CIP-API
         """
+        logger.info("Polling API for case", interpretation_request_id)
         request_poll = PollAPI(
             # instantiate a poll of CIP API for a given case json
             "cip_api", "interpretation-request/{id}/{version}".format(
