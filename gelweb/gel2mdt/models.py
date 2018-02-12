@@ -3,31 +3,6 @@ from django.utils import timezone
 
 from .model_utils.choices import ChoiceEnum
 
-#
-# class CharNullField(models.CharField):  # subclass CharField
-#     description = "CharField that stores NULL but returns a blank string"
-#     # __metaclass__ = models.SubfieldBase  # this ensures to_python is called
-#
-#     def to_python(self, value):
-#         """
-#         Get the value out of the DB or an instance.
-#         """
-#         if isinstance(value, models.CharField):
-#             return value
-#         if value is None:  # if db has NULL / Python None
-#             return ''
-#         else:
-#             return value  # otherwise just return value
-#
-#     def get_prep_value(self, value):  # catch value just before sending to DB
-#         if value == '':
-#             # if Django tries to save an empty string, send None
-#             return None
-#         else:
-#             # otherwise, just return the value
-#             return value
-
-
 class ListUpdate(models.Model):
     """
     A table containing a single field which displays the each time the
@@ -98,7 +73,7 @@ class Gene(models.Model):
     Ensembl ID hopes to be able to reference any gene consistently despite
     future name changes - the ENSG should not change.
     """
-    ensembl_id = models.CharField(max_length=200, unique=True, null=True)
+    ensembl_id = models.CharField(max_length=200, unique=True, blank=True,  null=True)
     hgnc_name = models.CharField(max_length=200)
 
     description = models.CharField(max_length=200)
