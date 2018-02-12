@@ -6,7 +6,7 @@ from .model_utils.choices import ChoiceEnum
 
 class CharNullField(models.CharField):  # subclass CharField
     description = "CharField that stores NULL but returns a blank string"
-    __metaclass__ = models.SubfieldBase  # this ensures to_python is called
+    # __metaclass__ = models.SubfieldBase  # this ensures to_python is called
 
     def to_python(self, value):
         """
@@ -399,39 +399,6 @@ class Zygosities(ChoiceEnum):
     alternate_homozygous = "alternate_homozygous"
     unknown = "unknown"
 
-
-class RareDiseaseReport(models.Model):
-    discussion = models.TextField(db_column='Discussion', blank=True)
-    action = models.TextField(db_column='Action', blank=True)
-    contribution_to_phenotype = models.CharField(db_column='Contribution_to_phenotype', max_length=2, choices=(
-        ('UN', 'Uncertain'), ('No', 'None'), ('FU', 'Full'), ('PA', 'Partial'), ('SE', 'Secondary'), ('NA', 'NA')
-    ), default='NA')
-    change_med = models.NullBooleanField(db_column='Change_med')
-    surgical_option = models.NullBooleanField(db_column='Surgical_Option')
-    add_surveillance_for_relatives = models.NullBooleanField(db_column='Add_surveillance_for_relatives')
-    clinical_trial = models.NullBooleanField(db_column='Clinical_trial')
-    inform_reproductive_choice = models.NullBooleanField(db_column='inform_reproductive_choice')
-    classification = models.CharField(db_column='classification', max_length=2, choices=(
-        ('NA', 'NA'), ('1', '1'), ('2', '2'), ('3', '3'), ('4', '4'), ('5', '5'),
-    ), default='NA')
-
-    class Meta:
-        managed = True
-        db_table = 'RareDiseaseReport'
-
-
-class CancerReport(models.Model):
-    discussion = models.TextField(db_column='Discussion', blank=True)
-    action = models.TextField(db_column='Action', blank=True)
-    classification = models.CharField(db_column='classification', max_length=2, choices=(
-        ('NA', 'NA'), ('1', '1'), ('2', '2'), ('3', '3'), ('4', '4'), ('5', '5'),
-    ), default='NA')
-
-    class Meta:
-        managed = True
-        db_table = 'CancerReport'
-
-
 class ProbandVariant(models.Model):
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
     max_tier = models.IntegerField()
@@ -440,8 +407,6 @@ class ProbandVariant(models.Model):
 
     interpretation_report = models.ForeignKey(
         GELInterpretationReport, on_delete=models.CASCADE)
-    rare_disease_report = models.ForeignKey(RareDiseaseReport, on_delete=models.CASCADE)
-    cancer_report = models.ForeignKey(CancerReport, on_delete=models.CASCADE)
 
     zygosity = models.CharField(
         max_length=20,
@@ -460,9 +425,51 @@ class ProbandVariant(models.Model):
         ProbandTranscriptVariant.objects.filter(proband_variant=self.id,
                                                 transcript=selected_transcript).update(selected=True)
 
+    def create_rare_disease_report(self):
+        if not hasattr(self, 'rarediseasereport'):
+            report = RareDiseaseReport(proband_variant=self)
+            report.save()
+
     class Meta:
         managed = True
         db_table = 'ProbandVariant'
+
+
+class RareDiseaseReport(models.Model):
+    discussion = models.TextField(db_column='Discussion', blank=True)
+    action = models.TextField(db_column='Action', blank=True)
+    contribution_to_phenotype = models.CharField(db_column='Contribution_to_phenotype', max_length=2, choices=(
+        ('UN', 'Uncertain'), ('No', 'None'), ('FU', 'Full'), ('PA', 'Partial'), ('SE', 'Secondary'), ('NA', 'NA')
+    ), default='NA')
+    change_med = models.NullBooleanField(db_column='Change_med')
+    surgical_option = models.NullBooleanField(db_column='Surgical_Option')
+    add_surveillance_for_relatives = models.NullBooleanField(db_column='Add_surveillance_for_relatives')
+    clinical_trial = models.NullBooleanField(db_column='Clinical_trial')
+    inform_reproductive_choice = models.NullBooleanField(db_column='inform_reproductive_choice')
+    classification = models.CharField(db_column='classification', max_length=2, choices=(
+        ('NA', 'NA'), ('1', '1'), ('2', '2'), ('3', '3'), ('4', '4'), ('5', '5'),
+    ), default='NA')
+    proband_variant = models.OneToOneField(ProbandVariant, on_delete=models.CASCADE)
+
+    class Meta:
+        managed = True
+        db_table = 'RareDiseaseReport'
+
+
+class CancerReport(models.Model):
+    discussion = models.TextField(db_column='Discussion', blank=True)
+    action = models.TextField(db_column='Action', blank=True)
+    classification = models.CharField(db_column='classification', max_length=2, choices=(
+        ('NA', 'NA'), ('1', '1'), ('2', '2'), ('3', '3'), ('4', '4'), ('5', '5'),
+    ), default='NA')
+    proband_variant = models.OneToOneField(ProbandVariant, on_delete=models.CASCADE)
+
+    class Meta:
+        managed = True
+        db_table = 'CancerReport'
+
+
+
 
 class ProbandTranscriptVariant(models.Model):
     transcript = models.ForeignKey(Transcript, on_delete=models.CASCADE)
@@ -474,6 +481,7 @@ class ProbandTranscriptVariant(models.Model):
         transcript_variant = TranscriptVariant.objects.get(transcript=self.transcript,
                                                               variant=self.proband_variant.variant)
         return transcript_variant
+
     class Meta:
         managed = True
         db_table = 'ProbandTranscriptVariant'
@@ -611,6 +619,7 @@ class MDT(models.Model):
     creator = models.CharField(db_column='Creator', max_length=255)  # Change to user foreignkey?
     status = models.CharField(db_column='Status', max_length=50, choices=(
         ('A', 'Active'), ('C', 'Completed')), default='A')
+    gatb = models.NullBooleanField()
 
     def __str__(self):
         return str(self.date_of_mdt)
