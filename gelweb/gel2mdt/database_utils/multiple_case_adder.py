@@ -93,7 +93,7 @@ class MultipleCaseAdder(object):
             with open(file_path) as json_file:
                 json_data = json.load(json_file)
                 list_of_cases.append(Case(case_json=json_data))
-        logger.info("Found", len(list_of_cases), "test cases."
+        logger.info("Found", len(list_of_cases), "test cases.")
         return list_of_cases
 
     def fetch_api_data(self):
