@@ -1,7 +1,5 @@
+center=BIRM
 vep=/opt/programs/ensembl-vep/vep
 cache=/media/sf_S_DRIVE/VEP_cache
 fasta_loc=/media/sf_S_DRIVE/VEP_cache/fasta
 labkey_server_request=Genomics England Portal/West Midlands/MeRCURy/Rare Diseases/Core
-gosh_vep=/opt/ensembl-tools-release-82/scripts/variant_effect_predictor/variant_effect_predictor.pl
-gosh_cache=/home/chris/.vep/
-gosh_fasta_loc=/var/NGS_annotation/VEP/homo_sapiens/79_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa
