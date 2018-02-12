@@ -10,6 +10,7 @@ from django.template.loader import render_to_string
 from django.http import JsonResponse
 from django.db.models import Q
 from .database_utils.multiple_case_adder import MultipleCaseAdder
+from .primer_utils import singletarget
 
 # Create your views here.
 def register(request):
@@ -207,10 +208,37 @@ def variant_view(request, variant_id):
     :param report_id: GEL Report ID
     :return:
     '''
+    if request.method == "POST":
+        # if not models.objects.filter(gel_id=proband_id):
+        print("Designing primers")
+        #report_event = ReportEvent.objects.filter(variant=variant_id)
+        variant = Variant.objects.get(id=variant_id)
+        # currently just takes first hit from above query set.
+        gene_symbol = ''
+        chromosome = "chr" + getattr(variant, "chromosome")
+        position = str(getattr(variant, "position"))
+        assembly = str(getattr(variant, "genome_assembly"))
+        print(assembly)
+        designed_primers = singletarget.design_primers(chromosome, position, assembly, gene_symbol)
+        count = 1
+        # tool id currently not set properly
+        for designed_primer in designed_primers:
+            primer = Primer(variant=variant, primer_set=chromosome + ":" + position + "-" + str(count),
+                            left_primer_seq=designed_primer.forward_seq, right_primer_seq=designed_primer.reverse_seq,
+                            date_created=datetime.today(), tool_id=1)
+            primer.save()
+            # variant.primers.add(primer)
+            # variant.save()
+            print("primer added to database:")
+            print(primer.primer_set)
+            count += 1
+
+    primers = Primer.objects.filter(variant=variant_id)
     variant = Variant.objects.get(id=variant_id)
     proband_variants = ProbandVariant.objects.filter(variant=variant)
     return render(request, 'gel2mdt/variant.html', {'variant': variant,
-                                                    'proband_variants': proband_variants})
+                                                    'proband_variants': proband_variants,
+                                                    'primers': primers})
 
 
 @login_required
