@@ -3,29 +3,29 @@ from django.utils import timezone
 
 from .model_utils.choices import ChoiceEnum
 
-
-class CharNullField(models.CharField):  # subclass CharField
-    description = "CharField that stores NULL but returns a blank string"
-    # __metaclass__ = models.SubfieldBase  # this ensures to_python is called
-
-    def to_python(self, value):
-        """
-        Get the value out of the DB or an instance.
-        """
-        if isinstance(value, models.CharField):
-            return value
-        if value is None:  # if db has NULL / Python None
-            return ''
-        else:
-            return value  # otherwise just return value
-
-    def get_prep_value(self, value):  # catch value just before sending to DB
-        if value == '':
-            # if Django tries to save an empty string, send None
-            return None
-        else:
-            # otherwise, just return the value
-            return value
+#
+# class CharNullField(models.CharField):  # subclass CharField
+#     description = "CharField that stores NULL but returns a blank string"
+#     # __metaclass__ = models.SubfieldBase  # this ensures to_python is called
+#
+#     def to_python(self, value):
+#         """
+#         Get the value out of the DB or an instance.
+#         """
+#         if isinstance(value, models.CharField):
+#             return value
+#         if value is None:  # if db has NULL / Python None
+#             return ''
+#         else:
+#             return value  # otherwise just return value
+#
+#     def get_prep_value(self, value):  # catch value just before sending to DB
+#         if value == '':
+#             # if Django tries to save an empty string, send None
+#             return None
+#         else:
+#             # otherwise, just return the value
+#             return value
 
 
 class ListUpdate(models.Model):
@@ -72,7 +72,7 @@ o   applied to this case, which should be concordant with the phenotype of the
         verbose_name_plural = "Families"
         db_table = 'Family'
         managed = True
-    gel_family_id = models.IntegerField(unique=True)
+    gel_family_id = models.CharField(max_length=255, unique=True)
 
     clinician = models.ForeignKey(Clinician, on_delete=models.CASCADE)
 
