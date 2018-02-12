@@ -219,7 +219,7 @@ class CaseAttributeManager(object):
         Create a case model to handle adding/getting the clinician for case.
         """
         # family ID used to search for clinician details in labkey
-        # family_id = int(self.case.json["family_id"])
+        # family_id = self.case.json["family_id"]
         # # load in site specific details from config file
         # config_dict = load_config.LoadConfig().load()
         # labkey_server_request = config_dict['labkey_server_request']
@@ -375,7 +375,7 @@ class CaseAttributeManager(object):
         clinician = self.case.attribute_managers[Clinician].case_model
         family = CaseModel(Family, {
             "clinician": clinician.entry,
-            "gel_family_id": self.case.json["family_id"]
+            "gel_family_id": int(self.case.json["family_id"])
         })
         return family
 
@@ -456,7 +456,6 @@ class CaseAttributeManager(object):
         gene_list = []
         for panel in panels:
             genes = panel["panelapp_results"]["Genes"]
-            print("Adding gene ensembl ID to list:", genes["GeneSymbol"])
             gene_list += genes
 
         for gene in gene_list:
@@ -855,6 +854,27 @@ class CaseModel(object):
         except self.model_type.DoesNotExist as e:
             entry = False
         return entry
+
+    def refresh_model_entry(self, all_objects):
+        """
+        Take all objects for a particular Model type then filter which objects
+        belong to this particular CaseModel based on the model_attributes.
+        """
+        attribute_list = model_attributes.keys()
+        check_identical = True
+        object_found = False
+        for db_object in all_objects:
+            for attribute_name in attribute_list:
+                if db_object.attribute_name != self.model_attributes[attribute_name]:
+                    check_identical = False
+
+            if check_identical:
+                self.entry = db_object
+                object_found = True
+                break
+
+        assert object_found
+
 
 
 class ManyCaseModel(object):

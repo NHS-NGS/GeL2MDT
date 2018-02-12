@@ -30,22 +30,37 @@ class MultipleCaseAdder(object):
         manage the updating of the database.
         :param test_data: Boolean. Use test data or not. Default = False
         """
+        logger.info("Initialising a MultipleCaseAdder.")
 
         # fetch and identify cases to add or update
         # -----------------------------------------
         # are we using test data files? defaults False (no)
         self.test_data = test_data
         if self.test_data:
+            logger.info("Fetching test data.")
             # set list_of_cases to test zoo
             self.list_of_cases = self.fetch_test_data()
             self.cases_to_poll = None
+            logger.info("Fetched test data.")
         else:
             # set list_of_cases to cases of interest from API
+            logger.info("Fetching live API data.")
+            logger.info("Polling for list of available cases...")
             interpretation_list_poll = InterpretationList()
+            logger.info("Fetched available cases")
+
+            logger.info("Determining which cases to poll...")
             self.cases_to_poll = interpretation_list_poll.cases_to_poll
+
+            logger.info("Fetching API JSON data for cases to poll...")
             self.list_of_cases = self.fetch_api_data()
 
+            logger.info("Fetched all required CIP API data.")
+
+
+        logger.info("Checking which cases to add.")
         self.cases_to_add = self.check_cases_to_add()
+        logger.info("Checking which cases require updating.")
         self.cases_to_update = self.check_cases_to_update()#
         self.cases_to_skip = set(self.list_of_cases) - \
             set(self.cases_to_add) - \
@@ -56,7 +71,9 @@ class MultipleCaseAdder(object):
         # begin update process
         # --------------------
         self.update_errors = {}
+        logger.info("Adding cases from cases_to_add.")
         self.add_cases()
+        logger.info("Adding cases from cases_to_update.")
         self.update_cases()
 
     def fetch_test_data(self):
@@ -72,9 +89,11 @@ class MultipleCaseAdder(object):
             file_path = os.path.join(
                 os.getcwd(), "gel2mdt/tests/test_files/{filename}".format(
                     filename=filename))
+            logger.info("Found case json at", file_path, "for testing.")
             with open(file_path) as json_file:
                 json_data = json.load(json_file)
                 list_of_cases.append(Case(case_json=json_data))
+        logger.info("Found", len(list_of_cases), "test cases.")
         return list_of_cases
 
     def fetch_api_data(self):
@@ -85,6 +104,7 @@ class MultipleCaseAdder(object):
                 case_json=self.get_case_json(case["interpretation_request_id"])
             ) for case in self.cases_to_poll
         ]
+        print("Successfully fetched", len(list_of_cases), "cases from CIP API.")
         return list_of_cases
 
     def get_case_json(self, interpretation_request_id):
@@ -94,6 +114,7 @@ class MultipleCaseAdder(object):
         :param interpretation_request_id: an IR ID of the format XXXX-X
         :returns: A case json associated with the given IR ID from CIP-API
         """
+        logger.info("Polling API for case", interpretation_request_id)
         request_poll = PollAPI(
             # instantiate a poll of CIP API for a given case json
             "cip_api", "interpretation-request/{id}/{version}".format(
@@ -251,6 +272,7 @@ class MultipleCaseAdder(object):
                 tuple(attribute_dict.items())
                 for attribute_dict
                 in new_attributes])]
+        pprint.pprint(new_attributes)
         # save database entries from the list of unique new attributes
         for attributes in new_attributes:
             model_type.objects.create(

@@ -73,7 +73,7 @@ class Gene(models.Model):
     Ensembl ID hopes to be able to reference any gene consistently despite
     future name changes - the ENSG should not change.
     """
-    ensembl_id = models.CharField(max_length=200, unique=True, blank=True,  null=True)
+    ensembl_id = models.CharField(max_length=200, blank=True, null=True)
     hgnc_name = models.CharField(max_length=200)
 
     description = models.CharField(max_length=200)
@@ -377,7 +377,7 @@ class Zygosities(ChoiceEnum):
 class ProbandVariant(models.Model):
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
     max_tier = models.IntegerField()
-    somatic = models.BooleanField()
+    somatic = models.NullBooleanField()
     vaf = models.DecimalField(max_digits=8, decimal_places=3, null=True)
 
     interpretation_report = models.ForeignKey(
