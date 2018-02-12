@@ -375,7 +375,7 @@ class CaseAttributeManager(object):
         clinician = self.case.attribute_managers[Clinician].case_model
         family = CaseModel(Family, {
             "clinician": clinician.entry,
-            "gel_family_id": int(self.case.json["family_id"])
+            "gel_family_id": self.case.json["family_id"]
         })
         return family
 
