@@ -162,7 +162,7 @@ def generate_transcripts(variant_list):
 
     transcript_list = parse_vep_annotations(annotated_file)
     # bypassing running VEP
-    #transcript_list = parse_vep_annotations()
+    # transcript_list = parse_vep_annotations()
 
     #remove_temp_files()
     return transcript_list
