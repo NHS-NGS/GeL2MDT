@@ -377,7 +377,7 @@ class Zygosities(ChoiceEnum):
 class ProbandVariant(models.Model):
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
     max_tier = models.IntegerField()
-    somatic = models.BooleanField()
+    somatic = models.NullBooleanField()
     vaf = models.DecimalField(max_digits=8, decimal_places=3, null=True)
 
     interpretation_report = models.ForeignKey(
