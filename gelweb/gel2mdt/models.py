@@ -3,7 +3,6 @@ from django.utils import timezone
 
 from .model_utils.choices import ChoiceEnum
 
-
 class ListUpdate(models.Model):
     """
     A table containing a single field which displays the each time the
@@ -48,7 +47,7 @@ o   applied to this case, which should be concordant with the phenotype of the
         verbose_name_plural = "Families"
         db_table = 'Family'
         managed = True
-    gel_family_id = models.IntegerField(unique=True)
+    gel_family_id = models.CharField(max_length=255, unique=True)
 
     clinician = models.ForeignKey(Clinician, on_delete=models.CASCADE)
 
