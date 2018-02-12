@@ -456,7 +456,6 @@ class CaseAttributeManager(object):
         gene_list = []
         for panel in panels:
             genes = panel["panelapp_results"]["Genes"]
-            #print("Adding gene ensembl ID to list:", genes["GeneSymbol"])
             gene_list += genes
 
         for gene in gene_list:
