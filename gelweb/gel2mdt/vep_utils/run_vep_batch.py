@@ -4,6 +4,7 @@ import subprocess
 import csv
 from ..config import load_config
 from . import parse_vep
+import paramiko
 
 class CaseVariant:
     def __init__(self, chromosome, position, case_id, variant_count, ref, alt):
@@ -66,8 +67,7 @@ def generate_vcf(variants):
 #     os.system(cmd)
 
 # new version using tempfile
-def run_vep(infile):
-    config_dict = load_config.LoadConfig().load()
+def run_vep(infile, config_dict):
     outfile = tempfile.NamedTemporaryFile(mode='w+t', delete=False)
     # builds command from locations supplied in config file
     cmd = "{vep} -i {infile} -o {outfile} --force_overwrite --cache --dir_cache {cache} --fork 4 --vcf --flag_pick \
@@ -79,7 +79,38 @@ def run_vep(infile):
         fasta_loc=config_dict['fasta_loc'],
     )
     subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell=True).wait()
-    print(outfile.name)
+    return outfile.name
+
+def run_vep_gosh(infile, config_dict):
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+    outfile = tempfile.NamedTemporaryFile(mode='w+t', delete=False)
+    outfile.close()
+    # builds command from locations supplied in config file
+    ssh.connect(config_dict['crick_ip'],
+                username=config_dict['crick_username'],
+                password=config_dict['crick_password'])
+    sftp = ssh.open_sftp()
+    sftp.put(infile, '/home/chris/gel2mdt_testing/destination_file.txt'.format(infile))
+
+    cmd = "{vep} -i /home/chris/gel2mdt_testing/destination_file.txt " \
+          " -o /home/chris/gel2mdt_testing/output.txt --species homo_sapiens "  \
+          " --force_overwrite --cache --dir_cache {cache} --fork 4 --vcf --flag_pick --assembly GRCh38 " \
+          " --exclude_predicted --everything --hgvsg --dont_skip --total_length --offline --fasta {fasta_loc} ".format(
+            vep=config_dict['vep'],
+            infile=infile,
+            cache=config_dict['cache'],
+            fasta_loc=config_dict['fasta_loc'],
+    )
+    stdin, stdout, stderr = ssh.exec_command(cmd)
+    # stdin, stdout, stderr = ssh.exec_command('{gosh_vep} help'.format(gosh_vep=config_dict['gosh_vep']))
+
+    print('stdin:', stdin, 'stdout:', stdout.read(), 'stderr:', stderr.read())
+
+    sftp.get('/home/chris/gel2mdt_testing/output.txt', outfile.name)
+    sftp.close()
+    ssh.close()
     return outfile.name
 
 def parse_vep_annotations(infile=None):
@@ -122,10 +153,14 @@ def remove_temp_files():
 
 def generate_transcripts(variant_list):
     #variant_list = get_variants()
+    config_dict = load_config.LoadConfig().load()
     variant_file = generate_vcf(variant_list)
-    annotated_file = run_vep(variant_file)
-    transcript_list = parse_vep_annotations(annotated_file)
+    if config_dict['center'] == 'GOSH':
+        annotated_file = run_vep_gosh(variant_file, config_dict)
+    else:
+        annotated_file = run_vep(variant_file, config_dict)
 
+    transcript_list = parse_vep_annotations(annotated_file)
     # bypassing running VEP
     #transcript_list = parse_vep_annotations()
 
