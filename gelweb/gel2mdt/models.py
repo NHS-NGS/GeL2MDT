@@ -3,6 +3,7 @@ from django.utils import timezone
 
 from .model_utils.choices import ChoiceEnum
 
+
 class ListUpdate(models.Model):
     """
     A table containing a single field which displays the each time the
@@ -47,7 +48,7 @@ o   applied to this case, which should be concordant with the phenotype of the
         verbose_name_plural = "Families"
         db_table = 'Family'
         managed = True
-    gel_family_id = models.CharField(max_length=255, unique=True)
+    gel_family_id = models.CharField(max_length=200, unique=True)
 
     clinician = models.ForeignKey(Clinician, on_delete=models.CASCADE)
 
@@ -252,7 +253,7 @@ class ClinicalScientist(models.Model):
 
 class Proband(models.Model):
     # these set to null to allow creation then updating later
-    gel_id = models.IntegerField(unique=True)
+    gel_id = models.CharField(max_length=200, unique=True)
     family = models.OneToOneField(Family, on_delete=models.CASCADE)
     nhs_number = models.CharField(max_length=200, null=True)
     # must be unique, but can also be null if not known
@@ -288,7 +289,7 @@ class Proband(models.Model):
 
 
 class Relative(models.Model):
-    gel_id = models.IntegerField(unique=True)
+    gel_id = models.CharField(max_length=200, unique=True)
     relation_to_proband = models.CharField(max_length=200)
     affected_status = models.CharField(max_length=200)
     proband = models.ForeignKey(Proband, on_delete=models.CASCADE)
@@ -377,7 +378,7 @@ class Zygosities(ChoiceEnum):
 class ProbandVariant(models.Model):
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
     max_tier = models.IntegerField()
-    somatic = models.NullBooleanField()
+    somatic = models.BooleanField()
     vaf = models.DecimalField(max_digits=8, decimal_places=3, null=True)
 
     interpretation_report = models.ForeignKey(
