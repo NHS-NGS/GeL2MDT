@@ -823,6 +823,8 @@ class CaseModel(object):
         Queries the database for a model of the given type with the given
         attributes. Returns True if found, False if not.
         """
+
+        print("looking for", self.model_type, "with attr", self.model_attributes)
         if self.model_type == Clinician:
             entry = [db_obj for db_obj in queryset
                      if db_obj.name == self.model_attributes["name"]
@@ -900,12 +902,19 @@ class CaseModel(object):
                      and db_obj.version_number == self.model_attributes["version_number"]]
 
         if len(entry) == 1:
-            self.entry = entry[0]
+            entry = entry[0]
+            # also need to set self.entry here as it may not be called in init
+            self.entry = entry
+            print("Found")
         elif len(entry) == 0:
-            self.entry = False
+            entry = False
+            self.entry = entry
+            print("Not found")
         else:
             # Barf. Multiple entries found for same object
             raise ValueError("Multiple entries found for same object.")
+
+        return entry
 
 
 class ManyCaseModel(object):
