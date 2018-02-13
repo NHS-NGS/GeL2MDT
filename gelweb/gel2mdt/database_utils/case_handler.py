@@ -869,10 +869,11 @@ class CaseModel(object):
                      and db_obj.email == self.model_attributes["email"]]
         elif self.model_type == Proband:
             entry = [db_obj for db_obj in queryset
-                     if db_obj.gel_id == self.model_attributes["gel_id"]]
+                     if db_obj.gel_id == str(self.model_attributes["gel_id"])]
+            print(entry)
         elif self.model_type == Family:
             entry = [db_obj for db_obj in queryset
-                     if db_obj.gel_family_id == self.model_attributes["gel_family_id"]]
+                     if db_obj.gel_family_id == str(self.model_attributes["gel_family_id"])]
         elif self.model_type == Relative:
             entry = [db_obj for db_obj in queryset
                      if str(db_obj.gel_id) == str(self.model_attributes["gel_id"])]
