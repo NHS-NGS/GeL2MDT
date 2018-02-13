@@ -247,11 +247,17 @@ class MultipleCaseAdder(object):
             else:
                 print("attempting to bulk create", model_type)
                 self.bulk_create_new(model_type, model_list)
+
             # refresh CaseAttributeManagers with new CaseModels
+            lookups = self.get_prefetch_lookups(model_type)
+            if lookups:
+                model_objects = model_type.objects.all().prefetch_related(*lookups)
+            elif not lookups:
+                model_objects = model_type.objects.all()
 
             for model in model_list:
                 if model.entry is False:
-                    model.entry = model.check_found_in_db()
+                    model.refresh_model_entry(model_objects)
 
     def save_new(self, model_type, model_list):
         """
@@ -302,12 +308,6 @@ class MultipleCaseAdder(object):
                 for attribute_dict
                 in new_attributes])]
 
-        # bulk create database entries from the list of unique new attributes
-        lookups = get_prefetch_lookups(model_type)
-        if lookups:
-            model_objects = model_type.objects.all().prefetch_related(*lookups)
-        elif not lookups:
-            model_objects = model_type.objects.all()
 
         model_type.objects.bulk_create([
             model_type(**attributes)

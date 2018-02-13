@@ -171,6 +171,7 @@ class CaseAttributeManager(object):
         Call the corresponding function to update the case model within the
         AttributeManager.
         """
+
         if self.model_type == Clinician:
             case_model = self.get_clinician()
         elif self.model_type == Proband:
@@ -855,6 +856,92 @@ class CaseModel(object):
         except self.model_type.DoesNotExist as e:
             entry = False
         return entry
+
+    def refresh_model_entry(self, queryset):
+        """
+        Take all objects for a particular Model type then filter which objects
+        belong to this particular CaseModel based on the model_attributes.
+        """
+        if self.model_type == Clinician:
+            entry = [db_obj for db_obj in queryset
+                     if db_obj.name == self.model_attributes["name"]
+                     and db_obj.hospital == self.model_attributes["hospital"]
+                     and db_obj.email == self.model_attributes["email"]]
+        elif self.model_type == Proband:
+            entry = [db_obj for db_obj in queryset
+                     if db_obj.gel_id == self.model_attributes["gel_id"]]
+        elif self.model_type == Family:
+            entry = [db_obj for db_obj in queryset
+                     if db_obj.gel_family_id == self.model_attributes["gel_family_id"]]
+        elif self.model_type == Relative:
+            entry = [db_obj for db_obj in queryset
+                     if str(db_obj.gel_id) == str(self.model_attributes["gel_id"])]
+        elif self.model_type == Phenotype:
+            entry = [db_obj for db_obj in queryset
+                     if db_obj.hpo_terms == self.model_attributes["hpo_terms"]]
+        elif self.model_type == FamilyPhenotype:
+                     pass
+        elif self.model_type == InterpretationReportFamily:
+            entry =[db_obj for db_obj in queryset
+                    if db_obj.ir_family_id == self.model_attributes["ir_family_id"]]
+        elif self.model_type == Panel:
+            entry = [db_obj for db_obj in queryset
+                     if db_obj.panelapp_id == self.model_attributes["panelapp_id"]]
+        elif self.model_type == PanelVersion:
+            entry = [db_obj for db_obj in queryset
+                     if db_obj.panel == self.model_attributes["panel"]
+                     and db_obj.version_number == self.model_attributes["version_number"]]
+        elif self.model_type == InterpretationReportFamilyPanel:
+                     pass
+        elif self.model_type == Gene:
+            entry = [db_obj for db_obj in queryset
+                     if db_obj.ensembl_id == self.model_attributes["ensembl_id"]
+                     and db_obj.hgnc_name == self.model_attributes["hgnc_name"]]
+        elif self.model_type == PanelVersionGene:
+                     pass
+        elif self.model_type == Transcript:
+            entry = [db_obj for db_obj in queryset
+                     if db_obj.name == self.model_attributes["name"]]
+        elif self.model_type == GELInterpretationReport:
+            entry = [db_obj for db_obj in queryset
+                     if db_obj.sha_hash == self.model_attributes["sha_hash"]]
+        elif self.model_type == Variant:
+            entry = [db_obj for db_obj in queryset
+                     if db_obj.chromosome == self.model_attributes["chromosome"]
+                     and db_obj.position == self.model_attributes["position"]
+                     and db_obj.reference == self.model_attributes["reference"]
+                     and db_obj.alternate == self.model_attributes["alternate"]]
+        elif self.model_type == TranscriptVariant:
+            entry = [db_obj for db_obj in queryset
+                     if db_obj.transcript == self.model_attributes["transcript"]
+                     and db_obj.variant == self.model_attributes["variant"]]
+        elif self.model_type == ProbandVariant:
+            print(self.model_attributes["variant"], '-', self.model_attributes["interpretation_report"])
+            for db_obj in queryset:
+                print(db_obj.variant, '-', db_obj.interpretation_report)
+            entry = [db_obj for db_obj in queryset
+                     if db_obj.variant == self.model_attributes["variant"]
+                     and db_obj.max_tier == self.model_attributes["max_tier"]
+                     and db_obj.interpretation_report == self.model_attributes["interpretation_report"]]
+            print(entry)
+        elif self.model_type == ProbandTranscriptVariant:
+            entry = [db_obj for db_obj in queryset
+                     if db_obj.transcript == self.model_attributes["transcript"]
+                     and db_obj.proband_variant == self.model_attributes["proband_variant"]]
+        elif self.model_type == ReportEvent:
+            entry = [db_obj for db_obj in queryset
+                     if db_obj.re_id == self.model_attributes["re_id"]
+                     and db_obj.proband_variant == self.model_attributes["proband_variant"]]
+        elif self.model_type == ToolOrAssemblyVersion:
+            entry = [db_obj for db_obj in queryset
+                     if db_obj.tool_name == self.model_attributes["tool_name"]
+                     and db_obj.version_number == self.model_attributes["version_number"]]
+
+        assert len(entry) == 1
+
+        self.entry = entry[0]
+
+
 
 class ManyCaseModel(object):
     """
