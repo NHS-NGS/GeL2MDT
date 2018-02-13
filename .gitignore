@@ -4,6 +4,7 @@ gelweb/gel2mdt/migrations/*
 *.sqlite3
 *.sqlite3-journal
 .idea
+*.bak
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
