@@ -603,6 +603,9 @@ class CaseAttributeManager(object):
                     # we don't make entries for tx with no Gene
                     case_transcript.transcript_entry = None
 
+        for transcript in self.case_transcripts:
+            print(vars(transcript))
+
         # use the updated CaseTranscript instances to create an MCM
         transcript_variants = ManyCaseModel(TranscriptVariant, [{
             "transcript": transcript.transcript_entry,
