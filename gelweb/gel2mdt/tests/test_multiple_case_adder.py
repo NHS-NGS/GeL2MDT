@@ -251,11 +251,13 @@ class TestCaseModel(TestCase):
         """
         Return created=False when a Clinician is not known to the db.
         """
+        clinician_objects = Clinician.objects.all()
         clinician = CaseModel(Clinician, {
             "name": "test",
             "email": "test",
             "hospital": "test"
-        })
+        }, clinician_objects)
+        print(clinician.entry)
         assert clinician.entry is False  # checking for a literal False
 
     def test_existing_clinician(self):
@@ -270,8 +272,9 @@ class TestCaseModel(TestCase):
         archived_clinician = Clinician.objects.create(
             **clinician_attributes
         )
+        clinician_objects = Clinician.objects.all()
 
-        test_clinician = CaseModel(Clinician, clinician_attributes)
+        test_clinician = CaseModel(Clinician, clinician_attributes, clinician_objects)
         assert test_clinician.entry.id == archived_clinician.id
 
 
