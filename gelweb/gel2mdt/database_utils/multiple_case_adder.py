@@ -263,9 +263,11 @@ class MultipleCaseAdder(object):
             elif not lookups:
                 model_objects = model_type.objects.all()
 
+            print(model_objects.values())
+
             for model in model_list:
                 if model.entry is False:
-                    model.refresh_model_entry(model_objects)
+                    model.check_found_in_db(model_objects)
 
     def save_new(self, model_type, model_list):
         """
