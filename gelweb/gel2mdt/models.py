@@ -146,7 +146,7 @@ class ToolOrAssemblyVersion(models.Model):
         managed = True
         db_table = 'ToolOrAssemblyVersion'
 
-    tool_name = models.CharField(max_length=200, unique=True)
+    tool_name = models.CharField(max_length=200)
     version_number = models.CharField(max_length=200)
 
     def __str__(self):
