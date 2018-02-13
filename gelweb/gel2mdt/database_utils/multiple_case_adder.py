@@ -219,10 +219,18 @@ class MultipleCaseAdder(object):
         # BULK UPDATE PROCESS #
         # ------------------- #
         for model_type, many in update_order:
+
+            # prefetch database entries for check_found_in_db()
+            lookups = self.get_prefetch_lookups(model_type)
+            if lookups:
+                model_objects = model_type.objects.all().prefetch_related(*lookups)
+            elif not lookups:
+                model_objects = model_type.objects.all()
+
             for case in self.cases_to_add:
                 # create a CaseAttributeManager for the case
                 case.attribute_managers[model_type] = CaseAttributeManager(
-                    case, model_type)
+                    case, model_type, model_objects)
                 # use thea attribute manager to set the case models
                 attribute_manager = case.attribute_managers[model_type]
                 attribute_manager.get_case_model()

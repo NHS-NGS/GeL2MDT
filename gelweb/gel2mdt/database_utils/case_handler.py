@@ -157,12 +157,13 @@ class CaseAttributeManager(object):
     Holds get/refresh functions to be called by MCA, as well as pointing to
     CaseModels and ManyCaseModels for access by MCA.bulk_create_new().
     """
-    def __init__(self, case, model_type, many=False):
+    def __init__(self, case, model_type, model_objects, many=False):
         """
         Initialise with CaseModel or ManyCaseModel, dependent on many param.
         """
         self.case = case  # for accessing related table entries
         self.model_type = model_type
+        self.model_objects = model_objects
         self.many = many
         self.case_model = self.get_case_model()
 
@@ -250,7 +251,7 @@ class CaseAttributeManager(object):
             "name": clinician_details['name'],
             "email": "unknown",  # clinicain email not on labkey
             "hospital": clinician_details['hospital']
-        })
+        }, self.model_objects)
         return clinician
 
     def get_paricipant_demographics(self, participant_id):
@@ -275,46 +276,7 @@ class CaseAttributeManager(object):
             "nhs_num": 'unknown',
             "sex": 'unknown',
             }
-
-        # # API call to get participant name, DOB and NHS number
-        # search_results = lk.query.select_rows(
-        #     server_context=server_context,
-        #     schema_name='gel_rare_diseases',
-        #     query_name='participant_identifier',
-        #     filter_array=[
-        #         lk.query.QueryFilter(
-        #             'participant_id', participant_id, 'contains')
-        #     ]
-        # )
-        # participant_demographics["surname"] = search_results['rows'][0].get(
-        #     'surname')
-        # participant_demographics["forename"] = search_results['rows'][0].get(
-        #     'forenames')
-        # participant_demographics["date_of_birth"] = search_results['rows'][0].get(
-        #     'date_of_birth').split(' ')[0]
-        # if search_results['rows'][0].get('person_identifier_type').upper() == "NHSNUMBER":
-        #     participant_demographics["nhs_num"] = search_results['rows'][0].get(
-        #         'person_identifier')
-        #
-        # # API call to get participant sex
-        # search_results = lk.query.select_rows(
-        #     server_context=server_context,
-        #     schema_name='gel_rare_diseases',
-        #     query_name='rare_diseases_registration',
-        #     filter_array=[
-        #         lk.query.QueryFilter('participant_identifiers_id', participant_id, 'contains')
-        #     ]
-        # )
-        # sex_id = search_results["rows"][0]["person_stated_gender_id"]
-        # if sex_id == "1":
-        #     participant_demographics["sex"] = 'male'
-        # elif sex_id == "2":
-        #     participant_demographics["sex"] = 'female'
-        # else:
-        #     participant_demographics["sex"] = 'unknown'
-
         return participant_demographics
-
 
     def get_proband(self):
         """
@@ -332,7 +294,7 @@ class CaseAttributeManager(object):
             "date_of_birth": datetime.strptime(demographics["date_of_birth"], "%Y/%m/%d").date(),
             "sex": demographics["sex"],
             "status": 'N' # initialised to not started? (N)
-        })
+        }, self.model_objects)
         return proband
 
     def get_relatives(self):
@@ -366,7 +328,7 @@ class CaseAttributeManager(object):
             "surname": relative["surname"],
             "date_of_birth": datetime.strptime(relative["date_of_birth"], "%Y/%m/%d").date(),
             "sex": relative["sex"],
-        } for relative in relative_list])
+        } for relative in relative_list], self.model_objects)
         return relatives
 
     def get_family(self):
@@ -377,7 +339,7 @@ class CaseAttributeManager(object):
         family = CaseModel(Family, {
             "clinician": clinician.entry,
             "gel_family_id": self.case.json["family_id"]
-        })
+        }, self.model_objects)
         return family
 
     def get_phenotypes(self):
@@ -389,7 +351,7 @@ class CaseAttributeManager(object):
              "description": "unknown"}
             for phenotype in self.case.proband["hpoTermList"]
             if phenotype["termPresence"] is True
-        ])
+        ], self.model_objects)
         return phenotypes
 
 
@@ -398,7 +360,7 @@ class CaseAttributeManager(object):
         family_phenotypes = ManyCaseModel(FamilyPhenotype, [
             {"family": None,
              "phenotype": None}
-        ])
+        ], self.model_objects)
 
         return family_phenotypes
 
@@ -421,7 +383,7 @@ class CaseAttributeManager(object):
             "panel_name": panel["panelapp_results"]["SpecificDiseaseName"],
             "disease_group": panel["panelapp_results"]["DiseaseGroup"],
             "disease_subgroup": panel["panelapp_results"]["DiseaseSubGroup"]
-        } for panel in self.case.panels])
+        } for panel in self.case.panels], self.model_objects)
         return panels
 
     def get_panel_versions(self):
@@ -445,7 +407,7 @@ class CaseAttributeManager(object):
             # create the MCM
             "version_number": panel["panelapp_results"]["version"],
             "panel": panel["model"]
-        } for panel in self.case.panels])
+        } for panel in self.case.panels], self.model_objects)
         return panel_versions
 
     def get_genes(self):
@@ -466,7 +428,7 @@ class CaseAttributeManager(object):
         genes = ManyCaseModel(Gene, [{
             "ensembl_id": gene["EnsembleGeneIds"][0],  # TODO: which ID to use?
             "hgnc_name": gene["GeneSymbol"]
-        } for gene in gene_list])
+        } for gene in gene_list], self.model_objects)
         return genes
 
     def get_panel_version_genes(self):
@@ -474,7 +436,7 @@ class CaseAttributeManager(object):
         panel_version_genes = ManyCaseModel(PanelVersionGenes, [{
             "panel_version": None,
             "gene": None
-        }])
+        }], self.model_objects)
 
         return panel_version_genes
 
@@ -503,7 +465,9 @@ class CaseAttributeManager(object):
             "canonical_transcript": transcript.canonical,
             "strand": transcript.transcript_strand
         # add all transcripts except those without associated genes
-        } for transcript in case_transcripts if transcript.gene_ensembl_id])
+        } for transcript in case_transcripts if transcript.gene_ensembl_id],
+        self.model_objects)
+
         return transcripts
 
     def get_ir_family(self):
@@ -517,7 +481,7 @@ class CaseAttributeManager(object):
             "cip": self.case.json["cip"],
             "ir_family_id": self.case.request_id,
             "priority": self.case.json["case_priority"]
-        })
+        }, self.model_objects)
         return ir_family
 
     def get_ir_family_panels(self):
@@ -526,7 +490,7 @@ class CaseAttributeManager(object):
         ir_family_panels = ManyCaseModel(InterpretationReportFamilyPanel, [{
             "ir_family": None,
             "panel": None
-        }])
+        }], self.model_objects)
 
         return ir_family_panels
 
@@ -550,7 +514,7 @@ class CaseAttributeManager(object):
                     '%Y-%m-%dT%H:%M:%S'
                 )),
             "user": self.case.status["user"]
-        })
+        }, self.model_objects)
         return ir
 
     def get_variants(self):
@@ -578,7 +542,9 @@ class CaseAttributeManager(object):
             "position": variant["case_variant"].position,
         # loop through all variants and check that they have a case_variant
         # (all variants Tier1 and Tier2 do, Tier3 variants do not
-        } for variant in self.case.json_variants if variant["case_variant"]])
+        } for variant in self.case.json_variants if variant["case_variant"]],
+        self.model_objects)
+
         return variants
 
     def get_transcript_variants(self):
@@ -647,7 +613,7 @@ class CaseAttributeManager(object):
             "sift": transcript.variant_sift,
             "polyphen": transcript.variant_polyphen,
         } for transcript in self.case.transcripts
-            if transcript.transcript_entry])
+            if transcript.transcript_entry], self.model_objects)
 
         return transcript_variants
 
@@ -683,7 +649,9 @@ class CaseAttributeManager(object):
             "variant": variant["variant_entry"],
             "somatic": False
         # only adding T1/2
-        } for variant in self.case.json_variants if variant["variant_entry"]])
+        } for variant in self.case.json_variants if variant["variant_entry"]],
+        self.model_objects)
+
         return proband_variants
 
     def get_report_events(self):
@@ -791,7 +759,7 @@ class CaseAttributeManager(object):
                         "tier": int(report_event["tier"][-1:])
                     })
 
-        report_events = ManyCaseModel(ReportEvent, json_report_events)
+        report_events = ManyCaseModel(ReportEvent, json_report_events, self.model_objects)
         return report_events
 
     def get_proband_transcript_variants(self):
@@ -818,7 +786,10 @@ class CaseAttributeManager(object):
             # default is true if assoc. tx is canonical
             "selected": transcript.transcript_entry.canonical_transcript,
             "effect": transcript.proband_transcript_variant_effect
-        } for transcript in self.case.transcripts if transcript.transcript_entry and transcript.proband_variant_entry])
+        } for transcript
+            in self.case.transcripts
+            if transcript.transcript_entry
+            and transcript.proband_variant_entry], self.model_objects)
 
         return proband_transcript_variants
 
@@ -829,7 +800,9 @@ class CaseAttributeManager(object):
         tools_and_assemblies = ManyCaseModel(ToolOrAssemblyVersion, [{
             "tool_name": tool,
             "version_number": version
-        }for tool, version in self.case.tools_and_versions.items()])
+        }for tool, version in self.case.tools_and_versions.items()],
+        self.model_objects)
+
         return tools_and_assemblies
 
 
@@ -839,28 +812,16 @@ class CaseModel(object):
     instance of a model (pre-creation or post-creation) and whether it
     requires creation in the database.
     """
-    def __init__(self, model_type, model_attributes):
+    def __init__(self, model_type, model_attributes, model_objects):
         self.model_type = model_type
         self.model_attributes = model_attributes
-        self.entry = self.check_found_in_db()
+        self.model_objects = model_objects
+        self.entry = self.check_found_in_db(self.model_objects)
 
-    def check_found_in_db(self):
+    def check_found_in_db(self, queryset):
         """
         Queries the database for a model of the given type with the given
         attributes. Returns True if found, False if not.
-        """
-        try:
-            entry = self.model_type.objects.get(
-                **self.model_attributes
-            )  # returns True if corresponding instance exists
-        except self.model_type.DoesNotExist as e:
-            entry = False
-        return entry
-
-    def refresh_model_entry(self, queryset):
-        """
-        Take all objects for a particular Model type then filter which objects
-        belong to this particular CaseModel based on the model_attributes.
         """
         if self.model_type == Clinician:
             entry = [db_obj for db_obj in queryset
@@ -938,10 +899,13 @@ class CaseModel(object):
                      if db_obj.tool_name == self.model_attributes["tool_name"]
                      and db_obj.version_number == self.model_attributes["version_number"]]
 
-        assert len(entry) == 1
-
-        self.entry = entry[0]
-
+        if len(entry) == 1:
+            self.entry = entry[0]
+        elif len(entry) == 0:
+            self.entry = False
+        else:
+            # Barf. Multiple entries found for same object
+            raise ValueError("Multiple entries found for same object.")
 
 
 class ManyCaseModel(object):
@@ -950,12 +914,13 @@ class ManyCaseModel(object):
     for ManyToMany field population, as the bulk update must be handled using
     'through' tables.
     """
-    def __init__(self, model_type, model_attributes_list):
+    def __init__(self, model_type, model_attributes_list, model_objects):
         self.model_type = model_type
         self.model_attributes_list = model_attributes_list
+        self.model_objects = model_objects
 
         self.case_models = [
-            CaseModel(model_type, model_attributes)
+            CaseModel(model_type, model_attributes, model_objects)
             for model_attributes in model_attributes_list
         ]
         self.entries = self.get_entry_list()
