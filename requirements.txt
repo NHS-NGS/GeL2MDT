@@ -4,6 +4,9 @@ Django==2.0.1
 idna==2.6
 labkey==0.6.0
 Pillow==5.0.0
+primer3-py==0.5.5
+pybedtools==0.7.10
+pysam==0.13
 pytz==2017.3
 requests==2.18.4
 urllib3==1.22
