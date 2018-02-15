@@ -245,10 +245,16 @@ class CaseAttributeManager(object):
         clinician_details = {"name": "unknown", "hospital": "unknown"}
         # The results contain multiple rows for each famliy member.
         # This code just takes the first entry. May need refining.
-        clinician_details['name'] = search_results['rows'][0].get(
-            'consultant_details_full_name_of_responsible_consultant')
-        clinician_details['hospital'] = search_results['rows'][0].get(
-            'consultant_details_hospital_of_responsible_consultant')
+        try:
+            clinician_details['name'] = search_results['rows'][0].get(
+                'consultant_details_full_name_of_responsible_consultant')
+        except IndexError as e:
+            pass
+        try:
+            clinician_details['hospital'] = search_results['rows'][0].get(
+                'consultant_details_hospital_of_responsible_consultant')
+        except IndexError as e:
+            pass
 
         if not clinician_details['name']:
             clinician_details['name'] = "unknown"
@@ -294,15 +300,26 @@ class CaseAttributeManager(object):
                                 'participant_id', participant_id, 'contains')
                         ]
         )
-        participant_demographics["surname"] = search_results['rows'][0].get(
-                'surname')
-        participant_demographics["forename"] = search_results['rows'][0].get(
-                'forenames')
-        participant_demographics["date_of_birth"] = search_results['rows'][0].get(
-                'date_of_birth').split(' ')[0]
-        if search_results['rows'][0].get('person_identifier_type').upper() == "NHSNUMBER":
-                participant_demographics["nhs_num"] = search_results['rows'][0].get(
+        try:
+            participant_demographics["surname"] = search_results['rows'][0].get(
+                    'surname')
+        except IndexError as e:
+            pass
+            participant_demographics["forename"] = search_results['rows'][0].get(
+                    'forenames')
+        except IndexError as e:
+            pass
+        try:
+            participant_demographics["date_of_birth"] = search_results['rows'][0].get(
+                    'date_of_birth').split(' ')[0]
+        except IndexError as e:
+            pass
+        try:
+            if search_results['rows'][0].get('person_identifier_type').upper() == "NHSNUMBER":
+                    participant_demographics["nhs_num"] = search_results['rows'][0].get(
                             'person_identifier')
+        except IndexError as e:
+            pass
 
         search_results = lk.query.select_rows(
                 server_context=server_context,
