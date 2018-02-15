@@ -392,7 +392,7 @@ class PanelManager(object):
         fetched_panels then return it, otherwise return False.
         """
         pm_response =  self.fetched_panels.get((panelapp_id, panel_version), None)
-        print("PanelManager response:", response)
+        print("PanelManager response:", pm_response)
         return pm_response
 
 
