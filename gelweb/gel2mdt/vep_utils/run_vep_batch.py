@@ -34,6 +34,7 @@ class CaseTranscript:
         self.transcript_variant_hgvs_p = transcript_variant_hgvs_p
         self.transcript_variant_hgvs_g = transcript_variant_hgvs_g
         self.gene_model = None
+        self.transcript_entry = None
 
 
 # old version without using tempfile:
