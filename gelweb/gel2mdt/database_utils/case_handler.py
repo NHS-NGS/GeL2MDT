@@ -223,31 +223,36 @@ class CaseAttributeManager(object):
         Create a case model to handle adding/getting the clinician for case.
         """
         # family ID used to search for clinician details in labkey
-        # family_id = int(self.case.json["family_id"])
-        # # load in site specific details from config file
-        # config_dict = load_config.LoadConfig().load()
-        # labkey_server_request = config_dict['labkey_server_request']
-        #
-        # server_context = lk.utils.create_server_context(
-        #     'gmc.genomicsengland.nhs.uk',
-        #     labkey_server_request,
-        #     '/labkey', use_ssl=True)
-        #
-        clinician_details = {'name': 'unknown', 'hospital': 'unknown'}
-        # search_results = lk.query.select_rows(
-        #     server_context=server_context,
-        #     schema_name='gel_rare_diseases',
-        #     query_name='rare_diseases_registration',
-        #     filter_array=[
-        #         lk.query.QueryFilter('family_id', family_id, 'contains')
-        #     ]
-        # )
-        # # The results contain multiple rows for each famliy member.
-        # # This code just takes the first entry. May need refining.
-        # clinician_details['name'] = search_results['rows'][0].get(
-        #     'consultant_details_full_name_of_responsible_consultant')
-        # clinician_details['hospital'] = search_results['rows'][0].get(
-        #     'consultant_details_hospital_of_responsible_consultant')
+        family_id = int(self.case.json["family_id"])
+        # load in site specific details from config file
+        config_dict = load_config.LoadConfig().load()
+        labkey_server_request = config_dict['labkey_server_request']
+
+        server_context = lk.utils.create_server_context(
+            'gmc.genomicsengland.nhs.uk',
+            labkey_server_request,
+            '/labkey', use_ssl=True)
+
+        search_results = lk.query.select_rows(
+            server_context=server_context,
+            schema_name='gel_rare_diseases',
+            query_name='rare_diseases_registration',
+            filter_array=[
+                lk.query.QueryFilter('family_id', family_id, 'contains')
+            ]
+        )
+        clinician_details = {"name": "unknown", "hospital": "unknown"}
+        # The results contain multiple rows for each famliy member.
+        # This code just takes the first entry. May need refining.
+        clinician_details['name'] = search_results['rows'][0].get(
+            'consultant_details_full_name_of_responsible_consultant')
+        clinician_details['hospital'] = search_results['rows'][0].get(
+            'consultant_details_hospital_of_responsible_consultant')
+
+        if not clinician_details['name']:
+            clinician_details['name'] = "unknown"
+        if not clinician_details["hospital"]:
+            clinician_details["hospital"] = "unknown"
 
         clinician = CaseModel(Clinician, {
             "name": clinician_details['name'],
@@ -278,6 +283,42 @@ class CaseAttributeManager(object):
             "nhs_num": 'unknown',
             "sex": 'unknown',
             }
+
+        search_results = lk.query.select_rows(
+                server_context=server_context,
+                schema_name='gel_rare_diseases',
+                query_name='participant_identifier',
+                filter_array=[
+                            lk.query.QueryFilter(
+                                'participant_id', participant_id, 'contains')
+                        ]
+        )
+        participant_demographics["surname"] = search_results['rows'][0].get(
+                'surname')
+        participant_demographics["forename"] = search_results['rows'][0].get(
+                'forenames')
+        participant_demographics["date_of_birth"] = search_results['rows'][0].get(
+                'date_of_birth').split(' ')[0]
+        if search_results['rows'][0].get('person_identifier_type').upper() == "NHSNUMBER":
+                participant_demographics["nhs_num"] = search_results['rows'][0].get(
+                            'person_identifier')
+
+        search_results = lk.query.select_rows(
+                server_context=server_context,
+                schema_name='gel_rare_diseases',
+                query_name='rare_diseases_registration',
+                filter_array=[
+                    lk.query.QueryFilter('participant_identifiers_id', participant_id, 'contains')
+                        ]
+        )
+        sex_id = search_results["rows"][0]["person_stated_gender_id"]
+        if sex_id == "1":
+                participant_demographics["sex"] = 'male'
+        elif sex_id == "2":
+                participant_demographics["sex"] = 'female'
+        else:
+                participant_demographics["sex"] = 'unknown'
+
         return participant_demographics
 
     def get_proband(self):
