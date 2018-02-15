@@ -7,13 +7,14 @@ from . import parse_vep
 import paramiko
 
 class CaseVariant:
-    def __init__(self, chromosome, position, case_id, variant_count, ref, alt):
+    def __init__(self, chromosome, position, case_id, variant_count, ref, alt, genome_build):
         self.chromosome = chromosome
         self.position = position
         self.case_id = case_id
         self.variant_count = variant_count
         self.ref = ref
         self.alt = alt
+        self.genome_build = genome_build
 
 class CaseTranscript:
     def __init__(self, case_id, variant_count, gene_ensembl_id, gene_hgnc_name, transcript_name, transcript_canonical,
@@ -36,86 +37,120 @@ class CaseTranscript:
         self.gene_model = None
 
 
-# old version without using tempfile:
-# def generate_vcf(variants):
-#     with open('temp.vcf', 'w') as vcffile:
-#         f = csv.writer(vcffile, delimiter='\t')
-#         for variant in variants:
-#             f.writerow([variant.chromosome, variant.position, variant.case_id + ":" + variant.variant_count,
-#                         variant.ref, variant.alt])
-
-# new version using tempfile:
 def generate_vcf(variants):
-    tmpvcf = tempfile.NamedTemporaryFile(mode='w+t', delete=False)
+    tmphg19 = tempfile.NamedTemporaryFile(mode='w+t', delete=False)
+    tmphg38 = tempfile.NamedTemporaryFile(mode='w+t', delete=False)
     for variant in variants:
-        row_to_write = str(variant.chromosome) + '\t' + str(variant.position) + '\t' + str(variant.case_id) + ":" + \
-                       str(variant.variant_count) + '\t' + variant.ref + '\t' + variant.alt + '\n'
-        tmpvcf.writelines(row_to_write)
-    print(tmpvcf.name)
-    return tmpvcf.name
+        if 'GRCh37' in variant.genome_build:
+            row_to_write = str(variant.chromosome) + '\t' + str(variant.position) + '\t' + str(variant.case_id) + ":" + \
+                           str(variant.variant_count) + '\t' + variant.ref + '\t' + variant.alt + '\n'
+            tmphg19.writelines(row_to_write)
+        elif 'GRCh38' in variant.genome_build:
+            row_to_write = str(variant.chromosome) + '\t' + str(variant.position) + '\t' + str(variant.case_id) + ":" + \
+                           str(variant.variant_count) + '\t' + variant.ref + '\t' + variant.alt + '\n'
+            tmphg38.writelines(row_to_write)
+    print(tmphg19.name, tmphg38.name)
+    variant_dict = {'hg19_vcf': tmphg19.name, 'hg38_vcf': tmphg38.name}
+    return variant_dict
 
-#old version without using tempfile
-# def run_vep():
-#     config_dict = load_config.LoadConfig().load()
-#     # builds command from locations supplied in config file
-#     cmd = "{vep} -i temp.vcf -o temp.vep.vcf --cache --dir_cache {cache} --fork 4 --vcf --flag_pick \
-#             --exclude_predicted --everything --dont_skip --total_length --offline --fasta {fasta_loc}".format(
-#         vep=config_dict['vep'],
-#         cache=config_dict['cache'],
-#         fasta_loc=config_dict['fasta_loc'],
-#     )
-#     os.system(cmd)
-
-# new version using tempfile
 def run_vep(infile, config_dict):
-    outfile = tempfile.NamedTemporaryFile(mode='w+t', delete=False)
-    # builds command from locations supplied in config file
-    cmd = "{vep} -i {infile} -o {outfile} --force_overwrite --cache --dir_cache {cache} --fork 4 --vcf --flag_pick \
-            --exclude_predicted --everything --hgvsg --dont_skip --total_length --offline --fasta {fasta_loc}".format(
-        vep=config_dict['vep'],
-        infile=infile,
-        outfile=outfile.name,
-        cache=config_dict['cache'],
-        fasta_loc=config_dict['fasta_loc'],
-    )
-    subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell=True).wait()
-    return outfile.name
+    hg19_vcf = infile['hg19_vcf']
+    hg38_vcf = infile['hg38_vcf']
+    hg19_outfile = tempfile.NamedTemporaryFile(mode='w+t', delete=False)
+    hg38_outfile = tempfile.NamedTemporaryFile(mode='w+t', delete=False)
+    # run VEP for hg19 variants
+    if os.stat(hg19_vcf).st_size != 0: # if file not empty
+        # builds command from locations supplied in config file
+        cmd = "{vep} -i {infile} -o {outfile} --force_overwrite --cache --dir_cache {cache} --fork 4 --vcf --flag_pick \
+                --exclude_predicted --everything --hgvsg --dont_skip --total_length --offline --fasta {fasta_loc}".format(
+            vep=config_dict['vep'],
+            infile=hg19_vcf,
+            outfile=hg19_outfile.name,
+            cache=config_dict['hg19_cache'],
+            fasta_loc=config_dict['hg19_fasta_loc'],
+        )
+        subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell=True).wait()
+    # run VEP for hg38 variants
+    if os.stat(hg38_vcf).st_size != 0:
+        cmd = "{vep} -i {infile} -o {outfile} --force_overwrite --cache --dir_cache {cache} --fork 4 --vcf --flag_pick \
+                    --exclude_predicted --everything --hgvsg --dont_skip --total_length --offline --fasta {fasta_loc}".format(
+            vep=config_dict['vep'],
+            infile=hg38_vcf,
+            outfile=hg38_outfile.name,
+            cache=config_dict['hg38_cache'],
+            fasta_loc=config_dict['hg38_fasta_loc'],
+        )
+        subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell=True).wait()
+    annotated_variant_dict = {'hg19_vep': hg19_outfile.name, 'hg38_vep': hg38_outfile.name}
+    return annotated_variant_dict
 
 def run_vep_gosh(infile, config_dict):
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-    outfile = tempfile.NamedTemporaryFile(mode='w+t', delete=False)
-    outfile.close()
+    hg19_vcf = infile['hg19_vcf']
+    hg38_vcf = infile['hg38_vcf']
+    hg19_outfile = tempfile.NamedTemporaryFile(mode='w+t', delete=False)
+    hg19_outfile.close()
+    hg38_outfile = tempfile.NamedTemporaryFile(mode='w+t', delete=False)
+    hg38_outfile.close()
+
     # builds command from locations supplied in config file
     ssh.connect(config_dict['crick_ip'],
                 username=config_dict['crick_username'],
                 password=config_dict['crick_password'])
     sftp = ssh.open_sftp()
-    sftp.put(infile, '/home/chris/gel2mdt_testing/destination_file.txt'.format(infile))
+    # run VEP for hg19 variants
+    if os.stat(hg19_vcf).st_size != 0:
+        sftp.put(hg19_vcf, '/home/chris/gel2mdt_testing/hg19_destination_file.txt'.format(hg19_vcf))
 
-    cmd = "{vep} -i /home/chris/gel2mdt_testing/destination_file.txt " \
-          " -o /home/chris/gel2mdt_testing/output.txt --species homo_sapiens "  \
-          " --force_overwrite --cache --dir_cache {cache} --fork 4 --vcf --flag_pick --assembly GRCh38 " \
-          " --exclude_predicted --everything --hgvsg --dont_skip --total_length --offline --fasta {fasta_loc} ".format(
-            vep=config_dict['vep'],
-            infile=infile,
-            cache=config_dict['cache'],
-            fasta_loc=config_dict['fasta_loc'],
-    )
-    stdin, stdout, stderr = ssh.exec_command(cmd)
-    # stdin, stdout, stderr = ssh.exec_command('{gosh_vep} help'.format(gosh_vep=config_dict['gosh_vep']))
+        cmd = "{vep} -i /home/chris/gel2mdt_testing/hg19_destination_file.txt " \
+              " -o /home/chris/gel2mdt_testing/hg19_output.txt --species homo_sapiens "  \
+              " --force_overwrite --cache --dir_cache {cache} --fork 4 --vcf --flag_pick --assembly GRCh38 " \
+              " --exclude_predicted --everything --hgvsg --dont_skip --total_length --offline --fasta {fasta_loc} ".format(
+                vep=config_dict['vep'],
+                cache=config_dict['hg19_cache'],
+                fasta_loc=config_dict['hg19_fasta_loc'],
+        )
+        stdin, stdout, stderr = ssh.exec_command(cmd)
+        # stdin, stdout, stderr = ssh.exec_command('{gosh_vep} help'.format(gosh_vep=config_dict['gosh_vep']))
 
-    print('stdin:', stdin, 'stdout:', stdout.read(), 'stderr:', stderr.read())
+        print('stdin:', stdin, 'stdout:', stdout.read(), 'stderr:', stderr.read())
+    # run VEP for hg38 variants
+    if os.stat(hg38_vcf).st_size != 0:
+        sftp.put(hg38_vcf, '/home/chris/gel2mdt_testing/hg38_destination_file.txt'.format(hg38_vcf))
 
-    sftp.get('/home/chris/gel2mdt_testing/output.txt', outfile.name)
+        cmd = "{vep} -i /home/chris/gel2mdt_testing/hg38_destination_file.txt " \
+              " -o /home/chris/gel2mdt_testing/hg38_output.txt --species homo_sapiens "  \
+              " --force_overwrite --cache --dir_cache {cache} --fork 4 --vcf --flag_pick --assembly GRCh38 " \
+              " --exclude_predicted --everything --hgvsg --dont_skip --total_length --offline --fasta {fasta_loc} ".format(
+                vep=config_dict['vep'],
+                cache=config_dict['hg38_cache'],
+                fasta_loc=config_dict['hg38_fasta_loc'],
+        )
+        stdin, stdout, stderr = ssh.exec_command(cmd)
+        # stdin, stdout, stderr = ssh.exec_command('{gosh_vep} help'.format(gosh_vep=config_dict['gosh_vep']))
+
+        print('stdin:', stdin, 'stdout:', stdout.read(), 'stderr:', stderr.read())
+
+    sftp.get('/home/chris/gel2mdt_testing/hg19_output.txt', hg19_outfile.name)
+
+    sftp.get('/home/chris/gel2mdt_testing/hg38_output.txt', hg38_outfile.name)
     sftp.close()
     ssh.close()
-    return outfile.name
+    annotated_variant_dict = {'hg19_vep': hg19_outfile.name, 'hg38_vep': hg38_outfile.name}
+    return annotated_variant_dict
 
 def parse_vep_annotations(infile=None):
     if infile is not None:
-        variants = parse_vep.ParseVep().read_file(infile)
+        hg19_variants = []
+        hg38_variants = []
+        if os.stat(infile['hg19_vep']).st_size != 0:
+            hg19_variants = parse_vep.ParseVep().read_file(infile['hg19_vep'])
+        if os.stat(infile['hg38_vep']).st_size != 0:
+            hg38_variants = parse_vep.ParseVep().read_file(infile['hg38_vep'])
+        # concatenate the two lists of variant dictionaries
+        variants = hg19_variants + hg38_variants
     else:
         #reads in the local file saved in root folder for testing purposes
         variants = parse_vep.ParseVep().read_file('temp.vep.vcf')
@@ -147,23 +182,17 @@ def parse_vep_annotations(infile=None):
             transcripts_list.append(case_transcript)
     return transcripts_list
 
-# likely wont be needed when using tempfile
-def remove_temp_files():
-    os.system("rm temp.vcf temp.vep.vcf temp.vep.vcf_summary.txt")
-
 def generate_transcripts(variant_list):
-    #variant_list = get_variants()
     config_dict = load_config.LoadConfig().load()
-    variant_file = generate_vcf(variant_list)
+    variant_vcf_dict = generate_vcf(variant_list)
     if config_dict['center'] == 'GOSH':
-        annotated_file = run_vep_gosh(variant_file, config_dict)
+        annotated_files_dict = run_vep_gosh(variant_vcf_dict, config_dict)
     else:
-        annotated_file = run_vep(variant_file, config_dict)
+        annotated_files_dict = run_vep(variant_vcf_dict, config_dict)
 
-    transcript_list = parse_vep_annotations(annotated_file)
+    transcript_list = parse_vep_annotations(annotated_files_dict)
     # bypassing running VEP
     # transcript_list = parse_vep_annotations()
 
-    #remove_temp_files()
     return transcript_list
 
