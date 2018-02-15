@@ -140,7 +140,8 @@ class Case(object):
                     ref=variant["reference"],
                     alt=variant["alternate"],
                     case_id=self.request_id,
-                    variant_count=str(variant_object_count)
+                    variant_count=str(variant_object_count),
+                    genome_build=self.json_request_data["genomeAssemblyVersion"]
                 )
                 case_variant_list.append(case_variant)
                 # also add it to the dict within self.json_variants

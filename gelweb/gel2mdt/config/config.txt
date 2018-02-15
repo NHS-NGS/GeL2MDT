@@ -1,7 +1,9 @@
 center=BIRM
 vep=/opt/programs/ensembl-vep/vep
-cache=/media/sf_S_DRIVE/VEP_cache
-fasta_loc=/media/sf_S_DRIVE/VEP_cache/fasta
+hg19_cache=/media/sf_S_DRIVE/VEP_cache/hg19
+hg19_fasta_loc=/media/sf_S_DRIVE/VEP_cache/hg19/fasta
+hg38_cache=/media/sf_S_DRIVE/VEP_cache/hg38
+hg38_fasta_loc=/media/sf_S_DRIVE/VEP_cache/hg38/fasta
 labkey_server_request=Genomics England Portal/West Midlands/MeRCURy/Rare Diseases/Core
 gosh_vep=/opt/ensembl-tools-release-82/scripts/variant_effect_predictor/variant_effect_predictor.pl
 gosh_cache=/home/chris/.vep/
