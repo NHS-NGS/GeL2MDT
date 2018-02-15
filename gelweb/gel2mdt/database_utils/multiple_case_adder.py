@@ -194,8 +194,8 @@ class MultipleCaseAdder(object):
             (GELInterpretationReport, False),
             (ToolOrAssemblyVersion, True),
             (Variant, True),
-            (TranscriptVariant, True),
             (ProbandVariant, True),
+            (TranscriptVariant, True),
             (ProbandTranscriptVariant, True),
             (ReportEvent, True)
         )
