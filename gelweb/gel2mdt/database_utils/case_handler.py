@@ -19,7 +19,7 @@ class Case(object):
     updated in the database, or skipped dependent on whether a matching
     case/case family is found.
     """
-    def __init__(self, case_json):
+    def __init__(self, case_json, panel_manager):
         self.json = case_json
         self.json_case_data = self.json["interpretation_request_data"]
         self.json_request_data = self.json_case_data["json_request"]
@@ -34,6 +34,8 @@ class Case(object):
         self.status = self.get_status_json()
         self.json_variants \
             = self.json_case_data["json_request"]["TieredVariants"]
+
+        self.panel_manager = panel_manager
 
         self.panels = self.get_panels_json()
         self.variants = self.get_case_variants()
@@ -370,13 +372,27 @@ class CaseAttributeManager(object):
         ManyCaseModel with this information.
         """
         for panel in self.case.panels:
-            panelapp_poll = PollAPI(
-                "panelapp", "get_panel/{panelapp_id}/?version={v}".format(
-                    panelapp_id=panel["panelName"],
-                    v=panel["panelVersion"])
+            polled = self.case.panel_manager.fetch_panel_response(
+                panelapp_id=panel["panelName"],
+                panel_version=panel["panelVersion"]
             )
-            panelapp_poll.get_json_response()
-            panel["panelapp_results"] = panelapp_poll.response_json["result"]
+            if polled:
+                panel["panelapp_results"] = polled.results
+            elif not polled:
+                panelapp_poll = PollAPI(
+                    "panelapp", "get_panel/{panelapp_id}/?version={v}".format(
+                        panelapp_id=panel["panelName"],
+                        v=panel["panelVersion"])
+                )
+                panelapp_poll.get_json_response()
+                panel["panelapp_results"] = panelapp_poll.response_json["result"]
+
+                # inform the PanelManager that a new panel has been added
+                self.case.panel_manager.add_panel_response(
+                    panelapp_id=panel["panelName"],
+                    panel_version=panel["panelVersion"],
+                    panelapp_response = panel["panelapp_results"]
+                )
 
         panels = ManyCaseModel(Panel, [{
             "panelapp_id": panel["panelName"],
@@ -602,9 +618,6 @@ class CaseAttributeManager(object):
                 if not found:
                     # we don't make entries for tx with no Gene
                     case_transcript.transcript_entry = None
-
-        for transcript in self.case_transcripts:
-            print(vars(transcript))
 
         # use the updated CaseTranscript instances to create an MCM
         transcript_variants = ManyCaseModel(TranscriptVariant, [{
