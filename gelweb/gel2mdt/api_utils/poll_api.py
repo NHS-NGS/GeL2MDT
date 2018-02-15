@@ -44,14 +44,13 @@ class PollAPI(object):
         Creates a session which polls the instance's API a maximum of 20 times
         for a json response, retrying if the poll fails.
         """
-
-        while True:
+        json_poll_success = False
+        while not json_poll_success:
             # set up request session to retry failed connections
             MAX_RETRIES = 20
             session = requests.Session()
             adapter = requests.adapters.HTTPAdapter(max_retries=MAX_RETRIES)
             session.mount("https://", adapter)
-
             if (self.headers_required) and (self.headers is None):
                 # get auth headers if we need them and they're not yet set
                 self.get_auth_headers()
@@ -66,9 +65,15 @@ class PollAPI(object):
                 response = session.get(
                     url=self.url)
 
-            self.response_json = response.json()
-            self.response_status = response.status_code
-            return response.json()
+            try:
+                # ensure that the json can be decoded to avoid MCA crash
+                self.response_json = response.json()
+                self.response_status = response.status_code
+                json_poll_success = True
+            except json.JSONDecodeError as e:
+                continue
+
+        return response.json()
 
     def get_credentials(self):
         """
