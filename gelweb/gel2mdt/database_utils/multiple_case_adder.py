@@ -36,6 +36,10 @@ class MultipleCaseAdder(object):
         # -----------------------------------------
         # are we using test data files? defaults False (no)
         self.test_data = test_data
+
+        # instantiate a PanelManager for the Case classes to use
+        self.panel_manager = PanelManager()
+
         if self.test_data:
             logger.info("Fetching test data.")
             # set list_of_cases to test zoo
@@ -57,7 +61,6 @@ class MultipleCaseAdder(object):
 
             logger.info("Fetched all required CIP API data.")
 
-
         logger.info("Checking which cases to add.")
         self.cases_to_add = self.check_cases_to_add()
         logger.info("Checking which cases require updating.")
@@ -65,7 +68,6 @@ class MultipleCaseAdder(object):
         self.cases_to_skip = set(self.list_of_cases) - \
             set(self.cases_to_add) - \
             set(self.cases_to_update)
-
 
 
         # begin update process
@@ -92,7 +94,9 @@ class MultipleCaseAdder(object):
             logger.info("Found case json at " + file_path + " for testing.")
             with open(file_path) as json_file:
                 json_data = json.load(json_file)
-                list_of_cases.append(Case(case_json=json_data))
+                list_of_cases.append(Case(
+                    case_json=json_data,
+                    panel_manager=self.panel_manager))
         logger.info("Found " + str(len(list_of_cases)) +  " test cases.")
         return list_of_cases
 
@@ -101,7 +105,8 @@ class MultipleCaseAdder(object):
             # list comprehension, calling self.get_case_json each time for poll
             Case(
                 # instatiate a new case with the polled json
-                case_json=self.get_case_json(case["interpretation_request_id"])
+                case_json=self.get_case_json(case["interpretation_request_id"]),
+                panel_manager=self.panel_manager
             ) for case in self.cases_to_poll
         ]
         print("Successfully fetched", len(list_of_cases), "cases from CIP API.")
@@ -360,3 +365,37 @@ class MultipleCaseAdder(object):
         Updates the cases to the database which required updating.
         """
         pass
+
+
+class PanelManager(object):
+    """
+    A class which manages the panels polled in the cases to avoid polling the
+    same panel multiple times. Invokes PanelResposne classes for each different
+    panel.
+    """
+    def __init__(self):
+        self.fetched_panels = {}  # should be {(id, version): PanelResponse}
+
+    def add_panel_response(self, panelapp_id, panel_version, panelapp_response):
+        """
+        Instantiate a new PanelResponse and add it to fetched panels.
+        """
+        self.fetched_panels[(panelapp_id, panel_version)] = PanelResponse(
+            panelapp_response=panelapp_response
+        )
+
+    def fetch_panel_response(self, panelapp_id, panel_version):
+        """
+        Take a panelApp ID and version number. If a corresponding panel is in
+        fetched_panels then return it, otherwise return False.
+        """
+        self.fetched_panels.get((panelapp_id, panel_version), None)
+
+
+class PanelResponse(object):
+    """
+    Class to hold the json response from a panel as well as its panelApp ID and
+    version number.
+    """
+    def __init__(self, panelapp_response):
+        self.results = panelapp_response
