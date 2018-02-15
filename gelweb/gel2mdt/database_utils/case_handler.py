@@ -579,8 +579,6 @@ class CaseAttributeManager(object):
         variant_entries = [variant.entry
                            for variant in variant_manager.case_models]
 
-        # TODO: need some sort of way to link up Transcripts to the Variant
-        # which they originate from in VEP
         # for each CaseTranscript (which contains necessary info):
         for case_transcript in self.case.transcripts:
             # get information to hook up transcripts with variants

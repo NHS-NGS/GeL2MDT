@@ -194,8 +194,8 @@ class MultipleCaseAdder(object):
             (GELInterpretationReport, False),
             (ToolOrAssemblyVersion, True),
             (Variant, True),
-            (TranscriptVariant, True),
             (ProbandVariant, True),
+            (TranscriptVariant, True),
             (ProbandTranscriptVariant, True),
             (ReportEvent, True)
         )
@@ -378,18 +378,22 @@ class PanelManager(object):
 
     def add_panel_response(self, panelapp_id, panel_version, panelapp_response):
         """
-        Instantiate a new PanelResponse and add it to fetched panels.
+        Instantiate a new PanelResponse and add it to fetched panels. Returns
+        the added PanelResponse instance.
         """
         self.fetched_panels[(panelapp_id, panel_version)] = PanelResponse(
             panelapp_response=panelapp_response
         )
+        return self.fetched_panels.get((panelapp_id, panel_version), None)
 
     def fetch_panel_response(self, panelapp_id, panel_version):
         """
         Take a panelApp ID and version number. If a corresponding panel is in
         fetched_panels then return it, otherwise return False.
         """
-        self.fetched_panels.get((panelapp_id, panel_version), None)
+        pm_response =  self.fetched_panels.get((panelapp_id, panel_version), None)
+        print("PanelManager response:", pm_response)
+        return pm_response
 
 
 class PanelResponse(object):

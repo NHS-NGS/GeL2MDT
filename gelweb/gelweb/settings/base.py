@@ -95,6 +95,7 @@ NOSE_ARGS = [
 # Logging
 # https://docs.djangoproject.com/en/2.0/topics/logging/
 datetime_str_format = datetime.strftime(datetime.now(), '%Y-%m-%d')
+
 LOGGING = {
     'version': 1,
     'formatters': {
