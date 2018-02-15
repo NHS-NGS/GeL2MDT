@@ -224,7 +224,7 @@ class CaseAttributeManager(object):
         Create a case model to handle adding/getting the clinician for case.
         """
         # family ID used to search for clinician details in labkey
-        family_id = int(self.case.json["family_id"])
+        family_id = self.case.json["family_id"]
         # load in site specific details from config file
         config_dict = load_config.LoadConfig().load()
         labkey_server_request = config_dict['labkey_server_request']
