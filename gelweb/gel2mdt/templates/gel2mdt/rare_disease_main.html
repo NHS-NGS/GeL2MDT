@@ -17,8 +17,9 @@
                       method="POST"
                       style="margin-bottom:15px">
                     {% csrf_token %}
-                    <button class="btn btn-success"
-                        type="submit">
+                    <button class="btn btn-inactive"
+                            type="submit"
+                            disabled>
                         Update
                     </button>
 
@@ -51,34 +52,26 @@
                         <thead>
                             <tr>
                                 <th>GEL ID </th>
-                                <th>CIP ID</th>
                                 <th>Forename</th>
                                 <th>Surname</th>
                                 <th>DOB</th>
                                 <th>Clinician</th>
-                                <th>GMC</th>
+                                <th>Max Tier</th>
+                                <th>Assembly</th>
                                 <th>Case Status</th>
-                                <th>MDT Status</th>
-                                <th>Pilot</th>
                             </tr>
                         </thead>
                         <tbody>
                                 {% for report in rd_cases %}
                                 <tr>
                                      <td> <a href="/proband/{{report.id}}">{{report.ir_family.participant_family.proband.gel_id}}</a></td>
-                                    <td>{{report.ir_family.ir_family_id}}</td>
                                     <td>{{report.ir_family.participant_family.proband.forename}}</td>
                                     <td>{{report.ir_family.participant_family.proband.surname}}</td>
                                     <td>{{report.ir_family.participant_family.proband.date_of_birth|date}}</td>
                                     <td>{{report.ir_family.participant_family.clinician.name}}</td>
-                                    <td>{{report.ir_family.participant_family.proband.gmc}}</td>
+                                    <td>{{report.max_tier}}
+                                    <td>{{report.assembly}}
                                      <td>{{report.ir_family.participant_family.proband.get_status_display}}</td>
-                                    <td>{{report.ir_family.participant_family.proband.get_mdt_status_display}}</td>
-                                    {% if report.ir_family.participant_family.proband.pilot_case %}
-                                     <td>Yes</td>
-                                    {% else %}
-                                    <td>No</td>
-                                    {% endif %}
                                 </tr>
                                 {% endfor %}
                         </tbody>

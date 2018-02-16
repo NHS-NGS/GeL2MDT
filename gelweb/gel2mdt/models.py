@@ -195,6 +195,7 @@ class InterpretationReportFamilyPanel(models.Model):
 
     ir_family = models.ForeignKey(InterpretationReportFamily, on_delete=models.CASCADE)
 
+
 class GELInterpretationReport(models.Model):
     ir_family = models.ForeignKey(
         InterpretationReportFamily, on_delete=models.CASCADE)
@@ -207,6 +208,37 @@ class GELInterpretationReport(models.Model):
     sample_type = models.CharField(max_length=200, choices=(('cancer', 'cancer'),
                                                             ('raredisease', 'raredisease')))
 
+    def max_tier(self):
+        """
+        Get all PV associated with this variant and then return min or most
+        significant tier of all of these.
+        """
+        proband_variant_tiers = ProbandVariant.objects.filter(
+            interpretation_report=self
+        ).values_list('max_tier', flat=True)
+        try:
+            return min(proband_variant_tiers)
+        except ValueError as e:
+            return 3
+
+    def assembly(self):
+        """
+        Look at the variants and return the assemblies.
+        """
+        proband_variants = ProbandVariant.objects.filter(
+            interpretation_report=self
+        )
+        proband_variant_assemblies = []
+        for pv in proband_variants:
+            proband_variant_assemblies.append(pv.variant.genome_assembly)
+        proband_variant_assemblies = set(proband_variant_assemblies)
+        proband_variant_assemblies = list(proband_variant_assemblies)
+
+        if len(proband_variant_assemblies) == 1:
+            return proband_variant_assemblies[0]
+        else:
+            return proband_variant_assemblies
+
     # would be nice if this could link to the clinical scientist table
     # but wel also have "gel" and CIPs as users.
     user = models.CharField(max_length=200)
@@ -214,6 +246,11 @@ class GELInterpretationReport(models.Model):
     # sha hash to allow quick determination of differences each update
     sha_hash = models.CharField(max_length=200)
     polled_at_datetime = models.DateTimeField(default=timezone.now)
+
+    def get_max_tier(self):
+        variants = Variant.objects.filter(interpretation_report=self)
+        tiers = variants.value_list('tier', flat=True)
+        return min(tiers)
 
     def save(self, *args, **kwargs):
         """
@@ -324,6 +361,7 @@ class Variant(models.Model):
     db_snp_id = models.CharField(max_length=200)
 
     genome_assembly = models.ForeignKey(ToolOrAssemblyVersion, on_delete=models.CASCADE)
+
 
     def __str__(self):
         return str(self.chromosome + str(self.position) + self.reference + ">" + self.alternate)
