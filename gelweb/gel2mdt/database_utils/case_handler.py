@@ -305,6 +305,7 @@ class CaseAttributeManager(object):
                     'surname')
         except IndexError as e:
             pass
+        try:
             participant_demographics["forename"] = search_results['rows'][0].get(
                     'forenames')
         except IndexError as e:
@@ -329,7 +330,10 @@ class CaseAttributeManager(object):
                     lk.query.QueryFilter('participant_identifiers_id', participant_id, 'contains')
                         ]
         )
-        sex_id = search_results["rows"][0]["person_stated_gender_id"]
+        try:
+            sex_id = search_results["rows"][0]["person_stated_gender_id"]
+        except IndexError as e:
+            sex_id = "0"
         if sex_id == "1":
                 participant_demographics["sex"] = 'male'
         elif sex_id == "2":
@@ -343,7 +347,7 @@ class CaseAttributeManager(object):
         """
         Create a case model to handle adding/getting the proband for case.
         """
-        participant_id = int(self.case.json["proband"])
+        participant_id = self.case.json["proband"]
         demographics = self.get_paricipant_demographics(participant_id)
         family = self.case.attribute_managers[Family].case_model
         proband = CaseModel(Proband, {
@@ -897,7 +901,6 @@ class CaseModel(object):
         attributes. Returns True if found, False if not.
         """
 
-        print("looking for", self.model_type, "with attr", self.model_attributes)
         if self.model_type == Clinician:
             entry = [db_obj for db_obj in queryset
                      if db_obj.name == self.model_attributes["name"]
@@ -978,11 +981,9 @@ class CaseModel(object):
             entry = entry[0]
             # also need to set self.entry here as it may not be called in init
             self.entry = entry
-            print("Found")
         elif len(entry) == 0:
             entry = False
             self.entry = entry
-            print("Not found")
         else:
             # Barf. Multiple entries found for same object
             raise ValueError("Multiple entries found for same object.")
