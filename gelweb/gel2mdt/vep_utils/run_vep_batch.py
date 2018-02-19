@@ -154,7 +154,7 @@ def parse_vep_annotations(infile=None):
         variants = hg19_variants + hg38_variants
     else:
         #reads in the local file saved in root folder for testing purposes
-        variants = parse_vep.ParseVep().read_file('temp.vep.vcf')
+        variants = parse_vep.ParseVep().read_file('live.tmp.vep.vcf')
     transcripts_list = []
     for variant in variants:
         case_id = variant['id'].split(":")[0]
@@ -193,7 +193,7 @@ def generate_transcripts(variant_list):
 
     transcript_list = parse_vep_annotations(annotated_files_dict)
     # bypassing running VEP
-    # transcript_list = parse_vep_annotations()
+    #transcript_list = parse_vep_annotations()
 
     return transcript_list
 
