@@ -151,6 +151,24 @@ class Case(object):
                 # self.json_variants so we don't add a variant later
                 variant["case_variant"] = False
 
+        # check for CIP flagged variants
+        for interpreted_genome in self.json["interpreted_genome"]:
+            for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
+                print('doing the CIP flagged variants')
+                variant_object_count += 1
+                case_variant = CaseVariant(
+                    chromosome=variant["chromosome"],
+                    position=variant["position"],
+                    ref=variant["reference"],
+                    alt=variant["alternate"],
+                    case_id=self.request_id,
+                    variant_count=str(variant_object_count),
+                    genome_build=self.json_request_data["genomeAssemblyVersion"]
+                )
+                case_variant_list.append(case_variant)
+                # also add it to the dict within self.json_variants
+                variant["case_variant"] = case_variant
+
         return case_variant_list
 
 
