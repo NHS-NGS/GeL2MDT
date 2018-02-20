@@ -629,17 +629,47 @@ class CaseAttributeManager(object):
             if tool.tool_name == 'genome_build':
                 genome_assembly = tool
 
+        tiered_variants = []
+        # loop through all variants and check that they have a case_variant
+        # (all variants Tier1 and Tier2, Tier3 variants do not
+        for variant in self.case.json_variants:
+            if variant["case_variant"]:
+                tiered_variant = {
+                    "genome_assembly": genome_assembly,
+                    "alternate": variant["case_variant"].alt,
+                    "chromosome": variant["case_variant"].chromosome,
+                    "db_snp_id": variant["dbSNPid"],
+                    "reference": variant["case_variant"].ref,
+                    "position": variant["case_variant"].position,
+                }
+                tiered_variants.append(tiered_variant)
+
+        cip_variants = []
+        # loop through all variants and check that they have a case_variant (all should?)
+        for interpreted_genome in self.case.json["interpreted_genome"]:
+            for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
+                if variant["case_variant"]:
+                    cip_variant = {
+                        "genome_assembly": genome_assembly,
+                        "alternate": variant["case_variant"].alt,
+                        "chromosome": variant["case_variant"].chromosome,
+                        "db_snp_id": variant["dbSNPid"],
+                        "reference": variant["case_variant"].ref,
+                        "position": variant["case_variant"].position,
+                    }
+                    cip_variants.append(cip_variant)
+
+        tiered_and_cip_variants = tiered_variants + cip_variants
+
         # set and return the MCM
         variants = ManyCaseModel(Variant, [{
             "genome_assembly": genome_assembly,
-            "alternate": variant["case_variant"].alt,
-            "chromosome": variant["case_variant"].chromosome,
-            "db_snp_id": variant["dbSNPid"],
-            "reference": variant["case_variant"].ref,
-            "position": variant["case_variant"].position,
-        # loop through all variants and check that they have a case_variant
-        # (all variants Tier1 and Tier2 do, Tier3 variants do not
-        } for variant in self.case.json_variants if variant["case_variant"]],
+            "alternate": variant["alternate"],
+            "chromosome": variant["chromosome"],
+            "db_snp_id": variant["db_snp_id"],
+            "reference": variant["reference"],
+            "position": variant["position"],
+        } for variant in tiered_and_cip_variants],
         self.model_objects)
 
         return variants
@@ -724,6 +754,8 @@ class CaseAttributeManager(object):
             for variant
             in self.case.attribute_managers[Variant].case_model.case_models
         ]
+        # tiered variants
+        tiered_proband_variants = []
         for json_variant in self.case.json_variants:
             # some json_variants won't have an entry (T3), so:
             json_variant["variant_entry"] = None
@@ -738,13 +770,47 @@ class CaseAttributeManager(object):
                     # variant in json matches variant entry
                     json_variant["variant_entry"] = variant
 
+        for variant in self.case.json_variants:
+            if variant["variant_entry"]:
+                tiered_proband_variant = {
+                    "max_tier": variant["max_tier"],
+                    "variant": variant["variant_entry"],
+                }
+                tiered_proband_variants.append(tiered_proband_variant)
+
+        # cip flagged variants
+        cip_proband_variants = []
+        for interpreted_genome in self.case.json["interpreted_genome"]:
+            for json_variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
+                # all CIP flagged variants should have a variant entry.
+                json_variant["variant_entry"] = None
+                # variant in json matches variant entry
+                for variant in variant_entries:
+                    if (
+                                        json_variant["position"] == variant.position and
+                                        json_variant["reference"] == variant.reference and
+                                    json_variant["alternate"] == variant.alternate
+                    ):
+                        # variant in json matches variant entry
+                        json_variant["variant_entry"] = variant
+
+            for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
+                if variant["variant_entry"]:
+                    cip_proband_variant = {
+                        "max_tier": 0, # CIP flagged variants assigned tier 0
+                        "variant": variant["variant_entry"],
+                    }
+                    cip_proband_variants.append(cip_proband_variant)
+
+        tiered_and_cip_proband_variants = tiered_proband_variants + cip_proband_variants
+
         proband_variants = ManyCaseModel(ProbandVariant, [{
             "interpretation_report": ir_manager.case_model.entry,
             "max_tier": variant["max_tier"],
-            "variant": variant["variant_entry"],
+            "variant": variant["variant"],
             "somatic": False
-        # only adding T1/2
-        } for variant in self.case.json_variants if variant["variant_entry"]],
+        # only adding T1/2 and CIP flagged
+        } for variant in tiered_and_cip_proband_variants],
         self.model_objects)
 
         return proband_variants
@@ -853,6 +919,89 @@ class CaseAttributeManager(object):
                         "re_id": report_event["reportEventId"],
                         "tier": int(report_event["tier"][-1:])
                     })
+
+        # repeat for CIP flagged variants:
+        for interpreted_genome in self.case.json["interpreted_genome"]:
+            for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
+                # go through each RE in the variant
+                for report_event in variant["reportEvents"]:
+                    # set the Gene entry
+                    found = False
+                    gene_found = False
+                    re_genomic_info = report_event["genomicFeature"]
+                    re_gene_ensembl_id = re_genomic_info["ensemblId"]
+                    for gene in genes:
+                        if re_gene_ensembl_id == gene.ensembl_id:
+                            report_event["gene_entry"] = gene
+                            gene_found = True
+                            break
+
+                    if not gene_found:
+                        # re-attempt with HGNC
+                        re_gene_hgnc = re_genomic_info["HGNC"]
+                        for gene in genes:
+                            if re_gene_hgnc == gene.hgnc_name:
+                                report_event["gene_entry"] = gene
+                                gene_found = True
+
+                    if not gene_found:
+                        report_event["gene_entry"] = None
+
+                    # set the Panel entry
+                    panel_found = False
+                    re_panel_name = report_event["panelName"]
+                    re_panel_version = report_event["panelVersion"]
+
+                    for panel_version in panel_versions:
+                        if (re_panel_name == panel_version.panel.panel_name and
+                            re_panel_version == panel_version.version_number
+                        ):
+                            report_event["panel_version_entry"] = panel_version
+                            panel_found = True
+                            break
+                    if not panel_found:
+                        report_event["panel_version_entry"] = None
+
+                    if panel_found:
+                        panel = report_event["panel_version_entry"].panel
+                        panelapp_id = panel.panelapp_id
+                        # coverages is a dict of dicts: (1) access panel using hash
+                        panel_coverages = self.case.json_request_data["genePanelsCoverage"]
+                        panel_coverage = panel_coverages[panelapp_id]
+                    # (2) access coverage info using gene hgnc
+                    try:
+                        re_gene_hgnc = report_event["genomicFeature"]["HGNC"]
+                        re_gene_coverage = panel_coverage[re_gene_hgnc]
+                        # coverage info lists samples, get correct sample
+                        proband_sample = self.case.proband["samples"][0]
+                        proband_sample_avg = proband_sample + "_avg"
+                        gene_avg_coverage = re_gene_coverage[proband_sample_avg]
+                        report_event["gene_coverage"] = gene_avg_coverage
+                    except KeyError as e:
+                        report_event["gene_coverage"] = None
+
+                    # set the ProbandVariant entry
+                    proband_variant_found = False
+                    for proband_variant in proband_variants:
+                        if proband_variant.variant == variant["variant_entry"]:
+                            report_event["proband_variant_entry"] = proband_variant
+                            proband_variant_found = True
+                            break
+                    if not proband_variant_found:
+                        report_event["proband_variant_entry"] = None
+
+
+                    json_report_events.append({
+                        "coverage": report_event["gene_coverage"],
+                        "gene": report_event["gene_entry"],
+                        "mode_of_inheritance": report_event["modeOfInheritance"],
+                        "panel": report_event["panel_version_entry"],
+                        "penetrance": report_event["penetrance"],
+                        "proband_variant": None,
+                        "re_id": report_event["reportEventId"],
+                        "tier": int(report_event["tier"][-1:])
+                    })
+
 
         report_events = ManyCaseModel(ReportEvent, json_report_events, self.model_objects)
         return report_events
