@@ -235,8 +235,10 @@ def variant_view(request, variant_id):
 
     primers = Primer.objects.filter(variant=variant_id)
     variant = Variant.objects.get(id=variant_id)
+    transcript_variant = TranscriptVariant.objects.filter(variant=variant_id)[:1].get() #gets one (for hgvs_g)
     proband_variants = ProbandVariant.objects.filter(variant=variant)
     return render(request, 'gel2mdt/variant.html', {'variant': variant,
+                                                    'transcript_variant': transcript_variant,
                                                     'proband_variants': proband_variants,
                                                     'primers': primers})
 

@@ -353,7 +353,6 @@ class Variant(models.Model):
     """
     chromosome = models.CharField(max_length=2)
     position = models.IntegerField()
-    hgvs_g = models.CharField(max_length=255, unique=True, null=True)
 
     reference = models.CharField(max_length=200)
     alternate = models.CharField(max_length=200)
@@ -393,6 +392,7 @@ class TranscriptVariant(models.Model):
 
     hgvs_c = models.CharField(max_length=255)
     hgvs_p = models.CharField(max_length=255)
+    hgvs_g = models.CharField(max_length=255)
 
     sift = models.CharField(max_length=200, null=True)
     polyphen = models.CharField(max_length=200, null=True)
