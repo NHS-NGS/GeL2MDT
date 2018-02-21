@@ -629,7 +629,7 @@ class CaseAttributeManager(object):
             if tool.tool_name == 'genome_build':
                 genome_assembly = tool
 
-        tiered_variants = []
+        variants_list = []
         # loop through all variants and check that they have a case_variant
         # (all variants Tier1 and Tier2, Tier3 variants do not
         for variant in self.case.json_variants:
@@ -642,9 +642,8 @@ class CaseAttributeManager(object):
                     "reference": variant["case_variant"].ref,
                     "position": variant["case_variant"].position,
                 }
-                tiered_variants.append(tiered_variant)
+                variants_list.append(tiered_variant)
 
-        cip_variants = []
         # loop through all variants and check that they have a case_variant (all should?)
         for interpreted_genome in self.case.json["interpreted_genome"]:
             for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
@@ -657,9 +656,7 @@ class CaseAttributeManager(object):
                         "reference": variant["case_variant"].ref,
                         "position": variant["case_variant"].position,
                     }
-                    cip_variants.append(cip_variant)
-
-        tiered_and_cip_variants = tiered_variants + cip_variants
+                    variants_list.append(cip_variant)
 
         # set and return the MCM
         variants = ManyCaseModel(Variant, [{
@@ -669,7 +666,7 @@ class CaseAttributeManager(object):
             "db_snp_id": variant["db_snp_id"],
             "reference": variant["reference"],
             "position": variant["position"],
-        } for variant in tiered_and_cip_variants],
+        } for variant in variants_list],
         self.model_objects)
 
         return variants
@@ -735,6 +732,7 @@ class CaseAttributeManager(object):
             "af_max": transcript.transcript_variant_af_max,
             "hgvs_c": transcript.transcript_variant_hgvs_c,
             "hgvs_p": transcript.transcript_variant_hgvs_p,
+            "hgvs_g": transcript.transcript_variant_hgvs_g,
             "sift": transcript.variant_sift,
             "polyphen": transcript.variant_polyphen,
         } for transcript in self.case.transcripts
@@ -968,16 +966,18 @@ class CaseAttributeManager(object):
                         # coverages is a dict of dicts: (1) access panel using hash
                         panel_coverages = self.case.json_request_data["genePanelsCoverage"]
                         panel_coverage = panel_coverages[panelapp_id]
-                    # (2) access coverage info using gene hgnc
-                    try:
-                        re_gene_hgnc = report_event["genomicFeature"]["HGNC"]
-                        re_gene_coverage = panel_coverage[re_gene_hgnc]
-                        # coverage info lists samples, get correct sample
-                        proband_sample = self.case.proband["samples"][0]
-                        proband_sample_avg = proband_sample + "_avg"
-                        gene_avg_coverage = re_gene_coverage[proband_sample_avg]
-                        report_event["gene_coverage"] = gene_avg_coverage
-                    except KeyError as e:
+                        # (2) access coverage info using gene hgnc
+                        try:
+                            re_gene_hgnc = report_event["genomicFeature"]["HGNC"]
+                            re_gene_coverage = panel_coverage[re_gene_hgnc]
+                            # coverage info lists samples, get correct sample
+                            proband_sample = self.case.proband["samples"][0]
+                            proband_sample_avg = proband_sample + "_avg"
+                            gene_avg_coverage = re_gene_coverage[proband_sample_avg]
+                            report_event["gene_coverage"] = gene_avg_coverage
+                        except KeyError as e:
+                            report_event["gene_coverage"] = None
+                    else:
                         report_event["gene_coverage"] = None
 
                     # set the ProbandVariant entry
