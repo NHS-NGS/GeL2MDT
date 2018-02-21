@@ -107,10 +107,10 @@ def run_vep_gosh(infile, config_dict):
 
         cmd = "{vep} -i /home/chris/gel2mdt_testing/hg19_destination_file.txt " \
               " -o /home/chris/gel2mdt_testing/hg19_output.txt --species homo_sapiens "  \
-              " --force_overwrite --cache --dir_cache {cache} --fork 4 --vcf --flag_pick --assembly GRCh38 " \
+              " --force_overwrite --cache --dir_cache {cache} --fork 4 --vcf --flag_pick --assembly GRCh37 " \
               " --exclude_predicted --everything --hgvsg --dont_skip --total_length --offline --fasta {fasta_loc} ".format(
                 vep=config_dict['vep'],
-                cache=config_dict['hg19_cache'],
+                cache=config_dict['cache'],
                 fasta_loc=config_dict['hg19_fasta_loc'],
         )
         stdin, stdout, stderr = ssh.exec_command(cmd)
@@ -126,7 +126,7 @@ def run_vep_gosh(infile, config_dict):
               " --force_overwrite --cache --dir_cache {cache} --fork 4 --vcf --flag_pick --assembly GRCh38 " \
               " --exclude_predicted --everything --hgvsg --dont_skip --total_length --offline --fasta {fasta_loc} ".format(
                 vep=config_dict['vep'],
-                cache=config_dict['hg38_cache'],
+                cache=config_dict['cache'],
                 fasta_loc=config_dict['hg38_fasta_loc'],
         )
         stdin, stdout, stderr = ssh.exec_command(cmd)
