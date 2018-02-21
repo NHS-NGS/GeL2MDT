@@ -292,7 +292,7 @@ class CaseAttributeManager(object):
         :param participant_id: GEL participant ID
         :return: dict containing participant demographics
         '''
-        # # load in site specific details from config file
+        # load in site specific details from config file
         config_dict = load_config.LoadConfig().load()
         labkey_server_request = config_dict['labkey_server_request']
 
@@ -629,7 +629,7 @@ class CaseAttributeManager(object):
             if tool.tool_name == 'genome_build':
                 genome_assembly = tool
 
-        tiered_variants = []
+        variants_list = []
         # loop through all variants and check that they have a case_variant
         # (all variants Tier1 and Tier2, Tier3 variants do not
         for variant in self.case.json_variants:
@@ -642,9 +642,8 @@ class CaseAttributeManager(object):
                     "reference": variant["case_variant"].ref,
                     "position": variant["case_variant"].position,
                 }
-                tiered_variants.append(tiered_variant)
+                variants_list.append(tiered_variant)
 
-        cip_variants = []
         # loop through all variants and check that they have a case_variant (all should?)
         for interpreted_genome in self.case.json["interpreted_genome"]:
             for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
@@ -657,9 +656,7 @@ class CaseAttributeManager(object):
                         "reference": variant["case_variant"].ref,
                         "position": variant["case_variant"].position,
                     }
-                    cip_variants.append(cip_variant)
-
-        tiered_and_cip_variants = tiered_variants + cip_variants
+                    variants_list.append(cip_variant)
 
         # set and return the MCM
         variants = ManyCaseModel(Variant, [{
@@ -669,7 +666,7 @@ class CaseAttributeManager(object):
             "db_snp_id": variant["db_snp_id"],
             "reference": variant["reference"],
             "position": variant["position"],
-        } for variant in tiered_and_cip_variants],
+        } for variant in variants_list],
         self.model_objects)
 
         return variants
@@ -735,6 +732,7 @@ class CaseAttributeManager(object):
             "af_max": transcript.transcript_variant_af_max,
             "hgvs_c": transcript.transcript_variant_hgvs_c,
             "hgvs_p": transcript.transcript_variant_hgvs_p,
+            "hgvs_g": transcript.transcript_variant_hgvs_g,
             "sift": transcript.variant_sift,
             "polyphen": transcript.variant_polyphen,
         } for transcript in self.case.transcripts
