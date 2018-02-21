@@ -292,7 +292,7 @@ class CaseAttributeManager(object):
         :param participant_id: GEL participant ID
         :return: dict containing participant demographics
         '''
-        # load in site specific details from config file
+        # # load in site specific details from config file
         config_dict = load_config.LoadConfig().load()
         labkey_server_request = config_dict['labkey_server_request']
 
@@ -968,16 +968,18 @@ class CaseAttributeManager(object):
                         # coverages is a dict of dicts: (1) access panel using hash
                         panel_coverages = self.case.json_request_data["genePanelsCoverage"]
                         panel_coverage = panel_coverages[panelapp_id]
-                    # (2) access coverage info using gene hgnc
-                    try:
-                        re_gene_hgnc = report_event["genomicFeature"]["HGNC"]
-                        re_gene_coverage = panel_coverage[re_gene_hgnc]
-                        # coverage info lists samples, get correct sample
-                        proband_sample = self.case.proband["samples"][0]
-                        proband_sample_avg = proband_sample + "_avg"
-                        gene_avg_coverage = re_gene_coverage[proband_sample_avg]
-                        report_event["gene_coverage"] = gene_avg_coverage
-                    except KeyError as e:
+                        # (2) access coverage info using gene hgnc
+                        try:
+                            re_gene_hgnc = report_event["genomicFeature"]["HGNC"]
+                            re_gene_coverage = panel_coverage[re_gene_hgnc]
+                            # coverage info lists samples, get correct sample
+                            proband_sample = self.case.proband["samples"][0]
+                            proband_sample_avg = proband_sample + "_avg"
+                            gene_avg_coverage = re_gene_coverage[proband_sample_avg]
+                            report_event["gene_coverage"] = gene_avg_coverage
+                        except KeyError as e:
+                            report_event["gene_coverage"] = None
+                    else:
                         report_event["gene_coverage"] = None
 
                     # set the ProbandVariant entry
