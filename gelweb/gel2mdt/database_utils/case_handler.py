@@ -83,7 +83,8 @@ class Case(object):
                     continue
                 family_member = {'gel_id': participant["gelId"],
                                  'relation_to_proband': participant["additionalInformation"]["relation_to_proband"],
-                                 'affection_status': participant["affectionStatus"]
+                                 'affection_status': participant["affectionStatus"],
+                                 'sex': participant['sex'],
                                  }
                 family_members.append(family_member)
         return family_members
@@ -306,7 +307,6 @@ class CaseAttributeManager(object):
             "forename": 'unknown',
             "date_of_birth": '2011/01/01', # unknown but needs to be in date format
             "nhs_num": 'unknown',
-            "sex": 'unknown',
             }
 
         search_results = lk.query.select_rows(
@@ -340,25 +340,6 @@ class CaseAttributeManager(object):
         except IndexError as e:
             pass
 
-        search_results = lk.query.select_rows(
-                server_context=server_context,
-                schema_name='gel_rare_diseases',
-                query_name='rare_diseases_registration',
-                filter_array=[
-                    lk.query.QueryFilter('participant_identifiers_id', participant_id, 'contains')
-                        ]
-        )
-        try:
-            sex_id = search_results["rows"][0]["person_stated_gender_id"]
-        except IndexError as e:
-            sex_id = "0"
-        if sex_id == "1":
-                participant_demographics["sex"] = 'male'
-        elif sex_id == "2":
-                participant_demographics["sex"] = 'female'
-        else:
-                participant_demographics["sex"] = 'unknown'
-
         return participant_demographics
 
     def get_proband(self):
@@ -375,7 +356,7 @@ class CaseAttributeManager(object):
             "forename": demographics["forename"],
             "surname": demographics["surname"],
             "date_of_birth": datetime.strptime(demographics["date_of_birth"], "%Y/%m/%d").date(),
-            "sex": demographics["sex"],
+            "sex": self.case.proband["sex"],
             "status": 'N' # initialised to not started? (N)
         }, self.model_objects)
         return proband
@@ -398,7 +379,7 @@ class CaseAttributeManager(object):
                 "forename": demographics["forename"],
                 "surname":demographics["surname"],
                 "date_of_birth": demographics["date_of_birth"],
-                "sex": demographics["sex"],
+                "sex": family_member["sex"],
             }
             relative_list.append(relative)
         relatives = ManyCaseModel(Relative,[{
