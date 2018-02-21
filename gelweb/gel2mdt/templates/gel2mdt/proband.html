@@ -23,6 +23,11 @@
                         <div class="panel-body">
 
                             <div class="col-md-3">
+                                {% bootstrap_label "GEL ID" %}
+                                <div class="block">
+                                    {{report.ir_family.participant_family.proband.gel_id}}
+                                </div>
+                                </br>
                                 {% bootstrap_label "NHS Number" %}
                                 <div class="block">
                                     {{report.ir_family.participant_family.proband.nhs_number}}
@@ -218,9 +223,43 @@
 <div id="variants" class="tab-pane fade">
  <div class="container-fluid" >
         <h1> {{ proband.gel_id }}</h1>
+         <div class="row">
+
+                    <div class="col-md-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">Participant Information</div>
+                            <div class="panel-body">
+                                <div class="col-md-3">
+                                    {% bootstrap_label "GEL ID" %}
+                                    <div class="block">
+                                        {{report.ir_family.participant_family.proband.gel_id}}
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    {% bootstrap_label "Forename" %}
+                                    <div class="block">
+                                        {{report.ir_family.participant_family.proband.forename}}
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    {% bootstrap_label "Surname" %}
+                                    <div class="block">
+                                        {{report.ir_family.participant_family.proband.surname}}
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    {% bootstrap_label "CIP ID" %}
+                                    <div class="block">
+                                        {{report.ir_family.ir_family_id}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
 
         <div class="panel-body">
-
             <div class="table-responsive">
             <table width="100%" class="table table-striped table-bordered table-hover" id="dataTables-generic">
                 <thead style='font-size: 75%'>
