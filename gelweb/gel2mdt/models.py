@@ -355,7 +355,7 @@ class Variant(models.Model):
     position = models.IntegerField()
 
     reference = models.CharField(max_length=200)
-    alternate = models.CharField(max_length=200)
+    alternate = models.TextField()
 
     db_snp_id = models.CharField(max_length=200)
 
