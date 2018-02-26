@@ -39,6 +39,7 @@ class MultipleCaseAdder(object):
 
         # instantiate a PanelManager for the Case classes to use
         self.panel_manager = PanelManager()
+        self.transcript_manager = TranscriptManager()
 
         if self.test_data:
             logger.info("Fetching test data.")
@@ -209,16 +210,23 @@ class MultipleCaseAdder(object):
                 case_id_map[case.request_id] = case
                 variants += case.variants
 
-            # fetch the transcripts
+            # fetch the transcripts and put them into TranscriptManager
             transcripts = generate_transcripts(variants)
+            for transcript in transcripts:
+                case_id = transcript.case_id
+                print(case_id)
+                case = case_id_map[case_id]
+                self.transcript_manager.add_transcript(transcript, case.tools_and_versions['genome_build'] )
 
             # assign transcripts
             i = 0
             while i < len(transcripts):  # keep going until no transcripts left
-                transcript = transcripts.pop(0)
+                transcript = transcripts.pop(0) # check to see if transcript already exists in transcript manager
                 case_id = transcript.case_id
                 case = case_id_map[case_id]
-                case.transcripts.append(transcript)
+                fetched_transcript = self.transcript_manager.fetch_transcript(transcript,
+                                                                              case.tools_and_versions['genome_build'])
+                case.transcripts.append(fetched_transcript)
 
         # ------------------- #
         # BULK UPDATE PROCESS #
@@ -365,6 +373,29 @@ class MultipleCaseAdder(object):
         Updates the cases to the database which required updating.
         """
         pass
+
+class TranscriptManager(object):
+    """
+    A class which manages transcripts and avoids conflicts in
+    duplicate CaseTranscripts
+    """
+    def __init__(self):
+        self.fetched_transcripts = {} # should be {[name][build]}: CaseTranscript}
+
+    def add_transcript(self, transcript, genome_build):
+        if transcript.transcript_name in self.fetched_transcripts:
+            if genome_build not in self.fetched_transcripts[transcript.transcript_name]:
+                self.fetched_transcripts[transcript.transcript_name][genome_build] = transcript
+        else:
+            self.fetched_transcripts[transcript.transcript_name] = {}
+            self.fetched_transcripts[transcript.transcript_name][genome_build] = transcript
+
+    def fetch_transcript(self, transcript, genome_build):
+        if 'GRCh38' in self.fetched_transcripts[transcript.transcript_name]:
+            genome_build = 'GRCh38'
+        print(genome_build)
+        return self.fetched_transcripts[transcript.transcript_name][genome_build]
+
 
 
 class PanelManager(object):
