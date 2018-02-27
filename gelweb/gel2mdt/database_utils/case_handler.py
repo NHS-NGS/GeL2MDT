@@ -248,10 +248,10 @@ class CaseAttributeManager(object):
         # load in site specific details from config file
         config_dict = load_config.LoadConfig().load()
 
-        if case.skip_demographics:
+        if self.case.skip_demographics:
             # don't poll labkey
             clinician_details = {"name": "unknown", "hospital": "unknown"}
-        elif not case.skip_demographics:
+        elif not self.case.skip_demographics:
             # poll labkey
             labkey_server_request = config_dict['labkey_server_request']
             server_context = lk.utils.create_server_context(
@@ -302,7 +302,7 @@ class CaseAttributeManager(object):
         # load in site specific details from config file
         config_dict = load_config.LoadConfig().load()
 
-        if case.skip_demographics:
+        if self.case.skip_demographics:
             # don't poll labkey
             participant_demographics = {
                 "surname": 'unknown',
@@ -311,7 +311,7 @@ class CaseAttributeManager(object):
                 "nhs_num": 'unknown',
                 }
 
-        elif not case.skip_demographics:
+        elif not self.case.skip_demographics:
             labkey_server_request = config_dict['labkey_server_request']
             server_context = lk.utils.create_server_context(
                 'gmc.genomicsengland.nhs.uk',
