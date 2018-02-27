@@ -22,7 +22,7 @@ class MultipleCaseAdder(object):
     required related instances to the database and reporting status and
     errors during the process.
     """
-    def __init__(self, test_data=False):
+    def __init__(self, test_data=False, skip_demographics=False):
         """
         Initiliase an instance of a MultipleCaseAdder to start managing
         a database update. This will get the list of cases available to
@@ -36,6 +36,10 @@ class MultipleCaseAdder(object):
         # -----------------------------------------
         # are we using test data files? defaults False (no)
         self.test_data = test_data
+        # are we polling labkey? defaults False (yes)
+        self.skip_demographics = skip_demographics
+
+        # get the config file for datadumps
         self.config = load_config.LoadConfig().load()
 
         # instantiate a PanelManager for the Case classes to use
@@ -98,7 +102,8 @@ class MultipleCaseAdder(object):
                 json_data = json.load(json_file)
                 list_of_cases.append(Case(
                     case_json=json_data,
-                    panel_manager=self.panel_manager))
+                    panel_manager=self.panel_manager,
+                    skip_demographics=self.skip_demographics))
         logger.info("Found " + str(len(list_of_cases)) +  " test cases.")
         return list_of_cases
 
@@ -108,7 +113,8 @@ class MultipleCaseAdder(object):
             Case(
                 # instatiate a new case with the polled json
                 case_json=self.get_case_json(case["interpretation_request_id"]),
-                panel_manager=self.panel_manager
+                panel_manager=self.panel_manager,
+                skip_demographics=self.skip_demographics
             ) for case in self.cases_to_poll
         ]
         print("Successfully fetched", len(list_of_cases), "cases from CIP API.")

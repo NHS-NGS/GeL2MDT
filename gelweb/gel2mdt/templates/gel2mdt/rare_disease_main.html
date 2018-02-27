@@ -12,7 +12,7 @@
            </div>
             <!-- /.panel-heading -->
             <div class="panel-body">
-                <div class="pull-right">
+                <div> 
                 <form action="{% url 'rare-disease-main' %}"
                       method="POST"
                       style="margin-bottom:15px">
@@ -22,6 +22,17 @@
                         Update
                     </button>
 
+                    <div class="form-check">
+                       <input class="form-check-input" 
+                              type="checkbox" 
+                              value="true"
+                              name="skipDemographics"
+                              id="demographicSkipCheck">
+                       <label class="form-check-label"
+                              for="demographicSkipCheck">
+                           Skip LabKey demographics?
+                       </label>
+                    </div>
                     <div class="radio-inline">
                         <label><input 
                          type="radio" 
@@ -39,6 +50,7 @@
                             Live Cases
                         </label>
                     </div>
+
                     
                 </form>
                 </div>
@@ -47,7 +59,7 @@
                 <table width="100%" 
                        class="table table-striped table-bordered table-hover" 
                        id="dataTables-generic"
-                       style="border-top:15px">
+                       style="border-top:14px">
                         <thead>
                             <tr>
                                 <th>GEL ID </th>
