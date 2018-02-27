@@ -99,10 +99,15 @@ def rare_disease_main(request):
     #create_dummy_sample()
 
     if request.method == "POST":
+        skip_demographics = request.POST.get("skipDemographics", None)
+        if skip_demographics:
+            skip_demographics = True
+        else:
+            skip_demographics = False
         if request.POST.get("cases") == 'live':
-            update = MultipleCaseAdder()
+            update = MultipleCaseAdder(skip_demographics=skip_demographics)
         elif request.POST.get("cases") == 'test':
-            update = MultipleCaseAdder(test_data=True)
+            update = MultipleCaseAdder(test_data=True, skip_demographics=skip_demographics)
 
     rd_cases = GELInterpretationReport.objects.all()
     return render(request, 'gel2mdt/rare_disease_main.html', {'rd_cases': rd_cases})
