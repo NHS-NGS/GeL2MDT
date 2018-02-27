@@ -222,7 +222,6 @@ class MultipleCaseAdder(object):
             transcripts = generate_transcripts(variants)
             for transcript in transcripts:
                 case_id = transcript.case_id
-                print(case_id)
                 case = case_id_map[case_id]
                 self.transcript_manager.add_transcript(transcript, case.tools_and_versions['genome_build'] )
 
@@ -232,8 +231,7 @@ class MultipleCaseAdder(object):
                 transcript = transcripts.pop(0) # check to see if transcript already exists in transcript manager
                 case_id = transcript.case_id
                 case = case_id_map[case_id]
-                fetched_transcript = self.transcript_manager.fetch_transcript(transcript,
-                                                                              case.tools_and_versions['genome_build'])
+                fetched_transcript = self.transcript_manager.fetch_transcript(transcript)
                 case.transcripts.append(fetched_transcript)
 
         # ------------------- #
