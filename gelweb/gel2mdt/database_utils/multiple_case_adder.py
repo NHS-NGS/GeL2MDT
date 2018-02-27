@@ -140,7 +140,7 @@ class MultipleCaseAdder(object):
                 "cip_api", "interpretation-request/{id}/{version}".format(
                     id=interpretation_request_id.split("-")[0],
                     version=interpretation_request_id.split("-")[1]))
-            with open(os.path.join(cip_api_storage, '{}.json'.format(interpretation_request_id), 'w')) as f:
+            with open(os.path.join(cip_api_storage, '{}.json'.format(interpretation_request_id)), 'w') as f:
                 json.dump(request_poll.get_json_response(), f)
             response = request_poll.get_json_response()
         return response
