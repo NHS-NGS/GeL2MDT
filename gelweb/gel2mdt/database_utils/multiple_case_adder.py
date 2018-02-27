@@ -6,7 +6,7 @@ from ..api_utils.poll_api import PollAPI
 from ..api_utils.cip_utils import InterpretationList
 from ..vep_utils.run_vep_batch import generate_transcripts
 from .case_handler import Case, CaseAttributeManager
-
+from ..config import load_config
 import pprint
 import logging
 
@@ -38,6 +38,9 @@ class MultipleCaseAdder(object):
         self.test_data = test_data
         # are we polling labkey? defaults False (yes)
         self.skip_demographics = skip_demographics
+
+        # get the config file for datadumps
+        self.config = load_config.LoadConfig().load()
 
         # instantiate a PanelManager for the Case classes to use
         self.panel_manager = PanelManager()
@@ -125,12 +128,19 @@ class MultipleCaseAdder(object):
         :returns: A case json associated with the given IR ID from CIP-API
         """
         logger.info("Polling API for case", interpretation_request_id)
-        request_poll = PollAPI(
-            # instantiate a poll of CIP API for a given case json
-            "cip_api", "interpretation-request/{id}/{version}".format(
-                id=interpretation_request_id.split("-")[0],
-                version=interpretation_request_id.split("-")[1]))
-        return request_poll.get_json_response()
+        cip_api_storage = self.config['cip_api_storage']
+        if os.path.isfile(os.path.join(cip_api_storage, '{}.json'.format(interpretation_request_id))):
+            response = json.load(open(os.path.join(cip_api_storage, '{}.json'.format(interpretation_request_id))))
+        else:
+            request_poll = PollAPI(
+                # instantiate a poll of CIP API for a given case json
+                "cip_api", "interpretation-request/{id}/{version}".format(
+                    id=interpretation_request_id.split("-")[0],
+                    version=interpretation_request_id.split("-")[1]))
+            with open(os.path.join(cip_api_storage, '{}.json'.format(interpretation_request_id), 'w')) as f:
+                json.dump(request_poll.get_json_response(), f)
+            response = request_poll.get_json_response()
+        return response
 
     def check_cases_to_add(self):
         """
@@ -387,19 +397,14 @@ class TranscriptManager(object):
         self.fetched_transcripts = {} # should be {[name][build]}: CaseTranscript}
 
     def add_transcript(self, transcript, genome_build):
-        if transcript.transcript_name in self.fetched_transcripts:
-            if genome_build not in self.fetched_transcripts[transcript.transcript_name]:
-                self.fetched_transcripts[transcript.transcript_name][genome_build] = transcript
+        if transcript.transcript_name not in self.fetched_transcripts:
+            self.fetched_transcripts[transcript.transcript_name] = transcript
         else:
-            self.fetched_transcripts[transcript.transcript_name] = {}
-            self.fetched_transcripts[transcript.transcript_name][genome_build] = transcript
+            if genome_build == 'GRCh38':
+                self.fetched_transcripts[transcript.transcript_name] = transcript
 
-    def fetch_transcript(self, transcript, genome_build):
-        if 'GRCh38' in self.fetched_transcripts[transcript.transcript_name]:
-            genome_build = 'GRCh38'
-        print(genome_build)
-        return self.fetched_transcripts[transcript.transcript_name][genome_build]
-
+    def fetch_transcript(self, transcript):
+        return self.fetched_transcripts[transcript.transcript_name]
 
 
 class PanelManager(object):
