@@ -9,7 +9,7 @@ from ..models import *
 from ..api_utils.poll_api import PollAPI
 from ..vep_utils.run_vep_batch import CaseVariant, CaseTranscript
 from ..config import load_config
-
+import re
 import pprint
 
 
@@ -449,6 +449,8 @@ class CaseAttributeManager(object):
         Poll panelApp to fetch information about a panel, then create a
         ManyCaseModel with this information.
         """
+        config_dict = load_config.LoadConfig().load()
+        panelapp_storage = config_dict['panelapp_storage']
         for panel in self.case.panels:
             polled = self.case.panel_manager.fetch_panel_response(
                 panelapp_id=panel["panelName"],
@@ -457,13 +459,21 @@ class CaseAttributeManager(object):
             if polled:
                 panel["panelapp_results"] = polled.results
             elif not polled:
-                panelapp_poll = PollAPI(
-                    "panelapp", "get_panel/{panelapp_id}/?version={v}".format(
-                        panelapp_id=panel["panelName"],
-                        v=panel["panelVersion"])
-                )
-                panelapp_poll.get_json_response()
-                panel["panelapp_results"] = panelapp_poll.response_json["result"]
+                if os.path.isfile(os.path.join(panelapp_storage, '{}_{}.json'.format(panel['panelName'],
+                                                                                     panel['panelVersion']))):
+                    panel_app_response = json.load(open(os.path.join(panelapp_storage, '{}_{}.json'.format(panel['panelName'],
+                                                                                              panel['panelVersion']))))
+                else:
+                    panelapp_poll = PollAPI(
+                        "panelapp", "get_panel/{panelapp_id}/?version={v}".format(
+                            panelapp_id=panel["panelName"],
+                            v=panel["panelVersion"])
+                    )
+                    with open(os.path.join(panelapp_storage, '{}_{}.json'.format(panel['panelName'],
+                                                                                 panel['panelVersion']), 'w')) as f:
+                        json.dump(panelapp_poll.get_json_response(), f)
+                    panel_app_response = panelapp_poll.get_json_response()
+                panel["panelapp_results"] = panel_app_response["result"]
 
                 # inform the PanelManager that a new panel has been added
                 self.case.panel_manager.add_panel_response(
@@ -633,6 +643,9 @@ class CaseAttributeManager(object):
         # (all variants Tier1 and Tier2, Tier3 variants do not
         for variant in self.case.json_variants:
             if variant["case_variant"]:
+                if variant['dbSNPid']:
+                    if re.match('rs\d+', variant['dbSNPid']):
+                        variant['dbSNPid'] = None
                 tiered_variant = {
                     "genome_assembly": genome_assembly,
                     "alternate": variant["case_variant"].alt,
