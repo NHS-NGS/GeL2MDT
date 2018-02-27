@@ -19,7 +19,7 @@ class Case(object):
     updated in the database, or skipped dependent on whether a matching
     case/case family is found.
     """
-    def __init__(self, case_json, panel_manager, skip_demographics=False):
+    def __init__(self, case_json, panel_manager, variant_manager, skip_demographics=False):
         self.json = case_json
         self.json_case_data = self.json["interpretation_request_data"]
         self.json_request_data = self.json_case_data["json_request"]
@@ -36,6 +36,7 @@ class Case(object):
             = self.json_case_data["json_request"]["TieredVariants"]
 
         self.panel_manager = panel_manager
+        self.variant_manager = variant_manager
 
         self.panels = self.get_panels_json()
         self.variants = self.get_case_variants()
@@ -667,6 +668,13 @@ class CaseAttributeManager(object):
                     }
                     variants_list.append(cip_variant)
 
+        for variant in variants_list:
+            self.case.variant_manager.add_variant(variant)
+
+        cleaned_variant_list = []
+        for variant in variants_list:
+            cleaned_variant_list.append(self.case.variant_manager.fetch_variant(variant))
+
         # set and return the MCM
         variants = ManyCaseModel(Variant, [{
             "genome_assembly": genome_assembly,
@@ -675,7 +683,7 @@ class CaseAttributeManager(object):
             "db_snp_id": variant["db_snp_id"],
             "reference": variant["reference"],
             "position": variant["position"],
-        } for variant in variants_list],
+        } for variant in cleaned_variant_list],
         self.model_objects)
 
         return variants
@@ -1126,7 +1134,8 @@ class CaseModel(object):
                      if db_obj.chromosome == self.model_attributes["chromosome"]
                      and db_obj.position == self.model_attributes["position"]
                      and db_obj.reference == self.model_attributes["reference"]
-                     and db_obj.alternate == self.model_attributes["alternate"]]
+                     and db_obj.alternate == self.model_attributes["alternate"]
+                     and db_obj.genome_assembly == self.model_attributes["genome_assembly"]]
         elif self.model_type == TranscriptVariant:
             entry = [db_obj for db_obj in queryset
                      if db_obj.transcript == self.model_attributes["transcript"]

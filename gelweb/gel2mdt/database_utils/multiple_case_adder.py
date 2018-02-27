@@ -45,6 +45,7 @@ class MultipleCaseAdder(object):
         # instantiate a PanelManager for the Case classes to use
         self.panel_manager = PanelManager()
         self.transcript_manager = TranscriptManager()
+        self.variant_manager = VariantManager()
 
         if self.test_data:
             logger.info("Fetching test data.")
@@ -103,6 +104,7 @@ class MultipleCaseAdder(object):
                 list_of_cases.append(Case(
                     case_json=json_data,
                     panel_manager=self.panel_manager,
+                    variant_manager=self.variant_manager,
                     skip_demographics=self.skip_demographics))
         logger.info("Found " + str(len(list_of_cases)) +  " test cases.")
         return list_of_cases
@@ -114,6 +116,7 @@ class MultipleCaseAdder(object):
                 # instatiate a new case with the polled json
                 case_json=self.get_case_json(case["interpretation_request_id"]),
                 panel_manager=self.panel_manager,
+                variant_manager=self.variant_manager,
                 skip_demographics=self.skip_demographics
             ) for case in self.cases_to_poll
         ]
@@ -403,6 +406,30 @@ class TranscriptManager(object):
 
     def fetch_transcript(self, transcript):
         return self.fetched_transcripts[transcript.transcript_name]
+
+
+class VariantManager(object):
+
+    def __init__(self):
+        self.fetched_variants = {}
+
+    def add_variant(self, variant):
+        '''"genome_assembly": genome_assembly,
+                    "alternate": variant["case_variant"].alt,
+                    "chromosome": variant["case_variant"].chromosome,
+                    "db_snp_id": variant["dbSNPid"],
+                    "reference": variant["case_variant"].ref,
+                    "position": variant["case_variant"].position,'''
+        self.fetched_variants[(variant['chromosome'],
+                               variant["position"],
+                               variant["reference"],
+                               variant["alternate"])] = variant
+
+    def fetch_variant(self, variant):
+        return self.fetched_variants.get((variant['chromosome'],
+                                       variant["position"],
+                                       variant["reference"],
+                                       variant["alternate"]), None)
 
 
 class PanelManager(object):
