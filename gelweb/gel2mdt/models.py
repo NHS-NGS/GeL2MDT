@@ -354,7 +354,7 @@ class Variant(models.Model):
     chromosome = models.CharField(max_length=2)
     position = models.IntegerField()
 
-    reference = models.CharField(max_length=200)
+    reference = models.TextField()
     alternate = models.TextField()
 
     db_snp_id = models.CharField(max_length=200)
