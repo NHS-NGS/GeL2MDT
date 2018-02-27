@@ -156,7 +156,6 @@ class Case(object):
         # check for CIP flagged variants
         for interpreted_genome in self.json["interpreted_genome"]:
             for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
-                print('doing the CIP flagged variants')
                 variant_object_count += 1
                 case_variant = CaseVariant(
                     chromosome=variant["chromosome"],
@@ -459,18 +458,17 @@ class CaseAttributeManager(object):
             if polled:
                 panel["panelapp_results"] = polled.results
             elif not polled:
-                if os.path.isfile(os.path.join(panelapp_storage, '{}_{}.json'.format(panel['panelName'],
-                                                                                     panel['panelVersion']))):
-                    panel_app_response = json.load(open(os.path.join(panelapp_storage, '{}_{}.json'.format(panel['panelName'],
-                                                                                              panel['panelVersion']))))
+                panel_file = os.path.join(panelapp_storage, '{}_{}.json'.format(panel['panelName'],
+                                                                                panel['panelVersion']))
+                if os.path.isfile(panel_file):
+                    panel_app_response = json.load(open(panel_file))
                 else:
                     panelapp_poll = PollAPI(
                         "panelapp", "get_panel/{panelapp_id}/?version={v}".format(
                             panelapp_id=panel["panelName"],
                             v=panel["panelVersion"])
                     )
-                    with open(os.path.join(panelapp_storage, '{}_{}.json'.format(panel['panelName'],
-                                                                                 panel['panelVersion']), 'w')) as f:
+                    with open(panel_file, 'w') as f:
                         json.dump(panelapp_poll.get_json_response(), f)
                     panel_app_response = panelapp_poll.get_json_response()
                 panel["panelapp_results"] = panel_app_response["result"]
@@ -556,7 +554,6 @@ class CaseAttributeManager(object):
         for transcript in case_transcripts:
             # convert canonical to bools:
             transcript.canonical = transcript.transcript_canonical == "YES"
-            print(transcript.gene_ensembl_id)
             if not transcript.gene_ensembl_id:
                 # if the transcript has no recognised gene associated
                 continue  # don't bother checking genes
@@ -644,7 +641,7 @@ class CaseAttributeManager(object):
         for variant in self.case.json_variants:
             if variant["case_variant"]:
                 if variant['dbSNPid']:
-                    if re.match('rs\d+', variant['dbSNPid']):
+                    if re.match('rs\d+', str(variant['dbSNPid'])):
                         variant['dbSNPid'] = None
                 tiered_variant = {
                     "genome_assembly": genome_assembly,
