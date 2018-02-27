@@ -70,7 +70,6 @@ def run_vep(infile, config_dict):
             cache=config_dict['hg19_cache'],
             fasta_loc=config_dict['hg19_fasta_loc'],
         )
-        print(cmd)
         subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell=True).wait()
     # run VEP for hg38 variants
     if os.stat(hg38_vcf).st_size != 0:
