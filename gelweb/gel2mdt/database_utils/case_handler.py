@@ -530,9 +530,11 @@ class CaseAttributeManager(object):
         for transcript in case_transcripts:
             # convert canonical to bools:
             transcript.canonical = transcript.transcript_canonical == "YES"
+            print(transcript.gene_ensembl_id)
             if not transcript.gene_ensembl_id:
                 # if the transcript has no recognised gene associated
                 continue  # don't bother checking genes
+            transcript.gene_model = None
             for gene in genes:
                 if gene.entry.ensembl_id == transcript.gene_ensembl_id:
                     transcript.gene_model = gene.entry
@@ -543,7 +545,7 @@ class CaseAttributeManager(object):
             "canonical_transcript": transcript.canonical,
             "strand": transcript.transcript_strand
         # add all transcripts except those without associated genes
-        } for transcript in case_transcripts if transcript.gene_ensembl_id],
+        } for transcript in case_transcripts if transcript.gene_model],
         self.model_objects)
 
         return transcripts
