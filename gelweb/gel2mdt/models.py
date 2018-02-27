@@ -357,7 +357,7 @@ class Variant(models.Model):
     reference = models.TextField()
     alternate = models.TextField()
 
-    db_snp_id = models.CharField(max_length=200)
+    db_snp_id = models.CharField(max_length=200, null=True)
 
     genome_assembly = models.ForeignKey(ToolOrAssemblyVersion, on_delete=models.CASCADE)
 
@@ -368,7 +368,6 @@ class Variant(models.Model):
     class Meta:
         managed = True
         db_table = 'Variant'
-        unique_together = (('chromosome', 'position', 'reference', 'alternate'),)
 
 
 class Transcript(models.Model):
