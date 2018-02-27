@@ -19,7 +19,7 @@ class Case(object):
     updated in the database, or skipped dependent on whether a matching
     case/case family is found.
     """
-    def __init__(self, case_json, panel_manager):
+    def __init__(self, case_json, panel_manager, skip_demographics=False):
         self.json = case_json
         self.json_case_data = self.json["interpretation_request_data"]
         self.json_request_data = self.json_case_data["json_request"]
@@ -44,6 +44,7 @@ class Case(object):
         # initialise a dict to contain the AttributeManagers for this case,
         # which will be set by the MCA as they are required (otherwise there
         # are missing dependencies)
+        self.skip_demographics = skip_demographics
         self.attribute_managers = {}
 
     def hash_json(self):
@@ -245,39 +246,44 @@ class CaseAttributeManager(object):
         family_id = self.case.json["family_id"]
         # load in site specific details from config file
         config_dict = load_config.LoadConfig().load()
-        labkey_server_request = config_dict['labkey_server_request']
 
-        server_context = lk.utils.create_server_context(
-            'gmc.genomicsengland.nhs.uk',
-            labkey_server_request,
-            '/labkey', use_ssl=True)
+        if case.skip_demographics:
+            # don't poll labkey
+            clinician_details = {"name": "unknown", "hospital": "unknown"}
+        elif not case.skip_demographics:
+            # poll labkey
+            labkey_server_request = config_dict['labkey_server_request']
+            server_context = lk.utils.create_server_context(
+                'gmc.genomicsengland.nhs.uk',
+                labkey_server_request,
+                '/labkey', use_ssl=True)
 
-        search_results = lk.query.select_rows(
-            server_context=server_context,
-            schema_name='gel_rare_diseases',
-            query_name='rare_diseases_registration',
-            filter_array=[
-                lk.query.QueryFilter('family_id', family_id, 'contains')
-            ]
-        )
-        clinician_details = {"name": "unknown", "hospital": "unknown"}
-        # The results contain multiple rows for each famliy member.
-        # This code just takes the first entry. May need refining.
-        try:
-            clinician_details['name'] = search_results['rows'][0].get(
-                'consultant_details_full_name_of_responsible_consultant')
-        except IndexError as e:
-            pass
-        try:
-            clinician_details['hospital'] = search_results['rows'][0].get(
-                'consultant_details_hospital_of_responsible_consultant')
-        except IndexError as e:
-            pass
+            search_results = lk.query.select_rows(
+                server_context=server_context,
+                schema_name='gel_rare_diseases',
+                query_name='rare_diseases_registration',
+                filter_array=[
+                    lk.query.QueryFilter('family_id', family_id, 'contains')
+                ]
+            )
+            clinician_details = {"name": "unknown", "hospital": "unknown"}
+            # The results contain multiple rows for each famliy member.
+            # This code just takes the first entry. May need refining.
+            try:
+                clinician_details['name'] = search_results['rows'][0].get(
+                    'consultant_details_full_name_of_responsible_consultant')
+            except IndexError as e:
+                pass
+            try:
+                clinician_details['hospital'] = search_results['rows'][0].get(
+                    'consultant_details_hospital_of_responsible_consultant')
+            except IndexError as e:
+                pass
 
-        if not clinician_details['name']:
-            clinician_details['name'] = "unknown"
-        if not clinician_details["hospital"]:
-            clinician_details["hospital"] = "unknown"
+            if not clinician_details['name']:
+                clinician_details['name'] = "unknown"
+            if not clinician_details["hospital"]:
+                clinician_details["hospital"] = "unknown"
 
         clinician = CaseModel(Clinician, {
             "name": clinician_details['name'],
@@ -294,50 +300,60 @@ class CaseAttributeManager(object):
         '''
         # load in site specific details from config file
         config_dict = load_config.LoadConfig().load()
-        labkey_server_request = config_dict['labkey_server_request']
 
-        server_context = lk.utils.create_server_context(
-            'gmc.genomicsengland.nhs.uk',
-            labkey_server_request,
-            '/labkey', use_ssl=True)
+        if case.skip_demographics:
+            # don't poll labkey
+            participant_demographics = {
+                "surname": 'unknown',
+                "forename": 'unknown',
+                "date_of_birth": '2011/01/01', # unknown but needs to be in date format
+                "nhs_num": 'unknown',
+                }
 
-        participant_demographics = {
-            "surname": 'unknown',
-            "forename": 'unknown',
-            "date_of_birth": '2011/01/01', # unknown but needs to be in date format
-            "nhs_num": 'unknown',
-            }
+        elif not case.skip_demographics:
+            labkey_server_request = config_dict['labkey_server_request']
+            server_context = lk.utils.create_server_context(
+                'gmc.genomicsengland.nhs.uk',
+                labkey_server_request,
+                '/labkey', use_ssl=True)
 
-        search_results = lk.query.select_rows(
-                server_context=server_context,
-                schema_name='gel_rare_diseases',
-                query_name='participant_identifier',
-                filter_array=[
-                            lk.query.QueryFilter(
-                                'participant_id', participant_id, 'contains')
-                        ]
-        )
-        try:
-            participant_demographics["surname"] = search_results['rows'][0].get(
-                    'surname')
-        except IndexError as e:
-            pass
-        try:
-            participant_demographics["forename"] = search_results['rows'][0].get(
-                    'forenames')
-        except IndexError as e:
-            pass
-        try:
-            participant_demographics["date_of_birth"] = search_results['rows'][0].get(
-                    'date_of_birth').split(' ')[0]
-        except IndexError as e:
-            pass
-        try:
-            if search_results['rows'][0].get('person_identifier_type').upper() == "NHSNUMBER":
-                    participant_demographics["nhs_num"] = search_results['rows'][0].get(
-                            'person_identifier')
-        except IndexError as e:
-            pass
+            participant_demographics = {
+                "surname": 'unknown',
+                "forename": 'unknown',
+                "date_of_birth": '2011/01/01', # unknown but needs to be in date format
+                "nhs_num": 'unknown',
+                }
+
+            search_results = lk.query.select_rows(
+                    server_context=server_context,
+                    schema_name='gel_rare_diseases',
+                    query_name='participant_identifier',
+                    filter_array=[
+                                lk.query.QueryFilter(
+                                    'participant_id', participant_id, 'contains')
+                            ]
+            )
+            try:
+                participant_demographics["surname"] = search_results['rows'][0].get(
+                        'surname')
+            except IndexError as e:
+                pass
+            try:
+                participant_demographics["forename"] = search_results['rows'][0].get(
+                        'forenames')
+            except IndexError as e:
+                pass
+            try:
+                participant_demographics["date_of_birth"] = search_results['rows'][0].get(
+                        'date_of_birth').split(' ')[0]
+            except IndexError as e:
+                pass
+            try:
+                if search_results['rows'][0].get('person_identifier_type').upper() == "NHSNUMBER":
+                        participant_demographics["nhs_num"] = search_results['rows'][0].get(
+                                'person_identifier')
+            except IndexError as e:
+                pass
 
         return participant_demographics
 
