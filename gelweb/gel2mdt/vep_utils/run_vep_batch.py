@@ -39,8 +39,10 @@ class CaseTranscript:
 
 
 def generate_vcf(variants):
-    tmphg19 = tempfile.NamedTemporaryFile(mode='w+t', delete=False)
-    tmphg38 = tempfile.NamedTemporaryFile(mode='w+t', delete=False)
+    hg19 = 'VEP/hg19_variants.vcf'
+    hg38 = 'VEP/hg38_variants.vcf'
+    tmphg19 = open(hg19, 'w')
+    tmphg38 = open(hg38, 'w')
     for variant in variants:
         if 'GRCh37' in variant.genome_build:
             row_to_write = str(variant.chromosome) + '\t' + str(variant.position) + '\t' + str(variant.case_id) + ":" + \
@@ -50,8 +52,10 @@ def generate_vcf(variants):
             row_to_write = str(variant.chromosome) + '\t' + str(variant.position) + '\t' + str(variant.case_id) + ":" + \
                            str(variant.variant_count) + '\t' + variant.ref + '\t' + variant.alt + '\n'
             tmphg38.writelines(row_to_write)
+    tmphg19.close()
+    tmphg38.close()
     print(tmphg19.name, tmphg38.name)
-    variant_dict = {'hg19_vcf': tmphg19.name, 'hg38_vcf': tmphg38.name}
+    variant_dict = {'hg19_vcf': hg19, 'hg38_vcf': hg38}
     return variant_dict
 
 def run_vep(infile, config_dict):
@@ -91,10 +95,8 @@ def run_vep_gosh(infile, config_dict):
 
     hg19_vcf = infile['hg19_vcf']
     hg38_vcf = infile['hg38_vcf']
-    hg19_outfile = tempfile.NamedTemporaryFile(mode='w+t', delete=False)
-    hg19_outfile.close()
-    hg38_outfile = tempfile.NamedTemporaryFile(mode='w+t', delete=False)
-    hg38_outfile.close()
+    hg19_outfile = 'VEP/hg19_results.vcf'
+    hg38_outfile = 'VEP/hg38_results.vcf'
 
     # builds command from locations supplied in config file
     ssh.connect(config_dict['crick_ip'],
@@ -134,12 +136,12 @@ def run_vep_gosh(infile, config_dict):
 
         print('stdin:', stdin, 'stdout:', stdout.read(), 'stderr:', stderr.read())
 
-    sftp.get('/home/chris/gel2mdt_testing/hg19_output.txt', hg19_outfile.name)
+    sftp.get('/home/chris/gel2mdt_testing/hg19_output.txt', hg19_outfile)
 
-    sftp.get('/home/chris/gel2mdt_testing/hg38_output.txt', hg38_outfile.name)
+    sftp.get('/home/chris/gel2mdt_testing/hg38_output.txt', hg38_outfile)
     sftp.close()
     ssh.close()
-    annotated_variant_dict = {'hg19_vep': hg19_outfile.name, 'hg38_vep': hg38_outfile.name}
+    annotated_variant_dict = {'hg19_vep': hg19_outfile, 'hg38_vep': hg38_outfile}
     return annotated_variant_dict
 
 def parse_vep_annotations(infile=None):

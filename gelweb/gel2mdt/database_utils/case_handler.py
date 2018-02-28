@@ -451,42 +451,45 @@ class CaseAttributeManager(object):
         """
         config_dict = load_config.LoadConfig().load()
         panelapp_storage = config_dict['panelapp_storage']
-        for panel in self.case.panels:
-            polled = self.case.panel_manager.fetch_panel_response(
-                panelapp_id=panel["panelName"],
-                panel_version=panel["panelVersion"]
-            )
-            if polled:
-                panel["panelapp_results"] = polled.results
-            elif not polled:
-                panel_file = os.path.join(panelapp_storage, '{}_{}.json'.format(panel['panelName'],
-                                                                                panel['panelVersion']))
-                if os.path.isfile(panel_file):
-                    panel_app_response = json.load(open(panel_file))
-                else:
-                    panelapp_poll = PollAPI(
-                        "panelapp", "get_panel/{panelapp_id}/?version={v}".format(
-                            panelapp_id=panel["panelName"],
-                            v=panel["panelVersion"])
-                    )
-                    with open(panel_file, 'w') as f:
-                        json.dump(panelapp_poll.get_json_response(), f)
-                    panel_app_response = panelapp_poll.get_json_response()
-                panel["panelapp_results"] = panel_app_response["result"]
-
-                # inform the PanelManager that a new panel has been added
-                self.case.panel_manager.add_panel_response(
+        if self.case.panels:
+            for panel in self.case.panels:
+                polled = self.case.panel_manager.fetch_panel_response(
                     panelapp_id=panel["panelName"],
-                    panel_version=panel["panelVersion"],
-                    panelapp_response = panel["panelapp_results"]
+                    panel_version=panel["panelVersion"]
                 )
+                if polled:
+                    panel["panelapp_results"] = polled.results
+                elif not polled:
+                    panel_file = os.path.join(panelapp_storage, '{}_{}.json'.format(panel['panelName'],
+                                                                                    panel['panelVersion']))
+                    if os.path.isfile(panel_file):
+                        panel_app_response = json.load(open(panel_file))
+                    else:
+                        panelapp_poll = PollAPI(
+                            "panelapp", "get_panel/{panelapp_id}/?version={v}".format(
+                                panelapp_id=panel["panelName"],
+                                v=panel["panelVersion"])
+                        )
+                        with open(panel_file, 'w') as f:
+                            json.dump(panelapp_poll.get_json_response(), f)
+                        panel_app_response = panelapp_poll.get_json_response()
+                    panel["panelapp_results"] = panel_app_response["result"]
 
-        panels = ManyCaseModel(Panel, [{
-            "panelapp_id": panel["panelName"],
-            "panel_name": panel["panelapp_results"]["SpecificDiseaseName"],
-            "disease_group": panel["panelapp_results"]["DiseaseGroup"],
-            "disease_subgroup": panel["panelapp_results"]["DiseaseSubGroup"]
-        } for panel in self.case.panels], self.model_objects)
+                    # inform the PanelManager that a new panel has been added
+                    self.case.panel_manager.add_panel_response(
+                        panelapp_id=panel["panelName"],
+                        panel_version=panel["panelVersion"],
+                        panelapp_response = panel["panelapp_results"]
+                    )
+
+            panels = ManyCaseModel(Panel, [{
+                "panelapp_id": panel["panelName"],
+                "panel_name": panel["panelapp_results"]["SpecificDiseaseName"],
+                "disease_group": panel["panelapp_results"]["DiseaseGroup"],
+                "disease_subgroup": panel["panelapp_results"]["DiseaseSubGroup"]
+            } for panel in self.case.panels], self.model_objects)
+        else:
+            panels = ManyCaseModel(Panel, [], self.model_objects)
         return panels
 
     def get_panel_versions(self):
@@ -499,18 +502,20 @@ class CaseAttributeManager(object):
             case_model.entry
             for case_model
             in self.case.attribute_managers[Panel].case_model.case_models]
+        if self.case.panels:
+            for panel in self.case.panels:
+                # set self.case.panels["model"] to the correct model
+                for panel_model in panel_models:
+                    if panel["panelName"] == panel_model.panelapp_id:
+                        panel["model"] = panel_model
 
-        for panel in self.case.panels:
-            # set self.case.panels["model"] to the correct model
-            for panel_model in panel_models:
-                if panel["panelName"] == panel_model.panelapp_id:
-                    panel["model"] = panel_model
-
-        panel_versions = ManyCaseModel(PanelVersion, [{
-            # create the MCM
-            "version_number": panel["panelapp_results"]["version"],
-            "panel": panel["model"]
-        } for panel in self.case.panels], self.model_objects)
+            panel_versions = ManyCaseModel(PanelVersion, [{
+                # create the MCM
+                "version_number": panel["panelapp_results"]["version"],
+                "panel": panel["model"]
+            } for panel in self.case.panels], self.model_objects)
+        else:
+            panel_versions = ManyCaseModel(PanelVersion, [], self.model_objects)
         return panel_versions
 
     def get_genes(self):
@@ -520,18 +525,28 @@ class CaseAttributeManager(object):
         panels = self.case.panels
         # get the list of genes from the panelapp_result
         gene_list = []
-        for panel in panels:
-            genes = panel["panelapp_results"]["Genes"]
-            gene_list += genes
+        if panels:
+            for panel in panels:
+                genes = panel["panelapp_results"]["Genes"]
+                gene_list += genes
 
         for gene in gene_list:
-            if len(gene["EnsembleGeneIds"]) == 0:
-                gene["EnsembleGeneIds"] = [None, ]
+            if not gene["EnsembleGeneIds"]:
+                gene["EnsembleGeneIds"] = None
+            else:
+                gene['EnsembleGeneIds'] = gene['EnsembleGeneIds'][0]
 
+        for transcript in self.case.transcripts:
+            if transcript.gene_ensembl_id and transcript.gene_hgnc_name:
+                print(transcript.gene_ensembl_id)
+                gene_list.append({
+                    'EnsembleGeneIds': transcript.gene_ensembl_id,
+                     'GeneSymbol':   transcript.gene_hgnc_name
+                })
         genes = ManyCaseModel(Gene, [{
-            "ensembl_id": gene["EnsembleGeneIds"][0],  # TODO: which ID to use?
+            "ensembl_id": gene["EnsembleGeneIds"],  # TODO: which ID to use?
             "hgnc_name": gene["GeneSymbol"]
-        } for gene in gene_list], self.model_objects)
+        } for gene in gene_list if gene["EnsembleGeneIds"]], self.model_objects)
         return genes
 
     def get_panel_version_genes(self):
@@ -562,7 +577,7 @@ class CaseAttributeManager(object):
             for gene in genes:
                 if gene.entry.ensembl_id == transcript.gene_ensembl_id:
                     transcript.gene_model = gene.entry
-
+        
         transcripts = ManyCaseModel(Transcript, [{
             "gene": transcript.gene_model,
             "name": transcript.transcript_name,
@@ -817,7 +832,17 @@ class CaseAttributeManager(object):
                     }
                     cip_proband_variants.append(cip_proband_variant)
 
-        tiered_and_cip_proband_variants = tiered_proband_variants + cip_proband_variants
+        # remove CIP tiered variants which are in cip variants
+        tiered_and_cip_proband_variants = []
+        for variant in tiered_proband_variants:
+            found = False
+            for cip_variant in cip_proband_variants:
+                tiered_and_cip_proband_variants.append(cip_variant)
+                if cip_variant['variant'] == variant['variant']:
+                    found = True
+            if not found:
+                tiered_and_cip_proband_variants.append(variant)
+
 
         proband_variants = ManyCaseModel(ProbandVariant, [{
             "interpretation_report": ir_manager.case_model.entry,
@@ -846,8 +871,6 @@ class CaseAttributeManager(object):
         proband_variants = [proband_variant.entry for proband_variant
                             in self.case.attribute_managers[ProbandVariant].case_model.case_models]
 
-        print(PanelVersion.objects.values_list('panel', 'version_number'))
-        print(Panel.objects.values_list('id','panel_name'))
         # get list of dicts of each report event
         json_report_events = []
 
@@ -872,7 +895,7 @@ class CaseAttributeManager(object):
 
                     if not gene_found:
                         # re-attempt with HGNC
-                        re_gene_hgnc = re_genomic_info["HGNC"]
+                        re_gene_hgnc = re_genomic_info.get("HGNC", None)
                         for gene in genes:
                             if re_gene_hgnc == gene.hgnc_name:
                                 report_event["gene_entry"] = gene
@@ -896,12 +919,14 @@ class CaseAttributeManager(object):
                     if not panel_found:
                         report_event["panel_version_entry"] = None
 
-                    panel = report_event["panel_version_entry"].panel
-                    panelapp_id = panel.panelapp_id
-                    # coverages is a dict of dicts: (1) access panel using hash
-                    panel_coverages = self.case.json_request_data["genePanelsCoverage"]
-                    panel_coverage = panel_coverages[panelapp_id]
-                    # (2) access coverage info using gene hgnc
+                    if report_event["panel_version_entry"]:
+                        panel = report_event["panel_version_entry"].panel
+                        panelapp_id = panel.panelapp_id
+                        # coverages is a dict of dicts: (1) access panel using hash
+                        panel_coverages = self.case.json_request_data["genePanelsCoverage"]
+                        panel_coverage = panel_coverages[panelapp_id]
+                        # (2) access coverage info using gene hgnc
+
                     try:
                         re_gene_hgnc = report_event["genomicFeature"]["HGNC"]
                         re_gene_coverage = panel_coverage[re_gene_hgnc]
@@ -930,7 +955,7 @@ class CaseAttributeManager(object):
                         "mode_of_inheritance": report_event["modeOfInheritance"],
                         "panel": report_event["panel_version_entry"],
                         "penetrance": report_event["penetrance"],
-                        "proband_variant": None,
+                        "proband_variant": report_event["proband_variant_entry"],
                         "re_id": report_event["reportEventId"],
                         "tier": int(report_event["tier"][-1:])
                     })
@@ -953,7 +978,7 @@ class CaseAttributeManager(object):
 
                     if not gene_found:
                         # re-attempt with HGNC
-                        re_gene_hgnc = re_genomic_info["HGNC"]
+                        re_gene_hgnc = re_genomic_info.get("HGNC", None)
                         for gene in genes:
                             if re_gene_hgnc == gene.hgnc_name:
                                 report_event["gene_entry"] = gene
@@ -1007,6 +1032,10 @@ class CaseAttributeManager(object):
                     if not proband_variant_found:
                         report_event["proband_variant_entry"] = None
 
+                    if report_event["tier"]:
+                        report_event_tier = int(report_event["tier"][-1:])
+                    else:
+                        report_event_tier = None
 
                     json_report_events.append({
                         "coverage": report_event["gene_coverage"],
@@ -1014,9 +1043,9 @@ class CaseAttributeManager(object):
                         "mode_of_inheritance": report_event["modeOfInheritance"],
                         "panel": report_event["panel_version_entry"],
                         "penetrance": report_event["penetrance"],
-                        "proband_variant": None,
+                        "proband_variant": report_event["proband_variant_entry"],
                         "re_id": report_event["reportEventId"],
-                        "tier": int(report_event["tier"][-1:])
+                        "tier": report_event_tier
                     })
 
 
@@ -1093,7 +1122,7 @@ class CaseModel(object):
         elif self.model_type == Proband:
             entry = [db_obj for db_obj in queryset
                      if db_obj.gel_id == str(self.model_attributes["gel_id"])]
-            print(entry)
+            # print(entry)
         elif self.model_type == Family:
             entry = [db_obj for db_obj in queryset
                      if db_obj.gel_family_id == str(self.model_attributes["gel_family_id"])]
@@ -1141,14 +1170,14 @@ class CaseModel(object):
                      if db_obj.transcript == self.model_attributes["transcript"]
                      and db_obj.variant == self.model_attributes["variant"]]
         elif self.model_type == ProbandVariant:
-            print(self.model_attributes["variant"], '-', self.model_attributes["interpretation_report"])
-            for db_obj in queryset:
-                print(db_obj.variant, '-', db_obj.interpretation_report)
+            #print(self.model_attributes["variant"], '-', self.model_attributes["interpretation_report"])
+            #for db_obj in queryset:
+            #    print(db_obj.variant, '-', db_obj.interpretation_report)
             entry = [db_obj for db_obj in queryset
                      if db_obj.variant == self.model_attributes["variant"]
                      and db_obj.max_tier == self.model_attributes["max_tier"]
                      and db_obj.interpretation_report == self.model_attributes["interpretation_report"]]
-            print(entry)
+            # print(entry)
         elif self.model_type == ProbandTranscriptVariant:
             entry = [db_obj for db_obj in queryset
                      if db_obj.transcript == self.model_attributes["transcript"]
@@ -1170,7 +1199,7 @@ class CaseModel(object):
             entry = False
             self.entry = entry
         else:
-            # Barf. Multiple entries found for same object
+            print(queryset)
             raise ValueError("Multiple entries found for same object.")
 
         return entry

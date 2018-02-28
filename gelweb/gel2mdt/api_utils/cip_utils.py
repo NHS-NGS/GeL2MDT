@@ -38,7 +38,6 @@ class InterpretationList(object):
                     result["last_status"]}
                 for result in request_list_results
                 if result["sample_type"] == "raredisease"
-                and not result['family_id'].startswith('FM')
                 and result["last_status"] != "blocked"]
 
             if request_list_poll.response_json["next"]:
