@@ -98,14 +98,15 @@ class MultipleCaseAdder(object):
             file_path = os.path.join(
                 os.getcwd(), "gel2mdt/tests/test_files/{filename}".format(
                     filename=filename))
-            logger.info("Found case json at " + file_path + " for testing.")
-            with open(file_path) as json_file:
-                json_data = json.load(json_file)
-                list_of_cases.append(Case(
-                    case_json=json_data,
-                    panel_manager=self.panel_manager,
-                    variant_manager=self.variant_manager,
-                    skip_demographics=self.skip_demographics))
+            if filename.endswith('.json'):
+                logger.info("Found case json at " + file_path + " for testing.")
+                with open(file_path) as json_file:
+                    json_data = json.load(json_file)
+                    list_of_cases.append(Case(
+                        case_json=json_data,
+                        panel_manager=self.panel_manager,
+                        variant_manager=self.variant_manager,
+                        skip_demographics=self.skip_demographics))
         logger.info("Found " + str(len(list_of_cases)) +  " test cases.")
         return list_of_cases
 
@@ -241,7 +242,11 @@ class MultipleCaseAdder(object):
                 case_id = transcript.case_id
                 case = case_id_map[case_id]
                 fetched_transcript = self.transcript_manager.fetch_transcript(transcript)
-                case.transcripts.append(fetched_transcript)
+                # Reassigning case details
+                transcript.transcript_canonical = fetched_transcript.transcript_canonical
+                transcript.gene_model = fetched_transcript.gene_model
+                # Append to case transcripts
+                case.transcripts.append(transcript)
 
         # ------------------- #
         # BULK UPDATE PROCESS #
@@ -405,6 +410,7 @@ class TranscriptManager(object):
                 self.fetched_transcripts[transcript.transcript_name] = transcript
 
     def fetch_transcript(self, transcript):
+        print(transcript)
         return self.fetched_transcripts[transcript.transcript_name]
 
 
