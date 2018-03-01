@@ -576,7 +576,7 @@ class CaseAttributeManager(object):
             for gene in genes:
                 if gene.entry.ensembl_id == transcript.gene_ensembl_id:
                     transcript.gene_model = gene.entry
-        
+
         transcripts = ManyCaseModel(Transcript, [{
             "gene": transcript.gene_model,
             "name": transcript.transcript_name,
@@ -1209,6 +1209,7 @@ class CaseModel(object):
             print(queryset)
             raise ValueError("Multiple entries found for same object.")
 
+        print("Found", self.model_type, "entry:\t", entry)
         return entry
 
 

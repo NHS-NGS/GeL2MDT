@@ -389,9 +389,9 @@ class TranscriptVariant(models.Model):
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
     af_max = models.CharField(max_length=200)
 
-    hgvs_c = models.CharField(max_length=255)
-    hgvs_p = models.CharField(max_length=255)
-    hgvs_g = models.CharField(max_length=255)
+    hgvs_c = models.TextField()
+    hgvs_p = models.TextField()
+    hgvs_g = models.TextField()
 
     sift = models.CharField(max_length=200, null=True)
     polyphen = models.CharField(max_length=200, null=True)
