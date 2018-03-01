@@ -577,7 +577,7 @@ class CaseAttributeManager(object):
             for gene in genes:
                 if gene.entry.ensembl_id == transcript.gene_ensembl_id:
                     transcript.gene_model = gene.entry
-        
+
         transcripts = ManyCaseModel(Transcript, [{
             "gene": transcript.gene_model,
             "name": transcript.transcript_name,
@@ -1114,95 +1114,157 @@ class CaseModel(object):
         attributes. Returns True if found, False if not.
         """
 
-        if self.model_type == Clinician:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj.name == self.model_attributes["name"]
-                     and db_obj.hospital == self.model_attributes["hospital"]
-                     and db_obj.email == self.model_attributes["email"]]
-        elif self.model_type == Proband:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj.gel_id == str(self.model_attributes["gel_id"])]
-            # print(entry)
-        elif self.model_type == Family:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj.gel_family_id == str(self.model_attributes["gel_family_id"])]
-        elif self.model_type == Relative:
-            entry = [db_obj for db_obj in queryset
-                     if str(db_obj.gel_id) == str(self.model_attributes["gel_id"])]
-        elif self.model_type == Phenotype:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj.hpo_terms == self.model_attributes["hpo_terms"]]
-        elif self.model_type == FamilyPhenotype:
-                     pass
-        elif self.model_type == InterpretationReportFamily:
-            entry =[db_obj for db_obj in queryset
-                    if db_obj.ir_family_id == self.model_attributes["ir_family_id"]]
-        elif self.model_type == Panel:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj.panelapp_id == self.model_attributes["panelapp_id"]]
-        elif self.model_type == PanelVersion:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj.panel == self.model_attributes["panel"]
-                     and db_obj.version_number == self.model_attributes["version_number"]]
-        elif self.model_type == InterpretationReportFamilyPanel:
-                     pass
-        elif self.model_type == Gene:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj.ensembl_id == self.model_attributes["ensembl_id"]
-                     and db_obj.hgnc_name == self.model_attributes["hgnc_name"]]
-        elif self.model_type == PanelVersionGene:
-                     pass
-        elif self.model_type == Transcript:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj.name == self.model_attributes["name"]]
-        elif self.model_type == GELInterpretationReport:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj.sha_hash == self.model_attributes["sha_hash"]]
-        elif self.model_type == Variant:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj.chromosome == self.model_attributes["chromosome"]
-                     and db_obj.position == self.model_attributes["position"]
-                     and db_obj.reference == self.model_attributes["reference"]
-                     and db_obj.alternate == self.model_attributes["alternate"]
-                     and db_obj.genome_assembly == self.model_attributes["genome_assembly"]]
-        elif self.model_type == TranscriptVariant:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj.transcript == self.model_attributes["transcript"]
-                     and db_obj.variant == self.model_attributes["variant"]]
-        elif self.model_type == ProbandVariant:
-            #print(self.model_attributes["variant"], '-', self.model_attributes["interpretation_report"])
-            #for db_obj in queryset:
-            #    print(db_obj.variant, '-', db_obj.interpretation_report)
-            entry = [db_obj for db_obj in queryset
-                     if db_obj.variant == self.model_attributes["variant"]
-                     and db_obj.max_tier == self.model_attributes["max_tier"]
-                     and db_obj.interpretation_report == self.model_attributes["interpretation_report"]]
-            # print(entry)
-        elif self.model_type == ProbandTranscriptVariant:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj.transcript == self.model_attributes["transcript"]
-                     and db_obj.proband_variant == self.model_attributes["proband_variant"]]
-        elif self.model_type == ReportEvent:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj.re_id == self.model_attributes["re_id"]
-                     and db_obj.proband_variant == self.model_attributes["proband_variant"]]
-        elif self.model_type == ToolOrAssemblyVersion:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj.tool_name == self.model_attributes["tool_name"]
-                     and db_obj.version_number == self.model_attributes["version_number"]]
+        # convert QS to a iterable for iteration
+        list_queryset = list(queryset)
+        iter_queryset = iter(list_queryset)
+        entry_found = False
+        entry = None
 
-        if len(entry) == 1:
-            entry = entry[0]
-            # also need to set self.entry here as it may not be called in init
-            self.entry = entry
-        elif len(entry) == 0:
-            entry = False
-            self.entry = entry
-        else:
-            print(queryset)
-            raise ValueError("Multiple entries found for same object.")
+        counter = 1
+        while not entry_found:
+            try:
+                db_obj = next(iter_queryset)
+                print(
+                    "Checking",
+                    self.model_type,
+                    "entry (", counter, "/", len(queryset), "):",
+                    db_obj
+                )
+                counter += 1
+            except StopIteration as e:
+                entry = None
+                entry_found = True
 
-        return entry
+            if self.model_type == Clinician:
+                if (
+                    db_obj.name == self.model_attributes["name"] and
+                    db_obj.hospital == self.model_attributes["hospital"] and
+                    db_obj.email == self.model_attributes["email"]
+                ):
+                    entry, entry_found = self.set_db_obj(db_obj)
+                    return entry
+            elif self.model_type == Proband:
+                if (
+                    db_obj.gel_id == str(self.model_attributes["gel_id"])
+                ):
+                    entry, entry_found = self.set_db_obj(db_obj)
+                    return entry
+            elif self.model_type == Family:
+                if (
+                    db_obj.gel_family_id == str(self.model_attributes["gel_family_id"])
+                ):
+                    entry, entry_found = self.set_db_obj(db_obj)
+                    return entry
+            elif self.model_type == Relative:
+                if (
+                    str(db_obj.gel_id) == str(self.model_attributes["gel_id"])
+                ):
+                    entry, entry_found = self.set_db_obj(db_obj)
+                    return entry
+            elif self.model_type == Phenotype:
+                if (
+                    db_obj.hpo_terms == self.model_attributes["hpo_terms"]
+                ):
+                    entry, entry_found = self.set_db_obj(db_obj)
+                    return entry
+            elif self.model_type == FamilyPhenotype:
+                pass
+            elif self.model_type == InterpretationReportFamily:
+                if (
+                    db_obj.ir_family_id == self.model_attributes["ir_family_id"]
+                ):
+                    entry, entry_found = self.set_db_obj(db_obj)
+                    return entry
+            elif self.model_type == Panel:
+                if (
+                    db_obj.panelapp_id == self.model_attributes["panelapp_id"]
+                ):
+                    entry, entry_found = self.set_db_obj(db_obj)
+                    return entry
+            elif self.model_type == PanelVersion:
+                if (
+                    db_obj.panel == self.model_attributes["panel"] and
+                    db_obj.version_number == self.model_attributes["version_number"]
+                ):
+                    entry, entry_found = self.set_db_obj(db_obj)
+                    return entry
+            elif self.model_type == InterpretationReportFamilyPanel:
+                pass
+            elif self.model_type == Gene:
+                if (
+                    db_obj.ensembl_id == self.model_attributes["ensembl_id"] and
+                    db_obj.hgnc_name == self.model_attributes["hgnc_name"]
+                ):
+                    entry, entry_found = self.set_db_obj(db_obj)
+                    return entry
+            elif self.model_type == PanelVersionGene:
+                pass
+            elif self.model_type == Transcript:
+                if (
+                    db_obj.name == self.model_attributes["name"]
+                ):
+                    entry, entry_found = self.set_db_obj(db_obj)
+                    return entry
+            elif self.model_type == GELInterpretationReport:
+                if (
+                    db_obj.sha_hash == self.model_attributes["sha_hash"]
+                ):
+                    entry, entry_found = self.set_db_obj(db_obj)
+                    return entry
+            elif self.model_type == Variant:
+                if (
+                    db_obj.chromosome == self.model_attributes["chromosome"] and
+                    db_obj.position == self.model_attributes["position"] and
+                    db_obj.reference == self.model_attributes["reference"] and
+                    db_obj.alternate == self.model_attributes["alternate"] and
+                    db_obj.genome_assembly == self.model_attributes["genome_assembly"]
+                ):
+                    entry, entry_found = self.set_db_obj(db_obj)
+                    return entry
+            elif self.model_type == TranscriptVariant:
+                if (
+                    db_obj.transcript == self.model_attributes["transcript"] and
+                    db_obj.variant == self.model_attributes["variant"]
+                ):
+                    entry, entry_found = self.set_db_obj(db_obj)
+                    return entry
+            elif self.model_type == ProbandVariant:
+                if (
+                    db_obj.variant == self.model_attributes["variant"] and
+                    db_obj.max_tier == self.model_attributes["max_tier"] and
+                    db_obj.interpretation_report == self.model_attributes["interpretation_report"]
+                ):
+                    entry, entry_found = self.set_db_obj(db_obj)
+                    return entry
+            elif self.model_type == ProbandTranscriptVariant:
+                if (
+                    db_obj.transcript == self.model_attributes["transcript"] and
+                    db_obj.proband_variant == self.model_attributes["proband_variant"]
+                ):
+                    entry, entry_found = self.set_db_obj(db_obj)
+                    return entry
+            elif self.model_type == ReportEvent:
+                if (
+                    db_obj.re_id == self.model_attributes["re_id"] and
+                    db_obj.proband_variant == self.model_attributes["proband_variant"]
+                ):
+                    entry, entry_found = self.set_db_obj(db_obj)
+                    return entry
+            elif self.model_type == ToolOrAssemblyVersion:
+                if (
+                    db_obj.tool_name == self.model_attributes["tool_name"] and
+                    db_objtranscript.transcriptsversion_number == self.model_attributes["version_number"]
+                ):
+                    entry, entry_found = self.set_db_obj(db_obj)
+                    return entry
+
+    def set_db_obj(self, db_obj):
+        """
+        Sets a db_obj to the entry of the CaseModel in check_found_in_db.
+        Also returns True to unpack into 'entry_found'
+        """
+        print("Found entry!", db_obj)
+        return db_obj, True
 
 
 class ManyCaseModel(object):
