@@ -527,7 +527,7 @@ class ReportEvent(models.Model):
     way that the CIP-API is set up.
     """
     re_id = models.CharField(max_length=200)
-    tier = models.PositiveIntegerField()
+    tier = models.PositiveIntegerField(null=True)
 
     proband_variant = models.ForeignKey(ProbandVariant, on_delete=models.CASCADE, null=True) #made nullable
     panel = models.ForeignKey(PanelVersion, on_delete=models.CASCADE, null=True) #made nullable
