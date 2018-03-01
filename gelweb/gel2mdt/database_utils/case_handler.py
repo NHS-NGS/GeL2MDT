@@ -657,7 +657,7 @@ class CaseAttributeManager(object):
         for variant in self.case.json_variants:
             if variant["case_variant"]:
                 if variant['dbSNPid']:
-                    if re.match('rs\d+', str(variant['dbSNPid'])):
+                    if not re.match('rs\d+', str(variant['dbSNPid'])):
                         variant['dbSNPid'] = None
                 tiered_variant = {
                     "genome_assembly": genome_assembly,
@@ -1202,6 +1202,7 @@ class CaseModel(object):
             print(queryset)
             raise ValueError("Multiple entries found for same object.")
 
+        print("Found", self.model_type, "entry:\t", entry)
         return entry
 
 
