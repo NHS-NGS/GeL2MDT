@@ -36,6 +36,7 @@ class CaseTranscript:
         self.transcript_variant_hgvs_g = transcript_variant_hgvs_g
         self.gene_model = None
         self.transcript_entry = None
+        self.proband_variant_entry = None
 
 
 def generate_vcf(variants):
@@ -92,7 +93,7 @@ def run_vep(infile, config_dict):
 def run_vep_gosh(infile, config_dict):
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
+    annotated_variant_dict = {}
     hg19_vcf = infile['hg19_vcf']
     hg38_vcf = infile['hg38_vcf']
     hg19_outfile = 'VEP/hg19_results.vcf'
@@ -119,6 +120,9 @@ def run_vep_gosh(infile, config_dict):
         # stdin, stdout, stderr = ssh.exec_command('{gosh_vep} help'.format(gosh_vep=config_dict['gosh_vep']))
 
         print('stdin:', stdin, 'stdout:', stdout.read(), 'stderr:', stderr.read())
+        sftp.get('/home/chris/gel2mdt_testing/hg19_output.txt', hg19_outfile)
+
+        annotated_variant_dict['hg19_vep'] = hg19_outfile
     # run VEP for hg38 variants
     if os.stat(hg38_vcf).st_size != 0:
         sftp.put(hg38_vcf, '/home/chris/gel2mdt_testing/hg38_destination_file.txt'.format(hg38_vcf))
@@ -135,54 +139,54 @@ def run_vep_gosh(infile, config_dict):
         # stdin, stdout, stderr = ssh.exec_command('{gosh_vep} help'.format(gosh_vep=config_dict['gosh_vep']))
 
         print('stdin:', stdin, 'stdout:', stdout.read(), 'stderr:', stderr.read())
+        sftp.get('/home/chris/gel2mdt_testing/hg38_output.txt', hg38_outfile)
+        annotated_variant_dict['hg38_vep'] = hg38_outfile
 
-    sftp.get('/home/chris/gel2mdt_testing/hg19_output.txt', hg19_outfile)
-
-    sftp.get('/home/chris/gel2mdt_testing/hg38_output.txt', hg38_outfile)
     sftp.close()
     ssh.close()
-    annotated_variant_dict = {'hg19_vep': hg19_outfile, 'hg38_vep': hg38_outfile}
     return annotated_variant_dict
 
-def parse_vep_annotations(infile=None):
-    if infile is not None:
+def parse_vep_annotations(infile):
+    transcripts_list = []
+    if infile:
         hg19_variants = []
         hg38_variants = []
-        if os.stat(infile['hg19_vep']).st_size != 0:
-            hg19_variants = parse_vep.ParseVep().read_file(infile['hg19_vep'])
-        if os.stat(infile['hg38_vep']).st_size != 0:
-            hg38_variants = parse_vep.ParseVep().read_file(infile['hg38_vep'])
+        if 'hg19_vep' in infile:
+            if os.stat(infile['hg19_vep']).st_size != 0:
+                hg19_variants = parse_vep.ParseVep().read_file(infile['hg19_vep'])
+                #os.remove(infile['hg19_vep'])
+        if 'hg38_vep' in infile:
+            if os.stat(infile['hg38_vep']).st_size != 0:
+                hg38_variants = parse_vep.ParseVep().read_file(infile['hg38_vep'])
+                #os.remove(infile['hg38_vep'])
         # concatenate the two lists of variant dictionaries
         variants = hg19_variants + hg38_variants
-    else:
-        #reads in the local file saved in root folder for testing purposes
-        variants = parse_vep.ParseVep().read_file('tmpbn0gzn4k')
-    transcripts_list = []
-    for variant in variants:
-        case_id = variant['id'].split(":")[0]
-        variant_count = variant['id'].split(":")[1]
-        for transcript in variant['transcript_data']:
-            gene_id = variant['transcript_data'][transcript]['Gene']
-            gene_name = variant['transcript_data'][transcript]['SYMBOL']
-            if variant['transcript_data'][transcript]['CANONICAL'] == '':
-                canonical = False
-            else:
-                canonical = variant['transcript_data'][transcript]['CANONICAL']
-            transcript_name = variant['transcript_data'][transcript]['Feature']
-            transcript_strand = variant['transcript_data'][transcript]['STRAND']
-            proband_transcript_variant_effect = variant['transcript_data'][transcript]['Consequence']
-            transcript_variant_af_max = variant['transcript_data'][transcript]['MAX_AF']
-            variant_polyphen = variant['transcript_data'][transcript]['PolyPhen']
-            variant_sift = variant['transcript_data'][transcript]['SIFT']
-            transcript_variant_hgvs_c = variant['transcript_data'][transcript]['HGVSc']
-            transcript_variant_hgvs_p = variant['transcript_data'][transcript]['HGVSp']
-            transcript_variant_hgvs_g = variant['transcript_data'][transcript]['HGVSg']
-            case_transcript = CaseTranscript(case_id, variant_count, gene_id, gene_name, transcript_name, canonical,
-                                             transcript_strand, proband_transcript_variant_effect,
-                                             transcript_variant_af_max, variant_polyphen, variant_sift,
-                                             transcript_variant_hgvs_c, transcript_variant_hgvs_p,
-                                             transcript_variant_hgvs_g)
-            transcripts_list.append(case_transcript)
+
+        for variant in variants:
+            case_id = variant['id'].split(":")[0]
+            variant_count = variant['id'].split(":")[1]
+            for transcript in variant['transcript_data']:
+                gene_id = variant['transcript_data'][transcript]['Gene']
+                gene_name = variant['transcript_data'][transcript]['SYMBOL']
+                if variant['transcript_data'][transcript]['CANONICAL'] == '':
+                    canonical = False
+                else:
+                    canonical = variant['transcript_data'][transcript]['CANONICAL']
+                transcript_name = variant['transcript_data'][transcript]['Feature']
+                transcript_strand = variant['transcript_data'][transcript]['STRAND']
+                proband_transcript_variant_effect = variant['transcript_data'][transcript]['Consequence']
+                transcript_variant_af_max = variant['transcript_data'][transcript]['MAX_AF']
+                variant_polyphen = variant['transcript_data'][transcript]['PolyPhen']
+                variant_sift = variant['transcript_data'][transcript]['SIFT']
+                transcript_variant_hgvs_c = variant['transcript_data'][transcript]['HGVSc']
+                transcript_variant_hgvs_p = variant['transcript_data'][transcript]['HGVSp']
+                transcript_variant_hgvs_g = variant['transcript_data'][transcript]['HGVSg']
+                case_transcript = CaseTranscript(case_id, variant_count, gene_id, gene_name, transcript_name, canonical,
+                                                 transcript_strand, proband_transcript_variant_effect,
+                                                 transcript_variant_af_max, variant_polyphen, variant_sift,
+                                                 transcript_variant_hgvs_c, transcript_variant_hgvs_p,
+                                                 transcript_variant_hgvs_g)
+                transcripts_list.append(case_transcript)
     return transcripts_list
 
 def generate_transcripts(variant_list):
