@@ -78,13 +78,15 @@ class MultipleCaseAdder(object):
             set(self.cases_to_update)
 
 
+    def update_database(self):
         # begin update process
         # --------------------
         self.update_errors = {}
         logger.info("Adding cases from cases_to_add.")
+        print("Adding cases")
         self.add_cases()
-        logger.info("Adding cases from cases_to_update.")
-        self.update_cases()
+        print("Updating cases")
+        self.add_cases(update=True)
 
     def fetch_test_data(self):
         """
@@ -198,7 +200,7 @@ class MultipleCaseAdder(object):
         print(cases_to_update)
         return cases_to_update
 
-    def add_cases(self):
+    def add_cases(self, update=False):
         """
         Adds the cases to the database which required adding.
         """
@@ -224,11 +226,16 @@ class MultipleCaseAdder(object):
             (ReportEvent, True)
         )
 
-        if self.cases_to_add:
+        if update:
+            cases = self.cases_to_update
+        elif not update:
+            cases = self.cases_to_add
+
+        if cases:
             # we need vep results for all cases, which needs to be done in batch
             variants = []
             case_id_map = {}
-            for case in self.cases_to_add:
+            for case in cases:
                 # map case id to cases to easily assign transcripts from variant
                 case_id_map[case.request_id] = case
                 variants += case.variants
@@ -265,7 +272,7 @@ class MultipleCaseAdder(object):
             elif not lookups:
                 model_objects = model_type.objects.all()
 
-            for case in self.cases_to_add:
+            for case in cases:
                 # create a CaseAttributeManager for the case
                 case.attribute_managers[model_type] = CaseAttributeManager(
                     case, model_type, model_objects)
@@ -276,11 +283,11 @@ class MultipleCaseAdder(object):
                 # get a list of CaseModels
                 model_list = [
                     case.attribute_managers[model_type].case_model
-                    for case in self.cases_to_add
+                    for case in cases
                 ]
             elif many:
                 model_list = []
-                for case in self.cases_to_add:
+                for case in cases:
                     attribute_manager = case.attribute_managers[model_type]
                     many_case_model = attribute_manager.case_model
                     for case_model in many_case_model.case_models:
