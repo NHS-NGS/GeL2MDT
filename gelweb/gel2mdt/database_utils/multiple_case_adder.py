@@ -46,6 +46,7 @@ class MultipleCaseAdder(object):
         self.panel_manager = PanelManager()
         self.transcript_manager = TranscriptManager()
         self.variant_manager = VariantManager()
+        self.gene_manager = GeneManager()
 
         if self.test_data:
             logger.info("Fetching test data.")
@@ -106,6 +107,7 @@ class MultipleCaseAdder(object):
                         case_json=json_data,
                         panel_manager=self.panel_manager,
                         variant_manager=self.variant_manager,
+                        gene_manager=self.gene_manager,
                         skip_demographics=self.skip_demographics))
         logger.info("Found " + str(len(list_of_cases)) +  " test cases.")
         return list_of_cases
@@ -118,6 +120,7 @@ class MultipleCaseAdder(object):
                 case_json=self.get_case_json(case["interpretation_request_id"]),
                 panel_manager=self.panel_manager,
                 variant_manager=self.variant_manager,
+                gene_manager=self.gene_manager,
                 skip_demographics=self.skip_demographics
             ) for case in self.cases_to_poll
         ]
@@ -411,6 +414,17 @@ class TranscriptManager(object):
     def fetch_transcript(self, transcript):
         return self.fetched_transcripts[transcript.transcript_name]
 
+class GeneManager(object):
+
+    def __init__(self):
+        self.fetched_genes = {}
+
+    def add_gene(self, gene):
+        if gene['EnsembleGeneIds'] not in self.fetched_genes:
+            self.fetched_genes[gene['EnsembleGeneIds']] = gene
+
+    def fetch_gene(self, gene):
+        return self.fetched_genes.get(gene['EnsembleGeneIds'], None)
 
 class VariantManager(object):
 
@@ -435,7 +449,6 @@ class VariantManager(object):
                                        variant["reference"],
                                        variant["alternate"]), None)
 
-
 class PanelManager(object):
     """
     A class which manages the panels polled in the cases to avoid polling the
@@ -444,24 +457,38 @@ class PanelManager(object):
     """
     def __init__(self):
         self.fetched_panels = {}  # should be {(id, version): PanelResponse}
+        self.panel_names = {}
 
     def add_panel_response(self, panelapp_id, panel_version, panelapp_response):
         """
         Instantiate a new PanelResponse and add it to fetched panels. Returns
         the added PanelResponse instance.
         """
-        self.fetched_panels[(panelapp_id, panel_version)] = PanelResponse(
-            panelapp_response=panelapp_response
+        if panelapp_id not in self.fetched_panels:
+            self.fetched_panels[panelapp_id] = {}
+            self.panel_names[panelapp_id] = {'SpecificDiseaseName': panelapp_response['SpecificDiseaseName'],
+                                             'DiseaseGroup': panelapp_response['DiseaseGroup'],
+                                             'DiseaseSubGroup': panelapp_response['DiseaseSubGroup']}
+        self.fetched_panels[panelapp_id][panel_version] = PanelResponse(
+                panelapp_response=panelapp_response
         )
-        return self.fetched_panels.get((panelapp_id, panel_version), None)
+
+        return self.fetched_panels[panelapp_id][panel_version]
 
     def fetch_panel_response(self, panelapp_id, panel_version):
         """
         Take a panelApp ID and version number. If a corresponding panel is in
         fetched_panels then return it, otherwise return False.
         """
-        pm_response =  self.fetched_panels.get((panelapp_id, panel_version), None)
+        pm_response = self.fetched_panels.get(panelapp_id, None)
+        if pm_response:
+            pm_response = self.fetched_panels[panelapp_id].get(panel_version, None)
         return pm_response
+
+
+    def fetch_panel_names(self, panelapp_id):
+        return self.panel_names.get(panelapp_id, None)
+
 
 
 class PanelResponse(object):
