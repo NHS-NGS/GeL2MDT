@@ -1129,7 +1129,6 @@ class CaseModel(object):
         elif self.model_type == Proband:
             entry = [db_obj for db_obj in queryset
                      if db_obj.gel_id == str(self.model_attributes["gel_id"])]
-            # print(entry)
         elif self.model_type == Family:
             entry = [db_obj for db_obj in queryset
                      if db_obj.gel_family_id == str(self.model_attributes["gel_family_id"])]
@@ -1177,14 +1176,10 @@ class CaseModel(object):
                      if db_obj.transcript == self.model_attributes["transcript"]
                      and db_obj.variant == self.model_attributes["variant"]]
         elif self.model_type == ProbandVariant:
-            #print(self.model_attributes["variant"], '-', self.model_attributes["interpretation_report"])
-            #for db_obj in queryset:
-            #    print(db_obj.variant, '-', db_obj.interpretation_report)
             entry = [db_obj for db_obj in queryset
                      if db_obj.variant == self.model_attributes["variant"]
                      and db_obj.max_tier == self.model_attributes["max_tier"]
                      and db_obj.interpretation_report == self.model_attributes["interpretation_report"]]
-            # print(entry)
         elif self.model_type == ProbandTranscriptVariant:
             entry = [db_obj for db_obj in queryset
                      if db_obj.transcript == self.model_attributes["transcript"]
@@ -1206,10 +1201,8 @@ class CaseModel(object):
             entry = False
             self.entry = entry
         else:
-            print(queryset)
             raise ValueError("Multiple entries found for same object.")
 
-        print("Found", self.model_type, "entry:\t", entry)
         return entry
 
 

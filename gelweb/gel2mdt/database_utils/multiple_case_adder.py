@@ -191,6 +191,8 @@ class MultipleCaseAdder(object):
             # no such cases.
             pass
 
+
+        print(cases_to_update)
         return cases_to_update
 
     def add_cases(self):
@@ -296,8 +298,6 @@ class MultipleCaseAdder(object):
             elif not lookups:
                 model_objects = model_type.objects.all()
 
-            print(model_objects.values())
-
             for model in model_list:
                 if model.entry is False:
                     model.check_found_in_db(model_objects)
@@ -322,7 +322,6 @@ class MultipleCaseAdder(object):
                 tuple(attribute_dict.items())
                 for attribute_dict
                 in new_attributes])]
-        pprint.pprint(new_attributes)
         # save database entries from the list of unique new attributes
         for attributes in new_attributes:
             model_type.objects.create(
@@ -410,7 +409,6 @@ class TranscriptManager(object):
                 self.fetched_transcripts[transcript.transcript_name] = transcript
 
     def fetch_transcript(self, transcript):
-        print(transcript)
         return self.fetched_transcripts[transcript.transcript_name]
 
 
@@ -463,7 +461,6 @@ class PanelManager(object):
         fetched_panels then return it, otherwise return False.
         """
         pm_response =  self.fetched_panels.get((panelapp_id, panel_version), None)
-        print("PanelManager response:", pm_response)
         return pm_response
 
 
