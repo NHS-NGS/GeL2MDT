@@ -76,6 +76,7 @@ class Gene(models.Model):
     """
     ensembl_id = models.CharField(max_length=200, blank=True, null=True)
     hgnc_name = models.CharField(max_length=200)
+    genome_assembly = models.ForeignKey(ToolOrAssemblyVersion, on_delete=models.CASCADE)
 
     description = models.CharField(max_length=200)
 
