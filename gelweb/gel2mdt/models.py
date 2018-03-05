@@ -26,7 +26,7 @@ class ToolOrAssemblyVersion(models.Model):
     version_number = models.CharField(max_length=200)
 
     def __str__(self):
-        return str(self.tool_name + ' v' + self.version_number)
+        return str(self.version_number)
 
 
 class Phenotype(models.Model):
@@ -93,7 +93,6 @@ class Gene(models.Model):
     """
     ensembl_id = models.CharField(max_length=200, unique=True)
     hgnc_name = models.CharField(max_length=200)
-    genome_assembly = models.ForeignKey(ToolOrAssemblyVersion, on_delete=models.CASCADE)
 
     description = models.CharField(max_length=200)
 
@@ -377,8 +376,6 @@ class Transcript(models.Model):
     strand = models.CharField(max_length=255)
     protein = models.CharField(max_length=255, null=True)
     location = models.CharField(max_length=255, null=True)
-
-    gene = models.ForeignKey(Gene, on_delete=models.CASCADE, null=True)
 
     class Meta:
         managed = True
