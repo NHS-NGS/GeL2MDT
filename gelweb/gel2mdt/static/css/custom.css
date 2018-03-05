@@ -1,3 +1,109 @@
 form {
     display: inline;
 }
+body { 
+      padding-top: 70px; 
+} /* required for fixed-top navbar */
+
+#user {
+    text-decoration: underline;
+}
+
+.caption h3 {
+    margin-top: 0px;
+}
+
+.navbar-inverse {
+    background-color: #005EB8;
+    border: 0px solid #003087;
+}
+
+.navbar-header .navbar-brand {
+    color: white;
+}
+
+.navbar-header .navbar-brand:hover {
+    background-color: #0072CE;
+    color: #E8EDEE;
+}
+.navbar-inverse .navbar-toggle {
+    border: 1px solid white;
+    background-color: #005EB8;
+}
+
+.navbar-inverse .navbar-toggle:hover {
+    background-color: #003087; /* Changes toggle color on hover */
+}
+
+.navbar-inverse .navbar-toggle:focus {
+    background-color: #003087; /* Changes toggle color on hover */
+}
+
+.navbar-inverse .navbar-toggle:checked {
+    background-color: #003087; /* Changes toggle color on hover */
+}
+
+.navbar-inverse .navbar-nav>li>a {
+    color: white;
+}
+
+.navbar .navbar-inverse {
+    background-color: #99ccff;
+    border: 0;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+.navbar .navbar-inverse .navbar-collapse {
+    border: 0;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+.dropdown-menu {
+    background-color: #005EB8;
+}
+
+.dropdown-menu .divider {
+    background-color: #231f20;
+}
+
+.navbar-inverse .navbar-nav .open .dropdown-menu > li > a {
+    color: white;
+}
+.navbar-inverse .navbar-nav .open .dropdown-menu > li > a:hover {
+    background-color: #0072CE;
+    color: #E8EDEE;
+}
+
+.navbar-inverse .navbar-nav>li>a:hover {
+    background-color: #0072CE;
+    color: #E8EDEE;
+}
+
+.navbar-inverse .navbar-nav>.open>a, .navbar-inverse .navbar-nav>.open>a:focus, .navbar-inverse .navbar-nav>.open>a:hover {
+    background-color: #003087;
+}
+
+.navbar-inverse .navbar-text {
+    color: white;
+}
+
+.navbar-inverse .navbar-text .navbar-link {
+    color: white;
+}
+
+.navbar-inverse .navbar-text .navbar-link:hover {
+    color: #E8EDEE;
+}
+
+.btn-primary {
+    background-color: #005EB8;
+    border: 1px solid #003087;
+}
+
+.btn-primary:hover {
+    background-color: #003087;
+    border: 1px solid #231f20;
+}
+
