@@ -119,13 +119,28 @@ class TestCaseOperations(object):
         return hash_digest
 
 
+class TestUpdateCases(TestCase):
+    """
+    Test that all jsons can be added, then if one changes it is updated
+    with a new version number on the JSON but still associated with the same
+    IR family.
+    """
+    def setUp(self):
+        """
+        Instaniate a MCA for the zoo of test cases, unedited.
+        """
+        self.case_update_handler = MultipleCaseAdder(test_data=True)
+
+
 class TestAddCases(TestCase):
+    @unittest.skip("skip whilst testing hashcheck")
     def setUp(self):
         """
         Instantiate a MultipleCaseAdder for the zoo of test cases.
         """
         self.case_update_handler = MultipleCaseAdder(test_data=True)
 
+    @unittest.skip("skip whilst testing hashcheck")
     def test_request_id_format(self):
         """
         For each test case, assert that we correctly parse the IR ID.
@@ -133,6 +148,7 @@ class TestAddCases(TestCase):
         for case in self.case_update_handler.list_of_cases:
             assert re.match("\d+-\d+", case.request_id)
 
+    @unittest.skip("skip whilst testing hashcheck")
     def test_hash_cases(self):
         """
         For each test case, assert that we reliably hash the json.
@@ -141,6 +157,7 @@ class TestAddCases(TestCase):
         for case in self.case_update_handler.list_of_cases:
             assert case.json_hash == test_cases.json_hashes[case.request_id]
 
+    @unittest.skip("skip whilst testing hashcheck")
     def test_extract_proband(self):
         """
         Test that we can get the proband out of the json as a dict-type.
@@ -157,6 +174,7 @@ class TestAddCases(TestCase):
                     proband = participant
             assert case.proband["gelId"] == proband["gelId"]
 
+    @unittest.skip("skip whilst testing hashcheck")
     def test_extract_latest_status(self):
         """
         Test that the status extracted has the latest date and most progressed
@@ -247,6 +265,7 @@ class TestCaseModel(TestCase):
     entry for a particular case needs to be added or is already present in
     the database.
     """
+    @unittest.skip("skip whilst testing hashcheck")
     def test_new_clinician(self):
         """
         Return created=False when a Clinician is not known to the db.
@@ -308,8 +327,8 @@ class TestAddCases(TestCase):
             ReportEvent,
         ):
             all_models = model.objects.all().values()
-            pprint.pprint(list(all_models))
             if not all_models:
+                print("Fail on:",model)
                 check_cases = False
 
 
