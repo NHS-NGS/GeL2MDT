@@ -74,7 +74,7 @@ class Gene(models.Model):
     Ensembl ID hopes to be able to reference any gene consistently despite
     future name changes - the ENSG should not change.
     """
-    ensembl_id = models.CharField(max_length=200, blank=True, null=True)
+    ensembl_id = models.CharField(max_length=200, unique=True)
     hgnc_name = models.CharField(max_length=200)
     genome_assembly = models.ForeignKey(ToolOrAssemblyVersion, on_delete=models.CASCADE)
 
@@ -372,7 +372,7 @@ class Variant(models.Model):
 
 
 class Transcript(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     canonical_transcript = models.BooleanField(default=False)
     strand = models.CharField(max_length=255)
     protein = models.CharField(max_length=255, null=True)
