@@ -12,6 +12,23 @@ class ListUpdate(models.Model):
     update_time = models.DateTimeField()
 
 
+class ToolOrAssemblyVersion(models.Model):
+    """
+    Represents a tool used or genome build and version used in several use cases
+    within the CIP workflow.
+    """
+    class Meta:
+        verbose_name_plural = "Tool and assembly versions"
+        managed = True
+        db_table = 'ToolOrAssemblyVersion'
+
+    tool_name = models.CharField(max_length=200)
+    version_number = models.CharField(max_length=200)
+
+    def __str__(self):
+        return str(self.tool_name + ' v' + self.version_number)
+
+
 class Phenotype(models.Model):
     description = models.CharField(max_length=200, null=True, blank=True)
     hpo_terms = models.CharField(max_length=200)
@@ -135,23 +152,6 @@ class PanelVersionGene(models.Model):
     gene = models.ForeignKey(Gene, on_delete=models.CASCADE)
 
     level_of_confidence = models.CharField(max_length=200)
-
-
-class ToolOrAssemblyVersion(models.Model):
-    """
-    Represents a tool used or genome build and version used in several use cases
-    within the CIP workflow.
-    """
-    class Meta:
-        verbose_name_plural = "Tool and assembly versions"
-        managed = True
-        db_table = 'ToolOrAssemblyVersion'
-
-    tool_name = models.CharField(max_length=200)
-    version_number = models.CharField(max_length=200)
-
-    def __str__(self):
-        return str(self.tool_name + ' v' + self.version_number)
 
 
 class InterpretationReportFamily(models.Model):
