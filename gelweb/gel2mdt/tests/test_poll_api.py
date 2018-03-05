@@ -4,14 +4,12 @@ from ..api_utils.poll_api import PollAPI
 from ..api_utils.cip_utils import InterpretationList
 
 
-@unittest.skip("avoid polling for development testing")
 class Poll_CIP_API_TestCase(TestCase):
     def test_returns_status_code(self):
         cip_api_poll = PollAPI("cip_api", "interpretation-request")
         cip_api_poll.get_json_response()
 
 
-@unittest.skip("avoid polling for development testing")
 class TestInterpretationList(TestCase):
     def setUp(self):
         self.case_list_handler = InterpretationList()
