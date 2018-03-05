@@ -107,3 +107,12 @@ th{
     border: 1px solid #231f20;
 }
 
+.panel-default {
+        border-color: #E8EDEE;
+    }
+
+.panel-default > .panel-heading {
+    color: #231f20;
+    background-color: #E8EDEE;
+    border-color: #E8EDEE;
+}
