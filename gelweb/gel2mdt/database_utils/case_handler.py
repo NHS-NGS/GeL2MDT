@@ -1171,7 +1171,8 @@ class CaseModel(object):
                      pass
         elif self.model_type == Gene:
             entry = [db_obj for db_obj in queryset
-                     if db_obj.ensembl_id == self.model_attributes["ensembl_id"]]
+                     if db_obj.ensembl_id == self.model_attributes["ensembl_id"]
+                     and db_obj.hgnc_name == self.model_attributes["hgnc_name"]]
         elif self.model_type == PanelVersionGene:
                      pass
         elif self.model_type == Transcript:
