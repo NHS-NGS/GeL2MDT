@@ -612,17 +612,22 @@ class CaseAttributeManager(object):
 
         genes = self.case.attribute_managers[Gene].case_model.case_models
         case_transcripts = self.case.transcripts
+        print("Getting transcripts for case", self.case.request_id)
+        print("Case trancsripts:", case_transcripts)
         # for each transcript, add an FK to the gene with matching ensg ID
         for transcript in case_transcripts:
             # convert canonical to bools:
             transcript.canonical = transcript.transcript_canonical == "YES"
-            if not transcript.gene_ensembl_id:
+            if not transcript.gene_hgnc_id:
                 # if the transcript has no recognised gene associated
                 continue  # don't bother checking genes
+                print("Skipping transcript: no hgnc")
             transcript.gene_model = None
             for gene in genes:
+                print("GENE HGNC", gene.entry.hgnc_id, "\t", transcript.gene_hgnc_id)
                 if gene.entry.hgnc_id == transcript.gene_hgnc_id:
                     transcript.gene_model = gene.entry
+                    print("Match found")
 
         transcripts = ManyCaseModel(Transcript, [{
             "gene": transcript.gene_model,
