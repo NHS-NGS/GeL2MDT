@@ -822,6 +822,7 @@ class CaseAttributeManager(object):
         """
         Get proband variant information from VEP and the JSON and create MCM.
         """
+        print('PV search')
         ir_manager = self.case.attribute_managers[GELInterpretationReport]
 
         # match up created variants to corresponding dict in json_variants:
@@ -839,9 +840,9 @@ class CaseAttributeManager(object):
             # variant in json matches variant entry
             for variant in variant_entries:
                 if (
-                    json_variant["position"] == variant.position and
-                    json_variant["reference"] == variant.reference and
-                    json_variant["alternate"] == variant.alternate
+                        json_variant["position"] == variant.position and
+                        json_variant["reference"] == variant.reference and
+                        json_variant["alternate"] == variant.alternate
                 ):
                     # variant in json matches variant entry
                     json_variant["variant_entry"] = variant
@@ -863,9 +864,9 @@ class CaseAttributeManager(object):
                 # variant in json matches variant entry
                 for variant in variant_entries:
                     if (
-                                        json_variant["position"] == variant.position and
-                                        json_variant["reference"] == variant.reference and
-                                    json_variant["alternate"] == variant.alternate
+                            json_variant["position"] == variant.position and
+                            json_variant["reference"] == variant.reference and
+                            json_variant["alternate"] == variant.alternate
                     ):
                         # variant in json matches variant entry
                         json_variant["variant_entry"] = variant
@@ -873,31 +874,29 @@ class CaseAttributeManager(object):
             for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
                 if variant["variant_entry"]:
                     cip_proband_variant = {
-                        "max_tier": 0, # CIP flagged variants assigned tier 0
+                        "max_tier": 0,  # CIP flagged variants assigned tier 0
                         "variant": variant["variant_entry"],
                     }
                     cip_proband_variants.append(cip_proband_variant)
-
         # remove CIP tiered variants which are in cip variants
-        tiered_and_cip_proband_variants = []
-        for variant in tiered_proband_variants:
-            found = False
-            for cip_variant in cip_proband_variants:
-                tiered_and_cip_proband_variants.append(cip_variant)
-                if cip_variant['variant'] == variant['variant']:
-                    found = True
-            if not found:
-                tiered_and_cip_proband_variants.append(variant)
+        tiered_and_cip_proband_variants = cip_proband_variants + tiered_proband_variants
+        seen_variants = {}
+        for cip_variant in cip_proband_variants:
+            tiered_and_cip_proband_variants.append(cip_variant)
+            seen_variants[cip_variant['variant']] = 1
 
+        for variant in tiered_proband_variants:
+            if variant['variant'] not in seen_variants:
+                tiered_and_cip_proband_variants.append(variant)
 
         proband_variants = ManyCaseModel(ProbandVariant, [{
             "interpretation_report": ir_manager.case_model.entry,
             "max_tier": variant["max_tier"],
             "variant": variant["variant"],
             "somatic": False
-        # only adding T1/2 and CIP flagged
+            # only adding T1/2 and CIP flagged
         } for variant in tiered_and_cip_proband_variants],
-        self.model_objects)
+                                         self.model_objects)
 
         return proband_variants
 
