@@ -17,13 +17,14 @@ class CaseVariant:
         self.genome_build = genome_build
 
 class CaseTranscript:
-    def __init__(self, case_id, variant_count, gene_ensembl_id, gene_hgnc_name, transcript_name, transcript_canonical,
+    def __init__(self, case_id, variant_count, gene_ensembl_id, gene_hgnc_name, gene_hgnc_id, transcript_name, transcript_canonical,
                  transcript_strand, proband_transcript_variant_effect, transcript_variant_af_max, variant_polyphen,
                  variant_sift, transcript_variant_hgvs_c, transcript_variant_hgvs_p, transcript_variant_hgvs_g):
         self.case_id = case_id
         self.variant_count = variant_count
         self.gene_ensembl_id = gene_ensembl_id
         self.gene_hgnc_name = gene_hgnc_name
+        self.gene_hgnc_id = gene_hgnc_id
         self.transcript_name = transcript_name
         self.transcript_canonical = transcript_canonical
         self.transcript_strand = transcript_strand
@@ -168,6 +169,7 @@ def parse_vep_annotations(infile):
             for transcript in variant['transcript_data']:
                 gene_id = variant['transcript_data'][transcript]['Gene']
                 gene_name = variant['transcript_data'][transcript]['SYMBOL']
+                hgnc_id = variant['transcript_data'][transcript]['HGNC_ID']
                 if variant['transcript_data'][transcript]['CANONICAL'] == '':
                     canonical = False
                 else:
@@ -181,7 +183,7 @@ def parse_vep_annotations(infile):
                 transcript_variant_hgvs_c = variant['transcript_data'][transcript]['HGVSc']
                 transcript_variant_hgvs_p = variant['transcript_data'][transcript]['HGVSp']
                 transcript_variant_hgvs_g = variant['transcript_data'][transcript]['HGVSg']
-                case_transcript = CaseTranscript(case_id, variant_count, gene_id, gene_name, transcript_name, canonical,
+                case_transcript = CaseTranscript(case_id, variant_count, gene_id, gene_name, hgnc_id, transcript_name, canonical,
                                                  transcript_strand, proband_transcript_variant_effect,
                                                  transcript_variant_af_max, variant_polyphen, variant_sift,
                                                  transcript_variant_hgvs_c, transcript_variant_hgvs_p,
