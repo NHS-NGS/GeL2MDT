@@ -24,6 +24,7 @@
       <link href="{% static 'gel2mdt/css/jumbotron.css' %}" rel="stylesheet">
       <link href="{% static 'gel2mdt/css/bootstrap-responsive.css' %}" rel="stylesheet">
         <script type="text/javascript" src="{% static 'gel2mdt/DataTables/datatables.min.js' %}"></script>
+        <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js"></script>
         <link rel="stylesheet" type="text/css" href="{% static 'gel2mdt/css/custom.css' %}">
     {% endblock %}
       {% block javascript %}
@@ -47,10 +48,13 @@
             <div  class="navbar-collapse collapse">
                  {% block tabs %}
                 <ul class="nav navbar-nav">
-                     <li><a href="/start_mdt" >Start MDT</a></li>
+                    <li><a href="#"><i class="fas fa-home"></i></span> Cases</a></li>
+                    </ul>
+               <ul class="nav navbar-nav">
+                   <li><a href="/start_mdt" ><i class="fas fa-comments"></i> Start MDT</a></li>
                     </ul>
                 <ul class="nav navbar-nav">
-                     <li><a href="/recent_mdts" >Recent MDTs</a></li>
+                    <li><a href="/recent_mdts" ><i class="fas fa-history"></i> Recent MDTs</a></li>
                     </ul>
                 <ul class="nav navbar-nav">
                      <li><a href="/main_cases" >Main Cases</a></li>
@@ -62,12 +66,18 @@
 
                 {% endblock %}
                 <ul class="nav navbar-nav navbar-right">
-                <li><a href="/">Logged in as {{user.username}}</a></li>
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" 
+                           data-toggle="dropdown"
+                           href="/">
+                            <i class="fas fa-bars"></i> {{user.username}}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                        </ul>
+                    </li>
                 </ul>
 
-                <ul class="nav navbar-nav navbar-right">
-                <li><a href="/logout">Logout</a></li>
-                </ul>
             </div><!--/.navbar-collapse -->
 
            {% else %}
@@ -88,6 +98,32 @@
         </div>
 
 {% block head-javascript %}
+<script>
+$(document).ready(function() {
+    $('#dataTables-rare-disease-main').DataTable( {
+        initComplete: function () {
+            this.api().columns().every( function () {
+                var column = this;
+                var select = $('<select><option value=""></option></select>')
+                    .appendTo( $(column.footer()).empty() )
+                    .on( 'change', function () {
+                        var val = $.fn.dataTable.util.escapeRegex(
+                            $(this).val()
+                        );
+
+                        column
+                            .search( val ? '^'+val+'$' : '', true, false )
+                            .draw();
+                    } );
+                                            
+                column.data().unique().sort().each( function ( d, j ) {
+                    select.append( '<option value="'+d+'">'+d+'</option>' )
+                } );
+            } );
+        }
+    } );
+} );
+    </script>
 <script>
     $(document).ready(function() {
         $('#dataTables-generic').DataTable({
