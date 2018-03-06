@@ -1,4 +1,5 @@
 import os
+import traceback
 import json
 
 from ..models import *
@@ -87,17 +88,20 @@ class MultipleCaseAdder(object):
             self.add_cases()
             print("Updating cases")
             self.add_cases(update=True)
+            success = True
         except Exception as e:
             print("Encountered error:", e)
-            error = e
+            error = traceback.format_exc()
+            print(error)
+            success = False
         finally:
             print("Recording update")
             # record the update in ListUpdate
             ListUpdate.objects.create(
                 update_time=timezone.now(),
                 success=success,
-                cases_added=len(cases_to_add),
-                cases_updated=len(cases_to_update),
+                cases_added=len(self.cases_to_add),
+                cases_updated=len(self.cases_to_update),
                 error=error
             )
 
