@@ -79,6 +79,7 @@ def index(request):
     # We want this to be a choice between cancer and rare disease
     return render(request, 'gel2mdt/index.html', {})
 
+
 @login_required
 def cancer_main(request):
     '''
@@ -88,6 +89,7 @@ def cancer_main(request):
     '''
     return render(request, 'gel2mdt/cancer_main.html', {})
 
+
 @login_required
 def rare_disease_main(request):
     '''
@@ -95,8 +97,12 @@ def rare_disease_main(request):
     :param request:
     :return:
     '''
-
-    rd_cases = GELInterpretationReport.objects.all()
+    rd_case_families = InterpretationReportFamily.objects.prefetch_related().all()
+    rd_case_families = [rd_case_family for rd_case_family in rd_case_families]
+    rd_cases = [
+        GELInterpretationReport.objects.filter(ir_family=ir_family).latest("polled_at_datetime")
+        for ir_family in rd_case_families
+    ]
     return render(request, 'gel2mdt/rare_disease_main.html', {'rd_cases': rd_cases})
 
 @login_required
