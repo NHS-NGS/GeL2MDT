@@ -333,7 +333,7 @@ class MultipleCaseAdder(object):
                 os.path.join(
                     cip_api_storage,
                     '{}.json'.format(
-                        case.request_id + "-" + case.attribute_managers[GELInterpretationReport].entry.archived_version)
+                        case.request_id + "-" + case.attribute_managers[GELInterpretationReport].case_model.entry.archived_version)
                 ),
                 'w') as f:
                     json.dump(case.json)
