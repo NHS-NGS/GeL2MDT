@@ -528,6 +528,7 @@ class CaseAttributeManager(object):
         Create gene objects from the genes from panelapp.
         """
         panels = self.case.panels
+
         # get the list of genes from the panelapp_result
         gene_list = []
         if panels:
@@ -536,7 +537,8 @@ class CaseAttributeManager(object):
                 gene_list += genes
 
         for gene in gene_list:
-            if not gene["EnsembleGeneIds"] or gene["EnsembleGeneIds"] == 'E': # Alot of pilot cases just have E for this
+            # Alot of pilot cases just have E for this
+            if not gene["EnsembleGeneIds"] or gene["EnsembleGeneIds"] == 'E':
                 gene["EnsembleGeneIds"] = None
             else:
                 if type(gene['EnsembleGeneIds']) is str:
@@ -544,23 +546,53 @@ class CaseAttributeManager(object):
                 else:
                     gene['EnsembleGeneIds'] = gene['EnsembleGeneIds'][0]
 
+        self.case.gene_manager.load_genes()
+        for gene in gene_list:
+            gene['HGNC_ID'] = None
+            if gene['EnsembleGeneIds']:
+                polled = self.case.gene_manager.fetch_searched(gene['EnsembleGeneIds'])
+                if polled:
+                    print(polled)
+                    gene['HGNC_ID'] = polled
+                else:
+                    print('Polling {}'.format(gene["EnsembleGeneIds"]))
+                    genename_poll = PollAPI(
+                        "genenames", "search/{gene}/".format(
+                            gene=gene["EnsembleGeneIds"])
+                    )
+                    genename_response = genename_poll.get_json_response()
+                    if genename_response['response']['docs']:
+                        hgnc_id = genename_response['response']['docs'][0]['hgnc_id']
+                        hgnc_id = re.sub('HGNC:', '', hgnc_id)
+                        gene['HGNC_ID'] = str(hgnc_id)
+                        self.case.gene_manager.add_searched(gene["EnsembleGeneIds"], str(hgnc_id))
+                    else:
+                        self.case.gene_manager.add_searched(gene["EnsembleGeneIds"], None)
+
         for transcript in self.case.transcripts:
             if transcript.gene_ensembl_id and transcript.gene_hgnc_name:
                 gene_list.append({
                     'EnsembleGeneIds': transcript.gene_ensembl_id,
-                     'GeneSymbol':   transcript.gene_hgnc_name
+                    'GeneSymbol': transcript.gene_hgnc_name,
+                    'HGNC_ID': str(transcript.gene_hgnc_id),
                 })
 
         cleaned_gene_list = []
         for gene in gene_list:
-            if gene['EnsembleGeneIds']:
+            if gene['HGNC_ID']:
                 self.case.gene_manager.add_gene(gene)
                 new_gene = self.case.gene_manager.fetch_gene(gene)
                 cleaned_gene_list.append(new_gene)
+                if gene['HGNC_ID'] == '4042':
+                    print(new_gene)
+
+        self.case.gene_manager.write_genes()
+
         genes = ManyCaseModel(Gene, [{
             "ensembl_id": gene["EnsembleGeneIds"],  # TODO: which ID to use?
-            "hgnc_name": gene["GeneSymbol"]
-        } for gene in cleaned_gene_list if gene["EnsembleGeneIds"]], self.model_objects)
+            "hgnc_name": gene["GeneSymbol"],
+            "hgnc_id": gene['HGNC_ID']
+        } for gene in cleaned_gene_list if gene["HGNC_ID"]], self.model_objects)
         return genes
 
     def get_panel_version_genes(self):
@@ -577,7 +609,7 @@ class CaseAttributeManager(object):
         Create a ManyCaseModel for transcripts based on information returned
         from VEP.
         """
-        # get list of gene case models
+
         genes = self.case.attribute_managers[Gene].case_model.case_models
         case_transcripts = self.case.transcripts
         # for each transcript, add an FK to the gene with matching ensg ID
@@ -589,17 +621,17 @@ class CaseAttributeManager(object):
                 continue  # don't bother checking genes
             transcript.gene_model = None
             for gene in genes:
-                if gene.entry.ensembl_id == transcript.gene_ensembl_id:
+                if gene.entry.hgnc_id == transcript.gene_hgnc_id:
                     transcript.gene_model = gene.entry
 
         transcripts = ManyCaseModel(Transcript, [{
             "gene": transcript.gene_model,
             "name": transcript.transcript_name,
             "canonical_transcript": transcript.canonical,
-            "strand": transcript.transcript_strand
-        # add all transcripts except those without associated genes
+            "strand": transcript.transcript_strand,
+            # add all transcripts except those without associated genes
         } for transcript in case_transcripts if transcript.gene_model],
-        self.model_objects)
+                                    self.model_objects)
 
         return transcripts
 
