@@ -77,7 +77,6 @@ class MultipleCaseAdder(object):
             set(self.cases_to_add) - \
             set(self.cases_to_update)
 
-
     def update_database(self):
         # begin update process
         # --------------------
@@ -421,17 +420,42 @@ class TranscriptManager(object):
     def fetch_transcript(self, transcript):
         return self.fetched_transcripts[transcript.transcript_name]
 
+
 class GeneManager(object):
 
     def __init__(self):
         self.fetched_genes = {}
+        self.searched_genes = {}
+        self.config_dict = load_config.LoadConfig().load()
 
     def add_gene(self, gene):
-        if gene['EnsembleGeneIds'] not in self.fetched_genes:
-            self.fetched_genes[gene['EnsembleGeneIds']] = gene
+        if gene['HGNC_ID'] not in self.fetched_genes:
+            self.fetched_genes[gene['HGNC_ID']] = gene
 
     def fetch_gene(self, gene):
-        return self.fetched_genes.get(gene['EnsembleGeneIds'], None)
+        return self.fetched_genes.get(gene['HGNC_ID'], None)
+
+    def add_searched(self, ensembl_id, hgnc_id):
+        self.searched_genes[ensembl_id] = hgnc_id
+
+    def fetch_searched(self, ensembl_id):
+        return self.searched_genes.get(ensembl_id, None)
+
+    def write_genes(self):
+        output = open(os.path.join(self.config_dict['gene_storage'],'saved_genes.tsv'), 'w')
+        for key in self.searched_genes:
+            output.write(f'{key}\t{self.searched_genes[key]}\n')
+        output.close()
+
+    def load_genes(self):
+        if os.path.isfile(os.path.join(self.config_dict['gene_storage'],'saved_genes.tsv')):
+            with open(os.path.join(self.config_dict['gene_storage'],'saved_genes.tsv')) as f:
+                for line in f:
+                    word = line.rstrip().split('\t')
+                    if word[1] == 'None':
+                        self.searched_genes[word[0]] = None
+                    else:
+                        self.searched_genes[word[0]] = word[1]
 
 class VariantManager(object):
 

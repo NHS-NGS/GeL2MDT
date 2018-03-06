@@ -91,9 +91,9 @@ class Gene(models.Model):
     Ensembl ID hopes to be able to reference any gene consistently despite
     future name changes - the ENSG should not change.
     """
-    ensembl_id = models.CharField(max_length=200, unique=True)
+    ensembl_id = models.CharField(max_length=200)
     hgnc_name = models.CharField(max_length=200)
-
+    hgnc_id = models.CharField(max_length=200, unique=True)
     description = models.CharField(max_length=200)
 
     def __str__(self):
