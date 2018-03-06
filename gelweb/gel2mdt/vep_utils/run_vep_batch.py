@@ -63,6 +63,7 @@ def run_vep(infile, config_dict):
     hg19_outfile = tempfile.NamedTemporaryFile(mode='w+t', delete=False)
     hg38_outfile = tempfile.NamedTemporaryFile(mode='w+t', delete=False)
     # run VEP for hg19 variants
+    annotated_variant_dict = {}
     if os.stat(hg19_vcf).st_size != 0: # if file not empty
         # builds command from locations supplied in config file
         cmd = "{vep} -i {infile} -o {outfile} --force_overwrite --cache --dir_cache {cache} --fork 4 --vcf --flag_pick \
@@ -74,6 +75,7 @@ def run_vep(infile, config_dict):
             fasta_loc=config_dict['hg19_fasta_loc'],
         )
         subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell=True).wait()
+        annotated_variant_dict['hg19_vep'] = hg19_outfile.name
     # run VEP for hg38 variants
     if os.stat(hg38_vcf).st_size != 0:
         cmd = "{vep} -i {infile} -o {outfile} --force_overwrite --cache --dir_cache {cache} --fork 4 --vcf --flag_pick \
@@ -85,17 +87,12 @@ def run_vep(infile, config_dict):
             fasta_loc=config_dict['hg38_fasta_loc'],
         )
         subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell=True).wait()
-    annotated_variant_dict = {'hg19_vep': hg19_outfile.name, 'hg38_vep': hg38_outfile.name}
+        annotated_variant_dict['hg38_vep'] = hg38_outfile.name
     return annotated_variant_dict
 
 def run_vep_gosh(infile, config_dict):
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
-    hg19_vcf = infile['hg19_vcf']
-    hg38_vcf = infile['hg38_vcf']
-    hg19_outfile = 'VEP/hg19_results.vcf'
-    hg38_outfile = 'VEP/hg38_results.vcf'
 
     # builds command from locations supplied in config file
     ssh.connect(config_dict['crick_ip'],
@@ -103,54 +100,64 @@ def run_vep_gosh(infile, config_dict):
                 password=config_dict['crick_password'])
     sftp = ssh.open_sftp()
     # run VEP for hg19 variants
-    if os.stat(hg19_vcf).st_size != 0:
-        sftp.put(hg19_vcf, '/home/chris/gel2mdt_testing/hg19_destination_file.txt'.format(hg19_vcf))
+    annotated_variant_dict = {}
+    if 'hg19_vcf' in infile:
+        hg19_vcf = infile['hg19_vcf']
+        hg19_outfile = 'VEP/hg19_results.vcf'
+        if os.stat(hg19_vcf).st_size != 0:
+            sftp.put(hg19_vcf, '/home/chris/gel2mdt_testing/hg19_destination_file.txt'.format(hg19_vcf))
 
-        cmd = "{vep} -i /home/chris/gel2mdt_testing/hg19_destination_file.txt " \
-              " -o /home/chris/gel2mdt_testing/hg19_output.txt --species homo_sapiens "  \
-              " --force_overwrite --cache --dir_cache {cache} --fork 4 --vcf --flag_pick --assembly GRCh37 " \
-              " --exclude_predicted --everything --hgvsg --dont_skip --total_length --offline --fasta {fasta_loc} ".format(
-                vep=config_dict['vep'],
-                cache=config_dict['cache'],
-                fasta_loc=config_dict['hg19_fasta_loc'],
-        )
-        stdin, stdout, stderr = ssh.exec_command(cmd)
-        # stdin, stdout, stderr = ssh.exec_command('{gosh_vep} help'.format(gosh_vep=config_dict['gosh_vep']))
+            cmd = "{vep} -i /home/chris/gel2mdt_testing/hg19_destination_file.txt " \
+                  " -o /home/chris/gel2mdt_testing/hg19_output.txt --species homo_sapiens "  \
+                  " --force_overwrite --cache --dir_cache {cache} --fork 4 --vcf --flag_pick --assembly GRCh37 " \
+                  " --exclude_predicted --everything --hgvsg --dont_skip --total_length --offline --fasta {fasta_loc} ".format(
+                    vep=config_dict['vep'],
+                    cache=config_dict['cache'],
+                    fasta_loc=config_dict['hg19_fasta_loc'],
+            )
+            stdin, stdout, stderr = ssh.exec_command(cmd)
+            # stdin, stdout, stderr = ssh.exec_command('{gosh_vep} help'.format(gosh_vep=config_dict['gosh_vep']))
 
-        print('stdin:', stdin, 'stdout:', stdout.read(), 'stderr:', stderr.read())
+            print('stdin:', stdin, 'stdout:', stdout.read(), 'stderr:', stderr.read())
+            sftp.get('/home/chris/gel2mdt_testing/hg19_output.txt', hg19_outfile)
+            annotated_variant_dict['hg19_vep'] = hg19_outfile
     # run VEP for hg38 variants
-    if os.stat(hg38_vcf).st_size != 0:
-        sftp.put(hg38_vcf, '/home/chris/gel2mdt_testing/hg38_destination_file.txt'.format(hg38_vcf))
+    if 'hg38_vcf' in infile:
+        hg38_vcf = infile['hg38_vcf']
+        hg38_outfile = 'VEP/hg38_results.vcf'
+        if os.stat(hg38_vcf).st_size != 0:
+            sftp.put(hg38_vcf, '/home/chris/gel2mdt_testing/hg38_destination_file.txt'.format(hg38_vcf))
 
-        cmd = "{vep} -i /home/chris/gel2mdt_testing/hg38_destination_file.txt " \
-              " -o /home/chris/gel2mdt_testing/hg38_output.txt --species homo_sapiens "  \
-              " --force_overwrite --cache --dir_cache {cache} --fork 4 --vcf --flag_pick --assembly GRCh38 " \
-              " --exclude_predicted --everything --hgvsg --dont_skip --total_length --offline --fasta {fasta_loc} ".format(
-                vep=config_dict['vep'],
-                cache=config_dict['cache'],
-                fasta_loc=config_dict['hg38_fasta_loc'],
-        )
-        stdin, stdout, stderr = ssh.exec_command(cmd)
-        # stdin, stdout, stderr = ssh.exec_command('{gosh_vep} help'.format(gosh_vep=config_dict['gosh_vep']))
+            cmd = "{vep} -i /home/chris/gel2mdt_testing/hg38_destination_file.txt " \
+                  " -o /home/chris/gel2mdt_testing/hg38_output.txt --species homo_sapiens "  \
+                  " --force_overwrite --cache --dir_cache {cache} --fork 4 --vcf --flag_pick --assembly GRCh38 " \
+                  " --exclude_predicted --everything --hgvsg --dont_skip --total_length --offline --fasta {fasta_loc} ".format(
+                    vep=config_dict['vep'],
+                    cache=config_dict['cache'],
+                    fasta_loc=config_dict['hg38_fasta_loc'],
+            )
+            stdin, stdout, stderr = ssh.exec_command(cmd)
+            # stdin, stdout, stderr = ssh.exec_command('{gosh_vep} help'.format(gosh_vep=config_dict['gosh_vep']))
 
-        print('stdin:', stdin, 'stdout:', stdout.read(), 'stderr:', stderr.read())
+            print('stdin:', stdin, 'stdout:', stdout.read(), 'stderr:', stderr.read())
+            sftp.get('/home/chris/gel2mdt_testing/hg38_output.txt', hg38_outfile)
+            annotated_variant_dict['hg38_vep'] = hg38_outfile
 
-    sftp.get('/home/chris/gel2mdt_testing/hg19_output.txt', hg19_outfile)
-
-    sftp.get('/home/chris/gel2mdt_testing/hg38_output.txt', hg38_outfile)
     sftp.close()
     ssh.close()
-    annotated_variant_dict = {'hg19_vep': hg19_outfile, 'hg38_vep': hg38_outfile}
     return annotated_variant_dict
 
 def parse_vep_annotations(infile=None):
+    transcripts_list = []
     if infile is not None:
         hg19_variants = []
         hg38_variants = []
-        if os.stat(infile['hg19_vep']).st_size != 0:
-            hg19_variants = parse_vep.ParseVep().read_file(infile['hg19_vep'])
-        if os.stat(infile['hg38_vep']).st_size != 0:
-            hg38_variants = parse_vep.ParseVep().read_file(infile['hg38_vep'])
+        if 'hg19_vep' in infile:
+            if os.stat(infile['hg19_vep']).st_size != 0:
+                hg19_variants = parse_vep.ParseVep().read_file(infile['hg19_vep'])
+        if 'hg38_vep' in infile:
+            if os.stat(infile['hg38_vep']).st_size != 0:
+                hg38_variants = parse_vep.ParseVep().read_file(infile['hg38_vep'])
         # concatenate the two lists of variant dictionaries
         variants = hg19_variants + hg38_variants
 
