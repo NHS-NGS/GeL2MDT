@@ -121,3 +121,13 @@ th{
     background-color: #E8EDEE;
     border-color: #E8EDEE;
 }
+
+.panel-info {
+    border-color: rgba(65, 182, 230, 0.2);
+}
+
+.panel-info > .panel-heading {
+    color: #31708f;
+    background-color: rgba(65, 182, 230, 0.2);
+    border-color: rgba(65, 182, 230, 0.2);
+}
