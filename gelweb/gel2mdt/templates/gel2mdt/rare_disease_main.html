@@ -12,6 +12,70 @@
            </div>
             <!-- /.panel-heading -->
             <div class="panel-body">
+                <div class="panel-group">
+                    <div class="panel panel-info">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a data-toggle="collapse" href="#collapse1"><i class="fas fa-caret-square-down"></i> You are currently viewing: <strong>all data.</strong> Click here to change filters.</a>
+                            </h4>
+                        </div>
+                        <div id="collapse1" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <table class="table">
+                                    <tbody>
+
+                                        <tr>
+                                            <td>Case type:</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <button type="button" class="btn btn-success">All</button>
+                                                    <button type="button" class="btn btn-success">Main</button>
+                                                    <button type="button" class="btn btn-success">Pilot</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Genome build:</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <button type="button" class="btn btn-success">All</button>
+                                                    <button type="button" class="btn btn-success">GRCh37</button>
+                                                    <button type="button" class="btn btn-success">GRCh38</button>
+                                                </div>
+</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Max tier:</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <button type="button" class="btn btn-success">CIP Candidate</button>
+                                                    <button type="button" class="btn btn-success">1</button>
+                                                    <button type="button" class="btn btn-success">2</button>
+                                                    <button type="button" class="btn btn-success">3</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Case status:</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                <button type="button" class="btn btn-success">Under Review</button>
+                                                <button type="button" class="btn btn-success">Awaiting MDT</button>
+                                                <button type="button" class="btn btn-success">Awaiting validation</button>
+                                                <button type="button" class="btn btn-success">Awaiting reporting</button>
+                                                <button type="button" class="btn btn-success">Reported</button>
+                                                <button type="button" class="btn btn-success">Completed</button>
+                                                <button type="button" class="btn btn-success">External</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <table width="100%" 
                        class="table table-striped table-bordered table-hover" 
                        id="dataTables-rare-disease-main"
@@ -25,7 +89,7 @@
                                 <th>Max Tier</th>
                                 <th>Assembly</th>
                                 <th>Case Status</th>
-                                <th>Version</th>
+                                <th>Updated <a href="#" data-toggle="tooltip" title="When the case was updated by GeL, not locally!"><i class="fas fa-info-circle"></i></a></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -38,7 +102,7 @@
                                     <td>{{report.max_tier}}
                                     <td>{{report.assembly}}
                                      <td>{{report.ir_family.participant_family.proband.get_status_display}}</td>
-                                     <td>{{report.archived_version}}</td>
+                                     <td>{{report.updated}}</td>
                                 </tr>
                                 {% endfor %}
                         </tbody>
