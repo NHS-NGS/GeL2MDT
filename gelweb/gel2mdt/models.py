@@ -10,6 +10,12 @@ class ListUpdate(models.Model):
     results list was updated.
     """
     update_time = models.DateTimeField()
+    success = models.BooleanField()
+
+    cases_added = models.IntegerField()
+    cases_updated = models.IntegerField()
+
+    error = models.TextField(null=True)
 
 
 class ToolOrAssemblyVersion(models.Model):
