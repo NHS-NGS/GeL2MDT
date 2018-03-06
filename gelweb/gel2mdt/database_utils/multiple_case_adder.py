@@ -332,10 +332,10 @@ class MultipleCaseAdder(object):
                 os.path.join(
                     cip_api_storage,
                     '{}.json'.format(
-                        case.request_id + "-" + case.attribute_managers[GELInterpretationReport].case_model.entry.archived_version)
+                        case.request_id + "-" + str(case.attribute_managers[GELInterpretationReport].case_model.entry.archived_version))
                 ),
                 'w') as f:
-                    json.dump(case.json)
+                    json.dump(case.json, f)
 
     def save_new(self, model_type, model_list):
         """
