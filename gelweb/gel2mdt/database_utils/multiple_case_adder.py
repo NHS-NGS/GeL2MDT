@@ -81,12 +81,27 @@ class MultipleCaseAdder(object):
     def update_database(self):
         # begin update process
         # --------------------
-        self.update_errors = {}
-        logger.info("Adding cases from cases_to_add.")
-        print("Adding cases")
-        self.add_cases()
-        print("Updating cases")
-        self.add_cases(update=True)
+        error = None
+        try:
+            logger.info("Adding cases from cases_to_add.")
+            print("Adding cases")
+            self.add_cases()
+            print("Updating cases")
+            self.add_cases(update=True)
+        except Exception as e:
+            print("Encountered error:", e)
+            error = e
+        finally:
+            print("Recording update")
+            # record the update in ListUpdate
+            ListUpdate.objects.create(
+                update_time=timezone.now(),
+                success=success,
+                cases_added=len(cases_to_add),
+                cases_updated=len(cases_to_update),
+                error=error
+            )
+
 
     def fetch_test_data(self):
         """
@@ -137,18 +152,13 @@ class MultipleCaseAdder(object):
         :returns: A case json associated with the given IR ID from CIP-API
         """
         logger.info("Polling API for case", interpretation_request_id)
-        cip_api_storage = self.config['cip_api_storage']
-        if os.path.isfile(os.path.join(cip_api_storage, '{}.json'.format(interpretation_request_id))):
-            response = json.load(open(os.path.join(cip_api_storage, '{}.json'.format(interpretation_request_id))))
-        else:
-            request_poll = PollAPI(
-                # instantiate a poll of CIP API for a given case json
-                "cip_api", "interpretation-request/{id}/{version}".format(
-                    id=interpretation_request_id.split("-")[0],
-                    version=interpretation_request_id.split("-")[1]))
-            with open(os.path.join(cip_api_storage, '{}.json'.format(interpretation_request_id)), 'w') as f:
-                json.dump(request_poll.get_json_response(), f)
-            response = request_poll.get_json_response()
+
+        request_poll = PollAPI(
+            # instantiate a poll of CIP API for a given case json
+            "cip_api", "interpretation-request/{id}/{version}".format(
+                id=interpretation_request_id.split("-")[0],
+                version=interpretation_request_id.split("-")[1]))
+        response = request_poll.get_json_response()
         return response
 
     def check_cases_to_add(self):
@@ -311,6 +321,19 @@ class MultipleCaseAdder(object):
             for model in model_list:
                 if model.entry is False:
                     model.check_found_in_db(model_objects)
+
+
+        # finally, save jsons to disk storage
+        cip_api_storage = self.config['cip_api_storage']
+        for case in cases:
+            with open(
+                os.path.join(
+                    cip_api_storage,
+                    '{}.json'.format(
+                        case.request_id + "-" + case.attribute_managers[GELInterpretationReport].entry.archived_version)
+                ),
+                'w') as f:
+                    json.dump(case.json)
 
     def save_new(self, model_type, model_list):
         """
