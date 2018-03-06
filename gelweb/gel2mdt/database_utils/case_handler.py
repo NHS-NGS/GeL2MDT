@@ -81,8 +81,8 @@ class Case(object):
         participant_jsons = \
             self.json_case_data["json_request"]["pedigree"]["participants"]
         for participant in participant_jsons:
-            if not participant["isProband"]:
-                if "relation_to_proband" not in  participant["additionalInformation"]:
+            if not participant["isProband"] and participant["additionalInformation"]:
+                if "relation_to_proband" not in participant["additionalInformation"]:
                     continue
                 family_member = {'gel_id': participant["gelId"],
                                  'relation_to_proband': participant["additionalInformation"]["relation_to_proband"],
@@ -547,14 +547,23 @@ class CaseAttributeManager(object):
                     gene['EnsembleGeneIds'] = gene['EnsembleGeneIds'][0]
 
         self.case.gene_manager.load_genes()
+
+        for transcript in self.case.transcripts:
+            if transcript.gene_ensembl_id and transcript.gene_hgnc_id:
+                gene_list.append({
+                    'EnsembleGeneIds': transcript.gene_ensembl_id,
+                    'GeneSymbol': transcript.gene_hgnc_name,
+                    'HGNC_ID': str(transcript.gene_hgnc_id),
+                })
+                self.case.gene_manager.add_searched(transcript.gene_ensembl_id, str(transcript.gene_hgnc_id))
+
         for gene in gene_list:
             gene['HGNC_ID'] = None
             if gene['EnsembleGeneIds']:
                 polled = self.case.gene_manager.fetch_searched(gene['EnsembleGeneIds'])
-                if polled:
-                    print(polled)
-                    gene['HGNC_ID'] = polled
-                else:
+                if polled == 'Not_found':
+                    gene['HGNC_ID'] = None
+                elif not polled:
                     print('Polling {}'.format(gene["EnsembleGeneIds"]))
                     genename_poll = PollAPI(
                         "genenames", "search/{gene}/".format(
@@ -567,15 +576,9 @@ class CaseAttributeManager(object):
                         gene['HGNC_ID'] = str(hgnc_id)
                         self.case.gene_manager.add_searched(gene["EnsembleGeneIds"], str(hgnc_id))
                     else:
-                        self.case.gene_manager.add_searched(gene["EnsembleGeneIds"], None)
-
-        for transcript in self.case.transcripts:
-            if transcript.gene_ensembl_id and transcript.gene_hgnc_name:
-                gene_list.append({
-                    'EnsembleGeneIds': transcript.gene_ensembl_id,
-                    'GeneSymbol': transcript.gene_hgnc_name,
-                    'HGNC_ID': str(transcript.gene_hgnc_id),
-                })
+                        self.case.gene_manager.add_searched(gene["EnsembleGeneIds"], 'Not_found')
+                else:
+                    gene['HGNC_ID'] = polled
 
         cleaned_gene_list = []
         for gene in gene_list:
@@ -583,8 +586,6 @@ class CaseAttributeManager(object):
                 self.case.gene_manager.add_gene(gene)
                 new_gene = self.case.gene_manager.fetch_gene(gene)
                 cleaned_gene_list.append(new_gene)
-                if gene['HGNC_ID'] == '4042':
-                    print(new_gene)
 
         self.case.gene_manager.write_genes()
 
@@ -822,7 +823,6 @@ class CaseAttributeManager(object):
         """
         Get proband variant information from VEP and the JSON and create MCM.
         """
-        print('PV search')
         ir_manager = self.case.attribute_managers[GELInterpretationReport]
 
         # match up created variants to corresponding dict in json_variants:

@@ -367,7 +367,6 @@ class Variant(models.Model):
 
     genome_assembly = models.ForeignKey(ToolOrAssemblyVersion, on_delete=models.CASCADE)
 
-
     def __str__(self):
         return str(self.chromosome + str(self.position) + self.reference + ">" + self.alternate)
 
@@ -383,7 +382,7 @@ class Transcript(models.Model):
     protein = models.CharField(max_length=255, null=True)
     location = models.CharField(max_length=255, null=True)
 
-    gene = models.ForeignKey(Gene, on_delete=models.CASCADE)
+    gene = models.ForeignKey(Gene, on_delete=models.CASCADE, null=True)
 
     class Meta:
         managed = True
@@ -486,8 +485,6 @@ class CancerReport(models.Model):
     class Meta:
         managed = True
         db_table = 'CancerReport'
-
-
 
 
 class ProbandTranscriptVariant(models.Model):
