@@ -243,7 +243,6 @@ class MultipleCaseAdder(object):
             cases = self.cases_to_update
         elif not update:
             cases = self.cases_to_add
-
         if cases:
             # we need vep results for all cases, which needs to be done in batch
             variants = []
@@ -469,20 +468,17 @@ class GeneManager(object):
         return self.searched_genes.get(ensembl_id, None)
 
     def write_genes(self):
-        output = open(os.path.join(self.config_dict['gene_storage'],'saved_genes.tsv'), 'w')
+        output = open(os.path.join(self.config_dict['gene_storage'], 'saved_genes.tsv'), 'w')
         for key in self.searched_genes:
             output.write(f'{key}\t{self.searched_genes[key]}\n')
         output.close()
 
     def load_genes(self):
-        if os.path.isfile(os.path.join(self.config_dict['gene_storage'],'saved_genes.tsv')):
-            with open(os.path.join(self.config_dict['gene_storage'],'saved_genes.tsv')) as f:
+        if os.path.isfile(os.path.join(self.config_dict['gene_storage'], 'saved_genes.tsv')):
+            with open(os.path.join(self.config_dict['gene_storage'], 'saved_genes.tsv')) as f:
                 for line in f:
                     word = line.rstrip().split('\t')
-                    if word[1] == 'None':
-                        self.searched_genes[word[0]] = None
-                    else:
-                        self.searched_genes[word[0]] = word[1]
+                    self.searched_genes[word[0]] = word[1]
 
 class VariantManager(object):
 
