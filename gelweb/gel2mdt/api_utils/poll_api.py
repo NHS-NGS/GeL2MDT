@@ -28,7 +28,11 @@ class PollAPI(object):
                 False),
             "mutalyzer": (
                 "https://mutalyzer.nl/json/{endpoint}",
-                False)}
+                False),
+            "genenames": (
+                "http://rest.genenames.org/{endpoint}",
+                True)
+        }
 
         self.server = self.server_list[api][0]
         self.url = self.server.format(endpoint=self.endpoint)
@@ -51,9 +55,12 @@ class PollAPI(object):
             session = requests.Session()
             adapter = requests.adapters.HTTPAdapter(max_retries=MAX_RETRIES)
             session.mount("https://", adapter)
-            if (self.headers_required) and (self.headers is None):
+            if (self.headers_required) and (self.headers is None) and (self.api == 'cip_api'):
                 # get auth headers if we need them and they're not yet set
                 self.get_auth_headers()
+                continue
+            elif (self.headers_required) and (self.headers is None) and (self.api == 'genenames'):
+                self.get_headers()
                 continue
             elif (self.headers_required) and (self.headers is not None):
                 # auth headers required; have been set
@@ -109,3 +116,8 @@ class PollAPI(object):
             "Accept": "application/json",
             "Authorization": "JWT {token}".format(
                 token=token_json.get("token"))}
+
+    def get_headers(self):
+        self.headers = {
+            'Accept': 'application/json',
+        }
