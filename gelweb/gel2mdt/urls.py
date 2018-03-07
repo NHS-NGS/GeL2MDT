@@ -2,6 +2,8 @@ from django.contrib import admin
 from django.urls import path
 from . import views
 
+from .api.api_urls import *
+
 urlpatterns = [
     path('', views.index, name='index'),
     path('register/', views.register, name='register'),
@@ -41,3 +43,5 @@ urlpatterns = [
          name='remove-attendee-from-mdt'),
     path('add_new_attendee/', views.add_new_attendee, name='add-new-attendee'),
 ]
+
+urlpatterns += api_urlpatterns

@@ -1,8 +1,8 @@
 {% extends 'gel2mdt/base.html' %}
 {% load bootstrap3 %}
 {% load static %}
-{% block content %}
 
+{% block content %}
 <div  class="container-fluid">
 <div class="row">
     <div class="col-lg-12">
@@ -21,57 +21,126 @@
                         </div>
                         <div id="collapse1" class="panel-collapse collapse">
                             <div class="panel-body">
-                                <table class="table">
+                                <form action="{% url 'rare-disease-main' %}" method="post">
+                                    {% csrf_token %}
+                                 <table class="table">
                                     <tbody>
 
                                         <tr>
                                             <td>Case type:</td>
                                             <td>
-                                                <div class="btn-group">
-                                                    <button type="button" class="btn btn-success">All</button>
-                                                    <button type="button" class="btn btn-success">Main</button>
-                                                    <button type="button" class="btn btn-success">Pilot</button>
+
+                                                <div class="btn-group" data-toggle="buttons">
+                                                    <label class="btn btn-success active">
+                                                        <input type="radio" name="caseType" id="all" autocomplete="off" checked>
+                                                        All
+                                                    </label>
+                                                    <label class="btn btn-success">
+                                                        <input type="radio" name="caseType" id="Main" autocomplete="off">
+                                                        Main
+                                                    </label>
+                                                    <label class="btn btn-success">
+                                                        <input type="radio" name="caseType" id="pilot" autocomplete="off">
+                                                        Pilot
+                                                    </label>
                                                 </div>
+
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>Genome build:</td>
                                             <td>
-                                                <div class="btn-group">
-                                                    <button type="button" class="btn btn-success">All</button>
-                                                    <button type="button" class="btn btn-success">GRCh37</button>
-                                                    <button type="button" class="btn btn-success">GRCh38</button>
+
+                                                <div class="btn-group" data-toggle="buttons">
+                                                    <label class="btn btn-success active">
+                                                        <input type="radio" name="genomeBuild" id="all" autocomplete="off" checked>
+                                                        All
+                                                    </label>
+                                                    <label class="btn btn-success">
+                                                        <input type="radio" name="genomeBuild" id="GRCh37" autocomplete="off">
+                                                        GRCh37
+                                                    </label>
+                                                    <label class="btn btn-success">
+                                                        <input type="radio" name="caseType" id="GRCh38" autocomplete="off">
+                                                        GRCh38
+                                                    </label>
                                                 </div>
 </td>
                                         </tr>
                                         <tr>
                                             <td>Max tier:</td>
                                             <td>
-                                                <div class="btn-group">
-                                                    <button type="button" class="btn btn-success">CIP Candidate</button>
-                                                    <button type="button" class="btn btn-success">1</button>
-                                                    <button type="button" class="btn btn-success">2</button>
-                                                    <button type="button" class="btn btn-success">3</button>
+                                                <div class="btn-group" data-toggle="buttons">
+
+                                                    <label class="btn btn-success">
+                                                        <input type="radio" name="maxTier" id="0" autocomplete="off">
+                                                        CIP Candidate
+                                                    </label>
+
+                                                    <label class="btn btn-success">
+                                                        <input type="radio" name="maxTier" id="1" autocomplete="off">
+                                                        1
+                                                    </label>
+
+                                                    <label class="btn btn-success active">
+                                                        <input type="radio" name="maxTier" id="2" autocomplete="off" checked>
+                                                        2
+                                                    </label>
+                                                    <label class="btn btn-success">
+                                                        <input type="radio" name="maxTier" id="3" autocomplete="off">
+                                                        3
+                                                    </label>
                                                 </div>
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>Case status:</td>
                                             <td>
-                                                <div class="btn-group">
-                                                <button type="button" class="btn btn-success">Under Review</button>
-                                                <button type="button" class="btn btn-success">Awaiting MDT</button>
-                                                <button type="button" class="btn btn-success">Awaiting validation</button>
-                                                <button type="button" class="btn btn-success">Awaiting reporting</button>
-                                                <button type="button" class="btn btn-success">Reported</button>
-                                                <button type="button" class="btn btn-success">Completed</button>
-                                                <button type="button" class="btn btn-success">External</button>
+                                                <div class="btn-group" data-toggle="buttons">
+
+                                                <label class="btn btn-success active">
+                                                    <input type="checkbox" name="caseStatus" id="underReview" autocomplete="off" checked>
+                                                    Under Review
+                                                </label>
+
+                                                <label class="btn btn-success active">
+                                                    <input type="checkbox" name="caseStatus" id="awaitingMDT" autocomplete="off" checked>
+                                                    Awaiting MDT
+                                                </label>
+
+                                                <label class="btn btn-success active">
+                                                    <input type="checkbox" name="caseStatus" id="awaitingValidation" autocomplete="off" checked>
+                                                    Awaiting Validation
+                                                </label>
+
+                                                <label class="btn btn-success active">
+                                                    <input type="checkbox" name="caseStatus" id="awaitingReporting" autocomplete="off" checked>
+                                                    Awaiting Reporting
+                                                </label>
+
+                                                <label class="btn btn-success active">
+                                                    <input type="checkbox" name="caseStatus" id="reported" autocomplete="off" checked>
+                                                    Reported
+                                                </label>
+
+                                                <label class="btn btn-success active">
+                                                    <input type="checkbox" name="caseStatus" id="completed" autocomplete="off" checked>
+                                                    Completed
+                                                </label>
+                                                <label class="btn btn-success active">
+                                                    <input type="checkbox" name="caseStatus" id="external" autocomplete="off" checked>
+                                                    External
+                                                </label>
                                                 </div>
                                             </td>
                                         </tr>
 
                                     </tbody>
                                 </table>
+                                <button type="submit" class="btn btn-primary">
+                                      Reload
+                                </button>
+                                </form>
                             </div>
                         </div>
                     </div>
