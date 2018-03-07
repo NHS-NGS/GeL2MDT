@@ -145,8 +145,8 @@ function reloadTable() {
     var caseType = getRadioValue("caseType");
     var genomeBuild = getRadioValue("genomeBuild");
     var maxTier = getRadioValue("maxTier");
-    var caseStatus;
-    console.log(caseType + ", " + genomeBuild + ", " + maxTier);
+    var caseStatus = getRadioValue("caseStatus");
+    console.log(caseType + ", " + genomeBuild + ", " + maxTier + ", " + caseStatus);
 }
 
 function getRadioValue(radioElementName) {
