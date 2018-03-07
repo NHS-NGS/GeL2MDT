@@ -116,14 +116,25 @@
                 "dataSrc": ''
             },
             "columns": [
+                { 
+                    "data": "proband_id",
+                    "render": function(data, type, row, meta){
+                        if(type === 'display'){
+                            data = '<a href="proband/' + data + '">' + '<i class="fas fa-external-link-alt"></i>' + '</a>';
+                        }
+                        return data;
+                    }
+                },
                 { "data": "gel_id" },
                 { "data": "forename" },
                 { "data": "surname" },
-                { "data": "date_of_birth" },
+                { "data": "date_of_birth",
+                  "type": "date " },
                 { "data": "max_tier" },
                 { "data": "assembly" },
-                { "data": "status" },
-                { "data": "updated" }
+                { "data": "case_status" },
+                { "data": "updated",
+                  "type": "date " }
             ]
         } );
     } );
