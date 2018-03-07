@@ -571,10 +571,9 @@ class CaseAttributeManager(object):
                     )
                     genename_response = genename_poll.get_json_response()
                     if genename_response['response']['docs']:
-                        hgnc_id = genename_response['response']['docs'][0]['hgnc_id']
-                        hgnc_id = re.sub('HGNC:', '', hgnc_id)
-                        gene['HGNC_ID'] = str(hgnc_id)
-                        self.case.gene_manager.add_searched(gene["EnsembleGeneIds"], str(hgnc_id))
+                        hgnc_id = genename_response['response']['docs'][0]['hgnc_id'].split(':')
+                        gene['HGNC_ID'] = str(hgnc_id[1])
+                        self.case.gene_manager.add_searched(gene["EnsembleGeneIds"], str(hgnc_id[1]))
                     else:
                         self.case.gene_manager.add_searched(gene["EnsembleGeneIds"], 'Not_found')
                 else:
@@ -583,6 +582,7 @@ class CaseAttributeManager(object):
         cleaned_gene_list = []
         for gene in gene_list:
             if gene['HGNC_ID']:
+                print(gene['HGNC_ID'])
                 self.case.gene_manager.add_gene(gene)
                 new_gene = self.case.gene_manager.fetch_gene(gene)
                 cleaned_gene_list.append(new_gene)
