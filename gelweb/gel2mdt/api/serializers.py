@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from gel2mdt.models import GELInterpretationReport
+from gel2mdt.models import *
 
 
 class GELInterpretationReportSerializer(serializers.ModelSerializer):
@@ -11,10 +11,32 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
     )
     assembly = serializers.StringRelatedField()
 
+    # get proband information
+    gel_id = serializers.CharField(
+        source="ir_family.participant_family.proband.gel_id",
+        read_only=True
+    )
+    forename = serializers.CharField(
+        source="ir_family.participant_family.proband.forename",
+        read_only=True
+    )
+    surname = serializers.CharField(
+        source="ir_family.participant_family.proband.surname",
+        read_only=True
+    )
+    date_of_birth = serializers.CharField(
+        source="ir_family.participant_family.proband.date_of_birth",
+        read_only=True
+    )
+
 
     class Meta:
         model = GELInterpretationReport
         fields = (
+            'gel_id',
+            'forename',
+            'surname',
+            'date_of_birth',
             'ir_family',
             'archived_version',
             'status',
