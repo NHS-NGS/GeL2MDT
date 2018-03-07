@@ -477,7 +477,8 @@ class GeneManager(object):
             with open(os.path.join(self.config_dict['gene_storage'], 'saved_genes.tsv')) as f:
                 for line in f:
                     word = line.rstrip().split('\t')
-                    self.searched_genes[word[0]] = word[1]
+                    if len(word) > 1:
+                        self.searched_genes[word[0]] = word[1]
 
 class VariantManager(object):
 
