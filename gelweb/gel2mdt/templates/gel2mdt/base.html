@@ -140,6 +140,27 @@
     } );
 </script>
 
+<script charset="utf-8">
+function reloadTable() {
+    var caseType = getRadioValue("caseType")
+    var genomeBuild = getRadioValue("genomeBuild");
+    var maxTier = getRadioValue("maxTier");
+    var caseStatus;
+    console.log(caseType + ", " + genomeBuild + ", " + maxTier);
+}
+
+function getRadioValue(radioElementName) {
+    var radios = document.getElementsByName(radioElementName);
+    for (var i = 0, length=radios.length; i < length; i++) {
+        if (radios[i].checked) {
+            var checked_radio = radios[i]
+            break
+        }
+    }
+    return checked_radio.value
+}
+</script>
+
 <script>
     $(document).ready(function() {
         $('#dataTables-generic').DataTable({
