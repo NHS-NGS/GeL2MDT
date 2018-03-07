@@ -584,6 +584,7 @@ class CaseAttributeManager(object):
         cleaned_gene_list = []
         for gene in gene_list:
             if gene['HGNC_ID']:
+                print(gene['HGNC_ID'])
                 self.case.gene_manager.add_gene(gene)
                 new_gene = self.case.gene_manager.fetch_gene(gene)
                 cleaned_gene_list.append(new_gene)
