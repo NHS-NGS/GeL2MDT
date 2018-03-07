@@ -169,6 +169,8 @@ def parse_vep_annotations(infile=None):
                 gene_id = variant['transcript_data'][transcript]['Gene']
                 gene_name = variant['transcript_data'][transcript]['SYMBOL']
                 hgnc_id = variant['transcript_data'][transcript]['HGNC_ID']
+                if hgnc_id.startswith('HGNC:'):
+                    hgnc_id = str(hgnc_id.split(':')[1])
                 if variant['transcript_data'][transcript]['CANONICAL'] == '':
                     canonical = False
                 else:
