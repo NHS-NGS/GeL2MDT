@@ -69,16 +69,6 @@ def register(request):
     return render(request, 'registration/registration.html',
                   {'user_form': user_form, 'registered': registered, 'username': username})
 
-@login_required
-def index(request):
-    '''
-    Gives the user the choice between rare disease and cancer
-    :param request:
-    :return:
-    '''
-    # We want this to be a choice between cancer and rare disease
-    return render(request, 'gel2mdt/index.html', {})
-
 
 @login_required
 def cancer_main(request):
@@ -104,78 +94,6 @@ def rare_disease_main(request):
         for ir_family in rd_case_families
     ]
     return render(request, 'gel2mdt/rare_disease_main.html', {'rd_cases': rd_cases})
-
-@login_required
-def main_cases(request):
-    '''
-    Shows breakdown of GEL main cases in database by proband status
-    :param request:
-    :return:
-    '''
-    not_started = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='N').\
-        filter(~Q(ir_family__participant_family__proband__pilot_case=True))
-    completed = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='C'). \
-        filter(~Q(ir_family__participant_family__proband__pilot_case=True))
-    awaiting_mdt = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='M'). \
-        filter(~Q(ir_family__participant_family__proband__pilot_case=True))
-    under_review = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='U'). \
-        filter(~Q(ir_family__participant_family__proband__pilot_case=True))
-    awaiting_reporting = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='R'). \
-        filter(~Q(ir_family__participant_family__proband__pilot_case=True))
-    awaiting_validation = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='V'). \
-        filter(~Q(ir_family__participant_family__proband__pilot_case=True))
-    reported = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='P'). \
-        filter(~Q(ir_family__participant_family__proband__pilot_case=True))
-    external = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='E'). \
-        filter(~Q(ir_family__participant_family__proband__pilot_case=True))
-
-    reports_previously_in_mdt = MDTReport.objects.all().values_list('interpretation_report', flat=True).distinct()
-    return render(request, 'gel2mdt/main_cases.html', {'not_started': not_started,
-                                                          'completed': completed,
-                                                          'awaiting_mdt': awaiting_mdt,
-                                                          'awaiting_validation': awaiting_validation,
-                                                          'awaiting_reporting': awaiting_reporting,
-                                                          'reported': reported,
-                                                          'under_review': under_review,
-                                                          'reports_previously_in_mdt': reports_previously_in_mdt,
-                                                          'external': external})
-
-
-@login_required
-def pilot_cases(request):
-    '''
-    Split the pilot cases by proband status
-    :param request:
-    :return:
-    '''
-    not_started = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='N'). \
-        filter(ir_family__participant_family__proband__pilot_case=True)
-    completed = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='C'). \
-        filter(ir_family__participant_family__proband__pilot_case=True)
-    awaiting_mdt = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='M'). \
-        filter(ir_family__participant_family__proband__pilot_case=True)
-    under_review = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='U'). \
-        filter(ir_family__participant_family__proband__pilot_case=True)
-    awaiting_reporting = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='R'). \
-        filter(ir_family__participant_family__proband__pilot_case=True)
-    awaiting_validation = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='V'). \
-        filter(ir_family__participant_family__proband__pilot_case=True)
-    reported = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='P'). \
-        filter(ir_family__participant_family__proband__pilot_case=True)
-    external = GELInterpretationReport.objects.filter(ir_family__participant_family__proband__status='E'). \
-        filter(ir_family__participant_family__proband__pilot_case=True)
-
-    reports_previously_in_mdt = MDTReport.objects.all().values_list('interpretation_report', flat=True).distinct()
-    return render(request, 'gel2mdt/pilot_cases.html', {'not_started': not_started,
-                                                           'completed': completed,
-                                                           'awaiting_mdt': awaiting_mdt,
-                                                           'awaiting_validation': awaiting_validation,
-                                                           'awaiting_reporting': awaiting_reporting,
-                                                           'reported': reported,
-                                                           'under_review': under_review,
-                                                           'reports_previously_in_mdt': reports_previously_in_mdt,
-                                                           'external': external})
-
 
 @login_required
 def proband_view(request, report_id):
