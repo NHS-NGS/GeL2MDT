@@ -324,16 +324,17 @@ class MultipleCaseAdder(object):
 
 
         # finally, save jsons to disk storage
-        # cip_api_storage = self.config['cip_api_storage']
-        # for case in cases:
-        #     with open(
-        #         os.path.join(
-        #             cip_api_storage,
-        #             '{}.json'.format(
-        #                 case.request_id + "-" + str(case.attribute_managers[GELInterpretationReport].case_model.entry.archived_version))
-        #         ),
-        #         'w') as f:
-        #             json.dump(case.json, f)
+        cip_api_storage = self.config['cip_api_storage']
+        for case in cases:
+            with open(
+                os.path.join(
+                    cip_api_storage,
+                    '{}.json'.format(
+                        case.request_id + "-" + str(case.attribute_managers[GELInterpretationReport].case_model.entry.archived_version))
+                ),
+                'w') as f:
+                    json.dump(case.raw_json, f)
+
 
     def save_new(self, model_type, model_list):
         """
