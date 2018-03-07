@@ -16,7 +16,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {% endblock %}
     {% block head-css %}
-      <script src="{% static 'gel2mdt/js/jquery-3.1.1.js' %}"></script>
+    <script src="{% static 'gel2mdt/js/jquery-3.1.1.js' %}"></script>
         <script src="{% static 'gel2mdt/js/bootstrap.js' %}"></script>
         <link href="{% static 'gel2mdt/css/bootstrap.css' %}" rel="stylesheet">
         <link href="{% static 'gel2mdt/css/heroic-features.css' %}" rel="stylesheet">
@@ -48,7 +48,7 @@
             <div  class="navbar-collapse collapse">
                  {% block tabs %}
                 <ul class="nav navbar-nav">
-                    <li><a href="#"><i class="fas fa-home"></i></span> Cases</a></li>
+                    <li><a href="/rare-disease-main"><i class="fas fa-home"></i></span> Cases</a></li>
                     </ul>
                <ul class="nav navbar-nav">
                    <li><a href="/start_mdt" ><i class="fas fa-comments"></i> Start MDT</a></li>
@@ -102,11 +102,11 @@
         </div>
 
 {% block head-javascript %}
-    <script>
-        $(document).ready(function(){
-                $('[data-toggle="tooltip"]').tooltip(); 
-        });
-    </script>
+<script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip(); 
+    });
+</script>
 <script>
 $(document).ready(function() {
     $('#dataTables-rare-disease-main').DataTable( {
@@ -132,7 +132,7 @@ $(document).ready(function() {
         }
     } );
 } );
-    </script>
+</script>
 <script>
     $(document).ready(function() {
         $('#dataTables-generic').DataTable({
