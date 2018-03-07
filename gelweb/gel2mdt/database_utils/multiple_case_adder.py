@@ -105,7 +105,6 @@ class MultipleCaseAdder(object):
                 error=error
             )
 
-
     def fetch_test_data(self):
         """
         This will run and convert our test data to a list of jsons if
@@ -155,7 +154,7 @@ class MultipleCaseAdder(object):
         :returns: A case json associated with the given IR ID from CIP-API
         """
         logger.info("Polling API for case", interpretation_request_id)
-
+        print("Polling API for case", interpretation_request_id)
         request_poll = PollAPI(
             # instantiate a poll of CIP API for a given case json
             "cip_api", "interpretation-request/{id}/{version}".format(
@@ -208,7 +207,6 @@ class MultipleCaseAdder(object):
         except GELInterpretationReport.DoesNotExist as e:
             # no such cases.
             pass
-
 
         print(cases_to_update)
         return cases_to_update
@@ -326,16 +324,16 @@ class MultipleCaseAdder(object):
 
 
         # finally, save jsons to disk storage
-        cip_api_storage = self.config['cip_api_storage']
-        for case in cases:
-            with open(
-                os.path.join(
-                    cip_api_storage,
-                    '{}.json'.format(
-                        case.request_id + "-" + str(case.attribute_managers[GELInterpretationReport].case_model.entry.archived_version))
-                ),
-                'w') as f:
-                    json.dump(case.json, f)
+        # cip_api_storage = self.config['cip_api_storage']
+        # for case in cases:
+        #     with open(
+        #         os.path.join(
+        #             cip_api_storage,
+        #             '{}.json'.format(
+        #                 case.request_id + "-" + str(case.attribute_managers[GELInterpretationReport].case_model.entry.archived_version))
+        #         ),
+        #         'w') as f:
+        #             json.dump(case.json, f)
 
     def save_new(self, model_type, model_list):
         """
