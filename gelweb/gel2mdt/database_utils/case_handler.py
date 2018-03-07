@@ -21,6 +21,8 @@ class Case(object):
     """
     def __init__(self, case_json, panel_manager, variant_manager, gene_manager, skip_demographics=False):
         self.json = case_json
+        # raw json created to dump at the end; json attr is modified
+        self.raw_json = case_json
         self.json_case_data = self.json["interpretation_request_data"]
         self.json_request_data = self.json_case_data["json_request"]
         self.request_id = str(
