@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'bootstrap3',
     'easyaudit',
     'django_extensions',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
