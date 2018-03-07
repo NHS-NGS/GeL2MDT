@@ -12,6 +12,10 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
     assembly = serializers.StringRelatedField()
 
     # get proband information
+    proband_id = serializers.CharField(
+        source="ir_family.participant_family.proband.id",
+        read_only=True
+    )
     gel_id = serializers.CharField(
         source="ir_family.participant_family.proband.gel_id",
         read_only=True
@@ -24,8 +28,18 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
         source="ir_family.participant_family.proband.surname",
         read_only=True
     )
-    date_of_birth = serializers.CharField(
+    date_of_birth = serializers.DateTimeField(
         source="ir_family.participant_family.proband.date_of_birth",
+        read_only=True,
+        format='%Y/%m/%d'
+    )
+    case_status = serializers.CharField(
+        source="ir_family.participant_family.proband.get_status_display",
+        read_only=True
+    )
+
+    updated = serializers.DateTimeField(
+        format='%Y/%m/%d',
         read_only=True
     )
 
@@ -33,10 +47,12 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = GELInterpretationReport
         fields = (
+            'proband_id',
             'gel_id',
             'forename',
             'surname',
             'date_of_birth',
+            'case_status',
             'ir_family',
             'archived_version',
             'status',
