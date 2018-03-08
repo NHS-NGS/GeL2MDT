@@ -1,0 +1,57 @@
+{% extends 'gel2mdt/base.html' %}
+{% load static %}
+
+<title> GEL2ME - {% block title %}Genomics England{% endblock %}</title>
+
+{% block tabs %}
+<div id="navbar" class="navbar-collapse collapse">
+                 <ul class="nav navbar-nav">
+                    <li><a href="/rare-disease-main"><i class="fas fa-home"></i></span> Cases</a></li>
+                    </ul>
+               <ul class="nav navbar-nav">
+                   <li><a href="/start_mdt" ><i class="fas fa-comments"></i> Start MDT</a></li>
+                    </ul>
+                <ul class="nav navbar-nav">
+                    <li><a href="/recent_mdts" ><i class="fas fa-history"></i> Recent MDTs</a></li>
+                    </ul>
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="/genomics_england" ><i class="fas fa-download"></i> GEL Reports</a></li>
+                    </ul>
+
+
+{% endblock %}
+
+{% block content %}
+ <div  class="container-fluid"  >
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Search for a GeL Sample to render a report and return a gene list  
+            </div>
+
+            <!-- <a href="/goshg2p/genomics_england/gel_api/">Gel api</a> -->
+            <!-- /.panel-heading -->
+
+            <div class="panel-body">
+                <form  id="genomicenglandform" method="post" action="">
+                {% csrf_token %}
+                <div>{{form}}</div>
+                    <input type="submit" name="gel_report" value="Get GeL report" />
+                    </form>
+                <form id="panelappform" method="post" action="">
+                    {% csrf_token %}
+                    <div>{{panelappform}}</div>
+                    <input type="submit" name="panel_app" value="Get gene panel">
+                </form>
+            </div>
+            <!-- /.panel-body -->
+
+        </div>
+        <!-- /.panel -->
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+ </div>
+
+{% endblock %}

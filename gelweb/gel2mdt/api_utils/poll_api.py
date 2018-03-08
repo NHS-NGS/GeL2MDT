@@ -20,6 +20,9 @@ class PollAPI(object):
             "cip_api": (
                 "https://cipapi.genomicsengland.nhs.uk/api/2/{endpoint}",
                 True),
+            "cip_api_for_report": (
+                "https://cipapi.genomicsengland.nhs.uk/api/{endpoint}",
+                True),
             "panelapp": (
                 "https://panelapp.genomicsengland.co.uk/WebServices/{endpoint}",
                 False),
@@ -43,7 +46,7 @@ class PollAPI(object):
         self.response_json = None  # set upon calling get_json_response()
         self.response_status = None
 
-    def get_json_response(self):
+    def get_json_response(self, content=False):
         """
         Creates a session which polls the instance's API a maximum of 20 times
         for a json response, retrying if the poll fails.
@@ -55,7 +58,7 @@ class PollAPI(object):
             session = requests.Session()
             adapter = requests.adapters.HTTPAdapter(max_retries=MAX_RETRIES)
             session.mount("https://", adapter)
-            if (self.headers_required) and (self.headers is None) and (self.api == 'cip_api'):
+            if (self.headers_required) and (self.headers is None) and (self.api.startswith('cip_api')):
                 # get auth headers if we need them and they're not yet set
                 self.get_auth_headers()
                 continue
@@ -71,16 +74,19 @@ class PollAPI(object):
                 # no headers required
                 response = session.get(
                     url=self.url)
+            if content:
+                return response.content
+            else:
+                try:
+                    # ensure that the json can be decoded to avoid MCA crash
+                    self.response_json = response.json()
+                    self.response_status = response.status_code
+                    json_poll_success = True
+                except json.JSONDecodeError as e:
+                    continue
 
-            try:
-                # ensure that the json can be decoded to avoid MCA crash
-                self.response_json = response.json()
-                self.response_status = response.status_code
-                json_poll_success = True
-            except json.JSONDecodeError as e:
-                continue
+                return response.json()
 
-        return response.json()
 
     def get_credentials(self):
         """
@@ -97,7 +103,8 @@ class PollAPI(object):
         Creates a token then uses this to get authentication headers for CIP-API"
         """
         token_endpoint_list = {
-            "cip_api": "get-token/"}
+            "cip_api": "get-token/",
+            "cip_api_for_report": "get-token/"}
         token_endpoint = token_endpoint_list[self.api]
 
         self.token_url = self.server.format(endpoint=token_endpoint)
