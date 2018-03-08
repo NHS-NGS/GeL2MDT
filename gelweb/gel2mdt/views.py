@@ -109,14 +109,14 @@ def proband_view(request, report_id):
     report = GELInterpretationReport.objects.get(id=report_id)
     relatives = Relative.objects.filter(proband=report.ir_family.participant_family.proband)
     proband_form = ProbandForm(instance=report.ir_family.participant_family.proband)
-    proband_transcript_variant = ProbandTranscriptVariant.objects.filter(proband_variant__interpretation_report=report,
-                                                                         selected=True)
-
+    proband_variants = ProbandVariant.objects.filter(interpretation_report=report)
     proband_mdt = MDTReport.objects.filter(interpretation_report=report)
+    for proband in proband_variants:
+        print(proband.get_transcript)
     return render(request, 'gel2mdt/proband.html', {'report': report,
                                                     'relatives': relatives,
                                                     'proband_form': proband_form,
-                                                    'proband_transcript_variant': proband_transcript_variant,
+                                                    'proband_variants': proband_variants,
                                                     'proband_mdt': proband_mdt})
 
 @login_required
@@ -156,6 +156,7 @@ def variant_view(request, variant_id):
     variant = Variant.objects.get(id=variant_id)
     transcript_variant = TranscriptVariant.objects.filter(variant=variant_id)[:1].get() #gets one (for hgvs_g)
     proband_variants = ProbandVariant.objects.filter(variant=variant)
+    
     return render(request, 'gel2mdt/variant.html', {'variant': variant,
                                                     'transcript_variant': transcript_variant,
                                                     'proband_variants': proband_variants,
@@ -287,8 +288,12 @@ def mdt_view(request, mdt_id):
     report_list = MDTReport.objects.filter(MDT=mdt_instance).values_list('interpretation_report', flat=True)
     reports = GELInterpretationReport.objects.filter(id__in=report_list)
 
-    proband_transcript_variants = ProbandTranscriptVariant.objects.filter(
-        proband_variant__interpretation_report__in=report_list, selected=True)
+    proband_variants = ProbandVariant.objects.filter(interpretation_report__in=report_list)
+    proband_variant_count = {}
+    for report in reports:
+        count = ProbandVariant.objects.filter(interpretation_report=report).count()
+        proband_variant_count[report.id] = count
+
     mdt_form = MdtForm(instance=mdt_instance)
     clinicians = Clinician.objects.filter(mdt=mdt_id)
     clinical_scientists = ClinicalScientist.objects.filter(mdt=mdt_id)
@@ -305,11 +310,20 @@ def mdt_view(request, mdt_id):
 
         return HttpResponseRedirect(f'/mdt_view/{mdt_id}')
     request.session['mdt_id'] = mdt_id
-    return render(request, 'gel2mdt/mdt_view2.html', {'proband_transcript_variants': proband_transcript_variants,
+    return render(request, 'gel2mdt/mdt_view3.html', {'proband_variants': proband_variants,
+                                                      'proband_variant_count': proband_variant_count,
                                                       'reports': reports,
                                                       'mdt_form': mdt_form,
                                                       'mdt_id': mdt_id,
                                                       'attendees': attendees})
+
+def mdt_proband_view(request, mdt_id, pk):
+    report = GELInterpretationReport.objects.get(id=pk)
+    proband_variants = ProbandVariant.objects.filter(interpretation_report=report)
+    return render(request, 'gel2mdt/mdt_proband_view.html', {'proband_variants': proband_variants,
+                                                               'report': report,
+                                                               'mdt_id': mdt_id,
+                                                               })
 
 @login_required
 def edit_mdt_variant(request, pv_id):
@@ -330,10 +344,9 @@ def edit_mdt_variant(request, pv_id):
 
             report_list = MDTReport.objects.filter(MDT=mdt_id).values_list('interpretation_report', flat=True)
 
-            proband_transcript_variants = ProbandTranscriptVariant.objects.filter(
-                proband_variant__interpretation_report__in=report_list, selected=True)
+            proband_variants = ProbandVariant.objects.filter(interpretation_report__in=report_list)
             data['html_mdt_list'] = render_to_string('gel2mdt/includes/mdt_variant_table.html', {
-                'proband_transcript_variants': proband_transcript_variants,
+                'proband_variants': proband_variants,
             })
         else:
             data['form_is_valid'] = False

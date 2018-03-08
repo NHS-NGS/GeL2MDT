@@ -25,68 +25,17 @@
 </div>
 
 <br>
-<div  class="container-fluid"   >
+<div  class="container-fluid">
 
 
     <div class=row>
         <div class="col-md-12">
 
-            <ul class="nav nav-tabs">
-                <li class="active"><a data-toggle="tab" href="#variant">Variants Discussion</a></li>
-                <li><a data-toggle="tab" href="#no-variant">Patient Discussion</a></li>
-            </ul>
-
-                <div class="tab-content">
-                    <div id="variant" class="tab-pane fade in active">
+                    <div id="proband" class="tab-pane fade in active">
                         <div class="panel panel-default" >
-                            <div class="panel-heading">Variants</div>
+                            <div class="panel-heading">Proband</div>
                             <div class="panel-body">
 
-                                <div class="table-responsive">
-                                    <table width="100%" class="table table-striped table-bordered table-hover" id="mdt-variant-table">
-                                        <thead style='font-size: 70%'>
-                                            <tr>
-                                                <th>GEL ID</th>
-                                                <th>CIP ID</th>
-                                                <th>Variant ID</th>
-                                                <th>Edit</th>
-                                                <th>Forename</th>
-                                                <th>Surname</th>
-                                                <th>GMC</th>
-                                                <th>Gene</th>
-                                                <th>HGVSc</th>
-                                                <th>HGVSp</th>
-                                                <th>Zygosity</th>
-                                                <th>Class</th>
-                                                <th>CP</th>
-                                                <th>Discussion</th>
-                                                <th>Actions </th>
-                                                <th>CM</th>
-                                                <th>SO</th>
-                                                <th>ASR</th>
-                                                <th>CT</th>
-                                                <th>IRC</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody style='font-size: 75%'>
-                                            {% include 'gel2mdt/includes/mdt_variant_table.html' %}
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                        </div>
-                            <div class="modal fade" id="modal-variant-mdt">
-                                    <div class="modal-dialog">
-                                      <div class="modal-content">
-                                      </div>
-                                    </div>
-                                </div>
-                    </div>
-                    </div>
-                    <div id="no-variant" class="tab-pane fade">
-                        <div class="panel panel-default">
-                            <div class="panel-heading">Patients</div>
-                            <div class="panel-body">
                                 <div class="table-responsive">
                                     <table width="100%" class="table table-striped table-bordered table-hover" id="mdt-proband-table">
                                         <thead>
@@ -98,30 +47,27 @@
                                                 <th>GMC</th>
                                                 <th>Discussion</th>
                                                 <th>Action</th>
-                                                <th>Edit</th>
+                                                <th>Patient Discussion/Action</th>
+                                                <th>Link to Variants</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {% include 'gel2mdt/includes/mdt_proband_table.html' %}
                                         </tbody>
                                     </table>
-
                                 </div>
-                            </div>
+
+                        </div>
                             <div class="modal fade" id="modal-proband-mdt">
                                     <div class="modal-dialog">
                                       <div class="modal-content">
                                       </div>
                                     </div>
                                 </div>
-                        </div>
-
+                    </div>
                     </div>
                 </div>
-
-
     </div>
-</div>
 
 
     <form role="form" method="post" enctype="multipart/form-data">
