@@ -56,12 +56,6 @@
                 <ul class="nav navbar-nav">
                     <li><a href="/recent_mdts" ><i class="fas fa-history"></i> Recent MDTs</a></li>
                     </ul>
-                <ul class="nav navbar-nav">
-                     <li><a href="/main_cases" >Main Cases</a></li>
-                    </ul>
-                <ul class="nav navbar-nav">
-                     <li><a href="/pilot_cases" >Pilot Cases</a></li>
-                    </ul>
 
 
                 {% endblock %}
@@ -123,7 +117,8 @@
                             data = '<a href="proband/' + data + '">' + '<i class="fas fa-external-link-alt"></i>' + '</a>';
                         }
                         return data;
-                    }
+                    },
+                    "orderable": false,
                 },
                 { "data": "gel_id" },
                 { "data": "forename" },
@@ -135,7 +130,8 @@
                 { "data": "case_status" },
                 { "data": "updated",
                   "type": "date " }
-            ]
+            ],
+            "order": [[ 8, "desc" ]]
         } );
     } );
 </script>
