@@ -42,7 +42,9 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-             <a class="navbar-brand" href="/">GEL2MDT v0.1 </a>
+          <a class="navbar-brand" href="/"><i class="fas fa-paper-plane fa-1x"></i> 
+              <em><strong>GeL2MDT v0.1</strong></em>
+          </a>
         </div>
             {% if user.is_authenticated %}
             <div  class="navbar-collapse collapse">
@@ -102,47 +104,110 @@
     });
 </script>
 
-<script type="text/javascript" language="javascript" class="init">
-    $(document).ready(function() {
-        $('#rare-disease-main').DataTable( {                 
-            "ajax": {
-                "url": '{% url 'rare-disease-json' %}',
-                "dataSrc": ''
-            },
-            "columns": [
-                { 
-                    "data": "proband_id",
-                    "render": function(data, type, row, meta){
-                        if(type === 'display'){
-                            data = '<a href="proband/' + data + '">' + '<i class="fas fa-external-link-alt"></i>' + '</a>';
-                        }
-                        return data;
-                    },
-                    "orderable": false,
-                },
-                { "data": "gel_id" },
-                { "data": "forename" },
-                { "data": "surname" },
-                { "data": "date_of_birth",
-                  "type": "date " },
-                { "data": "max_tier" },
-                { "data": "assembly" },
-                { "data": "case_status" },
-                { "data": "updated",
-                  "type": "date " }
-            ],
-            "order": [[ 8, "desc" ]]
-        } );
-    } );
-</script>
 
 <script charset="utf-8">
-function reloadTable() {
+$(document).ready(initaliseTable())
+
+// select the DataTable API object
+table = $("#rare-disease-main").DataTable()
+
+// filter value change listeners
+$("input[name='caseType']").change(function() {
+});
+
+$("input[name='genomeBuild']").change(function() {
+    table
+        // filter based on the value specified in HTML
+        .column(6)
+        .search($(this).val())
+        .draw()
+});
+
+$("input[name='maxTier']").change(function() {
+    // define search regex based on desired max tier
+    var searchRegex;
+    if ($(this).val() == 3) {
+        searchRegex = '[0123]';
+    } else if ($(this).val() == 2) {
+        searchRegex = '[012]';
+    } else if ($(this).val() == 1) {
+        searchRegex = '[01]';
+    } else if ($(this).val() == 0) {
+        searchRegex = '0';
+    }
+
+    // search and redraw the datatable API
+    table
+        .column(5)
+        .search(searchRegex, regex=true)
+        .draw()
+});
+
+$("input[name='caseStatus']").change(function() {
+    table
+        // filter based on the value specified in HTML
+        .column(7)
+        .search($(this).val())
+        .draw()
+});
+
+function initaliseTable() {
+    filterValues = getFilterValues()
+    var caseType = filterValues[0]
+        genomeBuild = filterValues[1]
+        maxTier = filterValues[2]
+        caseStatus = filterValues[3]
+    console.log("filter values:")
+    console.log("case type: " + caseType)
+    console.log("genome build: " + genomeBuild)
+    console.log("max tier: " + maxTier)
+    console.log("case status: " + caseStatus)
+    fetchDataTable(caseType, genomeBuild, maxTier, caseStatus)
+}
+
+function getFilterValues() {
     var caseType = getRadioValue("caseType");
     var genomeBuild = getRadioValue("genomeBuild");
     var maxTier = getRadioValue("maxTier");
     var caseStatus = getRadioValue("caseStatus");
-    console.log(caseType + ", " + genomeBuild + ", " + maxTier + ", " + caseStatus);
+    var filterValues = [caseType, genomeBuild, maxTier, caseStatus]
+    return filterValues
+}
+
+function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
+    console.log("Loading table through initaliseTable()!")
+    var table = $('#rare-disease-main').DataTable( {                 
+        "ajax": {
+            "url": '{% url 'rare-disease-json' %}',
+            "dataSrc": ''
+        },
+        "columns": [
+            { 
+                "data": "id",
+                "render": function(data, type, row, meta){
+                    if(type === 'display'){
+                        data = '<a href="proband/' + data + '">' + '<i class="fas fa-external-link-alt"></i>' + '</a>';
+                    }
+                    return data;
+                },
+                "orderable": false,
+            },
+            { "data": "gel_id" },
+            { "data": "forename" },
+            { "data": "surname" },
+            { "data": "date_of_birth",
+                "type": "date " },
+            { 
+                "data": "max_tier",
+                "type": "num"
+            },
+            { "data": "assembly" },
+            { "data": "case_status" },
+            { "data": "updated",
+                "type": "date " }
+        ],
+        "order": [[ 8, "desc" ]]
+    } );
 }
 
 function getRadioValue(radioElementName) {
