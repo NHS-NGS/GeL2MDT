@@ -2,6 +2,20 @@ from rest_framework import serializers
 from gel2mdt.models import *
 
 
+class ProbandSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Proband
+        fields = (
+            'gel_id',
+            'nhs_number',
+            'lab_number',
+            'forename',
+            'surname',
+            'date_of_birth',
+            'local_id'
+        )
+
+
 class GELInterpretationReportSerializer(serializers.ModelSerializer):
 
     # fetch the IR family in a readable form
