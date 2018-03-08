@@ -585,7 +585,6 @@ class CaseAttributeManager(object):
         cleaned_gene_list = []
         for gene in gene_list:
             if gene['HGNC_ID']:
-                print(gene['HGNC_ID'])
                 self.case.gene_manager.add_gene(gene)
                 new_gene = self.case.gene_manager.fetch_gene(gene)
                 cleaned_gene_list.append(new_gene)
@@ -613,11 +612,18 @@ class CaseAttributeManager(object):
         Create a ManyCaseModel for transcripts based on information returned
         from VEP.
         """
+        tool_models = [
+            case_model.entry
+            for case_model in self.case.attribute_managers[ToolOrAssemblyVersion].case_model.case_models]
+
+        genome_assembly = None
+
+        for tool in tool_models:
+            if tool.tool_name == 'genome_build':
+                genome_assembly = tool
 
         genes = self.case.attribute_managers[Gene].case_model.case_models
         case_transcripts = self.case.transcripts
-        print("Getting transcripts for case", self.case.request_id)
-        print("Case trancsripts:", case_transcripts)
         # for each transcript, add an FK to the gene with matching ensg ID
         for transcript in case_transcripts:
             # convert canonical to bools:
@@ -625,7 +631,6 @@ class CaseAttributeManager(object):
             if not transcript.gene_hgnc_id:
                 # if the transcript has no recognised gene associated
                 continue  # don't bother checking genes
-                print("Skipping transcript: no hgnc")
             transcript.gene_model = None
             for gene in genes:
                 print("GENE HGNC", gene.entry.hgnc_id, "\t", transcript.gene_hgnc_id)
@@ -638,6 +643,7 @@ class CaseAttributeManager(object):
             "name": transcript.transcript_name,
             "canonical_transcript": transcript.canonical,
             "strand": transcript.transcript_strand,
+            'genome_assembly': genome_assembly
             # add all transcripts except those without associated genes
         } for transcript in case_transcripts if transcript.gene_model],
                                     self.model_objects)
@@ -765,6 +771,16 @@ class CaseAttributeManager(object):
         information.
         """
         # get all Transcript and Variant entries
+        tool_models = [
+            case_model.entry
+            for case_model in self.case.attribute_managers[ToolOrAssemblyVersion].case_model.case_models]
+
+        genome_assembly = None
+
+        for tool in tool_models:
+            if tool.tool_name == 'genome_build':
+                genome_assembly = tool
+
         case_attribute_managers = self.case.attribute_managers
         transcript_manager = case_attribute_managers[Transcript].case_model
         transcript_entries = [transcript.entry
@@ -804,7 +820,7 @@ class CaseAttributeManager(object):
             # add the corresponding Transcript entry
             for transcript_entry in transcript_entries:
                 found = False
-                if transcript_entry.name == transcript_name:
+                if transcript_entry.name == transcript_name and transcript_entry.genome_assembly == genome_assembly:
                     case_transcript.transcript_entry = transcript_entry
                     found = True
                     break
@@ -1215,7 +1231,8 @@ class CaseModel(object):
                      pass
         elif self.model_type == Transcript:
             entry = [db_obj for db_obj in queryset
-                     if db_obj.name == self.model_attributes["name"]]
+                     if db_obj.name == self.model_attributes["name"]
+                     and db_obj.genome_assembly == self.model_attributes['genome_assembly']]
         elif self.model_type == GELInterpretationReport:
             entry = [db_obj for db_obj in queryset
                      if db_obj.sha_hash == self.model_attributes["sha_hash"]]
