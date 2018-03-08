@@ -11,7 +11,7 @@ from django.http import JsonResponse
 from django.db.models import Q
 from .database_utils.multiple_case_adder import MultipleCaseAdder
 from .primer_utils import singletarget
-
+from .tasks import get_gel_content
 from .api.api_views import *
 
 
@@ -111,8 +111,6 @@ def proband_view(request, report_id):
     proband_form = ProbandForm(instance=report.ir_family.participant_family.proband)
     proband_variants = ProbandVariant.objects.filter(interpretation_report=report)
     proband_mdt = MDTReport.objects.filter(interpretation_report=report)
-    for proband in proband_variants:
-        print(proband.get_transcript)
     return render(request, 'gel2mdt/proband.html', {'report': report,
                                                     'relatives': relatives,
                                                     'proband_form': proband_form,
@@ -512,7 +510,7 @@ def remove_attendee_from_mdt(request, mdt_id, attendee_id, role):
             mdt_instance.other_staff.remove(other)
         return HttpResponseRedirect(f'/select_attendees_for_mdt/{mdt_id}')
 
-
+@login_required
 def add_new_attendee(request):
     '''
     Add a new attendee to the 3 attendee models
@@ -545,3 +543,33 @@ def add_new_attendee(request):
     else:
         form = AddNewAttendee()
     return render(request, 'gel2mdt/add_new_attendee.html', {'form': form})
+
+@login_required
+def genomics_england(request):
+    """Render a page to enter genomics england samples """
+    context = {}
+    if request.method == 'POST':
+        form = GenomicsEnglandform(request.POST)
+        panelappform = PanelAppform(request.POST)
+        if 'gel_report' in request.POST:
+            if form.is_valid():
+                ir = form.cleaned_data['interpretation_id']
+                ir_version = form.cleaned_data['ir_version']
+                report_version = form.cleaned_data['report_version']
+                gel_content = get_gel_content(ir, ir_version, report_version)
+                context['gel_content'] = gel_content
+                return render(request, 'gel2mdt/gel_template.html', context)
+
+        elif 'panel_app' in request.POST:
+            if panelappform.is_valid:
+                gp = request.POST['gene_panel']
+                gp_version = request.POST['gp_version']
+                gene_panel_info = panel_app(gp, gp_version)
+                context['gene_panel_info'] = gene_panel_info
+                return render(request, 'gel2mdt/gel_template.html', context)
+    else:
+        form = GenomicsEnglandform()
+        context['form'] = form
+        panelappform = PanelAppform()
+        context['panelappform'] = panelappform
+    return render(request, 'gel2mdt/gel_report_page.html', context)

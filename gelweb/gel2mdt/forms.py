@@ -64,3 +64,20 @@ class AddNewAttendee(forms.Form):
     role = forms.ChoiceField(choices=(('Clinician', 'Clinician'),
                                       ('Clinical Scientist', 'Clinical Scientist'),
                                       ('Other Staff', 'Other Staff')))
+
+
+class GenomicsEnglandform(forms.Form):
+    """ Form for entering genomics england information to render a report to be used by the scientists """
+
+    interpretation_id = forms.IntegerField(label='Interpretation ID')
+    # Version number of the interpretation
+    ir_version = forms.IntegerField(label='Version')
+    report_version = forms.IntegerField(label='Clinical Report Version')
+
+
+class PanelAppform(forms.Form):
+    """ Search field for panel app """
+    gene_panel = forms.CharField(max_length=255, label="Gene Panel")
+    # Panel version number as a float
+    gp_version = forms.FloatField(label="Panel Version")
+

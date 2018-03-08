@@ -38,6 +38,8 @@ urlpatterns = [
     path('remove_attendee_from_mdt/<int:mdt_id>/<int:attendee_id>/<str:role>', views.remove_attendee_from_mdt,
          name='remove-attendee-from-mdt'),
     path('add_new_attendee/', views.add_new_attendee, name='add-new-attendee'),
+
+    path(r'genomics_england/', views.genomics_england, name='genomics-england'),
 ]
 
 urlpatterns += api_urlpatterns
