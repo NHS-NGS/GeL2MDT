@@ -116,6 +116,14 @@ function redrawCaseType(table,caseType) {
         .column(8)
         .search(caseType);
     table.draw();
+
+
+    // warn users of pilot mode
+    if (caseType == 'true') {
+        $('#pilotWarning').html('<div class="alert alert-danger" role="alert"><strong>Pilot Mode is on.</strong></div>');
+    } else {
+        $('#pilotWarning').html("");
+    }
 };
 
 function redrawGenomeBuild(table, genomeBuild) {
@@ -125,6 +133,15 @@ function redrawGenomeBuild(table, genomeBuild) {
         .column(6)
         .search(genomeBuild);
     table.draw();
+
+    // change the HTML text for build
+    if (genomeBuild == '') {
+        $('#genomeBuildSpec').text("all genome builds");
+    } else {
+        $('#genomeBuildSpec').text("build " + genomeBuild);
+    }
+
+
 };
 
 function redrawMaxTier(table, maxTier) {
@@ -146,6 +163,13 @@ function redrawMaxTier(table, maxTier) {
         .column(5)
         .search(searchRegex, regex=true);
     table.draw();
+
+    // change the HTML text for max tier
+    if (maxTier == 0) {
+        $('#maxTierSpec').text("CIP candidate variants only");
+    } else {
+        $('#maxTierSpec').text("at least Tier " + maxTier);
+    }
 };
 
 function redrawCaseStatus(table, caseStatus) {
@@ -156,6 +180,13 @@ function redrawCaseStatus(table, caseStatus) {
         .column(7)
         .search(caseStatus);
     table.draw();
+
+    // change the HTML text for status
+    if (caseStatus == '') {
+        $('#caseStatusSpec').text("All");
+    } else {
+        $('#caseStatusSpec').text(caseStatus);
+    }
 };
 
 // filter value change listeners
