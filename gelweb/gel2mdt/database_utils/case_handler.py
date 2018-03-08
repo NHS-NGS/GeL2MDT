@@ -903,12 +903,13 @@ class CaseAttributeManager(object):
                         "variant": variant["variant_entry"],
                     }
                     cip_proband_variants.append(cip_proband_variant)
+
         # remove CIP tiered variants which are in cip variants
-        tiered_and_cip_proband_variants = cip_proband_variants + tiered_proband_variants
-        seen_variants = {}
+        tiered_and_cip_proband_variants = []
+        seen_variants = []
         for cip_variant in cip_proband_variants:
             tiered_and_cip_proband_variants.append(cip_variant)
-            seen_variants[cip_variant['variant']] = 1
+            seen_variants.append(cip_variant['variant'])
 
         for variant in tiered_proband_variants:
             if variant['variant'] not in seen_variants:
@@ -1148,7 +1149,6 @@ class CaseAttributeManager(object):
             for proband_variant in proband_variants:
                 if proband_variant.variant == transcript.variant_entry:
                     transcript.proband_variant_entry = proband_variant
-
 
         proband_transcript_variants = ManyCaseModel(ProbandTranscriptVariant, [{
             "transcript": transcript.transcript_entry,
