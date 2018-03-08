@@ -113,6 +113,10 @@ table = $("#rare-disease-main").DataTable()
 
 // filter value change listeners
 $("input[name='caseType']").change(function() {
+    table
+        .column(8)
+        .search($(this).val())
+        .draw()
 });
 
 $("input[name='genomeBuild']").change(function() {
@@ -152,26 +156,11 @@ $("input[name='caseStatus']").change(function() {
 });
 
 function initaliseTable() {
-    filterValues = getFilterValues()
-    var caseType = filterValues[0]
-        genomeBuild = filterValues[1]
-        maxTier = filterValues[2]
-        caseStatus = filterValues[3]
-    console.log("filter values:")
-    console.log("case type: " + caseType)
-    console.log("genome build: " + genomeBuild)
-    console.log("max tier: " + maxTier)
-    console.log("case status: " + caseStatus)
-    fetchDataTable(caseType, genomeBuild, maxTier, caseStatus)
-}
-
-function getFilterValues() {
     var caseType = getRadioValue("caseType");
     var genomeBuild = getRadioValue("genomeBuild");
     var maxTier = getRadioValue("maxTier");
     var caseStatus = getRadioValue("caseStatus");
-    var filterValues = [caseType, genomeBuild, maxTier, caseStatus]
-    return filterValues
+    fetchDataTable(caseType, genomeBuild, maxTier, caseStatus)
 }
 
 function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
@@ -201,8 +190,16 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
                 "data": "max_tier",
                 "type": "num"
             },
-            { "data": "assembly" },
+            { 
+                "data": "assembly",
+                "visible": false
+            },
             { "data": "case_status" },
+            { 
+                "data": "case_type",
+                "visible": false,
+                "type": "string"
+            },
             { "data": "updated",
                 "type": "date " }
         ],
