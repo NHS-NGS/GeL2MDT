@@ -1,0 +1,119 @@
+{% extends 'gel2mdt/base.html' %}
+{% load bootstrap3 %}
+{% load static %}
+{% block content %}
+{% if mdt_form.status.value != "C" %}
+{% block javascript %}
+  <script src="{% static 'js/custom.js' %}"></script>
+{% endblock %}
+
+
+<div class="container-fluid" >
+        <div style="text-align:center">
+    <h1>{{report.ir_family.participant_family.proband.gel_id}} <form action="/gel2mdt/mdt_view/{{ mdt_id }}" role="form" method="post">
+        {% csrf_token %} {% bootstrap_button "Return to MDT" button_type="submit" button_class="btn-primary btn-primary" %}
+    </form> </h1>
+</div>
+            <div class="row">
+
+                <div class="col-md-7">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Participant Information</div>
+                        <div class="panel-body">
+
+                            <div class="col-md-4">
+                                {% bootstrap_label "Forename" %}
+                                <div class="block">
+                                    {{report.ir_family.participant_family.proband.forename}}
+                                </div>
+                                </br>
+                                {% bootstrap_label "Surname" %}
+                                <div class="block">
+                                    {{report.ir_family.participant_family.proband.surname}}
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-4">
+                                {% bootstrap_label "NHS Number" %}
+                                <div class="block">
+                                    {{report.ir_family.participant_family.proband.nhs_number}}
+                                </div>
+                                </br>
+                                {% bootstrap_label "DOB" %}
+                                <div class="block">
+                                    {{report.ir_family.participant_family.proband.date_of_birth}}
+                                </div>
+
+                            </div>
+                            <div class="col-md-4">
+                                {% bootstrap_label "Panel" %}
+                                <div class="block">
+                                    {{report.ir_family.participant_family}}
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            <div class="col-md-5">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Patient Discussion/Action</div>
+                        <div class="panel-body">
+                             <div class="table-responsive">
+                                <table width="100%" class="table table-striped table-bordered table-hover" id="mdt-proband-table">
+                                    <tbody style='font-size: 75%'>
+                                        {% include 'gel2mdt/includes/mdt_proband_view_table.html' %}
+                                    </tbody>
+                                </table>
+
+
+                        </div>
+                    </div>
+                    </div>
+            </div>
+                <div class="modal fade" id="modal-proband-mdt">
+                                    <div class="modal-dialog">
+                                      <div class="modal-content">
+                                      </div>
+                                    </div>
+                                </div>
+</div>
+            </div>
+    <div class="table-responsive">
+        <table width="100%" class="table table-striped table-bordered table-hover" id="mdt-table" >
+            <thead style='font-size: 70%'>
+                <tr>
+                    <th>Variant ID</th>
+                    <th>Edit</th>
+                    <th>Gene</th>
+                    <th>HGVSc</th>
+                    <th>HGVSp</th>
+                    <th>Genotype</th>
+                    <th>Class</th>
+                    <th>CP</th>
+                    <th>Discussion</th>
+                    <th>Actions </th>
+                    <th>CM</th>
+                    <th>SO</th>
+                    <th>ASR</th>
+                    <th>CT</th>
+                    <th>IRC</th>
+                </tr>
+            </thead>
+                                        <tbody style='font-size: 75%'>
+                                        {% include 'gel2mdt/includes/mdt_variant_table.html' %}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            <div class="modal fade" id="modal-mdt">
+                                    <div class="modal-dialog">
+                                      <div class="modal-content">
+                                      </div>
+                                    </div>
+                                </div>
+</div>
+{% endif %}
+    {% endblock %}
