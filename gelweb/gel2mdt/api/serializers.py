@@ -26,10 +26,6 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
     assembly = serializers.StringRelatedField()
 
     # get proband information
-    proband_id = serializers.CharField(
-        source="ir_family.participant_family.proband.id",
-        read_only=True
-    )
     gel_id = serializers.CharField(
         source="ir_family.participant_family.proband.gel_id",
         read_only=True
@@ -61,7 +57,7 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = GELInterpretationReport
         fields = (
-            'proband_id',
+            'id',
             'gel_id',
             'forename',
             'surname',
