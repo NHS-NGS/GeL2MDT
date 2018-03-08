@@ -332,14 +332,14 @@ class Proband(models.Model):
 
 
 class Relative(models.Model):
-    gel_id = models.CharField(max_length=200, unique=True)
+    gel_id = models.CharField(max_length=200)
     relation_to_proband = models.CharField(max_length=200)
     affected_status = models.CharField(max_length=200)
     proband = models.ForeignKey(Proband, on_delete=models.CASCADE)
     nhs_number = models.CharField(max_length=200, null=True)
     # must be unique, but can also be null if not known
     lab_number = models.CharField(
-        max_length=200, unique=True, blank=True, null=True)
+        max_length=200, blank=True, null=True)
     forename = models.CharField(max_length=200)
     surname = models.CharField(max_length=200)
     date_of_birth = models.DateTimeField('date_of_birth')
@@ -376,17 +376,19 @@ class Variant(models.Model):
 
 
 class Transcript(models.Model):
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
     canonical_transcript = models.BooleanField(default=False)
     strand = models.CharField(max_length=255)
     protein = models.CharField(max_length=255, null=True)
     location = models.CharField(max_length=255, null=True)
 
     gene = models.ForeignKey(Gene, on_delete=models.CASCADE, null=True)
+    genome_assembly = models.ForeignKey(ToolOrAssemblyVersion, on_delete=models.CASCADE)
 
     class Meta:
         managed = True
         db_table = 'Transcript'
+        unique_together = (('name', 'genome_assembly'),)
 
 
 class TranscriptVariant(models.Model):
