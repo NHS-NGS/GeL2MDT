@@ -143,3 +143,9 @@ tfoot input {
     background-color: rgba(218, 41, 28, 0.6);
     border-color: rgba(255, 255, 255, 0);
 }
+
+.alert-warning {
+    color: #8a6d3b;
+    background-color: rgba(250, 225, 0, 0.2);
+    border-color: rgba(250, 225, 0, 0.2);
+}

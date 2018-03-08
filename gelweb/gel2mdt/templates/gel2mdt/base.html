@@ -120,7 +120,9 @@ function redrawCaseType(table,caseType) {
 
     // warn users of pilot mode
     if (caseType == 'true') {
-        $('#pilotWarning').html('<div class="alert alert-danger" role="alert"><strong>Pilot Mode is on.</strong></div>');
+        $('#pilotWarning').html('<div class="alert alert-danger" role="alert"><strong>Only displaying pilot cases</strong></div>');
+    } else if (caseType == '') {
+        $('#pilotWarning').html('<div class="alert alert-warning" role="alert"><strong>Including pilot cases.</strong></div>');
     } else {
         $('#pilotWarning').html("");
     }
