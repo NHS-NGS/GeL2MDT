@@ -12,6 +12,9 @@ from django.db.models import Q
 from .database_utils.multiple_case_adder import MultipleCaseAdder
 from .primer_utils import singletarget
 
+from .api.api_views import *
+
+
 # Create your views here.
 def register(request):
     '''

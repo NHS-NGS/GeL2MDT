@@ -10,6 +10,8 @@ django-bootstrap3==9.1.0
 django-easy-audit==1.0
 django-extensions==1.9.9
 django-nose==1.4.5
+django-rest-framework==0.1.0
+djangorestframework==3.7.7
 greenlet==0.4.12
 idna==2.6
 labkey==0.6.0
