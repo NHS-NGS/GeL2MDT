@@ -1,17 +1,32 @@
 from gel2mdt.models import *
-from django.contrib.auth.decorators import login_required
-from rest_framework.decorators import api_view
+from gel2mdt.api.serializers import *
+
+from django.http import Http404
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
-from gel2mdt.api.serializers import GELInterpretationReportSerializer
+from rest_framework.views import APIView
+from rest_framework import status
+from rest_framework import mixins
+from rest_framework import generics
 
 
-@api_view(['GET'])
-def rare_disease_json(request):
-    '''
-    JSON response for all rare disease cases.
-    '''
-    all_gel_irs = GELInterpretationReport.objects.all()
-    serializer = GELInterpretationReportSerializer(all_gel_irs, many=True)
-    return Response(serializer.data)
+class RareDiseaseCases(generics.ListAPIView):
+    """
+    List all rare disease cases in our database.
+    """
+    queryset = GELInterpretationReport.objects.all()
+    serializer_class = GELInterpretationReportSerializer
+
+
+class ProbandDetail(generics.RetrieveUpdateAPIView):
+    """
+    Get information about a patient, or add/update a patient.
+    """
+    queryset = Proband.objects.all()
+    serializer_class = ProbandSerializer
+
+
+
+
+
