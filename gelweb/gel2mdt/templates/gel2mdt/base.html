@@ -107,32 +107,60 @@
         $('[data-toggle="tooltip"]').tooltip(); 
     });
 </script>
-<script>
-$(document).ready(function() {
-    $('#dataTables-rare-disease-main').DataTable( {
-        initComplete: function () {
-            this.api().columns().every( function () {
-                var column = this;
-                var select = $('<select><option value=""></option></select>')
-                    .appendTo( $(column.footer()).empty() )
-                    .on( 'change', function () {
-                        var val = $.fn.dataTable.util.escapeRegex(
-                            $(this).val()
-                        );
 
-                        column
-                            .search( val ? '^'+val+'$' : '', true, false )
-                            .draw();
-                    } );
-                                            
-                column.data().unique().sort().each( function ( d, j ) {
-                    select.append( '<option value="'+d+'">'+d+'</option>' )
-                } );
-            } );
-        }
+<script type="text/javascript" language="javascript" class="init">
+    $(document).ready(function() {
+        $('#rare-disease-main').DataTable( {                 
+            "ajax": {
+                "url": '{% url 'rare-disease-json' %}',
+                "dataSrc": ''
+            },
+            "columns": [
+                { 
+                    "data": "proband_id",
+                    "render": function(data, type, row, meta){
+                        if(type === 'display'){
+                            data = '<a href="proband/' + data + '">' + '<i class="fas fa-external-link-alt"></i>' + '</a>';
+                        }
+                        return data;
+                    }
+                },
+                { "data": "gel_id" },
+                { "data": "forename" },
+                { "data": "surname" },
+                { "data": "date_of_birth",
+                  "type": "date " },
+                { "data": "max_tier" },
+                { "data": "assembly" },
+                { "data": "case_status" },
+                { "data": "updated",
+                  "type": "date " }
+            ]
+        } );
     } );
-} );
 </script>
+
+<script charset="utf-8">
+function reloadTable() {
+    var caseType = getRadioValue("caseType");
+    var genomeBuild = getRadioValue("genomeBuild");
+    var maxTier = getRadioValue("maxTier");
+    var caseStatus = getRadioValue("caseStatus");
+    console.log(caseType + ", " + genomeBuild + ", " + maxTier + ", " + caseStatus);
+}
+
+function getRadioValue(radioElementName) {
+    var radios = document.getElementsByName(radioElementName);
+    for (var i = 0, length=radios.length; i < length; i++) {
+        if (radios[i].checked) {
+            var checked_radio = radios[i]
+            break
+        }
+    }
+    return checked_radio.value
+}
+</script>
+
 <script>
     $(document).ready(function() {
         $('#dataTables-generic').DataTable({
