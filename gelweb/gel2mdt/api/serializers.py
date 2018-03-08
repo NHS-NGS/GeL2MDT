@@ -12,7 +12,8 @@ class ProbandSerializer(serializers.ModelSerializer):
             'forename',
             'surname',
             'date_of_birth',
-            'local_id'
+            'local_id',
+            'pilot_case'
         )
 
 
@@ -26,10 +27,6 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
     assembly = serializers.StringRelatedField()
 
     # get proband information
-    proband_id = serializers.CharField(
-        source="ir_family.participant_family.proband.id",
-        read_only=True
-    )
     gel_id = serializers.CharField(
         source="ir_family.participant_family.proband.gel_id",
         read_only=True
@@ -52,6 +49,11 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
         read_only=True
     )
 
+    case_type = serializers.BooleanField(
+        source="ir_family.participant_family.proband.pilot_case",
+        read_only=True
+    )
+
     updated = serializers.DateTimeField(
         format='%Y/%m/%d',
         read_only=True
@@ -61,12 +63,13 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = GELInterpretationReport
         fields = (
-            'proband_id',
+            'id',
             'gel_id',
             'forename',
             'surname',
             'date_of_birth',
             'case_status',
+            'case_type',
             'ir_family',
             'archived_version',
             'status',
