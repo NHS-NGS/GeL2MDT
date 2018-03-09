@@ -42,7 +42,8 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="/"><i class="fas fa-paper-plane fa-1x"></i> 
+
+          <a class="navbar-brand" href="/rare-disease-main"><i class="fas fa-paper-plane fa-1x"></i>
               <em><strong>GeL2MDT v0.1</strong></em>
           </a>
         </div>
@@ -57,6 +58,9 @@
                     </ul>
                 <ul class="nav navbar-nav">
                     <li><a href="/recent_mdts" ><i class="fas fa-history"></i> Recent MDTs</a></li>
+                    </ul>
+                <ul class="nav navbar-nav">
+                    <li><a href="/genomics_england" ><i class="fas fa-download"></i> GEL Reports</a></li>
                     </ul>
 
 
@@ -106,53 +110,107 @@
 
 
 <script charset="utf-8">
-$(document).ready(initaliseTable())
+// intialise the table at document ready time
+$(document).ready(initaliseTable());
 
-// select the DataTable API object
-table = $("#rare-disease-main").DataTable()
-
-// filter value change listeners
-$("input[name='caseType']").change(function() {
+// define the filter and redraw functions
+function redrawCaseType(table,caseType) {
+    // select the DataTable API object
     table
         .column(8)
-        .search($(this).val())
-        .draw()
-});
+        .search(caseType);
+    table.draw();
 
-$("input[name='genomeBuild']").change(function() {
+
+    // warn users of pilot mode
+    if (caseType == 'true') {
+        $('#pilotWarning').html('<div class="alert alert-danger" role="alert"><strong>Only displaying pilot cases</strong></div>');
+    } else if (caseType == '') {
+        $('#pilotWarning').html('<div class="alert alert-warning" role="alert"><strong>Including pilot cases.</strong></div>');
+    } else {
+        $('#pilotWarning').html("");
+    }
+};
+
+function redrawGenomeBuild(table, genomeBuild) {
+    // select the DataTable API object
     table
         // filter based on the value specified in HTML
         .column(6)
-        .search($(this).val())
-        .draw()
-});
+        .search(genomeBuild);
+    table.draw();
 
-$("input[name='maxTier']").change(function() {
+    // change the HTML text for build
+    if (genomeBuild == '') {
+        $('#genomeBuildSpec').text("all genome builds");
+    } else {
+        $('#genomeBuildSpec').text("build " + genomeBuild);
+    }
+
+
+};
+
+function redrawMaxTier(table, maxTier) {
+    // select the DataTable API object
     // define search regex based on desired max tier
     var searchRegex;
-    if ($(this).val() == 3) {
+    if (maxTier == 3) {
         searchRegex = '[0123]';
-    } else if ($(this).val() == 2) {
+    } else if (maxTier == 2) {
         searchRegex = '[012]';
-    } else if ($(this).val() == 1) {
+    } else if (maxTier == 1) {
         searchRegex = '[01]';
-    } else if ($(this).val() == 0) {
+    } else if (maxTier == 0) {
         searchRegex = '0';
     }
 
     // search and redraw the datatable API
     table
         .column(5)
-        .search(searchRegex, regex=true)
-        .draw()
-});
+        .search(searchRegex, regex=true);
+    table.draw();
 
-$("input[name='caseStatus']").change(function() {
+    // change the HTML text for max tier
+    if (maxTier == 0) {
+        $('#maxTierSpec').text("CIP candidate variants only");
+    } else {
+        $('#maxTierSpec').text("at least Tier " + maxTier);
+    }
+};
+
+function redrawCaseStatus(table, caseStatus) {
+    console.log(caseStatus);
+    // select the DataTable API object
     table
         // filter based on the value specified in HTML
         .column(7)
-        .search($(this).val())
-        .draw()
+        .search(caseStatus);
+    table.draw();
+
+    // change the HTML text for status
+    if (caseStatus == '') {
+        $('#caseStatusSpec').text("All");
+    } else {
+        $('#caseStatusSpec').text(caseStatus);
+    }
+};
+
+// filter value change listeners
+$("input[name='caseType']").change(function() {
+    var table = $('#rare-disease-main').DataTable()
+    redrawCaseType(table, $(this).val());
+});
+$("input[name='genomeBuild']").change(function() {
+    var table = $('#rare-disease-main').DataTable()
+    redrawGenomeBuild(table, $(this).val());
+});
+$("input[name='maxTier']").change(function() {
+    var table = $('#rare-disease-main').DataTable()
+    redrawMaxTier(table, $(this).val());
+});
+$("input[name='caseStatus']").change(function() {
+    var table = $('#rare-disease-main').DataTable()
+    redrawCaseStatus(table, $(this).val());
 });
 
 function initaliseTable() {
@@ -160,7 +218,15 @@ function initaliseTable() {
     var genomeBuild = getRadioValue("genomeBuild");
     var maxTier = getRadioValue("maxTier");
     var caseStatus = getRadioValue("caseStatus");
-    fetchDataTable(caseType, genomeBuild, maxTier, caseStatus)
+    
+    // create the datatable
+    var table = fetchDataTable(caseType, genomeBuild, maxTier, caseStatus)
+    
+    // once DataTable is fetched from API, apply active filters and redraw
+    redrawCaseType(table, caseType);
+    redrawGenomeBuild(table, genomeBuild);
+    redrawMaxTier(table, maxTier);
+    redrawCaseStatus(table, caseStatus);
 }
 
 function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
@@ -205,6 +271,7 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
         ],
         "order": [[ 9, "desc" ]]
     } );
+    return table
 }
 
 function getRadioValue(radioElementName) {
@@ -222,7 +289,8 @@ function getRadioValue(radioElementName) {
 <script>
     $(document).ready(function() {
         $('#dataTables-generic').DataTable({
-            responsive: true
+            responsive: true,
+            "order": [[ 0, "desc" ]]
         });
     });
     </script>

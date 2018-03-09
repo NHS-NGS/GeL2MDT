@@ -23,7 +23,7 @@ class MultipleCaseAdder(object):
     required related instances to the database and reporting status and
     errors during the process.
     """
-    def __init__(self, test_data=False, skip_demographics=False):
+    def __init__(self, head=None, test_data=False, skip_demographics=False):
         """
         Initiliase an instance of a MultipleCaseAdder to start managing
         a database update. This will get the list of cases available to
@@ -39,6 +39,8 @@ class MultipleCaseAdder(object):
         self.test_data = test_data
         # are we polling labkey? defaults False (yes)
         self.skip_demographics = skip_demographics
+        # are we only getting a certain number of cases? defaults None (no)
+        self.head = head
 
         # get the config file for datadumps
         self.config = load_config.LoadConfig().load()
@@ -67,6 +69,9 @@ class MultipleCaseAdder(object):
 
             logger.info("Fetching API JSON data for cases to poll...")
             self.list_of_cases = self.fetch_api_data()
+            if head:
+                # take a certain number of cases off the top
+                self.list_of_cases = self.list_of_cases[:head]
 
             logger.info("Fetched all required CIP API data.")
 

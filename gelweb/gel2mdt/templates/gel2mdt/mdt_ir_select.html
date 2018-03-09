@@ -3,12 +3,17 @@
 {% load static %}
 
 {% block tabs %}
-<div id="navbar" class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                     <li class="active"><a href="/start_mdt" >Start MDT</a></li>
+    <ul class="nav navbar-nav">
+                    <li><a href="/rare-disease-main"><i class="fas fa-home"></i></span> Cases</a></li>
+                    </ul>
+               <ul class="nav navbar-nav">
+                   <li class="active"><a href="/start_mdt" ><i class="fas fa-comments"></i> Start MDT</a></li>
                     </ul>
                 <ul class="nav navbar-nav">
-                     <li><a href="/recent_mdts" >Recent MDTs</a></li>
+                    <li><a href="/recent_mdts" ><i class="fas fa-history"></i> Recent MDTs</a></li>
+                    </ul>
+                <ul class="nav navbar-nav">
+                    <li><a href="/genomics_england" ><i class="fas fa-download"></i> GEL Reports</a></li>
                     </ul>
 {% endblock %}
 
@@ -46,7 +51,7 @@
                             {% if gel_ir.id in reports_in_mdt %}
                                  <form action="/remove_ir_from_mdt/{{ mdt_id }}/{{gel_ir.id}}" role="form" method="post">
                                  {% csrf_token %}
-                                 {% bootstrap_button "Remove" button_type="submit" button_class="btn-primary btn-danger"%}
+                                 {% bootstrap_button "Remove" button_type="submit" button_class="btn-danger"%}
                                 </form>
                             {% else %}
                                 <form action="/add_ir_to_mdt/{{ mdt_id }}/{{gel_ir.id}}" role="form" method="post">
