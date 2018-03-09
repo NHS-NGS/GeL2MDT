@@ -10,6 +10,7 @@ from ..api_utils.poll_api import PollAPI
 from ..vep_utils.run_vep_batch import CaseVariant, CaseTranscript
 from ..config import load_config
 import re
+import copy
 import pprint
 
 
@@ -22,7 +23,7 @@ class Case(object):
     def __init__(self, case_json, panel_manager, variant_manager, gene_manager, skip_demographics=False):
         self.json = case_json
         # raw json created to dump at the end; json attr is modified
-        self.raw_json = case_json
+        self.raw_json = copy.deepcopy(case_json)
         self.json_case_data = self.json["interpretation_request_data"]
         self.json_request_data = self.json_case_data["json_request"]
         self.request_id = str(
@@ -902,12 +903,13 @@ class CaseAttributeManager(object):
                         "variant": variant["variant_entry"],
                     }
                     cip_proband_variants.append(cip_proband_variant)
+
         # remove CIP tiered variants which are in cip variants
-        tiered_and_cip_proband_variants = cip_proband_variants + tiered_proband_variants
-        seen_variants = {}
+        tiered_and_cip_proband_variants = []
+        seen_variants = []
         for cip_variant in cip_proband_variants:
             tiered_and_cip_proband_variants.append(cip_variant)
-            seen_variants[cip_variant['variant']] = 1
+            seen_variants.append(cip_variant['variant'])
 
         for variant in tiered_proband_variants:
             if variant['variant'] not in seen_variants:
@@ -1147,7 +1149,6 @@ class CaseAttributeManager(object):
             for proband_variant in proband_variants:
                 if proband_variant.variant == transcript.variant_entry:
                     transcript.proband_variant_entry = proband_variant
-
 
         proband_transcript_variants = ManyCaseModel(ProbandTranscriptVariant, [{
             "transcript": transcript.transcript_entry,

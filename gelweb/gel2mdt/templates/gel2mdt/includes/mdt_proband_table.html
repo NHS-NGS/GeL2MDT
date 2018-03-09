@@ -1,3 +1,6 @@
+{% load bootstrap3 %}
+{% load gel2mdt_extras %}
+
 {% for report in reports %}
 <tr>
     <td><a href="/proband/{{report.id}}">{{report.ir_family.participant_family.proband.gel_id}}</a></td>
@@ -11,13 +14,22 @@
         {% if mdt_form.status.value != "C" %}
         <p>
         <button type="button" class="btn btn-primary js-edit-mdt-proband"
-                data-url="/edit_mdt_proband/{{report.ir_family.participant_family.proband.id}}">
+                data-url="/edit_mdt_proband/{{report.id}}">
           Edit
         </button>
         </p>
         {% else %}
         <p></p>
         {% endif %}
+    </td>
+    <td>
+        {% ifnotequal  proband_variant_count|get_item:report.id 0 %}
+       <form action="/mdt_proband_view/{{mdt_id}}/{{report.id}}" role="form">
+        {% csrf_token %} {% bootstrap_button proband_variant_count|get_item:report.id button_type="submit" button_class="btn-primary" %}
+    </form>
+        {% else %}
+        No Variants
+        {% endifnotequal %}
     </td>
 </tr>
 {% endfor %}

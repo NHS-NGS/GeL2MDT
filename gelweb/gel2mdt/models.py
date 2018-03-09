@@ -445,6 +445,25 @@ class ProbandVariant(models.Model):
         ProbandTranscriptVariant.objects.filter(proband_variant=self.id,
                                                 transcript=selected_transcript).update(selected=True)
 
+    def get_ptv(self):
+        # Gets first corresponding PTV - needs assessing!
+        ptv = ProbandTranscriptVariant.objects.filter(selected=True, proband_variant=self.id)[0]
+        return ptv
+
+    def get_transcript_variant(self):
+        ptv = ProbandTranscriptVariant.objects.filter(selected=True, proband_variant=self.id)
+        if ptv:
+            transcript_variant = TranscriptVariant.objects.get(transcript=ptv[0].transcript,
+                                                            variant=self.variant)
+            return transcript_variant
+
+    def get_transcript(self):
+        ptv = ProbandTranscriptVariant.objects.filter(selected=True, proband_variant=self.id)
+        if ptv:
+            return ptv[0].transcript
+        else:
+            return None
+
     def create_rare_disease_report(self):
         if not hasattr(self, 'rarediseasereport'):
             report = RareDiseaseReport(proband_variant=self)
@@ -497,7 +516,7 @@ class ProbandTranscriptVariant(models.Model):
 
     def get_transcript_variant(self):
         transcript_variant = TranscriptVariant.objects.get(transcript=self.transcript,
-                                                              variant=self.proband_variant.variant)
+                                                           variant=self.proband_variant.variant)
         return transcript_variant
 
     class Meta:

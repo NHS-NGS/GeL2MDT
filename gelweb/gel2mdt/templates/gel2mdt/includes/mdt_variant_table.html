@@ -1,56 +1,51 @@
 
 
-{% for variant in proband_transcript_variants %}
+{% for pv in proband_variants %}
 
     <tr>
-        <td><a href="/proband/{{variant.proband_variant.interpretation_report.id}}">{{variant.proband_variant.interpretation_report.ir_family.participant_family.proband.gel_id}}</a></td>
-        <td>{{variant.proband_variant.interpretation_report.ir_family.ir_family_id}}</td>
-        <td  ><a href="/variant/{{variant.proband_variant.variant.id}}">{{variant.proband_variant.variant.id}}</a></td>
+        <td  ><a href="/variant/{{pv.variant.id}}">{{pv.variant.id}}</a></td>
         <td>
             {% if mdt_form.status.value != "C" %}
             <button type="button" class="btn btn-primary js-edit-mdt-variant"
-                    data-url="/edit_mdt_variant/{{variant.proband_variant.id}}">
+                    data-url="/edit_mdt_variant/{{pv.interpretation_report.id}}/{{pv.id}}">
               Edit
             </button>
 
         {% endif %}
         </td>
-        <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;">{{variant.proband_variant.interpretation_report.ir_family.participant_family.proband.forename}}</td>
-        <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;">{{variant.proband_variant.interpretation_report.ir_family.participant_family.proband.surname}}</td>
-        <td>{{variant.proband_variant.interpretation_report.ir_family.participant_family.proband.gmc}}</td>
-        <td>{{variant.transcript_variant.transcript.gene}}</td>
-        <td style="word-wrap: break-word; min-width: 120px;max-width: 120px;">{{variant.transcript_variant.hgvs_c}}</td>
-        <td style="word-wrap: break-word; min-width: 120px;max-width: 120px;">{{variant.transcript_variant.hgvs_p}}</td>
-        <td style="word-wrap: break-word; min-width: 90px;max-width: 90px;">{{variant.proband_variant.zygosity}}</td>
-        <td>{{variant.proband_variant.rarediseasereport.classification}}</td>
-        <td>{{variant.proband_variant.rarediseasereport.contribution_to_phenotype}}</td>
-        <td style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{variant.proband_variant.rarediseasereport.discussion}}</td>
-        <td style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{variant.proband_variant.rarediseasereport.action}}</td>
-        <td>{% if variant.proband_variant.rarediseasereport.change_med == True %}
+        <td>{{pv.get_transcript.gene}}</td>
+        <td style="word-wrap: break-word; min-width: 120px;max-width: 120px;">{{pv.get_transcript_variant.hgvs_c}}</td>
+        <td style="word-wrap: break-word; min-width: 120px;max-width: 120px;">{{pv.get_transcript_variant.hgvs_p}}</td>
+        <td style="word-wrap: break-word; min-width: 90px;max-width: 90px;">{{pv.zygosity}}</td>
+        <td>{{pv.rarediseasereport.classification}}</td>
+        <td>{{pv.rarediseasereport.contribution_to_phenotype}}</td>
+        <td style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{pv.rarediseasereport.discussion}}</td>
+        <td style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{pv.rarediseasereport.action}}</td>
+        <td>{% if pv.rarediseasereport.change_med == True %}
             <span class="glyphicon glyphicon-ok"></span>
             {% else %}
             <span class="glyphicon glyphicon-remove"></span>
             {% endif %}
         </td>
-        <td>{% if variant.proband_variant.rarediseasereport.surgical_option == True %}
+        <td>{% if pv.rarediseasereport.surgical_option == True %}
             <span class="glyphicon glyphicon-ok"></span>
             {% else %}
             <span class="glyphicon glyphicon-remove"></span>
             {% endif %}
         </td>
-        <td>{% if variant.proband_variant.rarediseasereport.add_surveillance_for_relatives == True %}
+        <td>{% if pv.rarediseasereport.add_surveillance_for_relatives == True %}
             <span class="glyphicon glyphicon-ok"></span>
             {% else %}
             <span class="glyphicon glyphicon-remove"></span>
             {% endif %}
         </td>
-        <td>{% if variant.proband_variant.rarediseasereport.clinical_trial == True %}
+        <td>{% if pv.rarediseasereport.clinical_trial == True %}
             <span class="glyphicon glyphicon-ok"></span>
             {% else %}
             <span class="glyphicon glyphicon-remove"></span>
             {% endif %}
         </td>
-        <td>{% if variant.proband_variant.rarediseasereport.inform_reproductive_choice == True %}
+        <td>{% if pv.rarediseasereport.inform_reproductive_choice == True %}
             <span class="glyphicon glyphicon-ok"></span>
             {% else %}
             <span class="glyphicon glyphicon-remove"></span>

@@ -1,0 +1,16 @@
+<tr>
+    <td style="word-wrap: break-word; min-width: 200px;max-width: 200px;">{{report.ir_family.participant_family.proband.discussion}}</td>
+    <td style="word-wrap: break-word; min-width: 200px;max-width: 200px;">{{report.ir_family.participant_family.proband.action}}</td>
+    <td>
+            {% if mdt_form.status.value != "C" %}
+            <p>
+            <button type="button" class="btn btn-primary js-edit-mdt-proband"
+                    data-url="/edit_mdt_proband_v2/{{report.id}}">
+              Edit
+            </button>
+        </p>
+        {% else %}
+        <p></p>
+        {% endif %}
+        </td>
+</tr>

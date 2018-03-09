@@ -1,0 +1,6 @@
+
+{% if gel_content %}
+{% autoescape off %}{{gel_content}}{% endautoescape %}
+{% elif gene_panel_info %}
+<p>{{gene_panel_info}}</p>
+{% endif %}
