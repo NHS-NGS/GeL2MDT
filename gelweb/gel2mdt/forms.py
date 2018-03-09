@@ -43,13 +43,11 @@ class RareDiseaseMDTForm(forms.ModelForm):
     class Meta:
         model = RareDiseaseReport
         fields = ('contribution_to_phenotype', 'change_med',
-                  'action', 'discussion', 'clinical_trial',
+                   'clinical_trial',
                   'inform_reproductive_choice', 'surgical_option',
                   'add_surveillance_for_relatives',
                   'classification', 'id',)
         widgets = {'id': HiddenInput(),
-                   'action': Textarea(attrs={'rows': 4, 'cols': 30}),
-                   'discussion': Textarea(attrs={'rows': 4, 'cols': 30}),
                    'surgical_option': CheckboxInput(),
                    'change_med': CheckboxInput(),
                    'add_surveillance_for_relatives': CheckboxInput(),
