@@ -200,6 +200,7 @@ class InterpretationReportFamilyPanel(models.Model):
         managed=True
 
     ir_family = models.ForeignKey(InterpretationReportFamily, on_delete=models.CASCADE)
+    panel = models.ForeignKey(PanelVersion, on_delete=models.CASCADE)
 
 
 class GELInterpretationReport(models.Model):
