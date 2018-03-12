@@ -32,9 +32,8 @@ class MdtForm(forms.ModelForm):
 class ProbandMDTForm(forms.ModelForm):
     class Meta:
         model = Proband
-        fields = ['discussion', 'action', 'id']
+        fields = ('discussion', 'action', )
         widgets = {
-            'id': HiddenInput(),
             'discussion': Textarea(attrs={'rows': '3'}),
             'action': Textarea(attrs={'rows': '3'}),
         }
@@ -43,13 +42,15 @@ class RareDiseaseMDTForm(forms.ModelForm):
     class Meta:
         model = RareDiseaseReport
         fields = ('contribution_to_phenotype', 'change_med',
-                   'clinical_trial',
+                  'clinical_trial', 'requires_validation',
                   'inform_reproductive_choice', 'surgical_option',
                   'add_surveillance_for_relatives',
                   'classification', 'id',)
-        widgets = {'id': HiddenInput(),
+        widgets = {
+                   'id': HiddenInput(),
                    'surgical_option': CheckboxInput(),
                    'change_med': CheckboxInput(),
+                   'requires_validation': CheckboxInput(),
                    'add_surveillance_for_relatives': CheckboxInput(),
                    'clinical_trial': CheckboxInput(),
                    'inform_reproductive_choice': CheckboxInput(),
