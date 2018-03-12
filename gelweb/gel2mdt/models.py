@@ -478,10 +478,16 @@ class ProbandVariant(models.Model):
 class RareDiseaseReport(models.Model):
     discussion = models.TextField(db_column='Discussion', blank=True)
     action = models.TextField(db_column='Action', blank=True)
-    contribution_to_phenotype = models.CharField(db_column='Contribution_to_phenotype', max_length=2, choices=(
-        ('UN', 'Uncertain'), ('No', 'None'), ('FU', 'Full'), ('PA', 'Partial'), ('SE', 'Secondary'), ('NA', 'NA')
+    contribution_to_phenotype = models.CharField(db_column='Contribution_to_phenotype', max_length=20, choices=(
+        ('NA', 'NA'),
+        ('Uncertain', 'Uncertain'),
+        ('None', 'None'),
+        ('Full', 'Full'),
+        ('Partial', 'Partial'),
+        ('SE', 'Secondary'),
     ), default='NA')
     change_med = models.NullBooleanField(db_column='Change_med')
+    requires_validation = models.NullBooleanField(db_column='Requires_Validation')
     surgical_option = models.NullBooleanField(db_column='Surgical_Option')
     add_surveillance_for_relatives = models.NullBooleanField(db_column='Add_surveillance_for_relatives')
     clinical_trial = models.NullBooleanField(db_column='Clinical_trial')

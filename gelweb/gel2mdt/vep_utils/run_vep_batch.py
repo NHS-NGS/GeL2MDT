@@ -109,7 +109,7 @@ def run_vep_gosh(infile, config_dict):
             sftp.put(hg19_vcf, '/home/chris/gel2mdt_testing/hg19_destination_file.txt'.format(hg19_vcf))
 
             cmd = "{vep} -i /home/chris/gel2mdt_testing/hg19_destination_file.txt " \
-                  " -o /home/chris/gel2mdt_testing/hg19_output.txt --species homo_sapiens "  \
+                  " -o /home/chris/gel2mdt_testing/hg19_output.txt --species homo_sapiens --merged "  \
                   " --force_overwrite --cache --dir_cache {cache} --fork 4 --vcf --flag_pick --assembly GRCh37 " \
                   " --exclude_predicted --everything --hgvsg --dont_skip --total_length --offline --fasta {fasta_loc} ".format(
                     vep=config_dict['vep'],
@@ -130,7 +130,7 @@ def run_vep_gosh(infile, config_dict):
             sftp.put(hg38_vcf, '/home/chris/gel2mdt_testing/hg38_destination_file.txt'.format(hg38_vcf))
 
             cmd = "{vep} -i /home/chris/gel2mdt_testing/hg38_destination_file.txt " \
-                  " -o /home/chris/gel2mdt_testing/hg38_output.txt --species homo_sapiens "  \
+                  " -o /home/chris/gel2mdt_testing/hg38_output.txt --species homo_sapiens --merged "  \
                   " --force_overwrite --cache --dir_cache {cache} --fork 4 --vcf --flag_pick --assembly GRCh38 " \
                   " --exclude_predicted --everything --hgvsg --dont_skip --total_length --offline --fasta {fasta_loc} ".format(
                     vep=config_dict['vep'],
