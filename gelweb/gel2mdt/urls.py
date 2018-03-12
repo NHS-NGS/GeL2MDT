@@ -25,8 +25,7 @@ urlpatterns = [
     path('add_ir_to_mdt/<int:mdt_id>/<int:irreport_id>', views.add_ir_to_mdt, name='add-ir-to-mdt'),
     path('remove_ir_from_mdt/<int:mdt_id>/<int:irreport_id>', views.remove_ir_from_mdt, name='remove-ir-from-mdt'),
 
-    path('edit_mdt_variant/<int:pv_id>', views.edit_mdt_variant, name='edit-mdt-variant'),
-    path('edit_mdt_proband/<int:proband_id>', views.edit_mdt_proband, name='edit-mdt-proband'),
+    path('edit_mdt_proband/<int:report_id>', views.edit_mdt_proband, name='edit-mdt-proband'),
 
     path('recent_mdts/', views.recent_mdts, name='recent-mdt'),
 
