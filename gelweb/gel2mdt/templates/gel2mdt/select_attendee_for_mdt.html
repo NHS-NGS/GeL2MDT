@@ -36,7 +36,7 @@
                             {% if attendee.email in currently_added_to_mdt %}
                                  <form action="/remove_attendee_from_mdt/{{ mdt_id }}/{{attendee.id}}/{{attendee.role}}" role="form" method="post">
                                  {% csrf_token %}
-                                 {% bootstrap_button "Remove" button_type="submit" button_class="btn-primary btn-danger"%}
+                                 {% bootstrap_button "Remove" button_type="submit" button_class=" btn-danger"%}
                                 </form>
                             {% else %}
                                 <form action="/add_attendee_to_mdt/{{ mdt_id }}/{{attendee.id}}/{{attendee.role}}" role="form" method="post">
