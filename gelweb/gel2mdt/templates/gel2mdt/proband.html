@@ -269,13 +269,13 @@
 
                 </div>
 
-        <div class="panel-body">
             <div class="table-responsive">
             <table width="100%" class="table table-striped table-bordered table-hover" id="dataTables-generic">
                 <thead style='font-size: 75%'>
                     <tr>
                         <th>Variant ID</th>
                         <th>Select Transcript</th>
+                        <th>No of Selected Transcripts</th>
                         <th>Gene</th>
                         <th>Transcript</th>
                         <th>HGVSc</th>
@@ -298,11 +298,12 @@
                     <tr >
                         <td><a href="/variant/{{pv.variant.id }}">{{ pv.variant.id}}</a></td>
                         <td><a href="/select_transcript/{{report.id}}/{{pv.id }}" class="btn btn-primary">Link</a></td>
+                        <td>{{ pv.get_selected_count }}</td>
                         <td>{{ pv.get_transcript.gene }}</td>
                         <td>{{ pv.get_transcript.name }}</td>
                         <td style="word-wrap: break-word; min-width: 100px;max-width: 100px;">{{pv.get_transcript_variant.hgvs_c}}</td>
                         <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv.get_transcript_variant.hgvs_p}}</td>
-                        <td>{{pv.zygosity}}</td>
+                        <td>{{pv.get_zygosity_display}}</td>
                         <td>{{pv.rarediseasereport.classification}}</td>
                         <td>{{pv.rarediseasereport.contribution_of_phenotype}}</td>
                         <td style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{pv.rarediseasereport.discussion}}</td>
@@ -342,7 +343,6 @@
 
                 </tbody>
             </table>
-        </div>
 
         </div>
     </div>

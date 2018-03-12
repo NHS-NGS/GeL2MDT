@@ -38,7 +38,7 @@
                     <thead>
                         <tr>
                             <th>MDT ID </th>
-                            <th>Attendees</th>
+                            <th>MDT Name</th>
                             <th>Date</th>
                             <th>Patients Discussed</th>
                             <th>Status</th>
@@ -55,7 +55,7 @@
                                     <a href="/proband/{{report_list.0}}"> {{ report_list.1}}</a>
                                 {% endfor %}
                             </td>
-                            <td>{{mdt.status}}</td>
+                            <td>{{mdt.get_status_display}}</td>
                             <td>{{mdt.creator}}</td>
                         </tr>
                         {% endfor %}
