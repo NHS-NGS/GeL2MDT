@@ -73,7 +73,8 @@ class Case(object):
         for participant in participant_jsons:
             if participant["isProband"]:
                 proband_json = participant
-                return proband_json
+
+        return proband_json
 
     def get_family_members(self):
         '''
@@ -93,7 +94,7 @@ class Case(object):
                                  'sex': participant['sex'],
                                  }
                 family_members.append(family_member)
-                return family_members
+        return family_members
 
     def get_tools_and_versions(self):
         '''
@@ -137,7 +138,7 @@ class Case(object):
                     variant_min_tier = tier
                 elif tier < variant_min_tier:
                     variant_min_tier = tier
-                    variant["max_tier"] = variant_min_tier
+            variant["max_tier"] = variant_min_tier
 
             if variant["max_tier"] < 3:
                 variant_object_count += 1
@@ -287,8 +288,8 @@ class CaseAttributeManager(object):
 
             if not clinician_details['name']:
                 clinician_details['name'] = "unknown"
-                if not clinician_details["hospital"]:
-                    clinician_details["hospital"] = "unknown"
+            if not clinician_details["hospital"]:
+                clinician_details["hospital"] = "unknown"
 
         clinician = CaseModel(Clinician, {
             "name": clinician_details['name'],
@@ -402,18 +403,18 @@ class CaseAttributeManager(object):
                 "sex": family_member["sex"],
             }
             relative_list.append(relative)
-            relatives = ManyCaseModel(Relative,[{
-                "gel_id": relative['gel_id'],
-                "relation_to_proband": relative["relation_to_proband"],
-                "affected_status": relative["affected_status"],
-                "proband": relative['proband'],
-                "nhs_number": relative["nhs_number"],
-                "forename": relative["forename"],
-                "surname": relative["surname"],
-                "date_of_birth": datetime.strptime(relative["date_of_birth"], "%Y/%m/%d").date(),
-                "sex": relative["sex"],
-            } for relative in relative_list], self.model_objects)
-            return relatives
+        relatives = ManyCaseModel(Relative,[{
+            "gel_id": relative['gel_id'],
+            "relation_to_proband": relative["relation_to_proband"],
+            "affected_status": relative["affected_status"],
+            "proband": relative['proband'],
+            "nhs_number": relative["nhs_number"],
+            "forename": relative["forename"],
+            "surname": relative["surname"],
+            "date_of_birth": datetime.strptime(relative["date_of_birth"], "%Y/%m/%d").date(),
+            "sex": relative["sex"],
+        } for relative in relative_list], self.model_objects)
+        return relatives
 
     def get_family(self):
         """
@@ -485,7 +486,6 @@ class CaseAttributeManager(object):
                         else:
                             panelapp_response = get_panelapp_api_response(panel)
 
-
                     # inform the PanelManager that a new panel has been added
                     polled = self.case.panel_manager.add_panel_response(
                         panelapp_id=panel["panelName"],
@@ -507,7 +507,8 @@ class CaseAttributeManager(object):
             } for panel in self.case.panels], self.model_objects)
         else:
             panels = ManyCaseModel(Panel, [], self.model_objects)
-            return panels
+
+        return panels
 
     def get_panel_versions(self):
         """
@@ -533,7 +534,7 @@ class CaseAttributeManager(object):
             } for panel in self.case.panels], self.model_objects)
         else:
             panel_versions = ManyCaseModel(PanelVersion, [], self.model_objects)
-            return panel_versions
+        return panel_versions
 
     def get_genes(self):
         """
@@ -655,8 +656,7 @@ class CaseAttributeManager(object):
             "strand": transcript.transcript_strand,
             'genome_assembly': genome_assembly
             # add all transcripts except those without associated genes
-        } for transcript in case_transcripts if transcript.gene_model],
-            self.model_objects)
+        } for transcript in case_transcripts if transcript.gene_model], self.model_objects)
 
         return transcripts
 
@@ -734,15 +734,15 @@ class CaseAttributeManager(object):
                 if variant['dbSNPid']:
                     if not re.match('rs\d+', str(variant['dbSNPid'])):
                         variant['dbSNPid'] = None
-                        tiered_variant = {
-                            "genome_assembly": genome_assembly,
-                            "alternate": variant["case_variant"].alt,
-                            "chromosome": variant["case_variant"].chromosome,
-                            "db_snp_id": variant["dbSNPid"],
-                            "reference": variant["case_variant"].ref,
-                            "position": variant["case_variant"].position,
-                        }
-                        variants_list.append(tiered_variant)
+                tiered_variant = {
+                    "genome_assembly": genome_assembly,
+                    "alternate": variant["case_variant"].alt,
+                    "chromosome": variant["case_variant"].chromosome,
+                    "db_snp_id": variant["dbSNPid"],
+                    "reference": variant["case_variant"].ref,
+                    "position": variant["case_variant"].position,
+                }
+                variants_list.append(tiered_variant)
 
         # loop through all variants and check that they have a case_variant (all should?)
         for interpreted_genome in self.case.json["interpreted_genome"]:
@@ -773,8 +773,7 @@ class CaseAttributeManager(object):
             "db_snp_id": variant["db_snp_id"],
             "reference": variant["reference"],
             "position": variant["position"],
-        } for variant in cleaned_variant_list],
-            self.model_objects)
+        } for variant in cleaned_variant_list], self.model_objects)
 
         return variants
 
@@ -934,8 +933,7 @@ class CaseAttributeManager(object):
             "variant": variant["variant"],
             "somatic": False
             # only adding T1/2 and CIP flagged
-        } for variant in tiered_and_cip_proband_variants],
-            self.model_objects)
+        } for variant in tiered_and_cip_proband_variants], self.model_objects)
 
         return proband_variants
 
@@ -995,9 +993,10 @@ class CaseAttributeManager(object):
                     re_panel_version = report_event.get("panelVersion", None)
 
                     for panel_version in panel_versions:
-                        if (re_panel_name == panel_version.panel.panel_name and
+                        if (
+                            re_panel_name == panel_version.panel.panel_name and
                             re_panel_version == panel_version.version_number
-                            ):
+                        ):
                             report_event["panel_version_entry"] = panel_version
                             panel_found = True
                             break
@@ -1085,9 +1084,10 @@ class CaseAttributeManager(object):
                     re_panel_version = report_event.get("panelVersion", None)
 
                     for panel_version in panel_versions:
-                        if (re_panel_name == panel_version.panel.panel_name and
+                        if (
+                            re_panel_name == panel_version.panel.panel_name and
                             re_panel_version == panel_version.version_number
-                            ):
+                        ):
                             report_event["panel_version_entry"] = panel_version
                             panel_found = True
                             break
@@ -1183,8 +1183,7 @@ class CaseAttributeManager(object):
         tools_and_assemblies = ManyCaseModel(ToolOrAssemblyVersion, [{
             "tool_name": tool,
             "version_number": version
-        }for tool, version in self.case.tools_and_versions.items()],
-            self.model_objects)
+        }for tool, version in self.case.tools_and_versions.items()], self.model_objects)
 
         return tools_and_assemblies
 
@@ -1311,4 +1310,4 @@ class ManyCaseModel(object):
         entries = []
         for case_model in self.case_models:
             entries.append(case_model.entry)
-            return entries
+        return entries
