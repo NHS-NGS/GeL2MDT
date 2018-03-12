@@ -54,7 +54,7 @@
                                 <div class="block">
                                     {% for panel in panels %}
 
-                                    <a class="btn btn-primary" href="/panel/{{panel.panel.id}}">
+                                    <a href="/panel/{{panel.panel.id}}">
                                     {{panel.panel}}
                                     </a>
                                     {% endfor %}
@@ -72,11 +72,20 @@
                                     </div>
 
                                     </br>
-                                    {% bootstrap_label "Clinician" %}
+                                    {% bootstrap_label "Lab Number" %}
                                     <div class="block">
-                                        {{report.ir_family.participant_family.clinician}}
+                                         {% if report.ir_family.participant_family.proband.lab_number %}
+                                            {{ report.ir_family.participant_family.proband.lab_number }}
+                                        {% else %}
+                                            <p style="color:gray">unknown</p>
+                                        {% endif %}
                                     </div>
                                     </br>
+                                    {% bootstrap_label "Clinician" %}
+                                    <div class="block">
+                                        {{report.ir_family.clinician}}
+                                    </div>
+
                                 </div>
                                 <div class="col-md-3">
                                     {% bootstrap_label "CIP ID" %}
@@ -84,9 +93,13 @@
                                         <a href="https://cipapi.genomicsengland.nhs.uk/interpretationportal/#/participant/{{report.ir_family.ir_family_id}}" target="_blank"><i class="fas fa-external-link-alt"></i> {{report.ir_family.ir_family_id}}</a>
                                     </div>
                                     </br>
-                                    {% bootstrap_label "GEL Family ID" %}
+                                    {% bootstrap_label "CGU Number" %}
                                     <div class="block">
-                                        {{report.ir_family.participant_family.id}}
+                                        {% if report.ir_family.participant_family.proband.local_id %}
+                                            {{ report.ir_family.participant_family.proband.local_id }}
+                                        {% else %}
+                                            <p style="color:gray">unknown</p>
+                                        {% endif %}
                                     </div>
                                     </br>
                                     {% bootstrap_label "GMC" %}
@@ -361,8 +374,9 @@
             <div class="modal-body">
                 <form action="/proband/{{ report.id }}">
                     {% csrf_token %}
-                    {% bootstrap_form demogs_form %}
+                    {% bootstrap_form demogs_form layout="inline" %}
                     {% buttons %}
+                    {% bootstrap_form_errors demogs_form %}
                     <button type="submit" class="btn btn-primary">
                         Update
                     </button>
