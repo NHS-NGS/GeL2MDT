@@ -189,6 +189,9 @@ def update_proband_demographics(request, report_id):
             demogs_form.save()
             return HttpResponseRedirect(f'/proband/{report_id}')
 
+        else:
+            return HttpResponseRedirect(f'/proband/{report_id}')
+
 @login_required
 def update_proband(request, report_id):
     '''
