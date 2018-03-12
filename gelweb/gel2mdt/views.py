@@ -128,8 +128,6 @@ def panel_view(request, panelversion_id):
     panelapp_file = f'{config_dict["panelapp_storage"]}/{panel.panel.panelapp_id}_{panel.version_number}.json'
     if os.path.isfile(panelapp_file):
         panelapp_json = json.load(open(panelapp_file))
-        for gene in panelapp_json['result']['Genes']:
-            print(gene)
         return render(request, 'gel2mdt/panel.html', {'panel':panel,
                                                       'genes': panelapp_json['result']['Genes']})
 
@@ -217,6 +215,16 @@ def select_transcript(request, report_id, pv_id):
     :return:
     '''
     proband_transcript_variants = ProbandTranscriptVariant.objects.filter(proband_variant__id=pv_id)
+    # Just selecting first selected transcript
+    selected_count = 0
+    for ptv in proband_transcript_variants:
+        if ptv.selected:
+            if selected_count == 0:
+                pass
+            else:
+                ptv.selected = False
+                ptv.save()
+            selected_count += 1
     report = GELInterpretationReport.objects.get(id=report_id)
     return render(request, 'gel2mdt/select_transcript.html',
                   {'proband_transcript_variants': proband_transcript_variants,
@@ -354,7 +362,7 @@ def mdt_proband_view(request, mdt_id, pk):
     proband_form = ProbandMDTForm(instance=report.ir_family.participant_family.proband)
     VariantForm = modelformset_factory(RareDiseaseReport, form=RareDiseaseMDTForm, extra=0)
     variant_formset = VariantForm(queryset=proband_variant_reports)
-
+    panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.ir_family)
     if request.method == 'POST':
         variant_formset = VariantForm(request.POST)
         proband_form = ProbandMDTForm(request.POST, instance=report.ir_family.participant_family.proband)
@@ -367,7 +375,8 @@ def mdt_proband_view(request, mdt_id, pk):
                                                                'report': report,
                                                                'mdt_id': mdt_id,
                                                              'proband_form': proband_form,
-                                                             'variant_formset': variant_formset})
+                                                             'variant_formset': variant_formset,
+                                                             'panels': panels})
 
 @login_required
 def edit_mdt_proband(request, report_id):
