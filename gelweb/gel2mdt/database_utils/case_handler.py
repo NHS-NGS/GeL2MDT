@@ -73,7 +73,7 @@ class Case(object):
         for participant in participant_jsons:
             if participant["isProband"]:
                 proband_json = participant
-        return proband_json
+                return proband_json
 
     def get_family_members(self):
         '''
@@ -93,7 +93,7 @@ class Case(object):
                                  'sex': participant['sex'],
                                  }
                 family_members.append(family_member)
-        return family_members
+                return family_members
 
     def get_tools_and_versions(self):
         '''
@@ -137,7 +137,7 @@ class Case(object):
                     variant_min_tier = tier
                 elif tier < variant_min_tier:
                     variant_min_tier = tier
-            variant["max_tier"] = variant_min_tier
+                    variant["max_tier"] = variant_min_tier
 
             if variant["max_tier"] < 3:
                 variant_object_count += 1
@@ -287,8 +287,8 @@ class CaseAttributeManager(object):
 
             if not clinician_details['name']:
                 clinician_details['name'] = "unknown"
-            if not clinician_details["hospital"]:
-                clinician_details["hospital"] = "unknown"
+                if not clinician_details["hospital"]:
+                    clinician_details["hospital"] = "unknown"
 
         clinician = CaseModel(Clinician, {
             "name": clinician_details['name'],
@@ -313,7 +313,7 @@ class CaseAttributeManager(object):
                 "forename": 'unknown',
                 "date_of_birth": '2011/01/01', # unknown but needs to be in date format
                 "nhs_num": 'unknown',
-                }
+            }
 
         elif not self.case.skip_demographics:
             labkey_server_request = config_dict['labkey_server_request']
@@ -327,36 +327,36 @@ class CaseAttributeManager(object):
                 "forename": 'unknown',
                 "date_of_birth": '2011/01/01', # unknown but needs to be in date format
                 "nhs_num": 'unknown',
-                }
+            }
 
             search_results = lk.query.select_rows(
-                    server_context=server_context,
-                    schema_name='gel_rare_diseases',
-                    query_name='participant_identifier',
-                    filter_array=[
-                                lk.query.QueryFilter(
-                                    'participant_id', participant_id, 'contains')
-                            ]
+                server_context=server_context,
+                schema_name='gel_rare_diseases',
+                query_name='participant_identifier',
+                filter_array=[
+                    lk.query.QueryFilter(
+                        'participant_id', participant_id, 'contains')
+                ]
             )
             try:
                 participant_demographics["surname"] = search_results['rows'][0].get(
-                        'surname')
+                    'surname')
             except IndexError as e:
                 pass
             try:
                 participant_demographics["forename"] = search_results['rows'][0].get(
-                        'forenames')
+                    'forenames')
             except IndexError as e:
                 pass
             try:
                 participant_demographics["date_of_birth"] = search_results['rows'][0].get(
-                        'date_of_birth').split(' ')[0]
+                    'date_of_birth').split(' ')[0]
             except IndexError as e:
                 pass
             try:
                 if search_results['rows'][0].get('person_identifier_type').upper() == "NHSNUMBER":
-                        participant_demographics["nhs_num"] = search_results['rows'][0].get(
-                                'person_identifier')
+                    participant_demographics["nhs_num"] = search_results['rows'][0].get(
+                        'person_identifier')
             except IndexError as e:
                 pass
 
@@ -402,18 +402,18 @@ class CaseAttributeManager(object):
                 "sex": family_member["sex"],
             }
             relative_list.append(relative)
-        relatives = ManyCaseModel(Relative,[{
-            "gel_id": relative['gel_id'],
-            "relation_to_proband": relative["relation_to_proband"],
-            "affected_status": relative["affected_status"],
-            "proband": relative['proband'],
-            "nhs_number": relative["nhs_number"],
-            "forename": relative["forename"],
-            "surname": relative["surname"],
-            "date_of_birth": datetime.strptime(relative["date_of_birth"], "%Y/%m/%d").date(),
-            "sex": relative["sex"],
-        } for relative in relative_list], self.model_objects)
-        return relatives
+            relatives = ManyCaseModel(Relative,[{
+                "gel_id": relative['gel_id'],
+                "relation_to_proband": relative["relation_to_proband"],
+                "affected_status": relative["affected_status"],
+                "proband": relative['proband'],
+                "nhs_number": relative["nhs_number"],
+                "forename": relative["forename"],
+                "surname": relative["surname"],
+                "date_of_birth": datetime.strptime(relative["date_of_birth"], "%Y/%m/%d").date(),
+                "sex": relative["sex"],
+            } for relative in relative_list], self.model_objects)
+            return relatives
 
     def get_family(self):
         """
@@ -447,6 +447,18 @@ class CaseAttributeManager(object):
 
         return family_phenotypes
 
+    def get_panelapp_api_response(panel):
+        panelapp_poll = PollAPI(
+            "panelapp", "get_panel/{panelapp_id}/?version={v}".format(
+                panelapp_id=panel["panelName"],
+                v=panel["panelVersion"])
+        )
+        with open(panel_file, 'w') as f:
+            json.dump(panelapp_poll.get_json_response(), f)
+            panel_app_response = panelapp_poll.get_json_response()
+
+        return panelapp_poll.get_json_response()
+
     def get_panels(self):
         """
         Poll panelApp to fetch information about a panel, then create a
@@ -462,20 +474,17 @@ class CaseAttributeManager(object):
                 )
                 if polled:
                     panel["panelapp_results"] = polled.results
-                if not polled:
-                    panel_file = os.path.join(panelapp_storage, '{}_{}.json'.format(panel['panelName'],
-                                                                                    panel['panelVersion']))
-                    if os.path.isfile(panel_file):
-                        panel_app_response = json.load(open(panel_file))
-                    else:
-                        panelapp_poll = PollAPI(
-                            "panelapp", "get_panel/{panelapp_id}/?version={v}".format(
-                                panelapp_id=panel["panelName"],
-                                v=panel["panelVersion"])
-                        )
-                        with open(panel_file, 'w') as f:
-                            json.dump(panelapp_poll.get_json_response(), f)
-                        panel_app_response = panelapp_poll.get_json_response()
+                    if not polled:
+                        panel_file = os.path.join(panelapp_storage, '{}_{}.json'.format(panel['panelName'],
+                                                                                        panel['panelVersion']))
+                        if os.path.isfile(panel_file):
+                            try:
+                                panel_app_response = json.load(open(panel_file))
+                            except:
+                                panelapp_response = get_panelapp_api_response(panel)
+                        else:
+                            panelapp_response = get_panelapp_api_response(panel)
+
 
                     # inform the PanelManager that a new panel has been added
                     polled = self.case.panel_manager.add_panel_response(
@@ -488,7 +497,7 @@ class CaseAttributeManager(object):
             for panel in self.case.panels:
                 panel["panel_name_results"] = self.case.panel_manager.fetch_panel_names(
                     panelapp_id=panel["panelName"]
-                    )
+                )
 
             panels = ManyCaseModel(Panel, [{
                 "panelapp_id": panel["panelName"],
@@ -498,7 +507,7 @@ class CaseAttributeManager(object):
             } for panel in self.case.panels], self.model_objects)
         else:
             panels = ManyCaseModel(Panel, [], self.model_objects)
-        return panels
+            return panels
 
     def get_panel_versions(self):
         """
@@ -524,7 +533,7 @@ class CaseAttributeManager(object):
             } for panel in self.case.panels], self.model_objects)
         else:
             panel_versions = ManyCaseModel(PanelVersion, [], self.model_objects)
-        return panel_versions
+            return panel_versions
 
     def get_genes(self):
         """
@@ -647,7 +656,7 @@ class CaseAttributeManager(object):
             'genome_assembly': genome_assembly
             # add all transcripts except those without associated genes
         } for transcript in case_transcripts if transcript.gene_model],
-                                    self.model_objects)
+            self.model_objects)
 
         return transcripts
 
@@ -725,15 +734,15 @@ class CaseAttributeManager(object):
                 if variant['dbSNPid']:
                     if not re.match('rs\d+', str(variant['dbSNPid'])):
                         variant['dbSNPid'] = None
-                tiered_variant = {
-                    "genome_assembly": genome_assembly,
-                    "alternate": variant["case_variant"].alt,
-                    "chromosome": variant["case_variant"].chromosome,
-                    "db_snp_id": variant["dbSNPid"],
-                    "reference": variant["case_variant"].ref,
-                    "position": variant["case_variant"].position,
-                }
-                variants_list.append(tiered_variant)
+                        tiered_variant = {
+                            "genome_assembly": genome_assembly,
+                            "alternate": variant["case_variant"].alt,
+                            "chromosome": variant["case_variant"].chromosome,
+                            "db_snp_id": variant["dbSNPid"],
+                            "reference": variant["case_variant"].ref,
+                            "position": variant["case_variant"].position,
+                        }
+                        variants_list.append(tiered_variant)
 
         # loop through all variants and check that they have a case_variant (all should?)
         for interpreted_genome in self.case.json["interpreted_genome"]:
@@ -765,7 +774,7 @@ class CaseAttributeManager(object):
             "reference": variant["reference"],
             "position": variant["position"],
         } for variant in cleaned_variant_list],
-        self.model_objects)
+            self.model_objects)
 
         return variants
 
@@ -789,7 +798,7 @@ class CaseAttributeManager(object):
         case_attribute_managers = self.case.attribute_managers
         transcript_manager = case_attribute_managers[Transcript].case_model
         transcript_entries = [transcript.entry
-                       for transcript in transcript_manager.case_models]
+                              for transcript in transcript_manager.case_models]
         variant_manager = case_attribute_managers[Variant].case_model
         variant_entries = [variant.entry
                            for variant in variant_manager.case_models]
@@ -869,9 +878,9 @@ class CaseAttributeManager(object):
             # variant in json matches variant entry
             for variant in variant_entries:
                 if (
-                        json_variant["position"] == variant.position and
-                        json_variant["reference"] == variant.reference and
-                        json_variant["alternate"] == variant.alternate
+                    json_variant["position"] == variant.position and
+                    json_variant["reference"] == variant.reference and
+                    json_variant["alternate"] == variant.alternate
                 ):
                     # variant in json matches variant entry
                     json_variant["variant_entry"] = variant
@@ -893,9 +902,9 @@ class CaseAttributeManager(object):
                 # variant in json matches variant entry
                 for variant in variant_entries:
                     if (
-                            json_variant["position"] == variant.position and
-                            json_variant["reference"] == variant.reference and
-                            json_variant["alternate"] == variant.alternate
+                        json_variant["position"] == variant.position and
+                        json_variant["reference"] == variant.reference and
+                        json_variant["alternate"] == variant.alternate
                     ):
                         # variant in json matches variant entry
                         json_variant["variant_entry"] = variant
@@ -926,7 +935,7 @@ class CaseAttributeManager(object):
             "somatic": False
             # only adding T1/2 and CIP flagged
         } for variant in tiered_and_cip_proband_variants],
-                                         self.model_objects)
+            self.model_objects)
 
         return proband_variants
 
@@ -987,8 +996,8 @@ class CaseAttributeManager(object):
 
                     for panel_version in panel_versions:
                         if (re_panel_name == panel_version.panel.panel_name and
-                                re_panel_version == panel_version.version_number
-                        ):
+                            re_panel_version == panel_version.version_number
+                            ):
                             report_event["panel_version_entry"] = panel_version
                             panel_found = True
                             break
@@ -1077,8 +1086,8 @@ class CaseAttributeManager(object):
 
                     for panel_version in panel_versions:
                         if (re_panel_name == panel_version.panel.panel_name and
-                                re_panel_version == panel_version.version_number
-                        ):
+                            re_panel_version == panel_version.version_number
+                            ):
                             report_event["panel_version_entry"] = panel_version
                             panel_found = True
                             break
@@ -1175,7 +1184,7 @@ class CaseAttributeManager(object):
             "tool_name": tool,
             "version_number": version
         }for tool, version in self.case.tools_and_versions.items()],
-        self.model_objects)
+            self.model_objects)
 
         return tools_and_assemblies
 
@@ -1215,8 +1224,6 @@ class CaseModel(object):
         elif self.model_type == Phenotype:
             entry = [db_obj for db_obj in queryset
                      if db_obj.hpo_terms == self.model_attributes["hpo_terms"]]
-        elif self.model_type == FamilyPhenotype:
-                     pass
         elif self.model_type == InterpretationReportFamily:
             entry =[db_obj for db_obj in queryset
                     if db_obj.ir_family_id == self.model_attributes["ir_family_id"]]
@@ -1234,8 +1241,6 @@ class CaseModel(object):
         elif self.model_type == Gene:
             entry = [db_obj for db_obj in queryset
                      if db_obj.hgnc_id == self.model_attributes["hgnc_id"]]
-        elif self.model_type == PanelVersionGene:
-                     pass
         elif self.model_type == Transcript:
             entry = [db_obj for db_obj in queryset
                      if db_obj.name == self.model_attributes["name"]
@@ -1306,4 +1311,4 @@ class ManyCaseModel(object):
         entries = []
         for case_model in self.case_models:
             entries.append(case_model.entry)
-        return entries
+            return entries
