@@ -204,6 +204,7 @@ def update_transcript(request, report_id, pv_id, transcript_id):
     transcript = Transcript.objects.get(id=transcript_id)
     proband_variant = ProbandVariant.objects.get(id=pv_id)
     proband_variant.select_transcript(selected_transcript=transcript)
+    messages.add_message(request, 25, 'Transcript Updated')
     return HttpResponseRedirect(f'/select_transcript/{report_id}/{proband_variant.id}')
 
 @login_required
@@ -319,18 +320,19 @@ def mdt_view(request, mdt_id):
 def mdt_proband_view(request, mdt_id, pk):
     report = GELInterpretationReport.objects.get(id=pk)
     proband_variants = ProbandVariant.objects.filter(interpretation_report=report)
-    proband_form = ProbandMDTForm(request.POST, instance=report.ir_family.participant_family.proband)
+    proband_variant_reports = RareDiseaseReport.objects.filter(proband_variant__in=proband_variants)
+
+    proband_form = ProbandMDTForm(instance=report.ir_family.participant_family.proband)
     VariantForm = modelformset_factory(RareDiseaseReport, form=RareDiseaseMDTForm, extra=0)
-    variant_formset = VariantForm(queryset=proband_variants)
+    variant_formset = VariantForm(queryset=proband_variant_reports)
+
     if request.method == 'POST':
         variant_formset = VariantForm(request.POST)
         proband_form = ProbandMDTForm(request.POST, instance=report.ir_family.participant_family.proband)
         if variant_formset.is_valid() and proband_form.is_valid():
             variant_formset.save()
             proband_form.save()
-        else:
-            print(variant_formset.errors)
-            print(variant_formset)
+            messages.add_message(request, 25, 'Proband Updated')
         return HttpResponseRedirect(f'/mdt_proband_view/{mdt_id}/{pk}')
     return render(request, 'gel2mdt/mdt_proband_view.html', {'proband_variants': proband_variants,
                                                                'report': report,
