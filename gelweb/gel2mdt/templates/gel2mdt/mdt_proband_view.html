@@ -11,10 +11,10 @@
 <div class="container-fluid" >
 
     <div align="center">
-<a class="btn btn-link btn-lg" href="/proband/{{report.id}}">
+<a class="btn btn-primary btn-lg" href="/proband/{{report.id}}">
    {{report.ir_family.participant_family.proband.gel_id}}
 </a>
-<a class="btn btn-link btn-lg" href="/mdt_view/{{mdt_id}}">
+<a class="btn btn-info btn-lg" href="/mdt_view/{{mdt_id}}">
    Return to MDT
 </a>
 </div>
@@ -56,11 +56,15 @@
 
                             </div>
                             <div class="col-md-4">
-                                {% bootstrap_label "Panel" %}
+                                {% bootstrap_label "Panels" %}
                                 <div class="block">
-                                    {{report.ir_family.participant_family}}
-                                </div>
+                                    {% for panel in panels %}
 
+                                    <a class="btn btn-primary" href="/panel/{{panel.panel.id}}">
+                                    {{panel.panel}}
+                                    </a>
+                                    {% endfor %}
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -465,6 +465,10 @@ class ProbandVariant(models.Model):
         else:
             return None
 
+    def get_selected_count(self):
+        ptv = ProbandTranscriptVariant.objects.filter(selected=True, proband_variant=self.id).count()
+        return ptv
+
     def create_rare_disease_report(self):
         if not hasattr(self, 'rarediseasereport'):
             report = RareDiseaseReport(proband_variant=self)
