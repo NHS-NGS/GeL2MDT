@@ -665,13 +665,17 @@ class CaseAttributeManager(object):
         }, self.model_objects)
         return ir_family
 
-    def get_ir_family_panels(self):
-        # TODO: implement M2M relationship
-
+    def get_ir_family_panel(self):
+        """
+        Through table linking panels to IRF when no variants have been reported
+        within a particular panel for a case.
+        """
+        ir_family= self.case.attribute_managers[InterpretationReportFamily].case_model
         ir_family_panels = ManyCaseModel(InterpretationReportFamilyPanel, [{
-            "ir_family": None,
-            "panel": None
-        }], self.model_objects)
+            "ir_family": ir_family.entry,
+            "panel": panel.entry
+        } for panel in self.case.attribute_managers[PanelVersion].case_model.case_models if "entry" in vars(panel)],
+            self.model_objects)
 
         return ir_family_panels
 
@@ -1224,7 +1228,9 @@ class CaseModel(object):
                      if db_obj.panel == self.model_attributes["panel"]
                      and db_obj.version_number == self.model_attributes["version_number"]]
         elif self.model_type == InterpretationReportFamilyPanel:
-                     pass
+            entry = [db_obj for db_obj in queryset
+                     if db_obj.ir_family == self.model_attributes["ir_family"]
+                     and db_obj.panel == self.model_attributes["panel"]]
         elif self.model_type == Gene:
             entry = [db_obj for db_obj in queryset
                      if db_obj.hgnc_id == self.model_attributes["hgnc_id"]]
