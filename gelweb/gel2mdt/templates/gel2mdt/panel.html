@@ -1,0 +1,96 @@
+{% extends 'gel2mdt/base.html' %}
+{% load bootstrap3 %}
+{% load static %}
+{% block content %}
+
+ <div class="container-fluid" >
+     <h1>{{panel.panel.panel_name}}</h1>
+
+            <div class="row">
+
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Panel Information</div>
+                        <div class="panel-body">
+
+                            <div class="col-md-3">
+                                {% bootstrap_label "Version" %}
+                                <div class="block">
+                                    {{panel.version_number}}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                {% bootstrap_label "Disease Group" %}
+                                <div class="block">
+                                    {{panel.panel.disease_group}}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                {% bootstrap_label "Disease Group" %}
+                                <div class="block">
+                                    {{panel.panel.disease_subgroup}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+<div class=row>
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Panel Genes</div>
+                    <div class="panel-body">
+                        <table width="100%" class="table table-striped table-bordered table-hover" id="dataTables-generic3">
+                            <thead>
+                                <tr>
+                                    <th>List</th>
+                                    <th>Gene</th>
+                                    <th>Mode of Inheritance</th>
+                                    <th>Evidences</th>
+                                    <th>Publications</th>
+                                    <th>Phenotypes</th>
+                                    <th>Penetrance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for gene in genes %}
+                                <tr>
+
+                                 {% if gene.LevelOfConfidence == 'LowEvidence' %}
+                                    <td style="background-color: red">{{gene.LevelOfConfidence}}</td>
+                                    <td style="background-color: red">{{gene.GeneSymbol}}</td>
+                                    {% elif gene.LevelOfConfidence == 'ModerateEvidence' %}
+                                    <td style="background-color: orange">{{gene.LevelOfConfidence}}</td>
+                                    <td style="background-color: orange">{{gene.GeneSymbol}}</td>
+                                    {% else %}
+                                    <td style="background-color: green">{{gene.LevelOfConfidence}}</td>
+                                    <td style="background-color: green">{{gene.GeneSymbol}}</td>
+                                    {% endif %}
+                                    <td>{{gene.ModeOfInheritance}}</td>
+                                    <td style="word-wrap: break-word; min-width: 200px;max-width: 200px;">
+                                        {% for pub in gene.Evidences %}
+                                        {{pub}}
+                                        {% endfor %}</td>
+                                    <td style="word-wrap: break-word; min-width: 200px;max-width: 200px;">
+                                    {% for pub in gene.Publications %}
+                                        {{pub}}
+                                        {% endfor %}</td>
+                                    <td  style="word-wrap: break-word; min-width: 200px;max-width: 200px;">
+                                        {% for pheno in gene.Phenotypes %}
+                                        {{pheno}}
+                                        {% endfor %}
+                                    </td>
+                                    <td>
+                                        {{gene.Penetrance}}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+ </div>
+{% endblock %}
