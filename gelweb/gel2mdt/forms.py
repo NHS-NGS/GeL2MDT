@@ -22,6 +22,12 @@ class ProbandForm(forms.ModelForm):
         fields = ['episode', 'outcome', 'comment', 'status', 'mdt_status', 'pilot_case', 'case_sent']
 
 
+class DemogsForm(forms.ModelForm):
+    class Meta:
+        model = Proband
+        fields = ['nhs_number', 'lab_number', 'forename', 'surname', 'date_of_birth', 'sex', 'local_id']
+
+
 class MdtForm(forms.ModelForm):
 
     class Meta:
