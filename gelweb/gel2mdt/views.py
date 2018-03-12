@@ -110,12 +110,14 @@ def proband_view(request, report_id):
     report = GELInterpretationReport.objects.get(id=report_id)
     relatives = Relative.objects.filter(proband=report.ir_family.participant_family.proband)
     proband_form = ProbandForm(instance=report.ir_family.participant_family.proband)
+    demogs_form = DemogsForm(instance=report.ir_family.participant_family.proband)
     proband_variants = ProbandVariant.objects.filter(interpretation_report=report)
     proband_mdt = MDTReport.objects.filter(interpretation_report=report)
     panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.ir_family)
     return render(request, 'gel2mdt/proband.html', {'report': report,
                                                     'relatives': relatives,
                                                     'proband_form': proband_form,
+                                                    'demogs_form': demogs_form,
                                                     'proband_variants': proband_variants,
                                                     'proband_mdt': proband_mdt,
                                                     'panels': panels})
@@ -167,12 +169,25 @@ def variant_view(request, variant_id):
     variant = Variant.objects.get(id=variant_id)
     transcript_variant = TranscriptVariant.objects.filter(variant=variant_id)[:1].get() #gets one (for hgvs_g)
     proband_variants = ProbandVariant.objects.filter(variant=variant)
-    
+
     return render(request, 'gel2mdt/variant.html', {'variant': variant,
                                                     'transcript_variant': transcript_variant,
                                                     'proband_variants': proband_variants,
                                                     'primers': primers})
 
+
+@login_required
+def update_proband_demographics(request, report_id):
+    '''
+    Updates proband page with new demographics.
+    '''
+    report = GELInterpretationReport.objects.get(id=report_id)
+    if request.method == "POST":
+        demogs_form = DemogsForm(request.POST, instance=report.ir_family.participant_family.proband)
+
+        if demogs_form.is_valid():
+            demogs_form.save()
+            return HttpResponseRedirect(f'/proband/{report_id}')
 
 @login_required
 def update_proband(request, report_id):
