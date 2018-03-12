@@ -13,6 +13,8 @@ urlpatterns = [
 
     path('variant/<int:variant_id>', views.variant_view, name='variant-view'),
 
+    path('panel/<int:panelversion_id>', views.panel_view, name='panel'),
+
     path('select_transcript/<int:report_id>/<int:pv_id>', views.select_transcript, name='select-transcript'),
     path('update_transcript/<int:report_id>/<int:pv_id>/<int:transcript_id>', views.update_transcript,
          name='update-transcript'),
