@@ -49,6 +49,16 @@
                                     {{report.ir_family.participant_family.proband.sex}}
                                 </div>
                                 </br>
+                                {% bootstrap_label "Panels" %}
+                                <div class="block">
+                                    {% for panel in panels %}
+
+                                    <a class="btn btn-primary" href="/panel/{{panel.panel.id}}">
+                                    {{panel.panel}}
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                                </br>
 
                             </div>
 

@@ -14,7 +14,8 @@ from .primer_utils import singletarget
 from .tasks import get_gel_content
 from .api.api_views import *
 from django.forms import modelformset_factory
-
+from .config import load_config
+import os, json
 # Create your views here.
 def register(request):
     '''
@@ -111,12 +112,25 @@ def proband_view(request, report_id):
     proband_form = ProbandForm(instance=report.ir_family.participant_family.proband)
     proband_variants = ProbandVariant.objects.filter(interpretation_report=report)
     proband_mdt = MDTReport.objects.filter(interpretation_report=report)
-    panels = []
+    panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.ir_family)
     return render(request, 'gel2mdt/proband.html', {'report': report,
                                                     'relatives': relatives,
                                                     'proband_form': proband_form,
                                                     'proband_variants': proband_variants,
-                                                    'proband_mdt': proband_mdt})
+                                                    'proband_mdt': proband_mdt,
+                                                    'panels': panels})
+
+def panel_view(request, panelversion_id):
+    panel = PanelVersion.objects.get(id=panelversion_id)
+    config_dict = load_config.LoadConfig().load()
+    panelapp_file = f'{config_dict["panelapp_storage"]}/{panel.panel.panelapp_id}_{panel.version_number}.json'
+    if os.path.isfile(panelapp_file):
+        panelapp_json = json.load(open(panelapp_file))
+        for gene in panelapp_json['result']['Genes']:
+            print(gene)
+        return render(request, 'gel2mdt/panel.html', {'panel':panel,
+                                                      'genes': panelapp_json['result']['Genes']})
+
 
 @login_required
 def variant_view(request, variant_id):
