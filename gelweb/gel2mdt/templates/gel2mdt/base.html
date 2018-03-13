@@ -14,6 +14,7 @@
     <!-- Bootstrap -->
   	<!--Add keywords that describe your project between the quotation marks. This helps search engines find and index your content-->
     <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link rel="shortcut icon" type="image/png" href="{% static 'gel2mdt/favicon/favicon-96x96.png' %}"/>
     {% endblock %}
     {% block head-css %}
     <script src="{% static 'gel2mdt/js/jquery-3.1.1.js' %}"></script>
@@ -24,9 +25,9 @@
       <link href="{% static 'gel2mdt/css/jumbotron.css' %}" rel="stylesheet">
       <link href="{% static 'gel2mdt/css/bootstrap-responsive.css' %}" rel="stylesheet">
         <script type="text/javascript" src="{% static 'gel2mdt/DataTables/datatables.min.js' %}"></script>
-        <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js"></script>
+        <script type="text/javascript" src="{% static 'gel2mdt/js/all.js' %}"></script>
         <link rel="stylesheet" type="text/css" href="{% static 'gel2mdt/css/custom.css' %}">
-        <link rel="shortcut icon" type="image/png" href="/favicon.png"/>
+
     {% endblock %}
       {% block javascript %}
       {% endblock %}
