@@ -44,8 +44,8 @@
                         <table width="100%" class="table table-striped table-bordered table-hover" id="dataTables-generic3">
                             <thead>
                                 <tr>
-                                    <th>List</th>
                                     <th>Gene</th>
+                                    <th>List</th>
                                     <th>Mode of Inheritance</th>
                                     <th>Evidences</th>
                                     <th>Publications</th>
@@ -58,14 +58,14 @@
                                 <tr>
 
                                  {% if gene.LevelOfConfidence == 'LowEvidence' %}
-                                    <td style="background-color: red">{{gene.LevelOfConfidence}}</td>
-                                    <td style="background-color: red">{{gene.GeneSymbol}}</td>
+                                    <td style="background-color: rgba(218, 41, 28, 0.8)">{{gene.GeneSymbol}}</td>
+                                    <td style="background-color: rgba(218, 41, 28, 0.8)">{{gene.LevelOfConfidence}}</td>
                                     {% elif gene.LevelOfConfidence == 'ModerateEvidence' %}
-                                    <td style="background-color: orange">{{gene.LevelOfConfidence}}</td>
-                                    <td style="background-color: orange">{{gene.GeneSymbol}}</td>
+                                    <td style="background-color: rgba(237, 139, 0, 0.8)">{{gene.GeneSymbol}}</td>
+                                    <td style="background-color: rgba(237, 139, 0, 0.8)">{{gene.LevelOfConfidence}}</td>
                                     {% else %}
-                                    <td style="background-color: green">{{gene.LevelOfConfidence}}</td>
-                                    <td style="background-color: green">{{gene.GeneSymbol}}</td>
+                                    <td style="background-color: rgba(120, 190, 32, 0.8)">{{gene.GeneSymbol}}</td>
+                                    <td style="background-color: rgba(120, 190, 32, 0.8)">{{gene.LevelOfConfidence}}</td>
                                     {% endif %}
                                     <td>{{gene.ModeOfInheritance}}</td>
                                     <td style="word-wrap: break-word; min-width: 200px;max-width: 200px;">
