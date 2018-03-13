@@ -50,7 +50,7 @@
                         <tr>
                             <td><a href="/mdt_view/{{mdt.id}}">{{mdt.id}}</a></td>
                             <td></td>
-                            <td>{{mdt.date_of_mdt}}</td>
+                            <td>{{mdt.date_of_mdt|date}}</td>
                             <td>{% for report_list in probands_in_mdt|get_item:mdt.id %}
                                     <a href="/proband/{{report_list.0}}"> {{ report_list.1}}</a>
                                 {% endfor %}

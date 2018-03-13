@@ -304,7 +304,7 @@ def start_mdt_view(request):
     :param request:
     :return:
     '''
-    mdt_instance = MDT(creator=request.user.username, date_of_mdt=datetime.now())
+    mdt_instance = MDT(creator=request.user, date_of_mdt=datetime.now())
     mdt_instance.save()
 
     return HttpResponseRedirect(f'/edit_mdt/{mdt_instance.id}')
