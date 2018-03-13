@@ -107,7 +107,15 @@ def proband_view(request, report_id):
     :param report_id: GEL Report ID
     :return:
     '''
+
     report = GELInterpretationReport.objects.get(id=report_id)
+
+    # POST request from Demographic Update Form
+    if request.method == "POST":
+        demogs_form = DemogsForm(request.POST, instance=report.ir_family.participant_family.proband)
+        if demogs_form.is_valid():
+            demogs_form.save()
+
     relatives = Relative.objects.filter(proband=report.ir_family.participant_family.proband)
     proband_form = ProbandForm(instance=report.ir_family.participant_family.proband)
     demogs_form = DemogsForm(instance=report.ir_family.participant_family.proband)
@@ -175,22 +183,6 @@ def variant_view(request, variant_id):
                                                     'proband_variants': proband_variants,
                                                     'primers': primers})
 
-
-@login_required
-def update_proband_demographics(request, report_id):
-    '''
-    Updates proband page with new demographics.
-    '''
-    report = GELInterpretationReport.objects.get(id=report_id)
-    if request.method == "POST":
-        demogs_form = DemogsForm(request.POST, instance=report.ir_family.participant_family.proband)
-
-        if demogs_form.is_valid():
-            demogs_form.save()
-            return HttpResponseRedirect(f'/proband/{report_id}')
-
-        else:
-            return HttpResponseRedirect(f'/proband/{report_id}')
 
 @login_required
 def update_proband(request, report_id):

@@ -448,7 +448,7 @@ class CaseAttributeManager(object):
 
         return family_phenotypes
 
-    def get_panelapp_api_response(panel):
+    def get_panelapp_api_response(self, panel):
         panelapp_poll = PollAPI(
             "panelapp", "get_panel/{panelapp_id}/?version={v}".format(
                 panelapp_id=panel["panelName"],
