@@ -8,14 +8,41 @@ class UserForm(forms.ModelForm):
     """ User registration form
     """
     password = forms.CharField(widget=forms.PasswordInput())
-    role_choices = (('Clinician', 'Clinician'), ('CS', 'Clinical Scientist'), ('Other', 'Other Staff'))
+    role_choices = (('Clinician', 'Clinician'),
+                    ('Clinical Scientist', 'Clinical Scientist'),
+                    ('Other Staff', 'Other Staff'))
     role = forms.ChoiceField(choices=role_choices)
-    hospital = forms.CharField()
+    config_dict = load_config.LoadConfig().load()
+    if config_dict['center'] == 'GOSH':
+        choices = config_dict['GMC'].split(',')
+        gmc_choices = []
+        for choice in choices:
+            choice = choice.strip(' ')
+            gmc_choices.append((choice, choice))
+        hospital = forms.ChoiceField(choices=gmc_choices)
+    else:
+        hospital = forms.CharField()
 
     class Meta:
         model = User
         fields = ('first_name', 'last_name', 'email', 'password')
 
+class ProfileForm(forms.Form):
+    role_choices = (('Clinician', 'Clinician'),
+                    ('Clinical Scientist', 'Clinical Scientist'),
+                    ('Other Staff', 'Other Staff'))
+    role = forms.ChoiceField(choices=role_choices)
+    #Hospital options from config
+    config_dict = load_config.LoadConfig().load()
+    if config_dict['center'] == 'GOSH':
+        choices = config_dict['GMC'].split(',')
+        gmc_choices = []
+        for choice in choices:
+            choice = choice.strip(' ')
+            gmc_choices.append((choice, choice))
+        hospital = forms.ChoiceField(choices=gmc_choices)
+    else:
+        hospital = forms.CharField()
 
 class ProbandForm(forms.ModelForm):
     class Meta:
@@ -36,6 +63,7 @@ class DemogsForm(forms.ModelForm):
             'sex',
             'gmc'
         ]
+
 
 
 class MdtForm(forms.ModelForm):

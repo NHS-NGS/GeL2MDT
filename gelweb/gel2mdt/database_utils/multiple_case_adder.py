@@ -180,7 +180,7 @@ class MultipleCaseAdder(object):
 
         cases_to_add = []
         for case in self.list_of_cases:
-            if case.request_id not in database_cases:
+            if case.request_id not in list(database_cases):
                 cases_to_add.append(case)
         return cases_to_add
 

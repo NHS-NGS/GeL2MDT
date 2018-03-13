@@ -75,6 +75,56 @@ def register(request):
 
 
 @login_required
+def profile(request):
+    '''
+    Profile page
+    :param request:
+    :return:
+    '''
+    role = None
+    cs = ClinicalScientist.objects.filter(email=request.user.email).first()
+    other = OtherStaff.objects.filter(email=request.user.email).first()
+    clinician = Clinician.objects.filter(email=request.user.email).first()
+    if cs:
+        rolename = 'Clinical Scientist'
+        role = cs
+    elif clinician:
+        rolename = 'Clinician'
+        role = clinician
+    elif other:
+        rolename = 'Other Staff'
+        role = other
+    if request.method == 'POST':
+        form = ProfileForm(request.POST)
+        if form.is_valid():
+            if role:
+                role.delete() # Delete the old role
+                print('deleted')
+            if form.cleaned_data['role'] == 'Clinical Scientist':
+                cs = ClinicalScientist(name=request.user.first_name + ' ' + request.user.last_name,
+                                       email=request.user.email,
+                                       hospital=form.cleaned_data['hospital'])
+                cs.save()
+            elif form.cleaned_data['role'] == 'Clinician':
+                clinician = Clinician(name=request.user.first_name + ' ' + request.user.last_name,
+                                      email=request.user.email,
+                                      hospital=form.cleaned_data['hospital'])
+                clinician.save()
+            elif form.cleaned_data['role'] == 'Other Staff':
+                other = OtherStaff(name=request.user.first_name + ' ' + request.user.last_name,
+                                   email=request.user.email,
+                                   hospital=form.cleaned_data['hospital'])
+                other.save()
+            messages.add_message(request,25, 'Profile Updated')
+            return HttpResponseRedirect('/profile')
+    else:
+        form = ProfileForm(initial={'role': rolename, 'hospital':role.hospital})
+    return render(request, 'gel2mdt/profile.html', {'form': form,
+                                                    'role':role,
+                                                    'rolename':rolename})
+
+
+@login_required
 def cancer_main(request):
     '''
     Shows all the Cancer cases the user has access to and allows easy searching of cases
@@ -246,7 +296,7 @@ def start_mdt_view(request):
     :param request:
     :return:
     '''
-    mdt_instance = MDT(creator=request.user.username, date_of_mdt=datetime.now())
+    mdt_instance = MDT(creator=request.user, date_of_mdt=datetime.now())
     mdt_instance.save()
 
     return HttpResponseRedirect(f'/edit_mdt/{mdt_instance.id}')
