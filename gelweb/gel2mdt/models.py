@@ -485,6 +485,9 @@ class ProbandVariant(models.Model):
         if not hasattr(self, 'rarediseasereport'):
             report = RareDiseaseReport(proband_variant=self)
             report.save()
+            return report
+        else:
+            return self.rarediseasereport
 
     class Meta:
         managed = True
@@ -492,8 +495,8 @@ class ProbandVariant(models.Model):
 
 
 class RareDiseaseReport(models.Model):
-    discussion = models.TextField(db_column='Discussion', blank=True)
-    action = models.TextField(db_column='Action', blank=True)
+    discussion = models.TextField(db_column='Discussion', blank=True, null=True)
+    action = models.TextField(db_column='Action', blank=True, null=True)
     contribution_to_phenotype = models.CharField(db_column='Contribution_to_phenotype', max_length=20, choices=(
         ('NA', 'NA'),
         ('Uncertain', 'Uncertain'),
