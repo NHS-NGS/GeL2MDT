@@ -482,9 +482,9 @@ class CaseAttributeManager(object):
                         try:
                             panel_app_response = json.load(open(panel_file))
                         except:
-                            panelapp_response = get_panelapp_api_response(panel)
+                            panelapp_response = self.get_panelapp_api_response(panel)
                     else:
-                        panelapp_response = get_panelapp_api_response(panel)
+                        panelapp_response = self.get_panelapp_api_response(panel)
 
                     # inform the PanelManager that a new panel has been added
                     polled = self.case.panel_manager.add_panel_response(
