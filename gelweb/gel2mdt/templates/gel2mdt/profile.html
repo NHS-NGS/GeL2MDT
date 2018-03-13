@@ -1,0 +1,47 @@
+{% extends 'gel2mdt/base.html' %}
+{% load bootstrap3 %}
+{% block content %}
+{% load static %}
+
+<div class='container-fluid'>
+<h1> Hello {{user}}</h1>
+
+            <div class="row">
+                <div class="col-md-5">
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Profile Information</div>
+                        <div class="panel-body">
+                            <div class="col-md-6">
+                                {% bootstrap_label "Username" %}
+                                <div class="block">
+                                {{user.username}}
+                                </div>
+                                 </br>
+                                {% bootstrap_label "Email" %}
+                                <div class="block">
+                                {{user.email}}
+                                </div>
+                                 </br>
+                                {% bootstrap_label "Role" %}
+                                <div class="block">
+                                {{rolename}}
+                                </div>
+                                </br>
+                                <form role="form" method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                {% bootstrap_form form %}
+                                <button type="submit" name="Submit" class="btn btn-default">Update Permissions</button>
+                                </form>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+</div>
+
+
+
+
+{% endblock %}
