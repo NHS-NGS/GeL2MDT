@@ -308,14 +308,14 @@ class Proband(models.Model):
 
     gel_id = models.CharField(max_length=200, unique=True)
     family = models.OneToOneField(Family, on_delete=models.CASCADE)
-    nhs_number = models.CharField(max_length=200, null=True)
+    nhs_number = models.CharField(max_length=200, null=True, blank=True)
     # must be unique, but can also be null if not known
     lab_number = models.CharField(
         max_length=200, unique=True, blank=True, null=True)
     forename = models.CharField(max_length=200)
     surname = models.CharField(max_length=200)
     date_of_birth = models.DateTimeField('date_of_birth')
-    sex = models.CharField(max_length=10, blank=True)
+    sex = models.CharField(max_length=10, null=True, blank=True)
     pilot_case = models.BooleanField(default=False)
     outcome = models.TextField(blank=True)
     comment = models.TextField(blank=True)
@@ -323,10 +323,10 @@ class Proband(models.Model):
     action = models.TextField(blank=True)
     episode = models.CharField( max_length=255, blank=True)
     if config_dict['center'] == 'GOSH':
-        gmc = models.CharField( max_length=255, choices=gmc_choices, default='Unknown')
+        gmc = models.CharField( max_length=255, choices=gmc_choices, default='Unknown', null=True, blank=True)
     else:
-        gmc = models.CharField(max_length=255)
-    local_id = models.CharField(max_length=255)
+        gmc = models.CharField(max_length=255, null=True, blank=True)
+    local_id = models.CharField(max_length=255, null=True, blank=True)
     case_sent = models.BooleanField(default=False)
     status = models.CharField( max_length=50, choices=(
         ('N', 'Not Started'), ('U', 'Under Review'), ('M', 'Awaiting MDT'), ('V', 'Awaiting Validation'),

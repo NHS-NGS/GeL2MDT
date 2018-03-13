@@ -22,6 +22,7 @@
                             <div class="panel-heading">Participant Information <span style="float:right"><a href=# data-toggle="modal" data-target="#demogModal"><i class="fas fa-pencil-alt"></i></a></span></div>
                             <div class="panel-body">
 
+                            {% bootstrap_form_errors demogs_form %}
 
                                 <div class="col-md-3">
                                     {% bootstrap_label "GEL ID" %}
@@ -286,11 +287,10 @@
 
             <div class="panel-body">
                 <div class="table-responsive">
-                    <table width="100%" class="table table-striped table-bordered table-hover" id="dataTables-generic">
+                    <table class="table table-striped table-bordered table-hover" id="dataTables-generic">
                         <thead style='font-size: 75%'>
                             <tr>
                                 <th>Variant ID</th>
-                                <th>Select Transcript</th>
                                 <th>Gene</th>
                                 <th>Transcript</th>
                                 <th>HGVSc</th>
@@ -312,9 +312,8 @@
                         {% for pv in proband_variants %}
                             <tr >
                             <td><a href="/variant/{{pv.variant.id }}">{{ pv.variant.id}}</a></td>
-                            <td><a href="/select_transcript/{{report.id}}/{{pv.id }}" class="btn btn-primary">Link</a></td>
                             <td>{{ pv.get_transcript.gene }}</td>
-                            <td>{{ pv.get_transcript.name }}</td>
+                            <td><a href="/select_transcript/{{report.id}}/{{pv.id }}"><i class="fas fa-pencil-alt" /></a>{{pv.get_transcript.name }}</td>
                             <td style="word-wrap: break-word; min-width: 100px;max-width: 100px;">{{pv.get_transcript_variant.hgvs_c}}</td>
                             <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv.get_transcript_variant.hgvs_p}}</td>
                             <td>{{pv.zygosity}}</td>
@@ -374,11 +373,10 @@
                 <h4 class="modal-title">Edit proband information</h4>
             </div>
             <div class="modal-body">
-                <form action="/update_proband_demographics/{{ report.id }}" method="POST">
+                <form action="/proband/{{ report.id }}" method="POST">
                     {% csrf_token %}
                     {% bootstrap_form demogs_form %}
                     {% buttons %}
-                    {% bootstrap_form_errors demogs_form %}
                     <button type="submit" class="btn btn-primary">
                         Update
                     </button>
