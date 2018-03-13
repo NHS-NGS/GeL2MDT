@@ -475,16 +475,16 @@ class CaseAttributeManager(object):
                 )
                 if polled:
                     panel["panelapp_results"] = polled.results
-                    if not polled:
-                        panel_file = os.path.join(panelapp_storage, '{}_{}.json'.format(panel['panelName'],
+                if not polled:
+                    panel_file = os.path.join(panelapp_storage, '{}_{}.json'.format(panel['panelName'],
                                                                                         panel['panelVersion']))
-                        if os.path.isfile(panel_file):
-                            try:
-                                panel_app_response = json.load(open(panel_file))
-                            except:
-                                panelapp_response = get_panelapp_api_response(panel)
-                        else:
+                    if os.path.isfile(panel_file):
+                        try:
+                            panel_app_response = json.load(open(panel_file))
+                        except:
                             panelapp_response = get_panelapp_api_response(panel)
+                    else:
+                        panelapp_response = get_panelapp_api_response(panel)
 
                     # inform the PanelManager that a new panel has been added
                     polled = self.case.panel_manager.add_panel_response(
@@ -498,6 +498,8 @@ class CaseAttributeManager(object):
                 panel["panel_name_results"] = self.case.panel_manager.fetch_panel_names(
                     panelapp_id=panel["panelName"]
                 )
+
+            print(self.case.panels)
 
             panels = ManyCaseModel(Panel, [{
                 "panelapp_id": panel["panelName"],
