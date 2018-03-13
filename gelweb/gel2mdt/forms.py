@@ -25,7 +25,7 @@ class ProbandForm(forms.ModelForm):
 class DemogsForm(forms.ModelForm):
     class Meta:
         model = Proband
-        fields = ['nhs_number', 'lab_number', 'forename', 'surname', 'date_of_birth', 'sex', 'local_id']
+        fields = ['nhs_number', 'lab_number', 'forename', 'surname', 'date_of_birth', 'sex', 'local_id', 'gmc']
 
 
 class MdtForm(forms.ModelForm):
