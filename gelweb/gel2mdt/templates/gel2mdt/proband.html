@@ -291,6 +291,8 @@
                         <thead style='font-size: 75%'>
                             <tr>
                                 <th>Variant ID</th>
+                                <th>Select Transcript</th>
+                                <th>Transcript Count</th>
                                 <th>Gene</th>
                                 <th>Transcript</th>
                                 <th>HGVSc</th>
@@ -312,6 +314,12 @@
                         {% for pv in proband_variants %}
                             <tr >
                             <td><a href="/variant/{{pv.variant.id }}">{{ pv.variant.id}}</a></td>
+                            <td><a href="/select_transcript/{{report.id}}/{{pv.id }}" class="btn btn-primary">Link</a></td>
+                                {% if pv.get_selected_count > 1 %}
+                                <td style="background-color: red">{{pv.get_selected_count}}</td>
+                                {% else %}
+                                <td>{{pv.get_selected_count}}</td>
+                                {% endif %}
                             <td>{{ pv.get_transcript.gene }}</td>
                             <td><a href="/select_transcript/{{report.id}}/{{pv.id }}"><i class="fas fa-pencil-alt" /></a>{{pv.get_transcript.name }}</td>
                             <td style="word-wrap: break-word; min-width: 100px;max-width: 100px;">{{pv.get_transcript_variant.hgvs_c}}</td>

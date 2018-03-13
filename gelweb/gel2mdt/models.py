@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-
+from django.contrib.auth.models import User
 from .model_utils.choices import ChoiceEnum
 from .config import load_config
 
@@ -485,6 +485,9 @@ class ProbandVariant(models.Model):
         if not hasattr(self, 'rarediseasereport'):
             report = RareDiseaseReport(proband_variant=self)
             report.save()
+            return report
+        else:
+            return self.rarediseasereport
 
     class Meta:
         managed = True
@@ -492,8 +495,8 @@ class ProbandVariant(models.Model):
 
 
 class RareDiseaseReport(models.Model):
-    discussion = models.TextField(db_column='Discussion', blank=True)
-    action = models.TextField(db_column='Action', blank=True)
+    discussion = models.TextField(db_column='Discussion', blank=True, null=True)
+    action = models.TextField(db_column='Action', blank=True, null=True)
     contribution_to_phenotype = models.CharField(db_column='Contribution_to_phenotype', max_length=20, choices=(
         ('NA', 'NA'),
         ('Uncertain', 'Uncertain'),
@@ -676,7 +679,7 @@ class MDT(models.Model):
 
     # outcome: should the variant be reported?
     to_report = models.NullBooleanField()
-    creator = models.CharField(db_column='Creator', max_length=255)  # Change to user foreignkey?
+    creator = models.ForeignKey(User, on_delete=models.CASCADE)  # Change to user foreignkey?
     status = models.CharField(db_column='Status', max_length=50, choices=(
         ('A', 'Active'), ('C', 'Completed')), default='A')
     gatb = models.NullBooleanField()
