@@ -376,7 +376,7 @@
             <div class="modal-body">
                 <form action="/update_proband_demographics/{{ report.id }}" method="POST">
                     {% csrf_token %}
-                    {% bootstrap_form demogs_form layout="inline" %}
+                    {% bootstrap_form demogs_form %}
                     {% buttons %}
                     {% bootstrap_form_errors demogs_form %}
                     <button type="submit" class="btn btn-primary">

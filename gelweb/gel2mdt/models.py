@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 
 from .model_utils.choices import ChoiceEnum
+from .config import load_config
 
 
 class ListUpdate(models.Model):
@@ -297,6 +298,14 @@ class ClinicalScientist(models.Model):
 
 class Proband(models.Model):
     # these set to null to allow creation then updating later
+    config_dict = load_config.LoadConfig().load()
+    if config_dict['center'] == 'GOSH':
+        choices = config_dict['GMC'].split(',')
+        gmc_choices = []
+        for choice in choices:
+            choice=choice.strip(' ')
+            gmc_choices.append((choice, choice))
+
     gel_id = models.CharField(max_length=200, unique=True)
     family = models.OneToOneField(Family, on_delete=models.CASCADE)
     nhs_number = models.CharField(max_length=200, null=True)
@@ -313,7 +322,10 @@ class Proband(models.Model):
     discussion = models.TextField(blank=True)
     action = models.TextField(blank=True)
     episode = models.CharField( max_length=255, blank=True)
-    gmc = models.CharField( max_length=255)
+    if config_dict['center'] == 'GOSH':
+        gmc = models.CharField( max_length=255, choices=gmc_choices, default='Unknown')
+    else:
+        gmc = models.CharField(max_length=255)
     local_id = models.CharField(max_length=255)
     case_sent = models.BooleanField(default=False)
     status = models.CharField( max_length=50, choices=(
