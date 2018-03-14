@@ -448,7 +448,7 @@ class CaseAttributeManager(object):
 
         return family_phenotypes
 
-    def get_panelapp_api_response(self, panel, panel_file):
+    def get_panelapp_api_response(panel):
         panelapp_poll = PollAPI(
             "panelapp", "get_panel/{panelapp_id}/?version={v}".format(
                 panelapp_id=panel["panelName"],
@@ -480,17 +480,17 @@ class CaseAttributeManager(object):
                                                                                         panel['panelVersion']))
                     if os.path.isfile(panel_file):
                         try:
-                            panelapp_response = json.load(open(panel_file))
+                            panel_app_response = json.load(open(panel_file))
                         except:
-                            panelapp_response = self.get_panelapp_api_response(panel, panel_file)
+                            panelapp_response = self.get_panelapp_api_response(panel)
                     else:
-                        panelapp_response = self.get_panelapp_api_response(panel, panel_file)
+                        panelapp_response = self.get_panelapp_api_response(panel)
 
                     # inform the PanelManager that a new panel has been added
                     polled = self.case.panel_manager.add_panel_response(
                         panelapp_id=panel["panelName"],
                         panel_version=panel["panelVersion"],
-                        panelapp_response=panelapp_response["result"]
+                        panelapp_response=panel_app_response["result"]
                     )
                     panel["panelapp_results"] = polled.results
 
@@ -498,8 +498,6 @@ class CaseAttributeManager(object):
                 panel["panel_name_results"] = self.case.panel_manager.fetch_panel_names(
                     panelapp_id=panel["panelName"]
                 )
-
-            print(self.case.panels)
 
             panels = ManyCaseModel(Panel, [{
                 "panelapp_id": panel["panelName"],
@@ -570,7 +568,6 @@ class CaseAttributeManager(object):
                     'GeneSymbol': transcript.gene_hgnc_name,
                     'HGNC_ID': str(transcript.gene_hgnc_id),
                 })
-                print(transcript.gene_hgnc_id)
                 self.case.gene_manager.add_searched(transcript.gene_ensembl_id, str(transcript.gene_hgnc_id))
 
         for gene in gene_list:
@@ -580,7 +577,6 @@ class CaseAttributeManager(object):
                 if polled == 'Not_found':
                     gene['HGNC_ID'] = None
                 elif not polled:
-                    print('Polling {}'.format(gene["EnsembleGeneIds"]))
                     genename_poll = PollAPI(
                         "genenames", "search/{gene}/".format(
                             gene=gene["EnsembleGeneIds"])
@@ -646,10 +642,8 @@ class CaseAttributeManager(object):
                 continue  # don't bother checking genes
             transcript.gene_model = None
             for gene in genes:
-                print("GENE HGNC", gene.entry.hgnc_id, "\t", transcript.gene_hgnc_id)
                 if gene.entry.hgnc_id == transcript.gene_hgnc_id:
                     transcript.gene_model = gene.entry
-                    print("Match found")
 
         transcripts = ManyCaseModel(Transcript, [{
             "gene": transcript.gene_model,
@@ -863,6 +857,7 @@ class CaseAttributeManager(object):
         Get proband variant information from VEP and the JSON and create MCM.
         """
         ir_manager = self.case.attribute_managers[GELInterpretationReport]
+        proband_manager = self.case.attribute_managers[Proband]
 
         # match up created variants to corresponding dict in json_variants:
         variant_entries = [
@@ -879,18 +874,22 @@ class CaseAttributeManager(object):
             # variant in json matches variant entry
             for variant in variant_entries:
                 if (
+                    json_variant["chromosome"] == variant.chromosome and
                     json_variant["position"] == variant.position and
                     json_variant["reference"] == variant.reference and
                     json_variant["alternate"] == variant.alternate
                 ):
                     # variant in json matches variant entry
                     json_variant["variant_entry"] = variant
-
+                for genotype in json_variant["calledGenotypes"]:
+                    if genotype["gelId"] == proband_manager.case_model.entry.gel_id:
+                        json_variant['zygosity'] = genotype["genotype"]
         for variant in self.case.json_variants:
             if variant["variant_entry"]:
                 tiered_proband_variant = {
                     "max_tier": variant["max_tier"],
                     "variant": variant["variant_entry"],
+                    "zygosity": variant["zygosity"],
                 }
                 tiered_proband_variants.append(tiered_proband_variant)
 
@@ -903,18 +902,23 @@ class CaseAttributeManager(object):
                 # variant in json matches variant entry
                 for variant in variant_entries:
                     if (
+                        json_variant["chromosome"] == variant.chromosome and
                         json_variant["position"] == variant.position and
                         json_variant["reference"] == variant.reference and
                         json_variant["alternate"] == variant.alternate
                     ):
                         # variant in json matches variant entry
                         json_variant["variant_entry"] = variant
+                    for genotype in json_variant["calledGenotypes"]:
+                        if genotype["gelId"] == proband_manager.case_model.entry.gel_id:
+                            json_variant['zygosity'] = genotype["genotype"]
 
             for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
                 if variant["variant_entry"]:
                     cip_proband_variant = {
                         "max_tier": 0,  # CIP flagged variants assigned tier 0
                         "variant": variant["variant_entry"],
+                        "zygosity": variant["zygosity"],
                     }
                     cip_proband_variants.append(cip_proband_variant)
 
@@ -933,6 +937,7 @@ class CaseAttributeManager(object):
             "interpretation_report": ir_manager.case_model.entry,
             "max_tier": variant["max_tier"],
             "variant": variant["variant"],
+            "zygosity": variant["zygosity"],
             "somatic": False
             # only adding T1/2 and CIP flagged
         } for variant in tiered_and_cip_proband_variants], self.model_objects)
@@ -1221,7 +1226,8 @@ class CaseModel(object):
                      if db_obj.gel_family_id == str(self.model_attributes["gel_family_id"])]
         elif self.model_type == Relative:
             entry = [db_obj for db_obj in queryset
-                     if str(db_obj.gel_id) == str(self.model_attributes["gel_id"])]
+                     if str(db_obj.gel_id) == str(self.model_attributes["gel_id"])
+                     and db_obj.proband == self.model_attributes['proband']]
         elif self.model_type == Phenotype:
             entry = [db_obj for db_obj in queryset
                      if db_obj.hpo_terms == self.model_attributes["hpo_terms"]]
