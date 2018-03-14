@@ -448,7 +448,7 @@ class CaseAttributeManager(object):
 
         return family_phenotypes
 
-    def get_panelapp_api_response(panel):
+    def get_panelapp_api_response(self, panel, panel_file):
         panelapp_poll = PollAPI(
             "panelapp", "get_panel/{panelapp_id}/?version={v}".format(
                 panelapp_id=panel["panelName"],
@@ -480,17 +480,17 @@ class CaseAttributeManager(object):
                                                                                         panel['panelVersion']))
                     if os.path.isfile(panel_file):
                         try:
-                            panel_app_response = json.load(open(panel_file))
+                            panelapp_response = json.load(open(panel_file))
                         except:
-                            panelapp_response = self.get_panelapp_api_response(panel)
+                            panelapp_response = self.get_panelapp_api_response(panel, panel_file)
                     else:
-                        panelapp_response = self.get_panelapp_api_response(panel)
+                        panelapp_response = self.get_panelapp_api_response(panel, panel_file)
 
                     # inform the PanelManager that a new panel has been added
                     polled = self.case.panel_manager.add_panel_response(
                         panelapp_id=panel["panelName"],
                         panel_version=panel["panelVersion"],
-                        panelapp_response=panel_app_response["result"]
+                        panelapp_response=panelapp_response["result"]
                     )
                     panel["panelapp_results"] = polled.results
 

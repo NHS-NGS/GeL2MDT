@@ -3,6 +3,7 @@ from .models import *
 from django.contrib.auth.models import User
 from django.forms import HiddenInput, Textarea, CheckboxInput
 
+
 class UserForm(forms.ModelForm):
     """ User registration form
     """
@@ -52,7 +53,16 @@ class ProbandForm(forms.ModelForm):
 class DemogsForm(forms.ModelForm):
     class Meta:
         model = Proband
-        fields = ['nhs_number', 'lab_number', 'forename', 'surname', 'date_of_birth', 'sex', 'local_id', 'gmc']
+        fields = [
+            'forename',
+            'surname',
+            'nhs_number',
+            'local_id',
+            'lab_number',
+            'date_of_birth',
+            'sex',
+            'gmc'
+        ]
 
 
 

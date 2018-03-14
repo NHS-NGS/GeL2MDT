@@ -12,7 +12,6 @@ urlpatterns = [
 
     path('proband/<int:report_id>', views.proband_view, name='proband-view'),
     path('update_proband/<int:report_id>', views.update_proband, name='update-proband'),
-    path('update_proband_demographics/<int:report_id>', views.update_proband_demographics, name='update_proband_demographics'),
 
     path('variant/<int:variant_id>', views.variant_view, name='variant-view'),
 
