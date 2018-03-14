@@ -152,9 +152,9 @@ def write_mdt_outcome_template(report):
     paragraph.add_run('MDT Date: ').bold = True
     paragraph.add_run('{}\n'.format(mdt.date_of_mdt.date()))
     paragraph.add_run('MDT Attendees: ').bold = True
-    clinicians = Clinician.objects.filter(mdt=mdt.id)
-    clinical_scientists = ClinicalScientist.objects.filter(mdt=mdt.id)
-    other_staff = OtherStaff.objects.filter(mdt=mdt.id)
+    clinicians = Clinician.objects.filter(mdt=mdt.id).values_list('name', flat=True)
+    clinical_scientists = ClinicalScientist.objects.filter(mdt=mdt.id).values_list('name', flat=True)
+    other_staff = OtherStaff.objects.filter(mdt=mdt.id).values_list('name', flat=True)
 
     attendees = list(clinicians) + list(clinical_scientists) + list(other_staff)
     paragraph.add_run('{}\n\n'.format(','.join(attendees)))

@@ -11,7 +11,7 @@ from django.http import JsonResponse
 from django.db.models import Q
 from .database_utils.multiple_case_adder import MultipleCaseAdder
 from .primer_utils import singletarget
-from .tasks import get_gel_content
+from .tasks import get_gel_content, panel_app
 from .api.api_views import *
 from django.forms import modelformset_factory
 from .config import load_config
@@ -36,6 +36,7 @@ def register(request):
         if user_form.is_valid():
             first_name = user_form.cleaned_data['first_name']
             last_name = user_form.cleaned_data['last_name']
+            full_name = str(first_name + ' ' + last_name)
             if len(last_name) >= 6:
                 username = (last_name[:5] + first_name[0]).lower()
             else:
@@ -51,20 +52,24 @@ def register(request):
                 user.set_password(user.password)
                 user.save()
                 registered = True
-                if role == 'CS':
-                    cs = ClinicalScientist(name=first_name + ' ' + last_name,
-                                           email=email,
-                                           hospital=hospital)
+                if role == 'Clinical Scientist':
+                    cs, created = ClinicalScientist.objects.get_or_create(
+                        email=email)
+                    cs.name = full_name,
+                    cs.hospital = hospital
                     cs.save()
+
                 elif role == 'Clinician':
-                    clinician = Clinician(name=first_name + ' ' + last_name,
-                                          email=email,
-                                          hospital=hospital)
+                    clinician, created = Clinician.objects.get_or_create(
+                        email=email)
+                    clinician.name = full_name
+                    clinician.hospital = hospital
                     clinician.save()
-                elif role == 'Other':
-                    other = OtherStaff(name=first_name + ' ' + last_name,
-                                       email=email,
-                                       hospital=hospital)
+                elif role == 'Other Staff':
+                    other, created = OtherStaff.objects.get_or_create(
+                        email=email)
+                    other.name = full_name,
+                    other.hospital = hospital
                     other.save()
             except IntegrityError:
                 messages.error(request, 'If you have already registered, '
@@ -175,6 +180,11 @@ def proband_view(request, report_id):
     proband_variants = ProbandVariant.objects.filter(interpretation_report=report)
     proband_mdt = MDTReport.objects.filter(interpretation_report=report)
     panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.ir_family)
+
+    if proband_form["status"].value() == "C":
+        for field in proband_form.__dict__["fields"]:
+            proband_form.fields[field].widget.attrs['readonly'] = True
+            proband_form.fields[field].widget.attrs['disabled'] = True
 
     return render(request, 'gel2mdt/proband.html', {'report': report,
                                                     'relatives': relatives,
@@ -381,11 +391,15 @@ def mdt_view(request, mdt_id):
         proband_variant_count[report.id] = count
 
     mdt_form = MdtForm(instance=mdt_instance)
-    clinicians = Clinician.objects.filter(mdt=mdt_id)
-    clinical_scientists = ClinicalScientist.objects.filter(mdt=mdt_id)
-    other_staff = OtherStaff.objects.filter(mdt=mdt_id)
+    clinicians = Clinician.objects.filter(mdt=mdt_id).values_list('name', flat=True)
+    clinical_scientists = ClinicalScientist.objects.filter(mdt=mdt_id).values_list('name', flat=True)
+    other_staff = OtherStaff.objects.filter(mdt=mdt_id).values_list('name', flat=True)
 
     attendees = list(clinicians) + list(clinical_scientists) + list(other_staff)
+    if mdt_form["status"].value() == "C":
+        for field in mdt_form.__dict__["fields"]:
+            mdt_form.fields[field].widget.attrs['readonly'] = True
+            mdt_form.fields[field].widget.attrs['disabled'] = True
 
     if request.method == 'POST':
         mdt_form = MdtForm(request.POST, instance=mdt_instance)
@@ -405,6 +419,7 @@ def mdt_view(request, mdt_id):
 
 @login_required
 def mdt_proband_view(request, mdt_id, pk):
+    mdt_instance = MDT.objects.get(id=mdt_id)
     report = GELInterpretationReport.objects.get(id=pk)
     proband_variants = ProbandVariant.objects.filter(interpretation_report=report)
     proband_variant_reports = RareDiseaseReport.objects.filter(proband_variant__in=proband_variants)
@@ -413,6 +428,16 @@ def mdt_proband_view(request, mdt_id, pk):
     VariantForm = modelformset_factory(RareDiseaseReport, form=RareDiseaseMDTForm, extra=0)
     variant_formset = VariantForm(queryset=proband_variant_reports)
     panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.ir_family)
+
+    if mdt_instance.status == "C":
+        for form in variant_formset.forms:
+            for field in form.__dict__["fields"]:
+                form.fields[field].widget.attrs['readonly'] = True
+                form.fields[field].widget.attrs['disabled'] = True
+        for field in proband_form.__dict__["fields"]:
+            proband_form.fields[field].widget.attrs['readonly'] = True
+            proband_form.fields[field].widget.attrs['disabled'] = True
+
     if request.method == 'POST':
         variant_formset = VariantForm(request.POST)
         proband_form = ProbandMDTForm(request.POST, instance=report.ir_family.participant_family.proband)
@@ -422,8 +447,9 @@ def mdt_proband_view(request, mdt_id, pk):
             messages.add_message(request, 25, 'Proband Updated')
         return HttpResponseRedirect(f'/mdt_proband_view/{mdt_id}/{pk}')
     return render(request, 'gel2mdt/mdt_proband_view.html', {'proband_variants': proband_variants,
-                                                               'report': report,
-                                                               'mdt_id': mdt_id,
+                                                             'report': report,
+                                                             'mdt_id': mdt_id,
+                                                             'mdt_instance': mdt_instance,
                                                              'proband_form': proband_form,
                                                              'variant_formset': variant_formset,
                                                              'panels': panels})
@@ -534,7 +560,6 @@ def select_attendees_for_mdt(request, mdt_id):
             currently_added_to_mdt.append(attendee['email'])
         attendee.pop('mdt')
 
-    # Uniquify the set of dicts, needed because of the mdt many relationship in the 3 models
     attendees = [dict(y) for y in set(tuple(x.items()) for x in attendees)]
     request.session['mdt_id'] = mdt_id
     return render(request, 'gel2mdt/select_attendee_for_mdt.html', {'attendees': attendees, 'mdt_id': mdt_id,
@@ -600,19 +625,22 @@ def add_new_attendee(request):
         form = AddNewAttendee(request.POST)
         if form.is_valid():
             if form.cleaned_data['role'] == 'Clinician':
-                clinician = Clinician(name=form.cleaned_data['name'],
-                                      hospital=form.cleaned_data['hospital'],
+                clinician, created = Clinician.objects.get_or_create(
                                       email=form.cleaned_data['email'])
+                clinician.name=form.cleaned_data['name']
+                clinician.hospital=form.cleaned_data['hospital']
                 clinician.save()
             elif form.cleaned_data['role'] == 'Clinical Scientist':
-                cs = ClinicalScientist(name=form.cleaned_data['name'],
-                                       hospital=form.cleaned_data['hospital'],
+                cs, created = ClinicalScientist.objects.get_or_create(
                                        email=form.cleaned_data['email'])
+                cs.name = form.cleaned_data['name']
+                cs.hospital = form.cleaned_data['hospital']
                 cs.save()
             elif form.cleaned_data['role'] == 'Other Staff':
-                other = OtherStaff(name=form.cleaned_data['name'],
-                                   hospital=form.cleaned_data['hospital'],
+                other, created = OtherStaff.objects.get_or_create(
                                    email=form.cleaned_data['email'])
+                other.name = form.cleaned_data['name']
+                other.hospital = form.cleaned_data['hospital']
                 other.save()
             if 'mdt_id' in request.session:
                 return HttpResponseRedirect('/select_attendees_for_mdt/{}'.format(request.session.get('mdt_id')))

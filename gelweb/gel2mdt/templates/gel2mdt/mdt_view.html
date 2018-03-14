@@ -12,6 +12,7 @@
 
 
 <div style="text-align:center">
+    {% if mdt_form.status.value != "C" %}
     <form action="/edit_mdt/{{ mdt_id }}" role="form">
         {% csrf_token %} {% bootstrap_button "Edit Samples in MDT" button_type="submit" button_class=" btn-warning" %}
     </form>
@@ -24,6 +25,11 @@
     <form action="/select_attendees_for_mdt/{{ mdt_id }}" role="form">
         {% csrf_token %} {% bootstrap_button "Add Attendees" button_type="submit" button_class="btn-primary" %}
     </form>
+    {% else %}
+    <form action="/export_mdt/{{ mdt_id }}" role="form" method="post">
+        {% csrf_token %} {% bootstrap_button "Export MDT" button_type="submit" button_class="btn-info" %}
+    </form>
+    {% endif %}
 </div>
 
 <br>
@@ -94,9 +100,11 @@
                         {% endfor %}
                     </div>
                     </div>
+                    {% if mdt_form.status.value != "C" %}
                     <div class="row" align="center">
                         <button type="submit" name="mdt_update" class="btn btn-default">Save</button>
                     </div>
+                    {% endif %}
                 </div>
 
         </div>

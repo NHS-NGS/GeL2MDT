@@ -3,7 +3,6 @@ from .models import *
 from django.contrib.auth.models import User
 from django.forms import HiddenInput, Textarea, CheckboxInput
 
-
 class UserForm(forms.ModelForm):
     """ User registration form
     """
@@ -53,16 +52,7 @@ class ProbandForm(forms.ModelForm):
 class DemogsForm(forms.ModelForm):
     class Meta:
         model = Proband
-        fields = [
-            'forename',
-            'surname',
-            'nhs_number',
-            'local_id',
-            'lab_number',
-            'date_of_birth',
-            'sex',
-            'gmc'
-        ]
+        fields = ['nhs_number', 'lab_number', 'forename', 'surname', 'date_of_birth', 'sex', 'local_id', 'gmc']
 
 
 
@@ -102,7 +92,16 @@ class RareDiseaseMDTForm(forms.ModelForm):
 
 class AddNewAttendee(forms.Form):
     name = forms.CharField()
-    hospital = forms.CharField()
+    config_dict = load_config.LoadConfig().load()
+    if config_dict['center'] == 'GOSH':
+        choices = config_dict['GMC'].split(',')
+        gmc_choices = []
+        for choice in choices:
+            choice = choice.strip(' ')
+            gmc_choices.append((choice, choice))
+        hospital = forms.ChoiceField(choices=gmc_choices)
+    else:
+        hospital = forms.CharField()
     email = forms.EmailField()
     role = forms.ChoiceField(choices=(('Clinician', 'Clinician'),
                                       ('Clinical Scientist', 'Clinical Scientist'),
