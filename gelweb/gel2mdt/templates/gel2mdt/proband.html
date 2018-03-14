@@ -19,7 +19,11 @@
 
                     <div class="col-md-12">
                         <div class="panel panel-default">
+                            {% if proband_form.status.value != "C" %}
                             <div class="panel-heading">Participant Information <span style="float:right"><a href=# data-toggle="modal" data-target="#demogModal"><i class="fas fa-pencil-alt"></i></a></span></div>
+                            {% else %}
+                            <div class="panel-heading">Participant Information</div>
+                            {% endif %}
                             <div class="panel-body">
 
                             {% bootstrap_form_errors demogs_form %}
@@ -163,7 +167,7 @@
                                 </div>
                                 {% endif %}
                                 <div class="col-md-12">
-                                    {% if sample_form.sample_status.value != "C" %}
+                                    {% if proband_form.status.value != "C" %}
                                         </br>
                                 <button type="submit" name="variant_update" class="btn btn-primary btn-lg">Save</button> {% endif %}
                                 </div>
@@ -173,7 +177,7 @@
                 </div>
             </form>
 
-            
+
             {% if proband_mdt %}
                 <div class="row">
                 <div class="col-md-12">
@@ -186,15 +190,19 @@
                                         <tr>
                                             <th>MDT Name</th>
                                             <th>MDT Date</th>
+                                            <th>Status</th>
                                             <th>Creator</th>
+
                                         </tr>
                                     </thead>
                                     <tbody>
                                     {% for mdt in proband_mdt %}
                                         <tr>
                                         <td><a href="/mdt_view/{{ mdt.MDT.id }}">{{ mdt.MDT.id }}</a></td>
-                                        <td>{{mdt.MDT.date_of_mdt}}</td>
-                                        <td>{{mdt.MDT.creator}}</td>
+                                        <td>{{mdt.MDT.date_of_mdt|date}}</td>
+                                            <td>{{mdt.MDT.get_status_display}}</td>
+                                        <td>{{mdt.MDT.creator}}</td
+
                                     </tr>
                                 {% endfor %}
 
@@ -348,7 +356,7 @@
                                                 <br>
                                                 {{ report.ir_family.participant_family.proband.discussion }}
                                             <hr>
-                                                <label>Change Medification?</label>
+                                                <label>Change Medication?</label>
                                                 <br>
                                                 {{ pv.rarediseasereport.change_med }}
                                             <hr>
@@ -375,9 +383,13 @@
 
                             <td>{{ pv.get_transcript.gene }}</td>
                             <td>{{ pv.max_tier }}</td>
-                            <td>
 
+                            <td>
+                                {% if proband_form.status.value != "C" %}
                                 <a href="/select_transcript/{{report.id}}/{{pv.id }}"><i class="fas fa-pencil-alt"></i></a></span>{{pv.get_transcript.name }}
+                                {% else%}
+                                {{pv.get_transcript.name }}
+                                {% endif %}
                             </td>
 
                             <td style="word-wrap: break-word; min-width: 100px;max-width: 100px;">{{pv.get_transcript_variant.hgvs_c}}</td>

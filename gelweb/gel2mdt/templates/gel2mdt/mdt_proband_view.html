@@ -146,7 +146,9 @@
     </div>
     <div class="row" align="right">
          <div class="col-md-12">
+             {% if mdt_instance.status != "C" %}
         <button type="submit" name="mdt_proband_update" class="btn btn-danger btn-lg">Save</button>
+             {% endif %}
          </div>
 </div>
     </form>
