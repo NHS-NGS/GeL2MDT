@@ -307,11 +307,6 @@
                             <tr >
                             <td>
                                 <!-- multiple transcript warning -->
-                                {% if pv.get_selected_count > 1 %}
-                                    <a href="#" data-toggle="tooltip" data-placement="right" title="Warning: multiple transcripts exist for this variant. Change with the pencil icon.">
-                                        <i style="color:red" class="fas fa-exclamation-circle"></i>
-                                    </a>
-                                {% endif %}
                                 <!-- variant ID -->
                                 <a href="/variant/{{pv.variant.id }}">
                                     <i class="fas fa-external-link-alt"></i>
@@ -323,7 +318,7 @@
                             <td>{{ pv.max_tier }}</td>
                             <td>
 
-                                {% if pv.get_selected_count < 1 %}<span><a href="/select_transcript/{{report.id}}/{{pv.id }}"><i class="fas fa-pencil-alt"></i></a></span>{% endif %}{{pv.get_transcript.name }}
+                                <a href="/select_transcript/{{report.id}}/{{pv.id }}"><i class="fas fa-pencil-alt"></i></a></span>{{pv.get_transcript.name }}
                             </td>
 
                             <td style="word-wrap: break-word; min-width: 100px;max-width: 100px;">{{pv.get_transcript_variant.hgvs_c}}</td>
