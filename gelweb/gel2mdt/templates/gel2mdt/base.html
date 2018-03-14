@@ -290,8 +290,18 @@ function getRadioValue(radioElementName) {
 
 <script>
     $(document).ready(function() {
+        $('#dataTables-pv').DataTable({
+            "columnDefs": [
+                { "orderable": false, "targets": 0 }
+            ],
+            "order": [[ 1, "desc" ]]
+        });
+    });
+    </script>
+
+<script>
+    $(document).ready(function() {
         $('#dataTables-generic').DataTable({
-            responsive: true,
             "order": [[ 0, "desc" ]]
         });
     });
