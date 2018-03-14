@@ -35,6 +35,7 @@ urlpatterns = [
 
     path('delete_mdt/<int:mdt_id>', views.delete_mdt, name='delete-mdt'),
     path('export_mdt/<int:mdt_id>', views.export_mdt, name='export-mdt'),
+    path('export_mdt_outcome_form/<int:report_id>', views.export_mdt_outcome_form, name='export-mdt-outcome'),
 
     path('select_attendees_for_mdt/<int:mdt_id>', views.select_attendees_for_mdt, name='select-attendees-for-mdt'),
     path('add_attendee_to_mdt/<int:mdt_id>/<int:attendee_id>/<str:role>', views.add_attendee_to_mdt,

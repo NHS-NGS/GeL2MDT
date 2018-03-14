@@ -16,6 +16,9 @@ from .api.api_views import *
 from django.forms import modelformset_factory
 from .config import load_config
 import os, json, csv
+from .exports import write_mdt_outcome_template, write_mdt_export
+from io import BytesIO, StringIO
+
 # Create your views here.
 
 def register(request):
@@ -172,6 +175,7 @@ def proband_view(request, report_id):
     proband_variants = ProbandVariant.objects.filter(interpretation_report=report)
     proband_mdt = MDTReport.objects.filter(interpretation_report=report)
     panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.ir_family)
+
     return render(request, 'gel2mdt/proband.html', {'report': report,
                                                     'relatives': relatives,
                                                     'proband_form': proband_form,
@@ -623,45 +627,33 @@ def export_mdt(request, mdt_id):
     if request.method == "POST":
         mdt_instance = MDT.objects.get(id=mdt_id)
         mdt_reports = MDTReport.objects.filter(MDT=mdt_instance)
-
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename=MDT_{}.csv'.format(mdt_id)
         writer = csv.writer(response)
-        writer.writerow([ 'CIP_ID', 'Forename', 'Surname', 'DOB', 'Hospital_ID',
-                         'Variant/Zygosity', 'Panel'])
-
-        for report in mdt_reports:
-            proband_variants = ProbandVariant.objects.filter(interpretation_report=report.interpretation_report)
-            panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.interpretation_report.ir_family)
-            pv_output = []
-            for proband_variant in proband_variants:
-                transcript = proband_variant.get_transcript()
-                transcript_variant = proband_variant.get_transcript_variant()
-                if transcript and transcript_variant:
-                    hgvs_c = None
-                    hgvs_p = None
-                    hgvs_c_split = transcript_variant.hgvs_c.split(':')
-                    hgvs_p_split = transcript_variant.hgvs_p.split(':')
-                    if len(hgvs_c_split) > 1:
-                        hgvs_c = hgvs_c_split[1]
-                    if len(hgvs_p_split) > 1:
-                        hgvs_p = hgvs_p_split[1]
-                    pv_output.append(f'{transcript.gene}, '
-                                 f'{hgvs_c}, '
-                                 f'{hgvs_p}, '
-                                 f'{proband_variant.zygosity}')
-            panel_names = []
-            for panel in panels:
-                panel_names.append(f'{panel.panel.panel.panel_name}_'
-                                   f'{panel.panel.version_number}')
-            writer.writerow([ report.interpretation_report.ir_family.ir_family_id,
-                              report.interpretation_report.ir_family.participant_family.proband.forename,
-                              report.interpretation_report.ir_family.participant_family.proband.surname,
-                              report.interpretation_report.ir_family.participant_family.proband.date_of_birth.date(),
-                              report.interpretation_report.ir_family.participant_family.proband.local_id,
-                              '\n'.join(pv_output),
-                              '\n'.join(panel_names)])
+        writer = write_mdt_export(writer, mdt_instance, mdt_reports)
         return response
+
+@login_required
+def export_mdt_outcome_form(request, report_id):
+    report = GELInterpretationReport.objects.get(id=report_id)
+    document, mdt = write_mdt_outcome_template(report)
+    f = BytesIO()
+    document.save(f)
+    length = f.tell()
+    f.seek(0)
+    response = HttpResponse(
+        f.getvalue(),
+        content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    )
+
+    filename = '{}_{}_{}_{}.docx'.format(report.ir_family.participant_family.proband.surname,
+                                         report.ir_family.participant_family.proband.forename,
+                                         report.ir_family.ir_family_id,
+                                         mdt.date_of_mdt.date())
+    response['Content-Disposition'] = 'attachment; filename=' + filename
+    response['Content-Length'] = length
+    return response
+
 
 @login_required
 def genomics_england(request):

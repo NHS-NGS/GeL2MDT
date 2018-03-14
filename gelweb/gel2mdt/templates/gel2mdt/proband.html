@@ -157,6 +157,11 @@
                                 <div class="col-md-2">
                                     {% bootstrap_field proband_form.pilot_case %}
                                 </div>
+                                {% if proband_mdt|length > 0 %}
+                                <div class="col-md-2">
+                                    <a href="/export_mdt_outcome_form/{{report.id}}"><i class="fas fa-external-link-alt"></i> MDM Outcome</a>
+                                </div>
+                                {% endif %}
                                 <div class="col-md-12">
                                     {% if sample_form.sample_status.value != "C" %}
                                         </br>
@@ -168,6 +173,7 @@
                 </div>
             </form>
 
+            
             {% if proband_mdt %}
                 <div class="row">
                 <div class="col-md-12">
@@ -243,6 +249,7 @@
                 </div>
             </div>
         {% endif %}
+
 
         </div>
     </div>
