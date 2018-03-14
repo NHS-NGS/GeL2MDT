@@ -27,13 +27,13 @@ class PollAPI(object):
                 "https://panelapp.genomicsengland.co.uk/WebServices/{endpoint}",
                 False),
             "ensembl": (
-                "http://rest.ensembl.org/{endpoint}",
+                "https://rest.ensembl.org/{endpoint}",
                 False),
             "mutalyzer": (
                 "https://mutalyzer.nl/json/{endpoint}",
                 False),
             "genenames": (
-                "http://rest.genenames.org/{endpoint}",
+                "https://rest.genenames.org/{endpoint}",
                 True)
         }
 
