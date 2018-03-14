@@ -100,7 +100,6 @@ def profile(request):
         if form.is_valid():
             if role:
                 role.delete() # Delete the old role
-                print('deleted')
             if form.cleaned_data['role'] == 'Clinical Scientist':
                 cs = ClinicalScientist(name=request.user.first_name + ' ' + request.user.last_name,
                                        email=request.user.email,
@@ -628,27 +627,40 @@ def export_mdt(request, mdt_id):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename=MDT_{}.csv'.format(mdt_id)
         writer = csv.writer(response)
-        writer.writerow(['GEL_ID', 'CIP_ID', 'Forename', 'Surname', 'DOB', 'Local_ID',
-                         'Gene', 'HGVSc', 'HGVSp', 'Zygosity', 'Panel'])
+        writer.writerow([ 'CIP_ID', 'Forename', 'Surname', 'DOB', 'Hospital_ID',
+                         'Variant/Zygosity', 'Panel'])
 
         for report in mdt_reports:
             proband_variants = ProbandVariant.objects.filter(interpretation_report=report.interpretation_report)
-            print(report)
             panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.interpretation_report.ir_family)
+            pv_output = []
             for proband_variant in proband_variants:
                 transcript = proband_variant.get_transcript()
                 transcript_variant = proband_variant.get_transcript_variant()
-            writer.writerow([ report.interpretation_report.ir_family.participant_family.proband.gel_id,
-                              report.interpretation_report.ir_family.ir_family_id,
+                if transcript and transcript_variant:
+                    hgvs_c = None
+                    hgvs_p = None
+                    hgvs_c_split = transcript_variant.hgvs_c.split(':')
+                    hgvs_p_split = transcript_variant.hgvs_p.split(':')
+                    if len(hgvs_c_split) > 1:
+                        hgvs_c = hgvs_c_split[1]
+                    if len(hgvs_p_split) > 1:
+                        hgvs_p = hgvs_p_split[1]
+                    pv_output.append(f'{transcript.gene}, '
+                                 f'{hgvs_c}, '
+                                 f'{hgvs_p}, '
+                                 f'{proband_variant.zygosity}')
+            panel_names = []
+            for panel in panels:
+                panel_names.append(f'{panel.panel.panel.panel_name}_'
+                                   f'{panel.panel.version_number}')
+            writer.writerow([ report.interpretation_report.ir_family.ir_family_id,
                               report.interpretation_report.ir_family.participant_family.proband.forename,
                               report.interpretation_report.ir_family.participant_family.proband.surname,
-                              report.interpretation_report.ir_family.participant_family.proband.date_of_birth,
-                              report.interpretation_report.ir_family.participant_family.proband.date_of_birth,
-                              transcript.gene,
-                              transcript_variant.hgvs_c,
-                              transcript_variant.hgvs_p,
-                              proband_variant.zygosity,
-                              panels])
+                              report.interpretation_report.ir_family.participant_family.proband.date_of_birth.date(),
+                              report.interpretation_report.ir_family.participant_family.proband.local_id,
+                              '\n'.join(pv_output),
+                              '\n'.join(panel_names)])
         return response
 
 @login_required
