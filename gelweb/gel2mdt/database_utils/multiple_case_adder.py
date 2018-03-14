@@ -66,6 +66,8 @@ class MultipleCaseAdder(object):
 
             logger.info("Determining which cases to poll...")
             self.cases_to_poll = interpretation_list_poll.cases_to_poll
+            if head:
+                self.cases_to_poll = self.cases_to_poll[:5]
 
             logger.info("Fetching API JSON data for cases to poll...")
             self.list_of_cases = self.fetch_api_data()
