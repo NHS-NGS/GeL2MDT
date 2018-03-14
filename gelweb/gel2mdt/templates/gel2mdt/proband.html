@@ -302,6 +302,7 @@
                                 <th>CP</th>
                                 <th>Discussion</th>
                                 <th>Actions</th>
+                                <th>RV</th>
                                 <th>CM</th>
                                 <th>SO</th>
                                 <th>ASR</th>
@@ -349,6 +350,12 @@
                             <td>{{pv.rarediseasereport.contribution_of_phenotype}}</td>
                             <td style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{pv.rarediseasereport.discussion}}</td>
                             <td style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{pv.rarediseasereport.action}}</td>
+                                <td>{% if pv.rarediseasereport.requires_validation == True %}
+                                    <span class="glyphicon glyphicon-ok"></span>
+                            {% else %}
+                                    <span class="glyphicon glyphicon-remove"></span>
+                            {% endif %}
+                            </td>
                             <td>{% if pv.rarediseasereport.change_med == True %}
                                     <span class="glyphicon glyphicon-ok"></span>
                             {% else %}
