@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from .forms import *
 from .models import *
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import IntegrityError
@@ -15,8 +15,9 @@ from .tasks import get_gel_content
 from .api.api_views import *
 from django.forms import modelformset_factory
 from .config import load_config
-import os, json
+import os, json, csv
 # Create your views here.
+
 def register(request):
     '''
     Registers a new user
@@ -172,6 +173,7 @@ def proband_view(request, report_id):
                                                     'proband_mdt': proband_mdt,
                                                     'panels': panels})
 
+
 def panel_view(request, panelversion_id):
     panel = PanelVersion.objects.get(id=panelversion_id)
     config_dict = load_config.LoadConfig().load()
@@ -180,7 +182,6 @@ def panel_view(request, panelversion_id):
         panelapp_json = json.load(open(panelapp_file))
         return render(request, 'gel2mdt/panel.html', {'panel':panel,
                                                       'genes': panelapp_json['result']['Genes']})
-
 
 @login_required
 def variant_view(request, variant_id):
@@ -407,6 +408,7 @@ def mdt_view(request, mdt_id):
                                                       'mdt_id': mdt_id,
                                                       'attendees': attendees})
 
+@login_required
 def mdt_proband_view(request, mdt_id, pk):
     report = GELInterpretationReport.objects.get(id=pk)
     proband_variants = ProbandVariant.objects.filter(interpretation_report=report)
@@ -624,6 +626,38 @@ def add_new_attendee(request):
     else:
         form = AddNewAttendee()
     return render(request, 'gel2mdt/add_new_attendee.html', {'form': form})
+
+@login_required
+def export_mdt(request, mdt_id):
+    if request.method == "POST":
+        mdt_instance = MDT.objects.get(id=mdt_id)
+        mdt_reports = MDTReport.objects.filter(MDT=mdt_instance)
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename=MDT_{}.csv'.format(mdt_id)
+        writer = csv.writer(response)
+        writer.writerow(['GEL_ID', 'CIP_ID', 'Forename', 'Surname', 'DOB', 'Local_ID',
+                         'Gene', 'HGVSc', 'HGVSp', 'Zygosity', 'Panel'])
+
+        for report in mdt_reports:
+            proband_variants = ProbandVariant.objects.filter(interpretation_report=report.interpretation_report)
+            print(report)
+            panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.interpretation_report.ir_family)
+            for proband_variant in proband_variants:
+                transcript = proband_variant.get_transcript()
+                transcript_variant = proband_variant.get_transcript_variant()
+            writer.writerow([ report.interpretation_report.ir_family.participant_family.proband.gel_id,
+                              report.interpretation_report.ir_family.ir_family_id,
+                              report.interpretation_report.ir_family.participant_family.proband.forename,
+                              report.interpretation_report.ir_family.participant_family.proband.surname,
+                              report.interpretation_report.ir_family.participant_family.proband.date_of_birth,
+                              report.interpretation_report.ir_family.participant_family.proband.date_of_birth,
+                              transcript.gene,
+                              transcript_variant.hgvs_c,
+                              transcript_variant.hgvs_p,
+                              proband_variant.zygosity,
+                              panels])
+        return response
 
 @login_required
 def genomics_england(request):
