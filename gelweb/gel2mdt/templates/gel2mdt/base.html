@@ -292,9 +292,9 @@ function getRadioValue(radioElementName) {
     $(document).ready(function() {
         $('#dataTables-pv').DataTable({
             "columnDefs": [
-                { "orderable": false, "targets": 0 }
+                { "orderable": false, "targets": [ 0, 1 ] }
             ],
-            "order": [[ 1, "desc" ]]
+            "order": [[ 3, "asc" ]]
         });
     });
     </script>
