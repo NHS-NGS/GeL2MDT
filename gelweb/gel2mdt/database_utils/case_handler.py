@@ -881,9 +881,12 @@ class CaseAttributeManager(object):
                 ):
                     # variant in json matches variant entry
                     json_variant["variant_entry"] = variant
+                json_variant['zygosity'] = 'unknown'
                 for genotype in json_variant["calledGenotypes"]:
-                    if genotype["gelId"] == proband_manager.case_model.entry.gel_id:
+                    genotype_gelid = genotype.get('gelId', None)
+                    if genotype_gelid == proband_manager.case_model.entry.gel_id:
                         json_variant['zygosity'] = genotype["genotype"]
+                        
         for variant in self.case.json_variants:
             if variant["variant_entry"]:
                 tiered_proband_variant = {
@@ -909,8 +912,10 @@ class CaseAttributeManager(object):
                     ):
                         # variant in json matches variant entry
                         json_variant["variant_entry"] = variant
+                    json_variant['zygosity'] = 'unknown'
                     for genotype in json_variant["calledGenotypes"]:
-                        if genotype["gelId"] == proband_manager.case_model.entry.gel_id:
+                        genotype_gelid = genotype.get('gelId', None)
+                        if genotype_gelid == proband_manager.case_model.entry.gel_id:
                             json_variant['zygosity'] = genotype["genotype"]
 
             for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
