@@ -66,7 +66,7 @@ class MdtForm(forms.ModelForm):
 class ProbandMDTForm(forms.ModelForm):
     class Meta:
         model = Proband
-        fields = ('discussion', 'action', )
+        fields = ('discussion', 'action', 'status')
         widgets = {
             'discussion': Textarea(attrs={'rows': '3'}),
             'action': Textarea(attrs={'rows': '3'}),
