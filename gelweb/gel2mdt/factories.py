@@ -47,7 +47,6 @@ class ProbandFactory(factory.django.DjangoModelFactory):
         model = models.Proband
 
     gel_id = factory.Faker('numerify', text='#########')
-    family = factory.SubFactory(FamilyFactory)
     nhs_number = factory.Faker('numerify', text='##########')
 
     lab_number = factory.Faker('numerify', text='D########')
@@ -189,6 +188,7 @@ class RelativeFactory(factory.django.DjangoModelFactory):
         start_date='-75y',
         end_date='-3y')
     sex = factory.Faker('random_element', elements=('Male','Female'))
+
 
 
 class InterpretationReportFamilyFactory(factory.django.DjangoModelFactory):
