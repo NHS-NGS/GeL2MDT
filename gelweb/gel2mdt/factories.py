@@ -42,40 +42,12 @@ class PhenotypeFactory(factory.django.DjangoModelFactory):
     hpo_terms = factory.Faker('numerify', text='HP:#######')
 
 
-class ProbandFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = models.Proband
-
-    gel_id = factory.Faker('numerify', text='#########')
-    family = factory.SubFactory(FamilyFactory)
-    nhs_number = factory.Faker('numerify', text='##########')
-
-    lab_number = factory.Faker('numerify', text='D########')
-    local_id = factory.Faker('numerify', text='#######')
-    forename = factory.Faker('first_name', locale='en-GB')
-    surname = factory.Faker('last_name', locale='en-GB')
-
-    date_of_birth = factory.Faker(
-        'date_time_between',
-        start_date='-75y',
-        end_date='-3y')
-    sex = factory.Faker('random_element', elements=('Male','Female'))
-
-    pilot_case = factory.Faker('boolean', chance_of_getting_true=85)
-
-    gmc = factory.Faker('lexify', text='???', letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ')
-
-    status = 'Not Started'
-    mdt_status = 'Required'
-
-
 class FamilyFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.Family
 
     gel_family_id = factory.Faker('numerify', text='#########')
     clinician = factory.SubFactory(ClinicianFactory)
-    proband = factory.SubFactory(ProbandFactory)
 
 
 class FamilyPhenotypeFactory(factory.django.DjangoModelFactory):
@@ -161,6 +133,32 @@ class TranscriptFactory(factory.django.DjangoModelFactory):
     genome_assembly = factory.SubFactory(GenomeBuildFactory)
 
 
+class ProbandFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = models.Proband
+
+    gel_id = factory.Faker('numerify', text='#########')
+    family = factory.SubFactory(FamilyFactory)
+    nhs_number = factory.Faker('numerify', text='##########')
+
+    lab_number = factory.Faker('numerify', text='D########')
+    local_id = factory.Faker('numerify', text='#######')
+    forename = factory.Faker('first_name', locale='en-GB')
+    surname = factory.Faker('last_name', locale='en-GB')
+
+    date_of_birth = factory.Faker(
+        'date_time_between',
+        start_date='-75y',
+        end_date='-3y')
+    sex = factory.Faker('random_element', elements=('Male','Female'))
+
+    pilot_case = factory.Faker('boolean', chance_of_getting_true=85)
+
+    gmc = factory.Faker('lexify', text='???', letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+
+    status = 'Not Started'
+    mdt_status = 'Required'
+
 
 
 class RelativeFactory(factory.django.DjangoModelFactory):
@@ -189,6 +187,7 @@ class RelativeFactory(factory.django.DjangoModelFactory):
         start_date='-75y',
         end_date='-3y')
     sex = factory.Faker('random_element', elements=('Male','Female'))
+
 
 
 class InterpretationReportFamilyFactory(factory.django.DjangoModelFactory):
