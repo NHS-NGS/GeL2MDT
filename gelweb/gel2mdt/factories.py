@@ -160,7 +160,6 @@ class ProbandFactory(factory.django.DjangoModelFactory):
     mdt_status = 'Required'
 
 
-
 class RelativeFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.Relative
