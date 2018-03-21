@@ -91,8 +91,15 @@ class Case(object):
                 family_member = {'gel_id': participant["gelId"],
                                  'relation_to_proband': participant["additionalInformation"]["relation_to_proband"],
                                  'affection_status': participant["affectionStatus"],
+                                 'sequenced': False,
                                  'sex': participant['sex'],
                                  }
+
+                # determine if participant has undergone sequencing for trio
+                # calc
+                if participant["samples"]:
+                    # family member has undergone sequencing
+                    family_member["sequenced"] = True
                 family_members.append(family_member)
         return family_members
 
@@ -390,6 +397,7 @@ class CaseAttributeManager(object):
                 "gel_id": family_member['gel_id'],
                 "relation_to_proband": family_member["relation_to_proband"],
                 "affected_status": family_member["affection_status"],
+                "sequenced": family_member["sequenced"],
                 "proband": proband.entry,
                 "nhs_number": demographics["nhs_num"],
                 "forename": demographics["forename"],
@@ -403,22 +411,41 @@ class CaseAttributeManager(object):
             "relation_to_proband": relative["relation_to_proband"],
             "affected_status": relative["affected_status"],
             "proband": relative['proband'],
+            "sequenced": relative['sequenced'],
             "nhs_number": relative["nhs_number"],
             "forename": relative["forename"],
             "surname": relative["surname"],
             "date_of_birth": datetime.strptime(relative["date_of_birth"], "%Y/%m/%d").date(),
             "sex": relative["sex"],
         } for relative in relative_list], self.model_objects)
+
         return relatives
 
     def get_family(self):
         """
         Create case model to handle adding/getting family for this case.
         """
+        family_members = self.case.family_members
+        self.case.mother = None
+        self.case.father = None
+
+        for family_member in family_members:
+            if family_member["relation_to_proband"] == "Father":
+                self.case.father = family_member
+            elif family_member["relation_to_proband"] == "Mother":
+                self.case.mother = family_member
+
+        self.case.trio_sequenced = False
+
+        if self.case.mother["sequenced"] and self.case.father["sequenced"]:
+            # participant has a mother and father recorded
+            self.case.trio_sequenced = True
+
         clinician = self.case.attribute_managers[Clinician].case_model
         family = CaseModel(Family, {
             "clinician": clinician.entry,
-            "gel_family_id": self.case.json["family_id"]
+            "gel_family_id": self.case.json["family_id"],
+            "trio_sequenced": self.case.trio_sequenced
         }, self.model_objects)
         return family
 
@@ -875,10 +902,18 @@ class CaseAttributeManager(object):
                     # variant in json matches variant entry
                     json_variant["variant_entry"] = variant
                 json_variant['zygosity'] = 'unknown'
+                json_variant['maternal_zygosity'] = 'unknown'
+                json_variant['paternal_zygosity'] = 'unknown'
+
                 for genotype in json_variant["calledGenotypes"]:
                     genotype_gelid = genotype.get('gelId', None)
                     if genotype_gelid == proband_manager.case_model.entry.gel_id:
                         json_variant['zygosity'] = genotype["genotype"]
+                    elif genotype_gelid == self.case.mother["gel_id"]:
+                        json_variant['maternal_zygosity'] = genotype["genotype"]
+                    elif genotype_gelid == self.case.father["gel_id"]:
+                        json_variant['paternal_zygosity'] = genotype["genotype"]
+
 
         for variant in self.case.json_variants:
             if variant["variant_entry"]:
@@ -886,6 +921,8 @@ class CaseAttributeManager(object):
                     "max_tier": variant["max_tier"],
                     "variant": variant["variant_entry"],
                     "zygosity": variant["zygosity"],
+                    "maternal_zygosity": variant["maternal_zygosity"],
+                    "paternal_zygosity": variant["paternal_zygosity"],
                 }
                 tiered_proband_variants.append(tiered_proband_variant)
 
@@ -905,11 +942,18 @@ class CaseAttributeManager(object):
                     ):
                         # variant in json matches variant entry
                         json_variant["variant_entry"] = variant
-                    json_variant['zygosity'] = variant.zygosity
+                    json_variant['zygosity'] = 'unknown'
+                    json_variant['maternal_zygosity'] = 'unknown'
+                    json_variant['paternal_zygosity'] = 'unknown'
+
                     for genotype in json_variant["calledGenotypes"]:
                         genotype_gelid = genotype.get('gelId', None)
                         if genotype_gelid == proband_manager.case_model.entry.gel_id:
                             json_variant['zygosity'] = genotype["genotype"]
+                        elif genotype_gelid == self.case.mother["gel_id"]:
+                            json_variant['maternal_zygosity'] = genotype["genotype"]
+                        elif genotype_gelid == self.case.father["gel_id"]:
+                            json_variant['paternal_zygosity'] = genotype["genotype"]
 
             for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
                 if variant["variant_entry"]:
@@ -917,6 +961,8 @@ class CaseAttributeManager(object):
                         "max_tier": 0,  # CIP flagged variants assigned tier 0
                         "variant": variant["variant_entry"],
                         "zygosity": variant["zygosity"],
+                        "maternal_zygosity": variant["maternal_zygosity"],
+                        "paternal_zygosity": variant["paternal_zygosity"],
                     }
                     cip_proband_variants.append(cip_proband_variant)
 
@@ -936,11 +982,44 @@ class CaseAttributeManager(object):
             "max_tier": variant["max_tier"],
             "variant": variant["variant"],
             "zygosity": variant["zygosity"],
+            "maternal_zygosity": variant["maternal_zygosity"],
+            "paternal_zygosity": variant["paternal_zygosity"],
+            "inheritance": self.determine_variant_inheritance(variant),
             "somatic": False
-            # only adding T1/2 and CIP flagged
         } for variant in tiered_and_cip_proband_variants], self.model_objects)
 
+        for proband_variant in proband_variants.model_attributes_list:
+            print(proband_variant["inheritance"])
+
         return proband_variants
+
+    def determine_variant_inheritance(self, variant):
+        """
+        Take a variant, and use maternal and paternal zygosities to determine
+        inheritance.
+        """
+        print("Maternal Z:", variant["maternal_zygosity"])
+        print("Paternal Z:", variant["paternal_zygosity"])
+
+
+        if variant["maternal_zygosity"] == 'reference_homozygous' and variant["paternal_zygosity"] == 'reference_homozygous':
+            # neither parent has variant, --/-- cross so must be de novo
+            inheritance = 'de_novo'
+
+        elif "heterozygous" in variant["maternal_zygosity"] or "heterozygous" in variant["paternal_zygosity"]:
+            # catch +-/?? cross
+            inheritance = 'inherited'
+
+        elif "alternate" in variant["maternal_zygosity"] or "alternate" in variant["paternal_zygosity"]:
+            # catch ++/?? cross
+            inheritance = 'inherited'
+
+        else:
+            # cannot determine
+            inheritance = 'unknown'
+
+        print("Proband I:", inheritance)
+        return inheritance
 
     def get_report_events(self):
 
