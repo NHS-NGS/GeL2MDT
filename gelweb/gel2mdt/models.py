@@ -464,18 +464,19 @@ class ProbandVariant(models.Model):
         return ptv
 
     def get_transcript_variant(self):
-        ptv = ProbandTranscriptVariant.objects.filter(selected=True, proband_variant=self.id)
+        ptv = ProbandTranscriptVariant.objects.filter(selected=True, proband_variant=self.id).first()
         if ptv:
-            transcript_variant = TranscriptVariant.objects.get(transcript=ptv[0].transcript,
+            transcript_variant = TranscriptVariant.objects.get(transcript=ptv.transcript,
                                                             variant=self.variant)
             return transcript_variant
 
     def get_transcript(self):
-        ptv = ProbandTranscriptVariant.objects.filter(selected=True, proband_variant=self.id)
+        ptv = ProbandTranscriptVariant.objects.filter(selected=True, proband_variant=self.id).first()
         if ptv:
-            return ptv[0].transcript
+            return ptv.transcript
         else:
             return None
+
 
     def get_selected_count(self):
         ptv = ProbandTranscriptVariant.objects.filter(selected=True, proband_variant=self.id).count()
