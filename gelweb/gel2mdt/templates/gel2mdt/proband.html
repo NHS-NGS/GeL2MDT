@@ -57,14 +57,15 @@
                                 </br>
                                 {% bootstrap_label "Panels" %}
                                 <div class="block">
-                                    {% for panel in panels %}
 
+                                    {% for panel in panels %}
                                         <p>
                                     <a href="/panel/{{panel.panel.id}}">
                                     {{panel.panel}}
                                     </a>
                                     </p>
                                     {% endfor %}
+
                                 </div>
                                 </br>
 
@@ -138,6 +139,7 @@
                                 <div class="col-md-6">
 
                                     {% bootstrap_field proband_form.comment %}
+                                    <a href="/proband/{{report.id}}/negative_report" target="_blank" class="btn btn-info" role="button">Negative Report</a>
 
                                 </div>
                             </div>

@@ -224,6 +224,14 @@ function redrawTier3Only(table, tier3Only) {
     }
 }
 
+function redrawDeNovoStatus(table, deNovoStatus) {
+    console.log(deNovoStatus)
+    table
+        .column(10)
+        .search(deNovoStatus);
+    table.draw()
+}
+
 // filter value change listeners
 $("input[name='caseType']").change(function() {
     var table = $('#rare-disease-main').DataTable()
@@ -249,6 +257,11 @@ $("input[name='tier3Only']").change(function() {
     var table = $('#rare-disease-main').DataTable()
     redrawTier3Only(table, $(this).is(":checked"));
 });
+$("input[name='deNovoStatus']").change(function() {
+    var table = $('#rare-disease-main').DataTable()
+    redrawDeNovoStatus(table, $(this).val());
+});
+
 
 
 
@@ -258,6 +271,7 @@ function initaliseTable() {
     var maxTier = getRadioValue("maxTier");
     var caseStatus = getRadioValue("caseStatus");
     var trioStatus = getRadioValue("trioStatus");
+    var deNovoStatus = getRadioValue("deNovoStatus");
     
     // create the datatable
     var table = fetchDataTable(caseType, genomeBuild, maxTier, caseStatus)
@@ -268,6 +282,7 @@ function initaliseTable() {
     redrawMaxTier(table, maxTier);
     redrawCaseStatus(table, caseStatus);
     redrawTrioStatus(table, trioStatus);
+    redrawDeNovoStatus(table, deNovoStatus);
 }
 
 function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
@@ -311,10 +326,13 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
                 "data": "trio_sequenced",
                 "visible": false,
             },
+            {
+                "data": "has_de_novo",
+            },
             { "data": "updated",
                 "type": "date " }
         ],
-        "order": [[ 10, "desc" ]]
+        "order": [[ 11, "desc" ]]
     } );
     return table
 }
