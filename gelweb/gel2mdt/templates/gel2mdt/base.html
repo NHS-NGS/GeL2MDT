@@ -195,6 +195,7 @@ function redrawCaseStatus(table, caseStatus) {
     } else {
         $('#caseStatusSpec').text(caseStatus);
     }
+
 };
 
 function redrawTrioStatus(table, trioStatus) {
@@ -214,6 +215,7 @@ function redrawTier3Only(table, tier3Only) {
             .column(5)
             .search('[3]', regex=true);
         table.draw()
+        $('#maxTierSpec').text("Tier 3 only");
     } else {
         $('label[name=maxTierLabel]').removeAttr('disabled', true);
         // looking at all variants, get values from maxTier
