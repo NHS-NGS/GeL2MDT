@@ -1,0 +1,150 @@
+{% load static %}
+{% load bootstrap3 %}
+
+<html>
+<head>
+<title>Technical Report</title>
+<!--This is the meta information which is good for SEO-->
+<!-- Bootstrap -->
+<!--Add keywords that describe your project between the quotation marks. This helps search engines find and index your content-->
+<link rel="shortcut icon" type="image/png" href="{% static 'gel2mdt/favicon/favicon-96x96.png' %}"/>
+{% block head-css %}
+    <script src="{% static 'gel2mdt/js/jquery-3.1.1.js' %}"></script>
+<script src="{% static 'gel2mdt/js/bootstrap.js' %}"></script>
+<link href="{% static 'gel2mdt/css/bootstrap.css' %}" rel="stylesheet">
+<link href="{% static 'gel2mdt/css/heroic-features.css' %}" rel="stylesheet">
+<link href="{% static 'gel2mdt/DataTables/datatables.min.css' %}" rel="stylesheet">
+<link href="{% static 'gel2mdt/css/jumbotron.css' %}" rel="stylesheet">
+<link href="{% static 'gel2mdt/css/bootstrap-responsive.css' %}" rel="stylesheet">
+<script type="text/javascript" src="{% static 'gel2mdt/DataTables/datatables.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'gel2mdt/js/all.js' %}"></script>
+
+<link rel="stylesheet" type="text/css" href="{% static 'gel2mdt/css/custom.css' %}">
+
+    {% endblock %}
+{% block javascript %}
+{% endblock %}
+
+
+</head>
+
+
+<body>
+
+<page size="A4">
+
+    <h2>Technical Information</h2>
+
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading"><strong>Patient Information</strong></div>
+            <div class="panel-body">
+
+                <table class="table table-condensed">
+                    <thead>
+                    </thead>
+                    <tbody>
+
+                    <tr>
+                        <td><strong>Patient name:</strong></td>
+                        <td>{{ report.ir_family.participant_family.proband.forename}} {{report.ir_family.participant_family.proband.forename}}</td>
+                        <td>NHS number:</td>
+                        <td>{{ report.ir_family.participant_family.proband.nhs_number}}</td>
+                    </tr>
+                    <tr>
+                        <td>Date of birth:</td>
+                        <td>{{report.ir_family.participant_family.proband.date_of_birth}}</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading"><strong>Sample Details</strong></div>
+            <div class="panel-body">
+                Test content.
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading"><strong>Test Methodology</strong></div>
+            <div class="panel-body">
+                <p style="text-align:justify">
+                Whole genome sequencing by the 100,000 Genomes Project with analysis of
+                selected gene panels (see below). Please note that the sensitivity of this test
+                is limited by the types of detectable pathogenic variants, regions of low read
+                depth coverage and incomplete ascertainment of disease-gene associations. More
+                in-depth information regarding read depth coverage is available on request.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading"><strong>Variant Details</strong></div>
+            <div class="panel-body">
+                No variants have been detected.
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading"><strong>Recruiting Disease</strong></div>
+            <div class="panel-body">
+                Disease name.
+                <hr>
+                </hr>
+                <strong>HPO terms:</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading"><strong>Gene Panels and Read Depth Coverage</strong></div>
+            <div class="panel-body">
+
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                            <th>Panel</th>
+                            <th>% at 10x</th>
+                            <th>% at 20x</th>
+                            <th>% at 30x</th>
+                        </th>
+                    </thead>
+                    <tbody>
+                    {% for panel in panels %}
+                    <tr>
+                        <td>{{panel.panel}}</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+            {% endfor %}
+                </tbody>
+            </table>
+
+                <hr>
+                </hr>
+                <strong>List of genes with low coverage:</strong>
+            </div>
+        </div>
+    </div>
+
+
+
+</body>
+
+</html>

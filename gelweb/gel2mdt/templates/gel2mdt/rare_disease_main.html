@@ -95,27 +95,36 @@
                                         <tr>
                                             <td>Max tier:</td>
                                             <td>
-                                                <div class="btn-group" data-toggle="buttons">
+                                                <div class="btn-group" id="maxTierButtonGroup" data-toggle="buttons">
 
-                                                    <label class="btn btn-success">
+                                                    <label name="maxTierLabel" class="btn btn-success">
                                                         <input type="radio" name="maxTier" id="tier_0" autocomplete="off" value="0">
                                                         CIP Candidate
                                                     </label>
 
-                                                    <label class="btn btn-success">
+                                                    <label name="maxTierLabel" class="btn btn-success">
                                                         <input type="radio" name="maxTier" id="tier_1" autocomplete="off" value="1">
                                                         1
                                                     </label>
 
-                                                    <label class="btn btn-success active">
+                                                    <label name="maxTierLabel" class="btn btn-success active">
                                                         <input type="radio" name="maxTier" id="tier_2" autocomplete="off" value="2" checked>
                                                         2
                                                     </label>
-                                                    <label class="btn btn-success">
+
+                                                    <label name="maxTierLabel" class="btn btn-success">
                                                         <input type="radio" name="maxTier" id="tier_3" autocomplete="off" value="3">
                                                         3
                                                     </label>
                                                 </div>
+
+                                                <div class="btn-group" data-toggle="buttons">
+                                                    <label class="btn btn-success">
+                                                        <input type="checkbox" name="tier3Only" id="tier_3_only" autocomplete="off" value="3_only">
+                                                        Tier 3 only
+                                                    </label>
+                                                </div>
+
                                             </td>
                                         </tr>
                                         <tr>
@@ -186,6 +195,23 @@
                                                 </div>
                                             </td>
                                         </tr>
+
+                                        <tr>
+                                            <td><em>De novo</em> status:</td>
+                                            <td>
+                                                <div class="btn-group" data-toggle="buttons">
+                                                    <label class="btn btn-success active">
+                                                        <input type="radio" name="deNovoStatus" id="denovo_all" autocomplete="off" value="" checked>
+                                                        All
+                                                    </label>
+                                                    <label class="btn btn-success">
+                                                        <input type="radio" name="deNovoStatus" id="denovo_only" autocomplete="off" value="true">
+                                                        <em>De novo(s)</em> 
+                                                        
+                                                    </label>
+                                                </div>
+                                            </td>
+                                        </tr>
                                     </tbody>
                                 </table>
                                 </form>
@@ -212,6 +238,7 @@
                             <th>Status</th>
                             <th>Pilot</th>
                             <th>Trio</th>
+                            <th>De Novo</th>
                             <th>Updated <a href="#" data-toggle="tooltip" title="When the case was updated by GeL, not locally!"><i class="fas fa-info-circle"></i></a></th>
                         </tr>
                     </thead>
