@@ -48,6 +48,7 @@ class FamilyFactory(factory.django.DjangoModelFactory):
 
     gel_family_id = factory.Faker('numerify', text='#########')
     clinician = factory.SubFactory(ClinicianFactory)
+    trio_sequenced = True
 
 
 class FamilyPhenotypeFactory(factory.django.DjangoModelFactory):
@@ -181,6 +182,8 @@ class RelativeFactory(factory.django.DjangoModelFactory):
     forename = factory.Faker('first_name', locale='en-GB')
     surname = factory.Faker('last_name', locale='en-GB')
 
+    sequenced = True
+
     date_of_birth = factory.Faker(
         'date_time_between',
         start_date='-75y',
@@ -253,11 +256,32 @@ class ProbandVariantFactory(factory.django.DjangoModelFactory):
     somatic = False
 
     interpretation_report = factory.SubFactory(GELInterpretationReportFactory)
+
     zygosity = factory.Faker('random_element', elements=(
         'heterozygous',
         'reference_homozygous',
         'alternate_homozygous',
         'unknown'
+    ))
+
+    maternal_zygosity = factory.Faker('random_element', elements=(
+        'heterozygous',
+        'reference_homozygous',
+        'alternate_homozygous',
+        'unknown'
+    ))
+
+    paternal_zygosity = factory.Faker('random_element', elements=(
+        'heterozygous',
+        'reference_homozygous',
+        'alternate_homozygous',
+        'unknown'
+    ))
+
+    inheritance = factory.Faker('random_element', elements=(
+        'unknown',
+        'de_novo',
+        'inherited'
     ))
 
 
