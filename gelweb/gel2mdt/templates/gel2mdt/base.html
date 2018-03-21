@@ -197,6 +197,14 @@ function redrawCaseStatus(table, caseStatus) {
     }
 };
 
+function redrawTrioStatus(table, trioStatus) {
+    console.log(trioStatus)
+    table
+        .column(9)
+        .search(trioStatus);
+    table.draw()
+}
+
 // filter value change listeners
 $("input[name='caseType']").change(function() {
     var table = $('#rare-disease-main').DataTable()
@@ -214,12 +222,18 @@ $("input[name='caseStatus']").change(function() {
     var table = $('#rare-disease-main').DataTable()
     redrawCaseStatus(table, $(this).val());
 });
+$("input[name='trioStatus']").change(function() {
+    var table = $('#rare-disease-main').DataTable()
+    redrawTrioStatus(table, $(this).val());
+});
+
 
 function initaliseTable() {
     var caseType = getRadioValue("caseType");
     var genomeBuild = getRadioValue("genomeBuild");
     var maxTier = getRadioValue("maxTier");
     var caseStatus = getRadioValue("caseStatus");
+    var trioStatus = getRadioValue("trioStatus");
     
     // create the datatable
     var table = fetchDataTable(caseType, genomeBuild, maxTier, caseStatus)
@@ -229,6 +243,7 @@ function initaliseTable() {
     redrawGenomeBuild(table, genomeBuild);
     redrawMaxTier(table, maxTier);
     redrawCaseStatus(table, caseStatus);
+    redrawTrioStatus(table, trioStatus);
 }
 
 function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
@@ -268,10 +283,14 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
                 "visible": false,
                 "type": "string"
             },
+            { 
+                "data": "trio_sequenced",
+                "visible": false,
+            },
             { "data": "updated",
                 "type": "date " }
         ],
-        "order": [[ 9, "desc" ]]
+        "order": [[ 10, "desc" ]]
     } );
     return table
 }

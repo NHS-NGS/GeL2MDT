@@ -55,7 +55,6 @@
                                         <tr>
                                             <td>Case type:</td>
                                             <td>
-
                                                 <div class="btn-group" data-toggle="buttons">
                                                     <label class="btn btn-success">
                                                         <input type="radio" name="caseType" id="casetype_all" autocomplete="off" value="">
@@ -70,9 +69,9 @@
                                                         Pilot
                                                     </label>
                                                 </div>
-
                                             </td>
                                         </tr>
+
                                         <tr>
                                             <td>Genome build:</td>
                                             <td>
@@ -168,6 +167,25 @@
                                             </td>
                                         </tr>
 
+                                        <tr>
+                                            <td>Trio status:</td>
+                                            <td>
+                                                <div class="btn-group" data-toggle="buttons">
+                                                    <label class="btn btn-success active">
+                                                        <input type="radio" name="trioStatus" id="triostatus_all" autocomplete="off" value="" checked>
+                                                        All
+                                                    </label>
+                                                    <label class="btn btn-success">
+                                                        <input type="radio" name="trioStatus" id="triostatus_true" autocomplete="off" value="true">
+                                                        Trio Sequenced
+                                                    </label>
+                                                    <label class="btn btn-success">
+                                                        <input type="radio" name="trioStatus" id="triostatus_false" autocomplete="off" value="false">
+                                                        Incomplete Trio
+                                                    </label>
+                                                </div>
+                                            </td>
+                                        </tr>
                                     </tbody>
                                 </table>
                                 </form>
@@ -193,6 +211,7 @@
                             <th>Assembly</th>
                             <th>Status</th>
                             <th>Pilot</th>
+                            <th>Trio</th>
                             <th>Updated <a href="#" data-toggle="tooltip" title="When the case was updated by GeL, not locally!"><i class="fas fa-info-circle"></i></a></th>
                         </tr>
                     </thead>

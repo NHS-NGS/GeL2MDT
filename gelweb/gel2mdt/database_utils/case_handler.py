@@ -91,8 +91,15 @@ class Case(object):
                 family_member = {'gel_id': participant["gelId"],
                                  'relation_to_proband': participant["additionalInformation"]["relation_to_proband"],
                                  'affection_status': participant["affectionStatus"],
+                                 'sequenced': False,
                                  'sex': participant['sex'],
                                  }
+
+                # determine if participant has undergone sequencing for trio
+                # calc
+                if participant["samples"]:
+                    # family member has undergone sequencing
+                    family_member["sequenced"] = True
                 family_members.append(family_member)
         return family_members
 
@@ -140,24 +147,19 @@ class Case(object):
                     variant_min_tier = tier
             variant["max_tier"] = variant_min_tier
 
-            if variant["max_tier"] < 3:
-                variant_object_count += 1
-                case_variant = CaseVariant(
-                    chromosome=variant["chromosome"],
-                    position=variant["position"],
-                    ref=variant["reference"],
-                    alt=variant["alternate"],
-                    case_id=self.request_id,
-                    variant_count=str(variant_object_count),
-                    genome_build=self.json_request_data["genomeAssemblyVersion"]
-                )
-                case_variant_list.append(case_variant)
-                # also add it to the dict within self.json_variants
-                variant["case_variant"] = case_variant
-            else:
-                # if the variant is Tier 3, assign False to the dict within
-                # self.json_variants so we don't add a variant later
-                variant["case_variant"] = False
+            variant_object_count += 1
+            case_variant = CaseVariant(
+                chromosome=variant["chromosome"],
+                position=variant["position"],
+                ref=variant["reference"],
+                alt=variant["alternate"],
+                case_id=self.request_id,
+                variant_count=str(variant_object_count),
+                genome_build=self.json_request_data["genomeAssemblyVersion"]
+            )
+            case_variant_list.append(case_variant)
+            # also add it to the dict within self.json_variants
+            variant["case_variant"] = case_variant
 
         # check for CIP flagged variants
         for interpreted_genome in self.json["interpreted_genome"]:
@@ -395,6 +397,7 @@ class CaseAttributeManager(object):
                 "gel_id": family_member['gel_id'],
                 "relation_to_proband": family_member["relation_to_proband"],
                 "affected_status": family_member["affection_status"],
+                "sequenced": family_member["sequenced"],
                 "proband": proband.entry,
                 "nhs_number": demographics["nhs_num"],
                 "forename": demographics["forename"],
@@ -408,22 +411,41 @@ class CaseAttributeManager(object):
             "relation_to_proband": relative["relation_to_proband"],
             "affected_status": relative["affected_status"],
             "proband": relative['proband'],
+            "sequenced": relative['sequenced'],
             "nhs_number": relative["nhs_number"],
             "forename": relative["forename"],
             "surname": relative["surname"],
             "date_of_birth": datetime.strptime(relative["date_of_birth"], "%Y/%m/%d").date(),
             "sex": relative["sex"],
         } for relative in relative_list], self.model_objects)
+
         return relatives
 
     def get_family(self):
         """
         Create case model to handle adding/getting family for this case.
         """
+        family_members = self.case.family_members
+        self.case.mother = None
+        self.case.father = None
+
+        for family_member in family_members:
+            if family_member["relation_to_proband"] == "Father":
+                self.case.father = family_member
+            elif family_member["relation_to_proband"] == "Mother":
+                self.case.mother = family_member
+
+        self.case.trio_sequenced = False
+
+        if self.case.mother["sequenced"] and self.case.father["sequenced"]:
+            # participant has a mother and father recorded
+            self.case.trio_sequenced = True
+
         clinician = self.case.attribute_managers[Clinician].case_model
         family = CaseModel(Family, {
             "clinician": clinician.entry,
-            "gel_family_id": self.case.json["family_id"]
+            "gel_family_id": self.case.json["family_id"],
+            "trio_sequenced": self.case.trio_sequenced
         }, self.model_objects)
         return family
 
@@ -726,7 +748,6 @@ class CaseAttributeManager(object):
 
         variants_list = []
         # loop through all variants and check that they have a case_variant
-        # (all variants Tier1 and Tier2, Tier3 variants do not
         for variant in self.case.json_variants:
             if variant["case_variant"]:
                 if variant['dbSNPid']:
@@ -742,19 +763,18 @@ class CaseAttributeManager(object):
                 }
                 variants_list.append(tiered_variant)
 
-        # loop through all variants and check that they have a case_variant (all should?)
+        # loop through all variants
         for interpreted_genome in self.case.json["interpreted_genome"]:
             for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
-                if variant["case_variant"]:
-                    cip_variant = {
-                        "genome_assembly": genome_assembly,
-                        "alternate": variant["case_variant"].alt,
-                        "chromosome": variant["case_variant"].chromosome,
-                        "db_snp_id": variant["dbSNPid"],
-                        "reference": variant["case_variant"].ref,
-                        "position": variant["case_variant"].position,
-                    }
-                    variants_list.append(cip_variant)
+                cip_variant = {
+                    "genome_assembly": genome_assembly,
+                    "alternate": variant["case_variant"].alt,
+                    "chromosome": variant["case_variant"].chromosome,
+                    "db_snp_id": variant["dbSNPid"],
+                    "reference": variant["case_variant"].ref,
+                    "position": variant["case_variant"].position,
+                }
+                variants_list.append(cip_variant)
 
         for variant in variants_list:
             self.case.variant_manager.add_variant(variant)
@@ -884,17 +904,27 @@ class CaseAttributeManager(object):
                     # variant in json matches variant entry
                     json_variant["variant_entry"] = variant
                 json_variant['zygosity'] = 'unknown'
+                json_variant['maternal_zygosity'] = 'unknown'
+                json_variant['paternal_zygosity'] = 'unknown'
+
                 for genotype in json_variant["calledGenotypes"]:
                     genotype_gelid = genotype.get('gelId', None)
                     if genotype_gelid == proband_manager.case_model.entry.gel_id:
                         json_variant['zygosity'] = genotype["genotype"]
-                        
+                    elif genotype_gelid == self.case.mother["gel_id"]:
+                        json_variant['maternal_zygosity'] = genotype["genotype"]
+                    elif genotype_gelid == self.case.father["gel_id"]:
+                        json_variant['paternal_zygosity'] = genotype["genotype"]
+
+
         for variant in self.case.json_variants:
             if variant["variant_entry"]:
                 tiered_proband_variant = {
                     "max_tier": variant["max_tier"],
                     "variant": variant["variant_entry"],
                     "zygosity": variant["zygosity"],
+                    "maternal_zygosity": variant["maternal_zygosity"],
+                    "paternal_zygosity": variant["paternal_zygosity"],
                 }
                 tiered_proband_variants.append(tiered_proband_variant)
 
@@ -915,10 +945,17 @@ class CaseAttributeManager(object):
                         # variant in json matches variant entry
                         json_variant["variant_entry"] = variant
                     json_variant['zygosity'] = 'unknown'
+                    json_variant['maternal_zygosity'] = 'unknown'
+                    json_variant['paternal_zygosity'] = 'unknown'
+
                     for genotype in json_variant["calledGenotypes"]:
                         genotype_gelid = genotype.get('gelId', None)
                         if genotype_gelid == proband_manager.case_model.entry.gel_id:
                             json_variant['zygosity'] = genotype["genotype"]
+                        elif genotype_gelid == self.case.mother["gel_id"]:
+                            json_variant['maternal_zygosity'] = genotype["genotype"]
+                        elif genotype_gelid == self.case.father["gel_id"]:
+                            json_variant['paternal_zygosity'] = genotype["genotype"]
 
             for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
                 if variant["variant_entry"]:
@@ -926,6 +963,8 @@ class CaseAttributeManager(object):
                         "max_tier": 0,  # CIP flagged variants assigned tier 0
                         "variant": variant["variant_entry"],
                         "zygosity": variant["zygosity"],
+                        "maternal_zygosity": variant["maternal_zygosity"],
+                        "paternal_zygosity": variant["paternal_zygosity"],
                     }
                     cip_proband_variants.append(cip_proband_variant)
 
@@ -945,11 +984,44 @@ class CaseAttributeManager(object):
             "max_tier": variant["max_tier"],
             "variant": variant["variant"],
             "zygosity": variant["zygosity"],
+            "maternal_zygosity": variant["maternal_zygosity"],
+            "paternal_zygosity": variant["paternal_zygosity"],
+            "inheritance": self.determine_variant_inheritance(variant),
             "somatic": False
-            # only adding T1/2 and CIP flagged
         } for variant in tiered_and_cip_proband_variants], self.model_objects)
 
+        for proband_variant in proband_variants.model_attributes_list:
+            print(proband_variant["inheritance"])
+
         return proband_variants
+
+    def determine_variant_inheritance(self, variant):
+        """
+        Take a variant, and use maternal and paternal zygosities to determine
+        inheritance.
+        """
+        print("Maternal Z:", variant["maternal_zygosity"])
+        print("Paternal Z:", variant["paternal_zygosity"])
+
+
+        if variant["maternal_zygosity"] == 'reference_homozygous' and variant["paternal_zygosity"] == 'reference_homozygous':
+            # neither parent has variant, --/-- cross so must be de novo
+            inheritance = 'de_novo'
+
+        elif "heterozygous" in variant["maternal_zygosity"] or "heterozygous" in variant["paternal_zygosity"]:
+            # catch +-/?? cross
+            inheritance = 'inherited'
+
+        elif "alternate" in variant["maternal_zygosity"] or "alternate" in variant["paternal_zygosity"]:
+            # catch ++/?? cross
+            inheritance = 'inherited'
+
+        else:
+            # cannot determine
+            inheritance = 'unknown'
+
+        print("Proband I:", inheritance)
+        return inheritance
 
     def get_report_events(self):
 
@@ -972,97 +1044,95 @@ class CaseAttributeManager(object):
 
         # modify report event dicts with gene and panel info
         for variant in self.case.json_variants:
-            # exlude Tier 3s:
-            if variant["max_tier"] < 3:
 
-                # go through each RE in the variant
-                for report_event in variant["reportEvents"]:
+            # go through each RE in the variant
+            for report_event in variant["reportEvents"]:
 
-                    # set the Gene entry
-                    found = False
-                    gene_found = False
-                    re_genomic_info = report_event.get("genomicFeature", None)
-                    if re_genomic_info:
-                        re_gene_ensembl_id = re_genomic_info.get("ensemblId", None)
-                        for gene in genes:
-                            if re_gene_ensembl_id == gene.ensembl_id:
-                                report_event["gene_entry"] = gene
-                                gene_found = True
-                                break
-
-                        if not gene_found:
-                            # re-attempt with HGNC
-                            re_gene_hgnc = re_genomic_info.get("HGNC", None)
-                            for gene in genes:
-                                if re_gene_hgnc == gene.hgnc_name:
-                                    report_event["gene_entry"] = gene
-                                    gene_found = True
+                # set the Gene entry
+                found = False
+                gene_found = False
+                re_genomic_info = report_event.get("genomicFeature", None)
+                if re_genomic_info:
+                    re_gene_ensembl_id = re_genomic_info.get("ensemblId", None)
+                    for gene in genes:
+                        if re_gene_ensembl_id == gene.ensembl_id:
+                            report_event["gene_entry"] = gene
+                            gene_found = True
+                            break
 
                     if not gene_found:
-                        report_event["gene_entry"] = None
+                        # re-attempt with HGNC
+                        re_gene_hgnc = re_genomic_info.get("HGNC", None)
+                        for gene in genes:
+                            if re_gene_hgnc == gene.hgnc_name:
+                                report_event["gene_entry"] = gene
+                                gene_found = True
 
-                    # set the Panel entry
-                    panel_found = False
-                    re_panel_name = report_event.get("panelName", None)
-                    re_panel_version = report_event.get("panelVersion", None)
+                if not gene_found:
+                    report_event["gene_entry"] = None
 
-                    for panel_version in panel_versions:
-                        if (
-                            re_panel_name == panel_version.panel.panel_name and
-                            re_panel_version == panel_version.version_number
-                        ):
-                            report_event["panel_version_entry"] = panel_version
-                            panel_found = True
-                            break
-                    if not panel_found:
-                        report_event["panel_version_entry"] = None
+                # set the Panel entry
+                panel_found = False
+                re_panel_name = report_event.get("panelName", None)
+                re_panel_version = report_event.get("panelVersion", None)
 
-                    if panel_found:
-                        try:
-                            panel = report_event["panel_version_entry"].panel
-                            panelapp_id = panel.panelapp_id
-                            # coverages is a dict of dicts: (1) access panel using hash
-                            panel_coverages = self.case.json_request_data["genePanelsCoverage"]
-                            panel_coverage = panel_coverages.get(panelapp_id, None)
-                            # (2) access coverage info using gene hgnc
+                for panel_version in panel_versions:
+                    if (
+                        re_panel_name == panel_version.panel.panel_name and
+                        re_panel_version == panel_version.version_number
+                    ):
+                        report_event["panel_version_entry"] = panel_version
+                        panel_found = True
+                        break
+                if not panel_found:
+                    report_event["panel_version_entry"] = None
 
-                            re_gene_hgnc = report_event["genomicFeature"]["HGNC"]
-                            re_gene_coverage = panel_coverage[re_gene_hgnc]
-                            # coverage info lists samples, get correct sample
-                            proband_sample = self.case.proband["samples"][0]
-                            proband_sample_avg = proband_sample + "_avg"
-                            gene_avg_coverage = re_gene_coverage[proband_sample_avg]
-                            report_event["gene_coverage"] = gene_avg_coverage
-                        except KeyError as e:
-                            report_event["gene_coverage"] = None
-
-                    # set the ProbandVariant entry
-                    proband_variant_found = False
-                    for proband_variant in proband_variants:
-                        if proband_variant.variant == variant["variant_entry"]:
-                            report_event["proband_variant_entry"] = proband_variant
-                            proband_variant_found = True
-                            break
-                    if not proband_variant_found:
-                        report_event["proband_variant_entry"] = None
-
+                if panel_found:
                     try:
-                        report_event_tier = int(report_event["tier"][-1:])
-                    except:
-                        report_event_tier = None
+                        panel = report_event["panel_version_entry"].panel
+                        panelapp_id = panel.panelapp_id
+                        # coverages is a dict of dicts: (1) access panel using hash
+                        panel_coverages = self.case.json_request_data["genePanelsCoverage"]
+                        panel_coverage = panel_coverages.get(panelapp_id, None)
+                        # (2) access coverage info using gene hgnc
 
-                    report_event_id = report_event.get("reportEventId", None)
-                    if report_event_id and report_event['proband_variant_entry']:
-                        json_report_events.append({
-                            "coverage": report_event.get("gene_coverage", None),
-                            "gene": report_event["gene_entry"],
-                            "mode_of_inheritance": report_event.get("modeOfInheritance", None),
-                            "panel": report_event["panel_version_entry"],
-                            "penetrance": report_event.get("penetrance", None),
-                            "proband_variant": report_event["proband_variant_entry"],
-                            "re_id": report_event_id,
-                            "tier": report_event_tier
-                        })
+                        re_gene_hgnc = report_event["genomicFeature"]["HGNC"]
+                        re_gene_coverage = panel_coverage[re_gene_hgnc]
+                        # coverage info lists samples, get correct sample
+                        proband_sample = self.case.proband["samples"][0]
+                        proband_sample_avg = proband_sample + "_avg"
+                        gene_avg_coverage = re_gene_coverage[proband_sample_avg]
+                        report_event["gene_coverage"] = gene_avg_coverage
+                    except KeyError as e:
+                        report_event["gene_coverage"] = None
+
+                # set the ProbandVariant entry
+                proband_variant_found = False
+                for proband_variant in proband_variants:
+                    if proband_variant.variant == variant["variant_entry"]:
+                        report_event["proband_variant_entry"] = proband_variant
+                        proband_variant_found = True
+                        break
+                if not proband_variant_found:
+                    report_event["proband_variant_entry"] = None
+
+                try:
+                    report_event_tier = int(report_event["tier"][-1:])
+                except:
+                    report_event_tier = None
+
+                report_event_id = report_event.get("reportEventId", None)
+                if report_event_id and report_event['proband_variant_entry']:
+                    json_report_events.append({
+                        "coverage": report_event.get("gene_coverage", None),
+                        "gene": report_event["gene_entry"],
+                        "mode_of_inheritance": report_event.get("modeOfInheritance", None),
+                        "panel": report_event["panel_version_entry"],
+                        "penetrance": report_event.get("penetrance", None),
+                        "proband_variant": report_event["proband_variant_entry"],
+                        "re_id": report_event_id,
+                        "tier": report_event_tier
+                    })
 
         # repeat for CIP flagged variants:
         for interpreted_genome in self.case.json["interpreted_genome"]:
