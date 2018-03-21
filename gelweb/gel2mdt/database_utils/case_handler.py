@@ -972,12 +972,14 @@ class CaseAttributeManager(object):
         tiered_and_cip_proband_variants = []
         seen_variants = []
         for cip_variant in cip_proband_variants:
-            tiered_and_cip_proband_variants.append(cip_variant)
-            seen_variants.append(cip_variant['variant'])
+            if cip_variant['variant'] not in seen_variants:
+                tiered_and_cip_proband_variants.append(cip_variant)
+                seen_variants.append(cip_variant['variant'])
 
         for variant in tiered_proband_variants:
             if variant['variant'] not in seen_variants:
                 tiered_and_cip_proband_variants.append(variant)
+                seen_variants.append(variant['variant'])
 
         proband_variants = ManyCaseModel(ProbandVariant, [{
             "interpretation_report": ir_manager.case_model.entry,
@@ -1346,7 +1348,6 @@ class CaseModel(object):
         elif self.model_type == ProbandVariant:
             entry = [db_obj for db_obj in queryset
                      if db_obj.variant == self.model_attributes["variant"]
-                     and db_obj.max_tier == self.model_attributes["max_tier"]
                      and db_obj.interpretation_report == self.model_attributes["interpretation_report"]]
         elif self.model_type == ProbandTranscriptVariant:
             entry = [db_obj for db_obj in queryset
