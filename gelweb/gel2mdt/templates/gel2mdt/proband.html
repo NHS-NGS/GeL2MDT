@@ -12,7 +12,7 @@
 <div class="tab-content">
     <div id="proband" class="tab-pane fade in active">
         <div class="container-fluid" >
-            <h1>{{proband.gel_id}}</h1>
+            <h1>{{report.ir_family.participant_family.proband.gel_id}}</h1>
             <form role="form" method="post" enctype="multipart/form-data" action="/update_proband/{{ report.id }}">
                 {% csrf_token %}
                 <div class="row">
@@ -264,7 +264,7 @@
 
     <div id="variants" class="tab-pane fade">
         <div class="container-fluid" >
-            <h1> {{ proband.gel_id }}</h1>
+            <h1> {{ report.ir_family.participant_family.proband.gel_id }}</h1>
             <div class="row">
 
                 <div class="col-md-12">
