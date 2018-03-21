@@ -75,6 +75,7 @@ o   applied to this case, which should be concordant with the phenotype of the
     gel_family_id = models.CharField(max_length=200, unique=True)
 
     clinician = models.ForeignKey(Clinician, on_delete=models.CASCADE)
+    trio_sequenced = models.BooleanField()
 
     def __str__(self):
         return str(self.gel_family_id)
@@ -358,6 +359,8 @@ class Relative(models.Model):
     date_of_birth = models.DateTimeField('date_of_birth')
     sex = models.CharField(max_length=10, blank=True)
 
+    sequenced = models.BooleanField()
+
     def __str__(self):
         return str(self.gel_id)
 
@@ -432,6 +435,15 @@ class Zygosities(ChoiceEnum):
     alternate_homozygous = "alternate_homozygous"
     unknown = "unknown"
 
+class Inheritance(ChoiceEnum):
+    """
+    List of choices for whether a variant is inherited, de novo, or unknown.
+    """
+    unknown = "unknown"
+    de_novo = "de_novo"
+    inheritance = "inherited"
+
+
 class ProbandVariant(models.Model):
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
     max_tier = models.IntegerField()
@@ -442,12 +454,26 @@ class ProbandVariant(models.Model):
         GELInterpretationReport, on_delete=models.CASCADE)
 
     zygosity = models.CharField(
+        # zygosity may also be 'unk' or 'missing', but this will default to
+        # Zygosities.unknown
         max_length=20,
         choices=Zygosities.choices(),
         default=Zygosities.unknown)
 
-    # TODO: find where to get these from
+    maternal_zygosity = models.CharField(
+        max_length=20,
+        choices=Zygosities.choices(),
+        default=Zygosities.unknown)
 
+    paternal_zygosity = models.CharField(
+        max_length=20,
+        choices=Zygosities.choices(),
+        default=Zygosities.unknown)
+
+    inheritance = models.CharField(
+        max_length=20,
+        choices=Inheritance.choices(),
+        default=Inheritance.unknown)
 
     def __str__(self):
         return str(self.interpretation_report) + " " + str(self.variant)
