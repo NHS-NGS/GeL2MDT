@@ -205,6 +205,23 @@ function redrawTrioStatus(table, trioStatus) {
     table.draw()
 }
 
+function redrawTier3Only(table, tier3Only) {
+    console.log(tier3Only)
+    if (tier3Only) {
+        // disable maxTier input
+        $('label[name=maxTierLabel]').attr('disabled', true);
+        table
+            .column(5)
+            .search('[3]', regex=true);
+        table.draw()
+    } else {
+        $('label[name=maxTierLabel]').removeAttr('disabled', true);
+        // looking at all variants, get values from maxTier
+        var maxTier = getRadioValue("maxTier");
+        redrawMaxTier(table, maxTier);
+    }
+}
+
 // filter value change listeners
 $("input[name='caseType']").change(function() {
     var table = $('#rare-disease-main').DataTable()
@@ -226,6 +243,11 @@ $("input[name='trioStatus']").change(function() {
     var table = $('#rare-disease-main').DataTable()
     redrawTrioStatus(table, $(this).val());
 });
+$("input[name='tier3Only']").change(function() {
+    var table = $('#rare-disease-main').DataTable()
+    redrawTier3Only(table, $(this).is(":checked"));
+});
+
 
 
 function initaliseTable() {
