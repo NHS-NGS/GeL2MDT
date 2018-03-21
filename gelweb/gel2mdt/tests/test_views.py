@@ -37,18 +37,26 @@ class ViewTests(TestCase):
         self.gel_ir = GELInterpretationReportFactory(ir_family=self.ir_family)
         self.ir_panels = InterpretationReportFamilyPanelFactory(ir_family=self.ir_family)
         self.gene = GeneFactory()
-        self.transcript = TranscriptFactory(gene=self.gene)
+        self.transcript1 = TranscriptFactory(gene=self.gene)
+        self.transcript2 = TranscriptFactory(gene=self.gene)
         self.variant = VariantFactory()
         self.proband_variant = ProbandVariantFactory(interpretation_report=self.gel_ir,
                                                      variant=self.variant)
         self.rdr = self.proband_variant.create_rare_disease_report()
         self.ptv = ProbandTranscriptVariantFactory(proband_variant=self.proband_variant,
-                                                   transcript=self.transcript,
+                                                   transcript=self.transcript1,
                                                    selected=True)
-        self.tv = TranscriptVariantFactory(transcript=self.transcript,
+        self.ptv = ProbandTranscriptVariantFactory(proband_variant=self.proband_variant,
+                                                   transcript=self.transcript2,
+                                                   selected=False)
+        self.tv1 = TranscriptVariantFactory(transcript=self.transcript1,
+                                           variant=self.variant)
+        self.tv2 = TranscriptVariantFactory(transcript=self.transcript2,
                                            variant=self.variant)
         self.reportevent = ReportEventFactory(proband_variant=self.proband_variant,
                                               panel=self.ir_panels.panel)
+        self.client.get(reverse('start-mdt'), follow=True)
+        self.mdt = MDT.objects.all().first()
 
     def test_index_view(self):
         """
@@ -60,6 +68,22 @@ class ViewTests(TestCase):
         #self.assertContains(response, self.proband.gel_id)  # Not working, maybe due to ajax?
         self.assertEquals(response.status_code, 200)
 
+    def test_rare_disease_api(self):
+        """
+        Test that you can get json of the rare disease cases
+        """
+        response = self.client.get(reverse('rare-disease-json'))
+        self.assertContains(response, self.proband.gel_id)
+        self.assertEquals(response.status_code, 200)
+
+    def test_proband_api(self):
+        """
+        Test that you can get json of proband case
+        """
+        response = self.client.get(reverse('proband-json', args=[self.proband.id]))
+        self.assertContains(response, self.proband.gel_id)
+        self.assertEquals(response.status_code, 200)
+
     def test_proband_view(self):
         """
         Tests the sample page for the factory case and you can see the patient
@@ -69,7 +93,7 @@ class ViewTests(TestCase):
         self.assertContains(response, self.proband.gel_id)
         self.assertContains(response, self.proband.surname)
         self.assertContains(response, self.gene)
-        self.assertContains(response, self.transcript.name)
+        self.assertContains(response, self.transcript1.name) # Should contain selected transcript
         self.assertEquals(response.status_code, 200)
 
     def test_variant_view(self):
@@ -81,6 +105,7 @@ class ViewTests(TestCase):
         self.assertContains(response, self.variant.db_snp_id)
         self.assertContains(response, self.proband.gel_id)
         self.assertContains(response, self.variant.reference)
+        #self.assertContains(response, self.variant.position)
         self.assertEquals(response.status_code, 200)
 
     def test_update_sample(self):
@@ -98,4 +123,143 @@ class ViewTests(TestCase):
                                      follow=True)
         self.assertContains(response, 'Proband Updated')
         self.assertEquals(response.status_code, 200)
+
+    def test_select_transcript(self):
+        """
+        View for selecting transcript for variant
+        """
+        response = self.client.post(reverse('select-transcript', args=[self.gel_ir.id,
+                                                                       self.proband_variant.id]))
+        self.assertContains(response, self.transcript1.name)
+        self.assertContains(response, self.transcript2.name)
+        self.assertEquals(response.status_code, 200)
+
+    def test_update_transcript(self):
+        """
+        Update transcript for variant
+        """
+        response = self.client.post(reverse('update-transcript',
+                                            args=[self.gel_ir.id,
+                                                  self.proband_variant.id,
+                                                  self.transcript2.id]),
+                                    follow=True)
+        self.assertContains(response, 'Transcript Updated')
+        self.assertEquals(response.status_code, 200)
+        response = self.client.get(reverse('proband-view', args=[self.gel_ir.id]))
+        self.assertContains(response, self.transcript2.name)
+
+    def test_start_mdt(self):
+        """
+        View for starting mdt
+        """
+        response = self.client.get(reverse('start-mdt'), follow=True)
+        self.assertContains(response, self.proband.gel_id)
+        self.assertEqual(response.status_code, 200)
+
+    def test_edit_mdt(self):
+        """
+        Allows you to edit samples in MDT
+        """
+        response = self.client.get(reverse('edit-mdt', args=[self.mdt.id]))
+        self.assertContains(response, self.proband.gel_id)
+        self.assertEqual(response.status_code, 200)
+
+    def test_add_ir_to_mdt(self):
+        """
+        Adding case to MDT
+        """
+        response = self.client.post(reverse('add-ir-to-mdt',
+                                            args=[self.mdt.id, self.gel_ir.id]),
+                                    follow=True)
+        self.assertContains(response, 'Remove')
+        self.assertContains(response, self.proband.gel_id)
+        self.assertEquals(response.status_code, 200)
+
+    def test_remove_ir_from_mdt(self):
+        """
+        Removing case to MDT
+        """
+        response = self.client.post(reverse('remove-ir-from-mdt',
+                                            args=[self.mdt.id, self.gel_ir.id]),
+                                    follow=True)
+        self.assertContains(response, 'Add')
+        self.assertContains(response, self.proband.gel_id)
+        self.assertEquals(response.status_code, 200)
+
+    def test_mdt_view(self):
+        """
+        Main MDT view and you can update MDTForm
+        """
+        self.client.post(reverse('add-ir-to-mdt',
+                                            args=[self.mdt.id, self.gel_ir.id]),
+                                    follow=True)
+        response = self.client.get(reverse('mdt-view',
+                                           args=[self.mdt.id]))
+        self.assertContains(response, self.proband.gel_id)
+        self.assertEquals(response.status_code, 200)
+        response = self.client.post(reverse('mdt-view', args=[self.mdt.id]),
+                                    {'status':'C',
+                                     'date_of_mdt': datetime.datetime.now()}, follow=True)
+        self.assertContains(response, 'Completed')
+        self.assertContains(response, 'MDT Updated')
+        self.assertEquals(response.status_code, 200)
+
+    def test_mdt_proband_view(self):
+        """
+        See MDT proband view
+        """
+        response = self.client.get(reverse('mdt-proband-view', args=[self.mdt.id,
+                                                                     self.gel_ir.id]))
+        self.assertContains(response, self.proband.gel_id)
+        self.assertContains(response, self.transcript1.gene)
+        self.assertEquals(response.status_code, 200)
+
+    def test_edit_mdt_proband(self):
+        """
+        Editing MDT proband discussion and actions
+        """
+        response = self.client.post(reverse('edit-mdt-proband', args=[self.gel_ir.id]),
+                                    {'discussion': 'asdjkasjkdjska',
+                                     'action': 'dakflajdfkl'})
+        self.assertContains(response, 'dakflajdfkl')
+        self.assertEquals(response.status_code, 200)
+
+    def test_recent_mdts(self):
+        """
+        You can see recent mdt's
+        """
+        response = self.client.get(reverse('recent-mdt'))
+        self.assertContains(response, self.mdt.id)
+        self.assertEquals(response.status_code, 200)
+
+    def test_select_attendees_for_mdt(self):
+        """
+        Can select and show existing attendees
+        """
+        response = self.client.get(reverse('select-attendees-for-mdt', args=[self.mdt.id]))
+        self.assertContains(response, self.family.clinician.name)
+        self.assertEquals(response.status_code, 200)
+
+    def test_add_attendee_to_mdt(self):
+        """
+        Can add a new attendee to a MDT
+        """
+        response = self.client.post(reverse('add-attendee-to-mdt', args=[self.mdt.id,
+                                                                          self.family.clinician.id,
+                                                                          'Clinician']),
+                                    follow=True)
+        self.assertContains(response, self.family.clinician.name)
+        self.assertIn(self.family.clinician, self.mdt.clinicians.all())
+        self.assertEquals(response.status_code, 200)
+
+    # def test_delete_mdt(self):
+    #     """
+    #     Delete MDT
+    #     """
+    #     # response = self.client.post(reverse('delete-mdt', args=[self.mdt.id]))
+    #     # self.assertContains(response, )
+
+
+
+
 
