@@ -682,6 +682,23 @@ def export_mdt_outcome_form(request, report_id):
     response['Content-Length'] = length
     return response
 
+@login_required
+def negative_report(request, report_id):
+    '''
+    Shows details about a particular proband, some fields are editable by clinical scientists
+    :param request:
+    :param report_id: GEL Report ID
+    :return:
+    '''
+
+    report = GELInterpretationReport.objects.get(id=report_id)
+    panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.ir_family)
+
+    return render(request, 'gel2mdt/technical_information.html', {
+        'report': report,
+        'panels': panels})
+
+
 
 @login_required
 def genomics_england(request):

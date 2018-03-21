@@ -441,11 +441,45 @@ class CaseAttributeManager(object):
             # participant has a mother and father recorded
             self.case.trio_sequenced = True
 
+        self.case.has_de_novo = False
+        if self.case.trio_sequenced:
+            # determine if any de_novo variants present
+            variants_to_check = []
+
+            # standard tiered variants
+            for json_variant in self.case.json_variants:
+                for genotype in json_variant["calledGenotypes"]:
+                    genotype_gelid = genotype.get('gelId', None)
+                    if genotype_gelid == self.case.mother["gel_id"]:
+                        json_variant['maternal_zygosity'] = genotype["genotype"]
+                    elif genotype_gelid == self.case.father["gel_id"]:
+                        json_variant['paternal_zygosity'] = genotype["genotype"]
+                variants_to_check.append(json_variant)
+
+            # cip-flagged variants
+            for interpreted_genome in self.case.json["interpreted_genome"]:
+                for json_variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
+                    for genotype in json_variant["calledGenotypes"]:
+                        genotype_gelid = genotype.get('gelId', None)
+                        if genotype_gelid == self.case.mother["gel_id"]:
+                            json_variant['maternal_zygosity'] = genotype["genotype"]
+                        elif genotype_gelid == self.case.father["gel_id"]:
+                            json_variant['paternal_zygosity'] = genotype["genotype"]
+                    variants_to_check.append(json_variant)
+
+            for variant in variants_to_check:
+                inheritance = self.determine_variant_inheritance(variant)
+                if inheritance == "de_novo":
+                    self.case.has_de_novo = True
+                    # found a de novo, can stop here
+                    break
+
         clinician = self.case.attribute_managers[Clinician].case_model
         family = CaseModel(Family, {
             "clinician": clinician.entry,
             "gel_family_id": self.case.json["family_id"],
-            "trio_sequenced": self.case.trio_sequenced
+            "trio_sequenced": self.case.trio_sequenced,
+            "has_de_novo": self.case.has_de_novo
         }, self.model_objects)
         return family
 
@@ -585,39 +619,37 @@ class CaseAttributeManager(object):
 
         for transcript in self.case.transcripts:
             if transcript.gene_ensembl_id and transcript.gene_hgnc_id:
-                if transcript.gene_ensembl_id.startswith('ENSG'):
-                    gene_list.append({
-                        'EnsembleGeneIds': transcript.gene_ensembl_id,
-                        'GeneSymbol': transcript.gene_hgnc_name,
-                        'HGNC_ID': str(transcript.gene_hgnc_id),
-                    })
-                    self.case.gene_manager.add_searched(transcript.gene_ensembl_id, str(transcript.gene_hgnc_id))
+                gene_list.append({
+                    'EnsembleGeneIds': transcript.gene_ensembl_id,
+                    'GeneSymbol': transcript.gene_hgnc_name,
+                    'HGNC_ID': str(transcript.gene_hgnc_id),
+                })
+                self.case.gene_manager.add_searched(transcript.gene_ensembl_id, str(transcript.gene_hgnc_id))
 
         for gene in gene_list:
             gene['HGNC_ID'] = None
             if gene['EnsembleGeneIds']:
-                if gene['EnsembleGeneIds'].startswith('ENSG'):
-                    polled = self.case.gene_manager.fetch_searched(gene['EnsembleGeneIds'])
-                    if polled == 'Not_found':
-                        gene['HGNC_ID'] = None
-                    elif not polled:
-                        genename_poll = PollAPI(
-                            "genenames", "search/{gene}/".format(
-                                gene=gene["EnsembleGeneIds"])
-                        )
-                        genename_response = genename_poll.get_json_response()
-                        if genename_response['response']['docs']:
-                            hgnc_id = genename_response['response']['docs'][0]['hgnc_id'].split(':')
-                            gene['HGNC_ID'] = str(hgnc_id[1])
-                            self.case.gene_manager.add_searched(gene["EnsembleGeneIds"], str(hgnc_id[1]))
-                        else:
-                            self.case.gene_manager.add_searched(gene["EnsembleGeneIds"], 'Not_found')
+                polled = self.case.gene_manager.fetch_searched(gene['EnsembleGeneIds'])
+                if polled == 'Not_found':
+                    gene['HGNC_ID'] = None
+                elif not polled:
+                    genename_poll = PollAPI(
+                        "genenames", "search/{gene}/".format(
+                            gene=gene["EnsembleGeneIds"])
+                    )
+                    genename_response = genename_poll.get_json_response()
+                    if genename_response['response']['docs']:
+                        hgnc_id = genename_response['response']['docs'][0]['hgnc_id'].split(':')
+                        gene['HGNC_ID'] = str(hgnc_id[1])
+                        self.case.gene_manager.add_searched(gene["EnsembleGeneIds"], str(hgnc_id[1]))
                     else:
-                        gene['HGNC_ID'] = polled
+                        self.case.gene_manager.add_searched(gene["EnsembleGeneIds"], 'Not_found')
+                else:
+                    gene['HGNC_ID'] = polled
 
         cleaned_gene_list = []
         for gene in gene_list:
-            if gene['HGNC_ID'] and gene['EnsembleGeneIds'].startswith:
+            if gene['HGNC_ID']:
                 self.case.gene_manager.add_gene(gene)
                 new_gene = self.case.gene_manager.fetch_gene(gene)
                 cleaned_gene_list.append(new_gene)
@@ -628,7 +660,7 @@ class CaseAttributeManager(object):
             "ensembl_id": gene["EnsembleGeneIds"],  # TODO: which ID to use?
             "hgnc_name": gene["GeneSymbol"],
             "hgnc_id": gene['HGNC_ID']
-        } for gene in cleaned_gene_list if gene["HGNC_ID"] and gene['EnsembleGeneIds'].startswith('ENSG')], self.model_objects)
+        } for gene in cleaned_gene_list if gene["HGNC_ID"]], self.model_objects)
         return genes
 
     def get_panel_version_genes(self):
@@ -702,7 +734,7 @@ class CaseAttributeManager(object):
         ir_family= self.case.attribute_managers[InterpretationReportFamily].case_model
         ir_family_panels = ManyCaseModel(InterpretationReportFamilyPanel, [{
             "ir_family": ir_family.entry,
-            "panel": panel.entry
+            "panel": panel.entry,
         } for panel in self.case.attribute_managers[PanelVersion].case_model.case_models if "entry" in vars(panel)],
             self.model_objects)
 
@@ -717,6 +749,22 @@ class CaseAttributeManager(object):
         irf_manager = case_attribute_managers[InterpretationReportFamily]
         ir_family = irf_manager.case_model
 
+        # find assembly
+        tool_models = [
+            case_model.entry
+            for case_model in self.case.attribute_managers[ToolOrAssemblyVersion].case_model.case_models]
+        genome_assembly = None
+        for tool in tool_models:
+            if tool.tool_name == 'genome_build':
+                genome_assembly = tool
+
+        # find the max tier
+        self.case.processed_variants = self.process_proband_variants()
+        self.case.max_tier = 3
+        for variant in self.case.processed_variants:
+            if variant["max_tier"] < self.case.max_tier:
+                self.case.max_tier = variant["max_tier"]
+
         ir = CaseModel(GELInterpretationReport, {
             "ir_family": ir_family.entry,
             "polled_at_datetime": timezone.now(),
@@ -727,7 +775,9 @@ class CaseAttributeManager(object):
                     self.case.status["created_at"][:19],
                     '%Y-%m-%dT%H:%M:%S'
                 )),
-            "user": self.case.status["user"]
+            "user": self.case.status["user"],
+            "max_tier": self.case.max_tier,
+            "assembly": genome_assembly
         }, self.model_objects)
         return ir
 
@@ -874,14 +924,13 @@ class CaseAttributeManager(object):
 
         return transcript_variants
 
-    def get_proband_variants(self):
+    def process_proband_variants(self):
         """
-        Get proband variant information from VEP and the JSON and create MCM.
+        Take all proband variants from this case and process them for
+        get_proband_variants.
         """
-        ir_manager = self.case.attribute_managers[GELInterpretationReport]
         proband_manager = self.case.attribute_managers[Proband]
 
-        # match up created variants to corresponding dict in json_variants:
         variant_entries = [
             variant.entry
             for variant
@@ -972,14 +1021,24 @@ class CaseAttributeManager(object):
         tiered_and_cip_proband_variants = []
         seen_variants = []
         for cip_variant in cip_proband_variants:
-            if cip_variant['variant'] not in seen_variants:
-                tiered_and_cip_proband_variants.append(cip_variant)
-                seen_variants.append(cip_variant['variant'])
+            tiered_and_cip_proband_variants.append(cip_variant)
+            seen_variants.append(cip_variant['variant'])
 
         for variant in tiered_proband_variants:
             if variant['variant'] not in seen_variants:
                 tiered_and_cip_proband_variants.append(variant)
-                seen_variants.append(variant['variant'])
+
+        return tiered_and_cip_proband_variants
+
+
+    def get_proband_variants(self):
+        """
+        Get proband variant information from VEP and the JSON and create MCM.
+        """
+
+        ir_manager = self.case.attribute_managers[GELInterpretationReport]
+
+        tiered_and_cip_proband_variants = self.case.processed_variants
 
         proband_variants = ManyCaseModel(ProbandVariant, [{
             "interpretation_report": ir_manager.case_model.entry,
@@ -1348,6 +1407,7 @@ class CaseModel(object):
         elif self.model_type == ProbandVariant:
             entry = [db_obj for db_obj in queryset
                      if db_obj.variant == self.model_attributes["variant"]
+                     and db_obj.max_tier == self.model_attributes["max_tier"]
                      and db_obj.interpretation_report == self.model_attributes["interpretation_report"]]
         elif self.model_type == ProbandTranscriptVariant:
             entry = [db_obj for db_obj in queryset

@@ -49,6 +49,7 @@ class FamilyFactory(factory.django.DjangoModelFactory):
     gel_family_id = factory.Faker('numerify', text='#########')
     clinician = factory.SubFactory(ClinicianFactory)
     trio_sequenced = True
+    has_de_novo = True
 
 
 class FamilyPhenotypeFactory(factory.django.DjangoModelFactory):
@@ -209,6 +210,9 @@ class InterpretationReportFamilyPanelFactory(factory.django.DjangoModelFactory):
 
     panel = factory.SubFactory(PanelVersionFactory)
     ir_family = factory.SubFactory(InterpretationReportFamilyFactory)
+
+    average_coverage = factory.Faker('numerify', text='###.##')
+    proportion_above_15x = factory.Faker('numerify', text='#.#####')
 
 
 class GELInterpretationReportFactory(factory.django.DjangoModelFactory):
