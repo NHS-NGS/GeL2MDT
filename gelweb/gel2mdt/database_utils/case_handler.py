@@ -563,37 +563,39 @@ class CaseAttributeManager(object):
 
         for transcript in self.case.transcripts:
             if transcript.gene_ensembl_id and transcript.gene_hgnc_id:
-                gene_list.append({
-                    'EnsembleGeneIds': transcript.gene_ensembl_id,
-                    'GeneSymbol': transcript.gene_hgnc_name,
-                    'HGNC_ID': str(transcript.gene_hgnc_id),
-                })
-                self.case.gene_manager.add_searched(transcript.gene_ensembl_id, str(transcript.gene_hgnc_id))
+                if transcript.gene_ensembl_id.startswith('ENSG'):
+                    gene_list.append({
+                        'EnsembleGeneIds': transcript.gene_ensembl_id,
+                        'GeneSymbol': transcript.gene_hgnc_name,
+                        'HGNC_ID': str(transcript.gene_hgnc_id),
+                    })
+                    self.case.gene_manager.add_searched(transcript.gene_ensembl_id, str(transcript.gene_hgnc_id))
 
         for gene in gene_list:
             gene['HGNC_ID'] = None
             if gene['EnsembleGeneIds']:
-                polled = self.case.gene_manager.fetch_searched(gene['EnsembleGeneIds'])
-                if polled == 'Not_found':
-                    gene['HGNC_ID'] = None
-                elif not polled:
-                    genename_poll = PollAPI(
-                        "genenames", "search/{gene}/".format(
-                            gene=gene["EnsembleGeneIds"])
-                    )
-                    genename_response = genename_poll.get_json_response()
-                    if genename_response['response']['docs']:
-                        hgnc_id = genename_response['response']['docs'][0]['hgnc_id'].split(':')
-                        gene['HGNC_ID'] = str(hgnc_id[1])
-                        self.case.gene_manager.add_searched(gene["EnsembleGeneIds"], str(hgnc_id[1]))
+                if gene['EnsembleGeneIds'].startswith('ENSG'):
+                    polled = self.case.gene_manager.fetch_searched(gene['EnsembleGeneIds'])
+                    if polled == 'Not_found':
+                        gene['HGNC_ID'] = None
+                    elif not polled:
+                        genename_poll = PollAPI(
+                            "genenames", "search/{gene}/".format(
+                                gene=gene["EnsembleGeneIds"])
+                        )
+                        genename_response = genename_poll.get_json_response()
+                        if genename_response['response']['docs']:
+                            hgnc_id = genename_response['response']['docs'][0]['hgnc_id'].split(':')
+                            gene['HGNC_ID'] = str(hgnc_id[1])
+                            self.case.gene_manager.add_searched(gene["EnsembleGeneIds"], str(hgnc_id[1]))
+                        else:
+                            self.case.gene_manager.add_searched(gene["EnsembleGeneIds"], 'Not_found')
                     else:
-                        self.case.gene_manager.add_searched(gene["EnsembleGeneIds"], 'Not_found')
-                else:
-                    gene['HGNC_ID'] = polled
+                        gene['HGNC_ID'] = polled
 
         cleaned_gene_list = []
         for gene in gene_list:
-            if gene['HGNC_ID']:
+            if gene['HGNC_ID'] and gene['EnsembleGeneIds'].startswith:
                 self.case.gene_manager.add_gene(gene)
                 new_gene = self.case.gene_manager.fetch_gene(gene)
                 cleaned_gene_list.append(new_gene)
@@ -604,7 +606,7 @@ class CaseAttributeManager(object):
             "ensembl_id": gene["EnsembleGeneIds"],  # TODO: which ID to use?
             "hgnc_name": gene["GeneSymbol"],
             "hgnc_id": gene['HGNC_ID']
-        } for gene in cleaned_gene_list if gene["HGNC_ID"]], self.model_objects)
+        } for gene in cleaned_gene_list if gene["HGNC_ID"] and gene['EnsembleGeneIds'].startswith('ENSG')], self.model_objects)
         return genes
 
     def get_panel_version_genes(self):
