@@ -81,7 +81,7 @@ def write_mdt_outcome_template(report):
     paragraph.add_run('Family ID: ').bold=True
     paragraph.add_run('{}\n'.format(report.ir_family.participant_family.gel_family_id))
     paragraph.add_run('Genome Build: ').bold=True
-    paragraph.add_run('{}\n\n'.format(report.assembly()))
+    paragraph.add_run('{}\n\n'.format(report.assembly))
 
     # paragraph.add_run('Phenotype summary: ').bold=True
     # if sample_info.hpo_terms:

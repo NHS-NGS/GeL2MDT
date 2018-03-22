@@ -642,6 +642,7 @@ def add_new_attendee(request):
                 other.name = form.cleaned_data['name']
                 other.hospital = form.cleaned_data['hospital']
                 other.save()
+            messages.add_message(request, 25, 'Attendee Added')
             if 'mdt_id' in request.session:
                 return HttpResponseRedirect('/select_attendees_for_mdt/{}'.format(request.session.get('mdt_id')))
             else:

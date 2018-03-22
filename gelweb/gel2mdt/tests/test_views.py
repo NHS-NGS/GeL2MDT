@@ -242,7 +242,7 @@ class ViewTests(TestCase):
 
     def test_add_attendee_to_mdt(self):
         """
-        Can add a new attendee to a MDT
+        Can add a attendee to a MDT
         """
         response = self.client.post(reverse('add-attendee-to-mdt', args=[self.mdt.id,
                                                                           self.family.clinician.id,
@@ -252,13 +252,64 @@ class ViewTests(TestCase):
         self.assertIn(self.family.clinician, self.mdt.clinicians.all())
         self.assertEquals(response.status_code, 200)
 
-    # def test_delete_mdt(self):
-    #     """
-    #     Delete MDT
-    #     """
-    #     # response = self.client.post(reverse('delete-mdt', args=[self.mdt.id]))
-    #     # self.assertContains(response, )
+    def test_add_new_attendee(self):
+        """
+        Can add a new attendee
+        """
+        response = self.client.post(reverse('add-new-attendee'),
+                                    {'name': 'Paddy',
+                                        'hospital':'GOSH',
+                                     'email': 'gosh@gosh.nhs.uk',
+                                     'role': 'Clinician'}, follow=True)
+        self.assertContains(response, 'Attendee Added')
+        self.assertEquals(response.status_code, 200)
 
+    def test_export_mdt(self):
+        """
+        Testing the mdt exporting function
+        """
+        self.client.post(reverse('add-ir-to-mdt',
+                                 args=[self.mdt.id, self.gel_ir.id]),
+                         follow=True)
+        response = self.client.post(reverse('export-mdt', args=[self.mdt.id]), follow=True)
+        self.assertContains(response, self.ir_family.ir_family_id)
+        self.assertContains(response, self.proband.surname)
+        self.assertContains(response, self.transcript1.gene)
+        self.assertEquals(response.status_code, 200)
+
+    def test_export_mdt_outcome_form(self):
+        """
+        Testing the mdm outcome exporting function
+        """
+        self.client.post(reverse('add-ir-to-mdt',
+                                            args=[self.mdt.id, self.gel_ir.id]),
+                                    follow=True)
+        response = self.client.post(reverse('export-mdt-outcome', args=[self.gel_ir.id]))
+        self.assertIn(self.ir_family.ir_family_id, response['Content-Disposition'])  # No idea how to test content of this
+        self.assertEquals(response.status_code, 200)
+
+    def test_delete_mdt(self):
+        """
+        #Delete MDT
+        """
+        response = self.client.post(reverse('delete-mdt', args=[self.mdt.id]), follow=True)
+        self.assertContains(response, 'MDT Deleted')
+        self.assertEquals(response.status_code, 200)
+
+    def test_negative_report(self):
+        """
+        Test negative report
+        """
+        pass
+
+    def gel_report(self):
+        """
+        Test this crap GEL view
+        """
+        response = self.client.get(reverse('genomics-england'), follow=True)  # Start MDT
+        self.assertContains(response, 'Clinical Report Version:')
+        self.assertContains(response, 'Panel Version:')
+        self.assertEquals(response.status_code, 200)
 
 
 
