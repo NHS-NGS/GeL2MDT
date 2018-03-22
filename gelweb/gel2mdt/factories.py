@@ -228,7 +228,7 @@ class GELInterpretationReportFactory(factory.django.DjangoModelFactory):
 
     updated = factory.Faker('past_date', start_date='-30d')
     sample_type = 'raredisease'
-
+    assembly = factory.SubFactory(GenomeBuildFactory)
     user = factory.Faker('last_name')
     sha_hash = factory.Faker('sha256')
     polled_at_datetime = datetime.datetime.now()
