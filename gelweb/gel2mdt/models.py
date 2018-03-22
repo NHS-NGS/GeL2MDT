@@ -52,6 +52,8 @@ class Clinician(models.Model):
     name = models.CharField(max_length=200)
     hospital = models.CharField(max_length=200)
     email = models.EmailField()
+    added_by_user = models.BooleanField(default=False)
+    relates_to = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return str(self.name)

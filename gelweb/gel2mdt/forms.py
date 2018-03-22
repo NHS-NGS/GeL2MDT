@@ -2,6 +2,7 @@ from django import forms
 from .models import *
 from django.contrib.auth.models import User
 from django.forms import HiddenInput, Textarea, CheckboxInput
+from django.forms import BaseFormSet
 
 class UserForm(forms.ModelForm):
     """ User registration form
@@ -72,6 +73,10 @@ class ProbandMDTForm(forms.ModelForm):
             'action': Textarea(attrs={'rows': '3'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super(ProbandMDTForm, self).__init__(*args, **kwargs)
+        self.fields['status'].required = False
+
 class RareDiseaseMDTForm(forms.ModelForm):
     class Meta:
         model = RareDiseaseReport
@@ -107,6 +112,32 @@ class AddNewAttendee(forms.Form):
                                       ('Clinical Scientist', 'Clinical Scientist'),
                                       ('Other Staff', 'Other Staff')))
 
+class VariantForm(forms.ModelForm):
+
+    def clean_reference(self):
+        data = self.cleaned_data['reference'].strip()
+        if not all([f in ['A', 'T', 'G', 'C'] for f in data]):
+            raise forms.ValidationError("Not DNA sequence")
+        else:
+            return data
+
+    def clean_alternate(self):
+        data = self.cleaned_data['alternate'].strip()
+        if not all([f in ['A', 'T', 'G', 'C'] for f in data]):
+            raise forms.ValidationError("Not DNA sequence")
+        else:
+            return data
+
+    class Meta:
+        model = Variant
+        fields = ['chromosome',
+                  'position',
+                  'reference',
+                  'alternate',
+                  'db_snp_id']
+        widgets = {'reference': Textarea(attrs={'rows': '2'}),
+                   'alternate': Textarea(attrs={'rows': '2'})}
+
 
 class GenomicsEnglandform(forms.Form):
     """ Form for entering genomics england information to render a report to be used by the scientists """
@@ -122,4 +153,3 @@ class PanelAppform(forms.Form):
     gene_panel = forms.CharField(max_length=255, label="Gene Panel")
     # Panel version number as a float
     gp_version = forms.FloatField(label="Panel Version")
-
