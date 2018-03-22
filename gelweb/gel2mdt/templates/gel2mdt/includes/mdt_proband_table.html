@@ -13,10 +13,12 @@
     <td>
         {% if mdt_form.status.value != "C" %}
         <p>
-        <button type="button" class="btn btn-primary js-edit-mdt-proband"
+        <button type="button" class="btn btn-xs btn-info js-edit-mdt-proband "
                 data-url="/edit_mdt_proband/{{report.id}}">
-          Edit
+            Edit
         </button>
+
+
         </p>
         {% else %}
         <p></p>
@@ -24,9 +26,18 @@
     </td>
     <td>
         {% ifnotequal  proband_variant_count|get_item:report.id 0 %}
-       <form action="/mdt_proband_view/{{mdt_id}}/{{report.id}}" role="form">
-        {% csrf_token %} {% bootstrap_button proband_variant_count|get_item:report.id button_type="submit" button_class="btn-primary" %}
-    </form>
+
+        <a href="/mdt_proband_view/{{mdt_id}}/{{report.id }}/1"><i class="fas fa-pencil-alt"></i></a> {{proband_variant_count|get_item:report.id  }}
+
+        {% else %}
+        No Variants
+        {% endifnotequal %}
+    </td>
+    <td>
+        {% ifnotequal  t3_proband_variant_count|get_item:report.id 0 %}
+
+        <a href="/mdt_proband_view/{{mdt_id}}/{{report.id }}/0"><i class="fas fa-pencil-alt"></i></a> {{t3_proband_variant_count|get_item:report.id  }}
+
         {% else %}
         No Variants
         {% endifnotequal %}

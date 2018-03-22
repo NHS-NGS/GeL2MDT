@@ -296,7 +296,8 @@ class CaseAttributeManager(object):
         clinician = CaseModel(Clinician, {
             "name": clinician_details['name'],
             "email": "unknown",  # clinicain email not on labkey
-            "hospital": clinician_details['hospital']
+            "hospital": clinician_details['hospital'],
+            "added_by_user": False
         }, self.model_objects)
         return clinician
 
@@ -426,8 +427,11 @@ class CaseAttributeManager(object):
         Create case model to handle adding/getting family for this case.
         """
         family_members = self.case.family_members
-        self.case.mother = None
-        self.case.father = None
+        self.case.mother = {}
+        self.case.father = {}
+        self.case.mother['sequenced'] = False
+        self.case.father['sequenced'] = False
+
 
         for family_member in family_members:
             if family_member["relation_to_proband"] == "Father":
@@ -436,6 +440,7 @@ class CaseAttributeManager(object):
                 self.case.mother = family_member
 
         self.case.trio_sequenced = False
+
 
         if self.case.mother["sequenced"] and self.case.father["sequenced"]:
             # participant has a mother and father recorded
@@ -448,6 +453,8 @@ class CaseAttributeManager(object):
 
             # standard tiered variants
             for json_variant in self.case.json_variants:
+                json_variant['maternal_zygosity'] = 'unknown'
+                json_variant['paternal_zygosity'] = 'unknown'
                 for genotype in json_variant["calledGenotypes"]:
                     genotype_gelid = genotype.get('gelId', None)
                     if genotype_gelid == self.case.mother["gel_id"]:
@@ -459,6 +466,8 @@ class CaseAttributeManager(object):
             # cip-flagged variants
             for interpreted_genome in self.case.json["interpreted_genome"]:
                 for json_variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
+                    json_variant['maternal_zygosity'] = 'unknown'
+                    json_variant['paternal_zygosity'] = 'unknown'
                     for genotype in json_variant["calledGenotypes"]:
                         genotype_gelid = genotype.get('gelId', None)
                         if genotype_gelid == self.case.mother["gel_id"]:
@@ -504,7 +513,7 @@ class CaseAttributeManager(object):
 
         return family_phenotypes
 
-    def get_panelapp_api_response(panel):
+    def get_panelapp_api_response(self, panel, panel_file):
         panelapp_poll = PollAPI(
             "panelapp", "get_panel/{panelapp_id}/?version={v}".format(
                 panelapp_id=panel["panelName"],
@@ -514,7 +523,7 @@ class CaseAttributeManager(object):
             json.dump(panelapp_poll.get_json_response(), f)
             panel_app_response = panelapp_poll.get_json_response()
 
-        return panelapp_poll.get_json_response()
+        return panel_app_response
 
     def get_panels(self):
         """
@@ -534,19 +543,21 @@ class CaseAttributeManager(object):
                 if not polled:
                     panel_file = os.path.join(panelapp_storage, '{}_{}.json'.format(panel['panelName'],
                                                                                         panel['panelVersion']))
+                    print(panel["panelName"], panel["panelVersion"])
                     if os.path.isfile(panel_file):
+
                         try:
-                            panel_app_response = json.load(open(panel_file))
+                            panelapp_response = json.load(open(panel_file))
                         except:
-                            panelapp_response = self.get_panelapp_api_response(panel)
+                            panelapp_response = self.get_panelapp_api_response(panel, panel_file)
                     else:
-                        panelapp_response = self.get_panelapp_api_response(panel)
+                        panelapp_response = self.get_panelapp_api_response(panel, panel_file)
 
                     # inform the PanelManager that a new panel has been added
                     polled = self.case.panel_manager.add_panel_response(
                         panelapp_id=panel["panelName"],
                         panel_version=panel["panelVersion"],
-                        panelapp_response=panel_app_response["result"]
+                        panelapp_response=panelapp_response["result"]
                     )
                     panel["panelapp_results"] = polled.results
 
@@ -1002,9 +1013,9 @@ class CaseAttributeManager(object):
                         if genotype_gelid == proband_manager.case_model.entry.gel_id:
                             json_variant['zygosity'] = genotype["genotype"]
                         elif genotype_gelid == self.case.mother["gel_id"]:
-                            json_variant['maternal_zygosity'] = genotype["genotype"]
+                            json_variant['maternal_zygosity'] = genotype.get("genotype", 'unknown')
                         elif genotype_gelid == self.case.father["gel_id"]:
-                            json_variant['paternal_zygosity'] = genotype["genotype"]
+                            json_variant['paternal_zygosity'] = genotype.get('genotype', 'unknown')
 
             for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
                 if variant["variant_entry"]:
@@ -1020,13 +1031,16 @@ class CaseAttributeManager(object):
         # remove CIP tiered variants which are in cip variants
         tiered_and_cip_proband_variants = []
         seen_variants = []
+
         for cip_variant in cip_proband_variants:
-            tiered_and_cip_proband_variants.append(cip_variant)
-            seen_variants.append(cip_variant['variant'])
+            if cip_variant['variant'] not in seen_variants:
+                tiered_and_cip_proband_variants.append(cip_variant)
+                seen_variants.append(cip_variant['variant'])
 
         for variant in tiered_proband_variants:
             if variant['variant'] not in seen_variants:
                 tiered_and_cip_proband_variants.append(variant)
+                seen_variants.append(variant['variant'])
 
         return tiered_and_cip_proband_variants
 
@@ -1061,9 +1075,6 @@ class CaseAttributeManager(object):
         Take a variant, and use maternal and paternal zygosities to determine
         inheritance.
         """
-        print("Maternal Z:", variant["maternal_zygosity"])
-        print("Paternal Z:", variant["paternal_zygosity"])
-
 
         if variant["maternal_zygosity"] == 'reference_homozygous' and variant["paternal_zygosity"] == 'reference_homozygous':
             # neither parent has variant, --/-- cross so must be de novo

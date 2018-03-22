@@ -11,13 +11,12 @@
 <div class="container-fluid" >
 
     <div align="center">
-<a class="btn btn-primary btn-lg" href="/proband/{{report.id}}">
-   {{report.ir_family.participant_family.proband.gel_id}}
-</a>
-<a class="btn btn-info btn-lg" href="/mdt_view/{{mdt_id}}">
+
+<a class="btn btn-link btn-lg" href="/mdt_view/{{mdt_id}}">
    Return to MDT
 </a>
-</div>
+    </div>
+</br>
     <form role="form" method="post" enctype="multipart/form-data" >
         {% csrf_token %}
           {{ variant_formset.management_form }}
@@ -29,6 +28,20 @@
                     <div class="panel panel-default">
                         <div class="panel-heading">Participant Information</div>
                         <div class="panel-body">
+
+                            <div class="col-md-4">
+                                {% bootstrap_label "CIP ID" %}
+                                <div class="block">
+                                    <a class=" btn-link" href="/proband/{{report.id}}">
+                                    {{report.ir_family.ir_family_id}}</a>
+                                </div>
+                                </br>
+                                {% bootstrap_label "DOB" %}
+                                <div class="block">
+                                    {{report.ir_family.participant_family.proband.date_of_birth}}
+                                </div>
+
+                            </div>
 
                             <div class="col-md-4">
                                 {% bootstrap_label "Forename" %}
@@ -43,19 +56,13 @@
 
                             </div>
 
+
                             <div class="col-md-4">
                                 {% bootstrap_label "NHS Number" %}
                                 <div class="block">
                                     {{report.ir_family.participant_family.proband.nhs_number}}
                                 </div>
                                 </br>
-                                {% bootstrap_label "DOB" %}
-                                <div class="block">
-                                    {{report.ir_family.participant_family.proband.date_of_birth}}
-                                </div>
-
-                            </div>
-                            <div class="col-md-4">
                                 {% bootstrap_label "Panels" %}
                                 <div class="block">
                                      {% for panel in panels %}
@@ -101,6 +108,7 @@
             <thead style='font-size: 70%' align="center">
                 <tr>
                     <th>Variant ID</th>
+                    <th>Tier</th>
                     <th>Gene</th>
                     <th>HGVSc</th>
                     <th>HGVSp</th>
@@ -115,15 +123,16 @@
                     <th>Inform Reproductive Choice</th>
                 </tr>
             </thead>
-                                        <tbody style='font-size: 75%' align="center">
+                                        <tbody style='font-size: 75%' >
                                             {% for form in variant_formset.forms %}
                                             {{ form.id }}
 
                                                 <tr>
                                                     <td  ><a href="/variant/{{form.instance.proband_variant.variant.id}}">{{form.instance.proband_variant.variant.id}}</a></td>
-                                                    <td>{{form.instance.proband_variant.get_transcript.gene}}</td>
-                                                    <td>{{form.instance.proband_variant.get_transcript_variant.hgvs_c}}</td>
-                                                    <td>{{form.instance.proband_variant.get_transcript_variant.hgvs_p}}</td>
+                                                    <td>{{form.instance.proband_variant.max_tier}}</td>
+                                                    <td >{{form.instance.proband_variant.get_transcript.gene}}</td>
+                                                    <td  style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{form.instance.proband_variant.get_transcript_variant.hgvs_c}}</td>
+                                                    <td style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{form.instance.proband_variant.get_transcript_variant.hgvs_p}}</td>
                                                     <td>{{form.instance.proband_variant.zygosity}}</td>
                                                     <td>{{ form.classification }}</td>
                                                     <td> {{ form.contribution_to_phenotype }}</td>

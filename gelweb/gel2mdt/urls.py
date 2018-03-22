@@ -25,7 +25,7 @@ urlpatterns = [
     path('start_mdt/', views.start_mdt_view, name='start-mdt'),
     path('edit_mdt/<int:mdt_id>', views.edit_mdt, name='edit-mdt'),
     path('mdt_view/<int:mdt_id>', views.mdt_view, name='mdt-view'),
-    path('mdt_proband_view/<int:mdt_id>/<int:pk>', views.mdt_proband_view, name='mdt-proband-view'),
+    path('mdt_proband_view/<int:mdt_id>/<int:pk>/<int:important>', views.mdt_proband_view, name='mdt-proband-view'),
 
     path('add_ir_to_mdt/<int:mdt_id>/<int:irreport_id>', views.add_ir_to_mdt, name='add-ir-to-mdt'),
     path('remove_ir_from_mdt/<int:mdt_id>/<int:irreport_id>', views.remove_ir_from_mdt, name='remove-ir-from-mdt'),
@@ -33,6 +33,7 @@ urlpatterns = [
     path('edit_mdt_proband/<int:report_id>', views.edit_mdt_proband, name='edit-mdt-proband'),
 
     path('recent_mdts/', views.recent_mdts, name='recent-mdt'),
+    path('add_variant/<int:report_id>', views.add_variant, name='add-variant'),
 
     path('delete_mdt/<int:mdt_id>', views.delete_mdt, name='delete-mdt'),
     path('export_mdt/<int:mdt_id>', views.export_mdt, name='export-mdt'),

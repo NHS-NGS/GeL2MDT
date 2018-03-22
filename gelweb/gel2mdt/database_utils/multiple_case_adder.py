@@ -67,7 +67,7 @@ class MultipleCaseAdder(object):
             logger.info("Determining which cases to poll...")
             self.cases_to_poll = interpretation_list_poll.cases_to_poll
             if head:
-                self.cases_to_poll = self.cases_to_poll[:5]
+                self.cases_to_poll = self.cases_to_poll[:head]
 
             logger.info("Fetching API JSON data for cases to poll...")
             self.list_of_cases = self.fetch_api_data()
@@ -494,12 +494,11 @@ class VariantManager(object):
         self.fetched_variants = {}
 
     def add_variant(self, variant):
-        '''"genome_assembly": genome_assembly,
-                    "alternate": variant["case_variant"].alt,
-                    "chromosome": variant["case_variant"].chromosome,
-                    "db_snp_id": variant["dbSNPid"],
-                    "reference": variant["case_variant"].ref,
-                    "position": variant["case_variant"].position,'''
+        '''
+        Allows the addition and retrival of variants
+        :param variant: Dict of Variant attributes
+        :return:
+        '''
         self.fetched_variants[(variant['chromosome'],
                                variant["position"],
                                variant["reference"],
@@ -546,7 +545,6 @@ class PanelManager(object):
         if pm_response:
             pm_response = self.fetched_panels[panelapp_id].get(panel_version, None)
         return pm_response
-
 
     def fetch_panel_names(self, panelapp_id):
         return self.panel_names.get(panelapp_id, None)

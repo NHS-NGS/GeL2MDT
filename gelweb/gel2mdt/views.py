@@ -18,7 +18,8 @@ from .config import load_config
 import os, json, csv
 from .exports import write_mdt_outcome_template, write_mdt_export
 from io import BytesIO, StringIO
-
+from .vep_utils.run_vep_batch import CaseVariant
+from .tasks import VariantAdder
 # Create your views here.
 
 def register(request):
@@ -64,6 +65,7 @@ def register(request):
                         email=email)
                     clinician.name = full_name
                     clinician.hospital = hospital
+                    clinician.added_by_user = True
                     clinician.save()
                 elif role == 'Other Staff':
                     other, created = OtherStaff.objects.get_or_create(
@@ -116,7 +118,8 @@ def profile(request):
             elif form.cleaned_data['role'] == 'Clinician':
                 clinician = Clinician(name=request.user.first_name + ' ' + request.user.last_name,
                                       email=request.user.email,
-                                      hospital=form.cleaned_data['hospital'])
+                                      hospital=form.cleaned_data['hospital'],
+                                      added_by_user=True)
                 clinician.save()
             elif form.cleaned_data['role'] == 'Other Staff':
                 other = OtherStaff(name=request.user.first_name + ' ' + request.user.last_name,
@@ -303,6 +306,38 @@ def update_transcript(request, report_id, pv_id, transcript_id):
     messages.add_message(request, 25, 'Transcript Updated')
     return HttpResponseRedirect(f'/select_transcript/{report_id}/{proband_variant.id}')
 
+
+@login_required
+def add_variant(request, report_id):
+    '''
+    Adds a variant to a report
+    :param request:
+    :param report_id:
+    :return:
+    '''
+
+    if request.method == 'POST':
+        variant_form = VariantForm(request.POST)
+        if variant_form.is_valid():
+            report = GELInterpretationReport.objects.get(id=report_id)
+            variant = CaseVariant(variant_form.cleaned_data['chromosome'],
+                                  variant_form.cleaned_data['position'],
+                                  report_id,
+                                  1,
+                                  variant_form.cleaned_data['reference'],
+                                  variant_form.cleaned_data['alternate'],
+                                  str(report.assembly))
+            variant_entry = variant_form.save(commit=False)
+            variant_entry.genome_assembly = report.assembly
+            variant_entry.save()
+            VariantAdder(variant_entry=variant_entry,
+                         report=report,
+                         variant=variant)
+    else:
+        variant_form = VariantForm()
+    return render(request, 'gel2mdt/add_variant.html', {'variant_form': variant_form})
+
+
 @login_required
 def start_mdt_view(request):
     '''
@@ -386,9 +421,14 @@ def mdt_view(request, mdt_id):
 
     proband_variants = ProbandVariant.objects.filter(interpretation_report__in=report_list)
     proband_variant_count = {}
+    t3_proband_variant_count = {}
     for report in reports:
-        count = ProbandVariant.objects.filter(interpretation_report=report).count()
+        count = ProbandVariant.objects.filter(interpretation_report=report,
+                                              max_tier__lte=2).count()
         proband_variant_count[report.id] = count
+        count = ProbandVariant.objects.filter(interpretation_report=report,
+                                              max_tier=3).count()
+        t3_proband_variant_count[report.id] = count
 
     mdt_form = MdtForm(instance=mdt_instance)
     clinicians = Clinician.objects.filter(mdt=mdt_id).values_list('name', flat=True)
@@ -412,16 +452,22 @@ def mdt_view(request, mdt_id):
     request.session['mdt_id'] = mdt_id
     return render(request, 'gel2mdt/mdt_view.html', {'proband_variants': proband_variants,
                                                       'proband_variant_count': proband_variant_count,
+                                                     't3_proband_variant_count': t3_proband_variant_count,
                                                       'reports': reports,
                                                       'mdt_form': mdt_form,
                                                       'mdt_id': mdt_id,
                                                       'attendees': attendees})
 
 @login_required
-def mdt_proband_view(request, mdt_id, pk):
+def mdt_proband_view(request, mdt_id, pk, important):
     mdt_instance = MDT.objects.get(id=mdt_id)
     report = GELInterpretationReport.objects.get(id=pk)
-    proband_variants = ProbandVariant.objects.filter(interpretation_report=report)
+    if important ==1:
+        proband_variants = ProbandVariant.objects.filter(interpretation_report=report,
+                                                         max_tier__lte=2).order_by('-max_tier')
+    else:
+        proband_variants = ProbandVariant.objects.filter(interpretation_report=report,
+                                                         max_tier=3)
     proband_variant_reports = RareDiseaseReport.objects.filter(proband_variant__in=proband_variants)
 
     proband_form = ProbandMDTForm(instance=report.ir_family.participant_family.proband)
@@ -445,7 +491,7 @@ def mdt_proband_view(request, mdt_id, pk):
             variant_formset.save()
             proband_form.save()
             messages.add_message(request, 25, 'Proband Updated')
-        return HttpResponseRedirect(f'/mdt_proband_view/{mdt_id}/{pk}')
+        return HttpResponseRedirect(f'/mdt_proband_view/{mdt_id}/{pk}/{important}')
     return render(request, 'gel2mdt/mdt_proband_view.html', {'proband_variants': proband_variants,
                                                              'report': report,
                                                              'mdt_id': mdt_id,
@@ -474,17 +520,24 @@ def edit_mdt_proband(request, report_id):
             report_list = MDTReport.objects.filter(MDT=mdt_id).values_list('interpretation_report', flat=True)
             reports = GELInterpretationReport.objects.filter(id__in=report_list)
             proband_variant_count = {}
+            t3_proband_variant_count = {}
             for report in reports:
-                count = ProbandVariant.objects.filter(interpretation_report=report).count()
+                count = ProbandVariant.objects.filter(interpretation_report=report,
+                                                      max_tier__lte=2).count()
                 proband_variant_count[report.id] = count
+                count = ProbandVariant.objects.filter(interpretation_report=report,
+                                                      max_tier=3).count()
+                t3_proband_variant_count[report.id] = count
 
             data['html_mdt_list'] = render_to_string('gel2mdt/includes/mdt_proband_table.html', {
                 'reports': reports,
                 'proband_variant_count': proband_variant_count,
+                't3_proband_variant_count': t3_proband_variant_count,
                 'mdt_id': request.session['mdt_id']
             })
         else:
             data['form_is_valid'] = False
+            print(proband_form.errors)
     else:
         proband_form = ProbandMDTForm(instance=report.ir_family.participant_family.proband)
 
@@ -544,9 +597,15 @@ def select_attendees_for_mdt(request, mdt_id):
     :param mdt_id:
     :return: Table showing all users
     '''
-    clinicians = Clinician.objects.all().values('name', 'email', 'hospital', 'id', 'mdt').distinct()
-    clinical_scientists = ClinicalScientist.objects.all().values('name', 'email', 'hospital', 'id', 'mdt').distinct()
-    other_staff = OtherStaff.objects.all().values('name', 'email', 'hospital', 'id', 'mdt').distinct()
+    clinicians = (Clinician.objects.filter(added_by_user=True)
+                  .values('name', 'email', 'hospital', 'id', 'mdt')
+                  .distinct())
+    clinical_scientists = (ClinicalScientist.objects.all()
+                           .values('name', 'email', 'hospital', 'id', 'mdt')
+                           .distinct())
+    other_staff = (OtherStaff.objects.all()
+                       .values('name', 'email', 'hospital', 'id', 'mdt')
+                       .distinct())
     for clinician in clinicians:
         clinician['role'] = 'Clinician'
     for cs in clinical_scientists:
@@ -629,6 +688,7 @@ def add_new_attendee(request):
                                       email=form.cleaned_data['email'])
                 clinician.name=form.cleaned_data['name']
                 clinician.hospital=form.cleaned_data['hospital']
+                clinician.added_by_user=True
                 clinician.save()
             elif form.cleaned_data['role'] == 'Clinical Scientist':
                 cs, created = ClinicalScientist.objects.get_or_create(

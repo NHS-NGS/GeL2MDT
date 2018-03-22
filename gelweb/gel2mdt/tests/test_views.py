@@ -27,7 +27,6 @@ class ViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('Thank you for registering', response.content.decode())
 
-
     def setUp(self):
         self.client = Client()
         self.client.login(username='test', password='defaultpassword')
