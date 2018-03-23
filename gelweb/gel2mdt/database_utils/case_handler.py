@@ -971,9 +971,9 @@ class CaseAttributeManager(object):
                     genotype_gelid = genotype.get('gelId', None)
                     if genotype_gelid == proband_manager.case_model.entry.gel_id:
                         json_variant['zygosity'] = genotype["genotype"]
-                    elif genotype_gelid == self.case.mother["gel_id"]:
+                    elif genotype_gelid == self.case.mother.get("gel_id", None):
                         json_variant['maternal_zygosity'] = genotype["genotype"]
-                    elif genotype_gelid == self.case.father["gel_id"]:
+                    elif genotype_gelid == self.case.father.get("gel_id", None):
                         json_variant['paternal_zygosity'] = genotype["genotype"]
 
 
@@ -1012,9 +1012,9 @@ class CaseAttributeManager(object):
                         genotype_gelid = genotype.get('gelId', None)
                         if genotype_gelid == proband_manager.case_model.entry.gel_id:
                             json_variant['zygosity'] = genotype["genotype"]
-                        elif genotype_gelid == self.case.mother["gel_id"]:
+                        elif genotype_gelid == self.case.mother.get("gel_id", None):
                             json_variant['maternal_zygosity'] = genotype.get("genotype", 'unknown')
-                        elif genotype_gelid == self.case.father["gel_id"]:
+                        elif genotype_gelid == self.case.father.get("gel_id", None):
                             json_variant['paternal_zygosity'] = genotype.get('genotype', 'unknown')
 
             for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
@@ -1065,9 +1065,6 @@ class CaseAttributeManager(object):
             "somatic": False
         } for variant in tiered_and_cip_proband_variants], self.model_objects)
 
-        for proband_variant in proband_variants.model_attributes_list:
-            print(proband_variant["inheritance"])
-
         return proband_variants
 
     def determine_variant_inheritance(self, variant):
@@ -1092,7 +1089,7 @@ class CaseAttributeManager(object):
             # cannot determine
             inheritance = 'unknown'
 
-        print("Proband I:", inheritance)
+        # print("Proband I:", inheritance)
         return inheritance
 
     def get_report_events(self):
@@ -1441,6 +1438,7 @@ class CaseModel(object):
             entry = False
             self.entry = entry
         else:
+            print(entry)
             raise ValueError("Multiple entries found for same object.")
 
         return entry

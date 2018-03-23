@@ -499,16 +499,23 @@ class VariantManager(object):
         :param variant: Dict of Variant attributes
         :return:
         '''
-        self.fetched_variants[(variant['chromosome'],
+        if (variant['chromosome'],
                                variant["position"],
                                variant["reference"],
-                               variant["alternate"])] = variant
+                               variant["alternate"],
+                               variant['genome_assembly']) not in self.fetched_variants:
+            self.fetched_variants[(variant['chromosome'],
+                               variant["position"],
+                               variant["reference"],
+                               variant["alternate"],
+                               variant['genome_assembly'])] = variant
 
     def fetch_variant(self, variant):
         return self.fetched_variants.get((variant['chromosome'],
-                                       variant["position"],
-                                       variant["reference"],
-                                       variant["alternate"]), None)
+                                           variant["position"],
+                                           variant["reference"],
+                                           variant["alternate"],
+                                          variant['genome_assembly']), None)
 
 class PanelManager(object):
     """
