@@ -139,7 +139,11 @@
                                 <div class="col-md-6">
 
                                     {% bootstrap_field proband_form.comment %}
-                                    <a href="/proband/{{report.id}}/negative_report" target="_blank" class="btn btn-info" role="button">Negative Report</a>
+                                    {% bootstrap_label "Assigned User" %}
+                                    <br>
+
+ <a href=# data-toggle="modal" data-target="#caseAssignModal"><i class="fas fa-user-plus"></i></a>                                   
+                                    </a> {{ report.assigned_user.first_name }} {{ report.assigned_user.last_name }}
 
                                 </div>
                             </div>
@@ -171,7 +175,11 @@
                                 <div class="col-md-12">
                                     {% if proband_form.status.value != "C" %}
                                         </br>
-                                <button type="submit" name="variant_update" class="btn btn-primary btn-lg">Save</button> {% endif %}
+                                <button type="submit" name="variant_update" class="btn btn-primary btn">Save</button> {% endif %}
+
+                                <span style="float: right">
+                                    <a href="/proband/{{report.id}}/negative_report" target="_blank" class="btn btn-info" role="button">Negative Report</a>
+                                </span>
                                 </div>
                             </div>
                         </div>
@@ -412,6 +420,27 @@
     </div>
 </div>
 
+<div id="caseAssignModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
+                <h4 class="modal-title">Assign case to user</h4>
+            </div>
+            <div class="modal-body">
+                <form action="/proband/{{ report.id }}" method="POST">
+                    {% csrf_token %}
+                    {% bootstrap_form case_assign_form %}
+                    {% buttons %}
+                    <button type="submit" class="btn btn-primary">
+                        Update
+                    </button>
+                    {% endbuttons %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div id="demogModal" class="modal fade" role="dialog">
     <div class="modal-dialog">

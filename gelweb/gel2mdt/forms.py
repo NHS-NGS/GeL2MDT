@@ -55,6 +55,11 @@ class DemogsForm(forms.ModelForm):
         model = Proband
         fields = ['nhs_number', 'lab_number', 'forename', 'surname', 'date_of_birth', 'sex', 'local_id', 'gmc']
 
+class CaseAssignForm(forms.ModelForm):
+    class Meta:
+        model = GELInterpretationReport
+        fields = ["assigned_user"]
+
 
 
 class MdtForm(forms.ModelForm):

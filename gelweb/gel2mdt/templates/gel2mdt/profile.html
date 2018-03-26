@@ -4,15 +4,22 @@
 {% load static %}
 
 <div class='container-fluid'>
-<h1> Hello {{user}}</h1>
+<h1> Hello, {{user.first_name}}</h1>
 
             <div class="row">
-                <div class="col-md-5">
+
+                <div class="col-md-9">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><i class="fas fa-clipboard-list"></i> My Cases</div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
 
                     <div class="panel panel-default">
-                        <div class="panel-heading">Profile Information</div>
+                        <div class="panel-heading"><i class="fas fa-user"></i> Profile Information</div>
                         <div class="panel-body">
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 {% bootstrap_label "Username" %}
                                 <div class="block">
                                 {{user.username}}

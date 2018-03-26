@@ -174,8 +174,11 @@ def proband_view(request, report_id):
     # POST request from Demographic Update Form
     if request.method == "POST":
         demogs_form = DemogsForm(request.POST, instance=report.ir_family.participant_family.proband)
+        case_assign_form = CaseAssignForm(request.POST, instance=report)
         if demogs_form.is_valid():
             demogs_form.save()
+        if case_assign_form.is_valid():
+            case_assign_form.save()
 
     relatives = Relative.objects.filter(proband=report.ir_family.participant_family.proband)
     proband_form = ProbandForm(instance=report.ir_family.participant_family.proband)
@@ -183,6 +186,9 @@ def proband_view(request, report_id):
     proband_variants = ProbandVariant.objects.filter(interpretation_report=report)
     proband_mdt = MDTReport.objects.filter(interpretation_report=report)
     panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.ir_family)
+
+    case_assign_form = CaseAssignForm(instance=report)
+
 
     if proband_form["status"].value() == "C":
         for field in proband_form.__dict__["fields"]:
@@ -193,6 +199,7 @@ def proband_view(request, report_id):
                                                     'relatives': relatives,
                                                     'proband_form': proband_form,
                                                     'demogs_form': demogs_form,
+                                                    'case_assign_form': case_assign_form,
                                                     'proband_variants': proband_variants,
                                                     'proband_mdt': proband_mdt,
                                                     'panels': panels})
