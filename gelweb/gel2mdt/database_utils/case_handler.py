@@ -32,6 +32,7 @@ class Case(object):
 
         self.json_hash = self.hash_json()
         self.proband = self.get_proband_json()
+        self.proband_sample = self.proband["samples"][0]
         self.family_members = self.get_family_members()
         self.tools_and_versions = self.get_tools_and_versions()
         self.status = self.get_status_json()
@@ -320,6 +321,7 @@ class CaseAttributeManager(object):
             }
 
         elif not self.case.skip_demographics:
+
             labkey_server_request = config_dict['labkey_server_request']
             server_context = lk.utils.create_server_context(
                 'gmc.genomicsengland.nhs.uk',
@@ -373,6 +375,31 @@ class CaseAttributeManager(object):
         participant_id = self.case.json["proband"]
         demographics = self.get_paricipant_demographics(participant_id)
         family = self.case.attribute_managers[Family].case_model
+
+        # set up LabKey to get recruited disease
+        config_dict = load_config.LoadConfig().load()
+        labkey_server_request = config_dict['labkey_server_request']
+        server_context = lk.utils.create_server_context(
+            'gmc.genomicsengland.nhs.uk',
+            labkey_server_request,
+            '/labkey', use_ssl=True)
+
+        # search in LabKey for recruited disease
+        search_results = lk.query.select_rows(
+            server_context=server_context,
+            schema_name='gel_rare_diseases',
+            query_name='rare_diseases_diagnosis',
+            filter_array=[
+                lk.query.QueryFilter('participant_identifiers_id', participant_id, 'eq')
+            ]
+        )
+
+        recruiting_disease = None
+        try:
+            recruiting_disease = search_results['rows'][0].get('gel_disease_information_specific_disease', None)
+        except IndexError as e:
+            pass
+
         proband = CaseModel(Proband, {
             "gel_id": participant_id,
             "family": family.entry,
@@ -381,7 +408,8 @@ class CaseAttributeManager(object):
             "surname": demographics["surname"],
             "date_of_birth": datetime.strptime(demographics["date_of_birth"], "%Y/%m/%d").date(),
             "sex": self.case.proband["sex"],
-            "status": 'N' # initialised to not started? (N)
+            "status": 'N', # initialised to not started? (N)
+            "recruiting_disease": recruiting_disease
         }, self.model_objects)
         return proband
 
@@ -742,10 +770,29 @@ class CaseAttributeManager(object):
         Through table linking panels to IRF when no variants have been reported
         within a particular panel for a case.
         """
+        # get the string names of all genes which fall below 95% 15x coverage
+        genes_failing_coverage = []
+        for panel in self.case.attribute_managers[PanelVersion].case_model.case_models:
+            if "entry" in vars(panel):
+                panel_coverage = self.case.json_request_data["genePanelsCoverage"][panel.entry.panel.panelapp_id]
+                for gene, coverage_dict in panel_coverage.items():
+                    if float(coverage_dict["_".join((self.case.proband_sample, "gte15x"))]) < 0.95:
+                        genes_failing_coverage.append(gene)
+        genes_failing_coverage = sorted(set(genes_failing_coverage))
+        str_genes_failing_coverage = ''
+        for gene in genes_failing_coverage:
+            str_genes_failing_coverage += gene + ', '
+        str_genes_failing_coverage = str_genes_failing_coverage[:-2]
+        str_genes_failing_coverage += '.'
+
+
         ir_family= self.case.attribute_managers[InterpretationReportFamily].case_model
         ir_family_panels = ManyCaseModel(InterpretationReportFamilyPanel, [{
             "ir_family": ir_family.entry,
             "panel": panel.entry,
+            "average_coverage": self.case.json_request_data["genePanelsCoverage"][panel.entry.panel.panelapp_id]["SUMMARY"]["_".join((self.case.proband_sample, "avg"))],
+            "proportion_above_15x": self.case.json_request_data["genePanelsCoverage"][panel.entry.panel.panelapp_id]["SUMMARY"]["_".join((self.case.proband_sample, "gte15x"))],
+            "genes_failing_coverage": str_genes_failing_coverage
         } for panel in self.case.attribute_managers[PanelVersion].case_model.case_models if "entry" in vars(panel)],
             self.model_objects)
 
