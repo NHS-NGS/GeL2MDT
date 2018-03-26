@@ -19,7 +19,7 @@
 <script type="text/javascript" src="{% static 'gel2mdt/DataTables/datatables.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'gel2mdt/js/all.js' %}"></script>
 
-<link rel="stylesheet" type="text/css" href="{% static 'gel2mdt/css/custom.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'gel2mdt/css/report.css' %}">
 
     {% endblock %}
 {% block javascript %}
@@ -33,117 +33,91 @@
 
 <page size="A4">
 
-    <h2>Technical Information</h2>
 
-    <div class="col-md-12">
-        <div class="panel panel-default">
-            <div class="panel-heading"><strong>Patient Information</strong></div>
-            <div class="panel-body">
-
-                <table class="table table-condensed">
-                    <thead>
-                    </thead>
-                    <tbody>
-
-                    <tr>
-                        <td><strong>Patient name:</strong></td>
-                        <td>{{ report.ir_family.participant_family.proband.forename}} {{report.ir_family.participant_family.proband.forename}}</td>
-                        <td>NHS number:</td>
-                        <td>{{ report.ir_family.participant_family.proband.nhs_number}}</td>
-                    </tr>
-                    <tr>
-                        <td>Date of birth:</td>
-                        <td>{{report.ir_family.participant_family.proband.date_of_birth}}</td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-
-                </tbody>
-            </table>
-            </div>
-        </div>
-    </div>
+    <h1>Technical Information</h1>
 
 
-    <div class="col-md-12">
-        <div class="panel panel-default">
-            <div class="panel-heading"><strong>Sample Details</strong></div>
-            <div class="panel-body">
-                Test content.
-            </div>
-        </div>
-    </div>
+    <h3>Patient name: {{ report.ir_family.participant_family.proband.forename}} {{report.ir_family.participant_family.proband.surname}}</h3>
 
-    <div class="col-md-12">
-        <div class="panel panel-default">
-            <div class="panel-heading"><strong>Test Methodology</strong></div>
-            <div class="panel-body">
-                <p style="text-align:justify">
-                Whole genome sequencing by the 100,000 Genomes Project with analysis of
-                selected gene panels (see below). Please note that the sensitivity of this test
-                is limited by the types of detectable pathogenic variants, regions of low read
-                depth coverage and incomplete ascertainment of disease-gene associations. More
-                in-depth information regarding read depth coverage is available on request.
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-12">
-        <div class="panel panel-default">
-            <div class="panel-heading"><strong>Variant Details</strong></div>
-            <div class="panel-body">
-                No variants have been detected.
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-12">
-        <div class="panel panel-default">
-            <div class="panel-heading"><strong>Recruiting Disease</strong></div>
-            <div class="panel-body">
-                Disease name.
-                <hr>
-                </hr>
-                <strong>HPO terms:</strong>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-12">
-        <div class="panel panel-default">
-            <div class="panel-heading"><strong>Gene Panels and Read Depth Coverage</strong></div>
-            <div class="panel-body">
-
-                <table class="table table-condensed">
-                    <thead>
-                        <tr>
-                            <th>Panel</th>
-                            <th>% at 10x</th>
-                            <th>% at 20x</th>
-                            <th>% at 30x</th>
-                        </th>
-                    </thead>
-                    <tbody>
-                    {% for panel in panels %}
-                    <tr>
-                        <td>{{panel.panel}}</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-            {% endfor %}
-                </tbody>
-            </table>
-
-                <hr>
-                </hr>
-                <strong>List of genes with low coverage:</strong>
-            </div>
-        </div>
-    </div>
+    <table class="table" style="table-layout:fixed">
+        <col style="width:25%", span="4" />
+        <tr>
+            <th>Date of Birth:</th>
+            <th> {{ report.ir_family.participant_family.proband.date_of_birth|date:"d/m/Y" }}</th>
+            <th>NHS No.:</th>
+            <th> {{ report.ir_family.participant_family.proband.nhs_number }}</th>
+        </tr>
+    </table>
 
 
+    <h4>Sample Details</h4>
+
+    <table class="table" style="table-layout:fixed">
+        <col style="width:25%", span="4" />
+        <tr>
+            <td>GeL ID:</td>
+            <td> {{ report.ir_family.participant_family.proband.gel_id }}</td>
+            <td>Laboratory No.:</td>
+            <td> {{ report.ir_family.participant_family.proband.lab_number }}</td>
+        </tr>
+    </table>
+
+
+    <hr>
+
+    <h3>Test Methodology</h3>
+    <p style="text-align:justify">
+    Whole genome sequencing by the 100,000 Genomes Project with analysis of
+    selected gene panels (see below). Please note that the sensitivity of this test
+    is limited by the types of detectable pathogenic variants, regions of low read
+    depth coverage and incomplete ascertainment of disease-gene associations. More
+    in-depth information regarding read depth coverage is available on request.
+    </p>
+
+
+    <h3>Variant Details</h3>
+
+    <strong>No variants have been detected.</strong>
+
+    <h3>Recruiting Disease</h3>
+    <p>
+    {{ report.ir_family.participant_family.proband.recruiting_disease }}
+    </p>
+
+
+    <h3>Gene Panels and Read Depth Coverage</h3>
+
+    <table class="table table-condensed">
+        <thead>
+            <tr>
+                <th>Panel</th>
+                <th>Coverage: Avg.</th>
+                <th>% >15x</th>
+            </th>
+        </thead>
+        <tbody>
+        {% for panel in panels %}
+            <tr>
+            <td>{{panel.panel}}</td>
+            <td style="text-align: right">{{ panel.average_coverage }}</td>
+            <td style="text-align: right">{{ panel.proportion_above_15x }}</td>
+        </tr>
+    {% endfor %}
+        </tbody>
+    </table>
+
+
+    <h4>Genes with low coverage*: </h4>
+    <ul>
+        {% for panel in panels %}
+        {% if forloop.first %}
+            <li>{{ panel.genes_failing_coverage }}</li>
+        {% endif %}
+        {% endfor %}
+    </ul>
+    <h6>* Low coverage = less than 95% of the gene has a coverage of 15x.</h6>
+
+</page>
 
 </body>
 
