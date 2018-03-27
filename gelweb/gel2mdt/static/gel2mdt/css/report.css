@@ -13,6 +13,10 @@ page[size="A4"] {
     box-shadow: 0 0 0.5cm rgba(0,0,0,0.5);
 }
 
+h3 {
+    font-size: 20px;
+}
+
 
 @media print {
     body, page[size="A4"] {

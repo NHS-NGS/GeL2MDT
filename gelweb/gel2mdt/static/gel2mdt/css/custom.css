@@ -149,3 +149,8 @@ tfoot input {
     background-color: rgba(250, 225, 0, 0.2);
     border-color: rgba(250, 225, 0, 0.2);
 }
+
+
+.rediconcolor {
+    color: #da291c;
+}
