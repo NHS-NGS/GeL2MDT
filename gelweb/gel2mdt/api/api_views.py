@@ -27,6 +27,7 @@ class RareDiseaseCases(generics.ListAPIView):
     serializer_class = GELInterpretationReportSerializer
 
 
+
 class ProbandVariants(APIView):
     """
     Retrieve a set of proband variants for a given IR.

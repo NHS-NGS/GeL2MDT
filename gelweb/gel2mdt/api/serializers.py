@@ -66,6 +66,10 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
         source="ir_family.participant_family.proband.gel_id",
         read_only=True
     )
+    cip_id = serializers.CharField(
+        source="ir_family.ir_family_id",
+        read_only=True
+    )
     forename = serializers.CharField(
         source="ir_family.participant_family.proband.forename",
         read_only=True
@@ -104,12 +108,15 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
         read_only=True
     )
 
+    assigned_user = serializers.StringRelatedField()
+
 
     class Meta:
         model = GELInterpretationReport
         fields = (
             'id',
             'gel_id',
+            'cip_id',
             'forename',
             'surname',
             'date_of_birth',
@@ -124,5 +131,6 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
             'sample_type',
             'max_tier',
             'assembly',
-            'user'
+            'user',
+            'assigned_user'
         )
