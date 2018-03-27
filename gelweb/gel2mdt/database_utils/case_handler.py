@@ -376,29 +376,32 @@ class CaseAttributeManager(object):
         demographics = self.get_paricipant_demographics(participant_id)
         family = self.case.attribute_managers[Family].case_model
 
-        # set up LabKey to get recruited disease
-        config_dict = load_config.LoadConfig().load()
-        labkey_server_request = config_dict['labkey_server_request']
-        server_context = lk.utils.create_server_context(
-            'gmc.genomicsengland.nhs.uk',
-            labkey_server_request,
-            '/labkey', use_ssl=True)
+        if self.case.skip_demographics:
+            recruiting_disease = None
+        else:
+            # set up LabKey to get recruited disease
+            config_dict = load_config.LoadConfig().load()
+            labkey_server_request = config_dict['labkey_server_request']
+            server_context = lk.utils.create_server_context(
+                'gmc.genomicsengland.nhs.uk',
+                labkey_server_request,
+                '/labkey', use_ssl=True)
 
-        # search in LabKey for recruited disease
-        search_results = lk.query.select_rows(
-            server_context=server_context,
-            schema_name='gel_rare_diseases',
-            query_name='rare_diseases_diagnosis',
-            filter_array=[
-                lk.query.QueryFilter('participant_identifiers_id', participant_id, 'eq')
-            ]
-        )
+            # search in LabKey for recruited disease
+            search_results = lk.query.select_rows(
+                server_context=server_context,
+                schema_name='gel_rare_diseases',
+                query_name='rare_diseases_diagnosis',
+                filter_array=[
+                    lk.query.QueryFilter('participant_identifiers_id', participant_id, 'eq')
+                ]
+            )
 
-        recruiting_disease = None
-        try:
-            recruiting_disease = search_results['rows'][0].get('gel_disease_information_specific_disease', None)
-        except IndexError as e:
-            pass
+            recruiting_disease = None
+            try:
+                recruiting_disease = search_results['rows'][0].get('gel_disease_information_specific_disease', None)
+            except IndexError as e:
+                pass
 
         proband = CaseModel(Proband, {
             "gel_id": participant_id,
