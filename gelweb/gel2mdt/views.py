@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .forms import *
 from .models import *
 from django.http import HttpResponseRedirect, HttpResponse
@@ -96,6 +96,10 @@ def profile(request):
     cs = ClinicalScientist.objects.filter(email=request.user.email).first()
     other = OtherStaff.objects.filter(email=request.user.email).first()
     clinician = Clinician.objects.filter(email=request.user.email).first()
+
+    my_cases = GELInterpretationReport.objects.filter(assigned_user__username=request.user.username)
+
+
     if cs:
         rolename = 'Clinical Scientist'
         role = cs
@@ -132,7 +136,18 @@ def profile(request):
         form = ProfileForm(initial={'role': rolename, 'hospital':role.hospital})
     return render(request, 'gel2mdt/profile.html', {'form': form,
                                                     'role':role,
+                                                    'my_cases': my_cases,
                                                     'rolename':rolename})
+
+@login_required
+def remove_case(request, case_id):
+
+    case = GELInterpretationReport.objects.get(id=case_id)
+    case.assigned_user = None
+    case.save()
+
+    return redirect('profile')
+
 
 
 @login_required
@@ -758,13 +773,25 @@ def negative_report(request, report_id):
     :param report_id: GEL Report ID
     :return:
     '''
+    config_dict = load_config.LoadConfig().load()
 
     report = GELInterpretationReport.objects.get(id=report_id)
     panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.ir_family)
 
+    panel_genes = {}
+    for panel in panels:
+        panelapp_file = f'{config_dict["panelapp_storage"]}/{panel.panel.panel.panelapp_id}_{panel.panel.version_number}.json'
+        if os.path.isfile(panelapp_file):
+            panelapp_json = json.load(open(panelapp_file))
+            num_genes = len(panelapp_json['result']['Genes'])
+            panel_genes[panel] = num_genes
+        else:
+            panel_genes[panel] = ''
+
+
     return render(request, 'gel2mdt/technical_information.html', {
         'report': report,
-        'panels': panels})
+        'panels': panel_genes})
 
 
 
