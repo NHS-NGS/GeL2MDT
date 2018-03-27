@@ -34,33 +34,28 @@
 <page size="A4">
 
 
-    <h2>Technical Information</h2>
+    <h2>Rare Disease Whole Genome Sequencing - Technical Report</h2>
 
 
-    <h3>Patient name: {{ report.ir_family.participant_family.proband.forename}} {{report.ir_family.participant_family.proband.surname}}</h3>
+    <h3>Patient name: <strong>{{ report.ir_family.participant_family.proband.forename}} {{report.ir_family.participant_family.proband.surname}}</strong></h3>
 
+    <h3><strong>Sample Details</strong></h3>
     <table class="table" style="table-layout:fixed">
         <col style="width:25%", span="4" />
         <tr>
-            <th>Date of Birth:</th>
-            <th> {{ report.ir_family.participant_family.proband.date_of_birth|date:"d/m/Y" }}</th>
+            <th>GeL ID:</th>
+            <th> {{ report.ir_family.participant_family.proband.gel_id }}</th>
+            <th>Laboratory No.:</th>
+            <th> {{ report.ir_family.participant_family.proband.lab_number }}</th>
+        <tr>
             <th>NHS No.:</th>
             <th> {{ report.ir_family.participant_family.proband.nhs_number }}</th>
-        </tr>
+             <th>Date of Birth:</th>
+            <th> {{ report.ir_family.participant_family.proband.date_of_birth|date:"d/m/Y" }}</th>
+       </tr>
     </table>
 
 
-    <h3>Sample Details</h3>
-
-    <table class="table" style="table-layout:fixed">
-        <col style="width:25%", span="4" />
-        <tr>
-            <td>GeL ID:</td>
-            <td> {{ report.ir_family.participant_family.proband.gel_id }}</td>
-            <td>Laboratory No.:</td>
-            <td> {{ report.ir_family.participant_family.proband.lab_number }}</td>
-        </tr>
-    </table>
 
     <h3>Recruiting Disease</h3>
     <p>
