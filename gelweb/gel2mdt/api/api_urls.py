@@ -9,6 +9,11 @@ api_urlpatterns = [
         name='rare-disease-json'
     ),
     path(
+        'api/user-rare-disease',
+        api_views.RareDiseaseCases.as_view(),
+        name='user-rare-disease-json'
+    ),
+    path(
         'api/proband_variants/<int:pk>',
         api_views.ProbandVariants.as_view(),
         name='proband-variants'
