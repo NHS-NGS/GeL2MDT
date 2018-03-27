@@ -1,54 +1,83 @@
 {% extends 'gel2mdt/base.html' %}
 {% load bootstrap3 %}
 {% block content %}
-{% load static %}
+    {% load static %}
 
 <div class='container-fluid'>
-<h1> Hello, {{user.first_name}}</h1>
+    <h1> Hello, {{user.first_name}}</h1>
 
-            <div class="row">
+    <div class="row">
 
-                <div class="col-md-9">
-                    <div class="panel panel-default">
-                        <div class="panel-heading"><i class="fas fa-clipboard-list"></i> My Cases</div>
+        <div class="col-md-9">
+            <div class="panel panel-default">
+                <div class="panel-heading"><i class="fas fa-clipboard-list"></i> My Cases</div>
+                <div class="panel-body">
+                    <div class="col-md-12">
+
+                <table width="100%" 
+                       class="table table-striped table-bordered table-hover responsive" 
+                       id="myCases">
+                            <thead>
+                                <tr>
+                                    <th>GeL ID</th>
+                                    <th>Forename</th>
+                                    <th>Surname</th>
+                                    <th>Max Tier</th>
+                                    <th>Assembly</th>
+                                    <th>Status</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for case in my_cases %}
+                                <tr>
+                                    <td><a href='{% url 'proband-view' report_id=case.id %}'>{{ case.ir_family.participant_family.proband.gel_id}}</a></td>
+                                <td>{{ case.ir_family.participant_family.proband.forename }}</td>
+                                <td>{{ case.ir_family.participant_family.proband.surname }}</td>
+                                <td>{{ case.max_tier }}</td>
+                                <td>{{ case.assembly }}</td>
+                                <td>{{ case.ir_family.participant_family.proband.get_status_display }}</td>
+                                <td><a href='{% url 'remove-case' case_id=case.id%}'><i class="fas fa-minus-circle rediconcolor"></i></a></td>
+                            </tr>
+                        {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <div class="col-md-3">
+    <div class="col-md-3">
 
-                    <div class="panel panel-default">
-                        <div class="panel-heading"><i class="fas fa-user"></i> Profile Information</div>
-                        <div class="panel-body">
-                            <div class="col-md-12">
-                                {% bootstrap_label "Username" %}
-                                <div class="block">
-                                {{user.username}}
-                                </div>
-                                 </br>
-                                {% bootstrap_label "Email" %}
-                                <div class="block">
-                                {{user.email}}
-                                </div>
-                                 </br>
-                                {% bootstrap_label "Role" %}
-                                <div class="block">
-                                {{rolename}}
-                                </div>
-                                </br>
-                                <form role="form" method="post" enctype="multipart/form-data">
-                                {% csrf_token %}
-                                {% bootstrap_form form %}
-                                <button type="submit" name="Submit" class="btn btn-default">Update Permissions</button>
-                                </form>
-                            </div>
-
-
-                        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading"><i class="fas fa-user"></i> Profile Information</div>
+            <div class="panel-body">
+                <div class="col-md-12">
+                    {% bootstrap_label "Username" %}
+                    <div class="block">
+                        {{user.username}}
                     </div>
+                    </br>
+                    {% bootstrap_label "Email" %}
+                    <div class="block">
+                        {{user.email}}
+                    </div>
+                    </br>
+                    {% bootstrap_label "Role" %}
+                    <div class="block">
+                        {{rolename}}
+                    </div>
+                    </br>
+                    <form role="form" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {% bootstrap_form form %}
+                        <button type="submit" name="Submit" style="float: right" class="btn btn-info">Update</button>
+                    </form>
                 </div>
+
+
+            </div>
+        </div>
+    </div>
 </div>
-
-
-
-
 {% endblock %}

@@ -328,9 +328,11 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
             },
             {
                 "data": "has_de_novo",
+                "visible": false,
             },
             { "data": "updated",
-                "type": "date " }
+                "type": "date " },
+            { "data": "cip_id" }
         ],
         "order": [[ 11, "desc" ]]
     } );
@@ -358,7 +360,17 @@ function getRadioValue(radioElementName) {
             "order": [[ 3, "asc" ]]
         });
     });
-    </script>
+</script>
+
+<script>
+    $(document).ready(function() {
+        $('#myCases').DataTable({
+            "columnDefs": [
+                { "orderable": false, "targets": [ 6 ] }
+            ],
+        });
+    });
+</script>
 
 <script>
     $(document).ready(function() {
@@ -366,7 +378,7 @@ function getRadioValue(radioElementName) {
             "order": [[ 0, "desc" ]]
         });
     });
-    </script>
+</script>
 
      <script>
     $(document).ready(function() {
