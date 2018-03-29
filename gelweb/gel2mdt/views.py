@@ -20,6 +20,7 @@ from .exports import write_mdt_outcome_template, write_mdt_export
 from io import BytesIO, StringIO
 from .vep_utils.run_vep_batch import CaseVariant
 from .tasks import VariantAdder
+from .database_utils.multiple_case_adder import MultipleCaseAdder
 # Create your views here.
 
 def register(request):
@@ -204,7 +205,6 @@ def proband_view(request, report_id):
 
     case_assign_form = CaseAssignForm(instance=report)
 
-
     if proband_form["status"].value() == "C":
         for field in proband_form.__dict__["fields"]:
             proband_form.fields[field].widget.attrs['readonly'] = True
@@ -218,6 +218,13 @@ def proband_view(request, report_id):
                                                     'proband_variants': proband_variants,
                                                     'proband_mdt': proband_mdt,
                                                     'panels': panels})
+
+@login_required
+def pull_t3_variants(request, report_id):
+    report = GELInterpretationReport.objects.get(id=report_id)
+    mca = MultipleCaseAdder(pullt3=True, sample=report.ir_family.participant_family.proband.gel_id)
+    mca.update_database()
+    return HttpResponseRedirect(f'/proband/{report_id}')
 
 
 def panel_view(request, panelversion_id):
