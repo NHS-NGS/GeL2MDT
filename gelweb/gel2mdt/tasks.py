@@ -6,17 +6,29 @@ from .vep_utils import run_vep_batch
 from .models import *
 from .database_utils.multiple_case_adder import GeneManager
 
-def get_gel_content(ir, ir_version, report_version):
+def get_gel_content(ir, ir_version):
     # otherwise get uname and password from a file
-    html_report = PollAPI(
-        "cip_api_for_report", f"ClinicalReport/{ir}/{ir_version}/{report_version}/"
-    )
-    gel_content = html_report.get_json_response(content=True)
+
     interpretation_reponse = PollAPI(
         "cip_api_for_report", f'interpretationRequests/{ir}/{ir_version}/')
     interp_json = interpretation_reponse.get_json_response()
 
-    # Analysis panels and genes
+    analysis_versions = []
+    latest = None
+    if 'interpreted_genome' in interp_json:
+        for cip_version in interp_json['interpreted_genome']:
+            analysis_versions.append(cip_version['cip_version'])
+        try:
+            latest = max(analysis_versions)
+        except ValueError as e:
+            print(e)
+            return None
+
+    html_report = PollAPI(
+        "cip_api_for_report", f"ClinicalReport/{ir}/{ir_version}/{latest}/"
+    )
+    gel_content = html_report.get_json_response(content=True)
+
     analysis_panels = {}
 
     panel_app_panel_query_version = 'https://bioinfo.extge.co.uk/crowdsourcing/WebServices/get_panel/{panelhash}/?version={version}'

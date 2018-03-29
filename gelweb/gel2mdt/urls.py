@@ -48,7 +48,7 @@ urlpatterns = [
          name='remove-attendee-from-mdt'),
     path('add_new_attendee/', views.add_new_attendee, name='add-new-attendee'),
 
-    path(r'genomics_england/', views.genomics_england, name='genomics-england'),
+    path(r'genomics_england_report/<int:report_id>', views.genomics_england_report, name='genomics-england-report'),
 ]
 
 urlpatterns += api_urlpatterns
