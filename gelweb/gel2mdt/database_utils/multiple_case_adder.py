@@ -23,13 +23,15 @@ class MultipleCaseAdder(object):
     required related instances to the database and reporting status and
     errors during the process.
     """
-    def __init__(self, head=None, test_data=False, skip_demographics=False):
+    def __init__(self, head=None, test_data=False, skip_demographics=False, sample=None, pullt3=True):
         """
         Initiliase an instance of a MultipleCaseAdder to start managing
         a database update. This will get the list of cases available to
         us, hash them all, check which need to be added/updated and then
         manage the updating of the database.
         :param test_data: Boolean. Use test data or not. Default = False
+        :param sample: If you want to add a single sample, set this the GELID
+        :param pullt3: Boolean to pull t3 variants
         """
         logger.info("Initialising a MultipleCaseAdder.")
 
@@ -41,7 +43,7 @@ class MultipleCaseAdder(object):
         self.skip_demographics = skip_demographics
         # are we only getting a certain number of cases? defaults None (no)
         self.head = head
-
+        self.pullt3 = pullt3
         # get the config file for datadumps
         self.config = load_config.LoadConfig().load()
 
@@ -57,6 +59,18 @@ class MultipleCaseAdder(object):
             self.list_of_cases = self.fetch_test_data()
             self.cases_to_poll = None
             logger.info("Fetched test data.")
+            self.cases_to_add = self.check_cases_to_add()
+            self.cases_to_update = self.check_cases_to_update()  #
+            self.cases_to_skip = set(self.list_of_cases) - \
+                                 set(self.cases_to_add) - \
+                                 set(self.cases_to_update)
+        elif sample:
+            interpretation_list_poll = InterpretationList(sample=sample)
+            self.cases_to_poll = interpretation_list_poll.cases_to_poll
+            self.list_of_cases = self.fetch_api_data()
+            self.cases_to_update = self.list_of_cases
+            self.cases_to_add = []
+            self.cases_to_skip = []
         else:
             # set list_of_cases to cases of interest from API
             logger.info("Fetching live API data.")
@@ -77,13 +91,13 @@ class MultipleCaseAdder(object):
 
             logger.info("Fetched all required CIP API data.")
 
-        logger.info("Checking which cases to add.")
-        self.cases_to_add = self.check_cases_to_add()
-        logger.info("Checking which cases require updating.")
-        self.cases_to_update = self.check_cases_to_update()#
-        self.cases_to_skip = set(self.list_of_cases) - \
-            set(self.cases_to_add) - \
-            set(self.cases_to_update)
+            logger.info("Checking which cases to add.")
+            self.cases_to_add = self.check_cases_to_add()
+            logger.info("Checking which cases require updating.")
+            self.cases_to_update = self.check_cases_to_update()#
+            self.cases_to_skip = set(self.list_of_cases) - \
+                set(self.cases_to_add) - \
+                set(self.cases_to_update)
 
     def update_database(self):
         # begin update process
@@ -147,7 +161,8 @@ class MultipleCaseAdder(object):
                 panel_manager=self.panel_manager,
                 variant_manager=self.variant_manager,
                 gene_manager=self.gene_manager,
-                skip_demographics=self.skip_demographics
+                skip_demographics=self.skip_demographics,
+                pullt3=self.pullt3
             ) for case in self.cases_to_poll
         ]
         print("Successfully fetched", len(list_of_cases), "cases from CIP API.")
@@ -242,7 +257,7 @@ class MultipleCaseAdder(object):
             (ProbandVariant, True),
             (TranscriptVariant, True),
             (ProbandTranscriptVariant, True),
-            (ReportEvent, True)
+            #(ReportEvent, True)
         )
 
         if update:

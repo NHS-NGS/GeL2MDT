@@ -20,9 +20,10 @@ class Case(object):
     updated in the database, or skipped dependent on whether a matching
     case/case family is found.
     """
-    def __init__(self, case_json, panel_manager, variant_manager, gene_manager, skip_demographics=False):
+    def __init__(self, case_json, panel_manager, variant_manager, gene_manager, skip_demographics=False, pullt3=True):
         self.json = case_json
         # raw json created to dump at the end; json attr is modified
+        self.pullt3 = pullt3
         self.raw_json = copy.deepcopy(case_json)
         self.json_case_data = self.json["interpretation_request_data"]
         self.json_request_data = self.json_case_data["json_request"]
@@ -133,7 +134,6 @@ class Case(object):
         then return a list of all CaseVariants for construction of
         CaseTranscripts using VEP.
         """
-        config_dict = load_config.LoadConfig().load()
         json_variants = self.json_variants
         case_variant_list = []
         # go through each variant in the json
@@ -150,7 +150,7 @@ class Case(object):
                     variant_min_tier = tier
             variant["max_tier"] = variant_min_tier
 
-            if config_dict['pull_T3'] == "False":
+            if not self.pullt3:
                 if variant["max_tier"] < 3:
                     interesting_variant = True
             else:
@@ -788,10 +788,11 @@ class CaseAttributeManager(object):
         panel=None
         for panel in self.case.attribute_managers[PanelVersion].case_model.case_models:
             if "entry" in vars(panel):
-                panel_coverage = self.case.json_request_data["genePanelsCoverage"].get(panel.entry.panel.panelapp_id, {})
-                for gene, coverage_dict in panel_coverage.items():
-                    if float(coverage_dict["_".join((self.case.proband_sample, "gte15x"))]) < 0.95:
-                        genes_failing_coverage.append(gene)
+                if 'genePanelsCoverage' in self.case.json_request_data:
+                    panel_coverage = self.case.json_request_data["genePanelsCoverage"].get(panel.entry.panel.panelapp_id, {})
+                    for gene, coverage_dict in panel_coverage.items():
+                        if float(coverage_dict["_".join((self.case.proband_sample, "gte15x"))]) < 0.95:
+                            genes_failing_coverage.append(gene)
         genes_failing_coverage = sorted(set(genes_failing_coverage))
         str_genes_failing_coverage = ''
         for gene in genes_failing_coverage:
@@ -1188,7 +1189,7 @@ class CaseAttributeManager(object):
         # modify report event dicts with gene and panel info
         for variant in self.case.json_variants:
             interesting_variant = False
-            if config_dict['pull_T3'] == "False":
+            if not self.case.pullt3:
                 if variant["max_tier"] < 3:
                     interesting_variant = True
             else:
