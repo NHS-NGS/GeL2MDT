@@ -801,33 +801,15 @@ def negative_report(request, report_id):
         'panels': panel_genes})
 
 
-
 @login_required
-def genomics_england(request):
+def genomics_england_report(request, report_id):
     """Render a page to enter genomics england samples """
-    context = {}
-    if request.method == 'POST':
-        form = GenomicsEnglandform(request.POST)
-        panelappform = PanelAppform(request.POST)
-        if 'gel_report' in request.POST:
-            if form.is_valid():
-                ir = form.cleaned_data['interpretation_id']
-                ir_version = form.cleaned_data['ir_version']
-                report_version = form.cleaned_data['report_version']
-                gel_content = get_gel_content(ir, ir_version, report_version)
-                context['gel_content'] = gel_content
-                return render(request, 'gel2mdt/gel_template.html', context)
-
-        elif 'panel_app' in request.POST:
-            if panelappform.is_valid:
-                gp = request.POST['gene_panel']
-                gp_version = request.POST['gp_version']
-                gene_panel_info = panel_app(gp, gp_version)
-                context['gene_panel_info'] = gene_panel_info
-                return render(request, 'gel2mdt/gel_template.html', context)
+    report = GELInterpretationReport.objects.get(id=report_id)
+    cip_id = report.ir_family.ir_family_id.split('-')
+    gel_content = get_gel_content(cip_id[0], cip_id[1])
+    if gel_content:
+        return render(request, 'gel2mdt/gel_template.html', {'gel_content': gel_content})
     else:
-        form = GenomicsEnglandform()
-        context['form'] = form
-        panelappform = PanelAppform()
-        context['panelappform'] = panelappform
-    return render(request, 'gel2mdt/gel_report_page.html', context)
+        messages.add_message(request, 40, 'Failed to generate report, does one exist?')
+        return HttpResponseRedirect(f'/proband/{report_id}')
+
