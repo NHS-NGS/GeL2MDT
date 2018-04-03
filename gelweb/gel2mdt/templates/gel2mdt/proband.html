@@ -12,7 +12,11 @@
 <div class="tab-content">
     <div id="proband" class="tab-pane fade in active">
         <div class="container-fluid" >
+            {% if config_dict|get_item:'cip_as_id' == 'True' %}
+            <h1>{{report.ir_family.ir_family_id}}</h1>
+            {% else %}
             <h1>{{report.ir_family.participant_family.proband.gel_id}}</h1>
+            {% endif %}
             <form role="form" method="post" enctype="multipart/form-data" action="/update_proband/{{ report.id }}">
                 {% csrf_token %}
                 <div class="row">
@@ -278,7 +282,11 @@
 
     <div id="variants" class="tab-pane fade">
         <div class="container-fluid" >
-            <h1> {{ report.ir_family.participant_family.proband.gel_id }}</h1>
+            {% if config_dict|get_item:'cip_as_id' == 'True' %}
+            <h1>{{report.ir_family.ir_family_id}}</h1>
+            {% else %}
+            <h1>{{report.ir_family.participant_family.proband.gel_id}}</h1>
+            {% endif %}
             <div class="row">
 
                 <div class="col-md-12">
