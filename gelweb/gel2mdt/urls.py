@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.urls import path
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 from .api.api_urls import *
 
@@ -49,6 +51,6 @@ urlpatterns = [
     path('add_new_attendee/', views.add_new_attendee, name='add-new-attendee'),
 
     path(r'genomics_england_report/<int:report_id>', views.genomics_england_report, name='genomics-england-report'),
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_DIR)
 
 urlpatterns += api_urlpatterns

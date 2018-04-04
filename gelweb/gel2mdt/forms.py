@@ -86,7 +86,7 @@ class RareDiseaseMDTForm(forms.ModelForm):
     class Meta:
         model = RareDiseaseReport
         fields = ('contribution_to_phenotype', 'change_med',
-                  'clinical_trial', 'requires_validation',
+                  'clinical_trial',
                   'inform_reproductive_choice', 'surgical_option',
                   'add_surveillance_for_relatives',
                   'classification', 'id',)
@@ -94,11 +94,19 @@ class RareDiseaseMDTForm(forms.ModelForm):
                    'id': HiddenInput(),
                    'surgical_option': CheckboxInput(),
                    'change_med': CheckboxInput(),
-                   'requires_validation': CheckboxInput(),
                    'add_surveillance_for_relatives': CheckboxInput(),
                    'clinical_trial': CheckboxInput(),
                    'inform_reproductive_choice': CheckboxInput(),
                    }
+
+class RequireValidationForm(forms.ModelForm):
+    class Meta:
+        model = RareDiseaseReport
+        fields = ('requires_validation', 'id',)
+        widgets = {
+            'id': HiddenInput(),
+            'requires_validation': CheckboxInput()
+        }
 
 class AddNewAttendee(forms.Form):
     name = forms.CharField()
