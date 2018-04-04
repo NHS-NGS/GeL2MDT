@@ -175,10 +175,11 @@ class VariantAdder(object):
             for transcript in self.transcripts:
                 if transcript.gene_model:
                     p, created = Transcript.objects.get_or_create(name=transcript.transcript_name,
+                                                                  genome_assembly=self.report.assembly,
                                                                   defaults={'gene': transcript.gene_model,
                                                                             'canonical_transcript':transcript.canonical,
-                                                                            'strand': transcript.transcript_strand,
-                                                                            'genome_assembly':self.report.assembly})
+                                                                            'strand': transcript.transcript_strand
+                                                                            })
                     self.transcript_entries.append(p)
 
     def insert_transcript_variants(self):
