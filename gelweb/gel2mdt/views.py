@@ -93,12 +93,13 @@ def profile(request):
     :return:
     '''
     role = None
+    rolename = None
+
     cs = ClinicalScientist.objects.filter(email=request.user.email).first()
     other = OtherStaff.objects.filter(email=request.user.email).first()
     clinician = Clinician.objects.filter(email=request.user.email).first()
 
     my_cases = GELInterpretationReport.objects.filter(assigned_user__username=request.user.username)
-
 
     if cs:
         rolename = 'Clinical Scientist'
@@ -133,7 +134,10 @@ def profile(request):
             messages.add_message(request,25, 'Profile Updated')
             return HttpResponseRedirect('/profile')
     else:
-        form = ProfileForm(initial={'role': rolename, 'hospital':role.hospital})
+        if role:
+            form = ProfileForm(initial={'role': rolename, 'hospital': role.hospital})
+        else:
+            form = ProfileForm(initial={'role': 'Unknown', 'hospital': 'Unknown'})
     return render(request, 'gel2mdt/profile.html', {'form': form,
                                                     'role':role,
                                                     'my_cases': my_cases,
@@ -141,13 +145,10 @@ def profile(request):
 
 @login_required
 def remove_case(request, case_id):
-
     case = GELInterpretationReport.objects.get(id=case_id)
     case.assigned_user = None
     case.save()
-
     return redirect('profile')
-
 
 
 @login_required
@@ -158,7 +159,6 @@ def cancer_main(request):
     :return:
     '''
     return render(request, 'gel2mdt/cancer_main.html', {})
-
 
 @login_required
 def rare_disease_main(request):
@@ -220,6 +220,24 @@ def proband_view(request, report_id):
                                                     'proband_mdt': proband_mdt,
                                                     'panels': panels,
                                                     'config_dict':config_dict})
+
+@login_required
+def variant_for_validation(request, pv_id):
+    proband_variant = ProbandVariant.objects.get(id=pv_id)
+    if proband_variant.requires_validation:
+        proband_variant.requires_validation = False
+    else:
+        proband_variant.requires_validation = True
+    proband_variant.save()
+    messages.add_message(request, 25, 'Validation Status Updated')
+    return HttpResponseRedirect(f'/proband/{proband_variant.interpretation_report.id}')
+
+@login_required
+def validation_list(request):
+    config_dict = load_config.LoadConfig().load()
+    proband_variants = ProbandVariant.objects.filter(requires_validation=True)
+    return render(request, 'gel2mdt/validation_list.html', {'proband_variants':proband_variants,
+                                                            'config_dict': config_dict})
 
 @login_required
 def pull_t3_variants(request, report_id):

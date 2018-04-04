@@ -30,7 +30,8 @@ class UserForm(forms.ModelForm):
 class ProfileForm(forms.Form):
     role_choices = (('Clinician', 'Clinician'),
                     ('Clinical Scientist', 'Clinical Scientist'),
-                    ('Other Staff', 'Other Staff'))
+                    ('Other Staff', 'Other Staff'),
+                    ('Unknown', 'Unknown'),)
     role = forms.ChoiceField(choices=role_choices)
     #Hospital options from config
     config_dict = load_config.LoadConfig().load()
@@ -60,13 +61,10 @@ class CaseAssignForm(forms.ModelForm):
         model = GELInterpretationReport
         fields = ["assigned_user"]
 
-
-
 class MdtForm(forms.ModelForm):
-
     class Meta:
         model = MDT
-        fields = ['date_of_mdt', 'status']
+        fields = ['description', 'date_of_mdt', 'status']
 
 
 class ProbandMDTForm(forms.ModelForm):
@@ -98,15 +96,6 @@ class RareDiseaseMDTForm(forms.ModelForm):
                    'clinical_trial': CheckboxInput(),
                    'inform_reproductive_choice': CheckboxInput(),
                    }
-
-class RequireValidationForm(forms.ModelForm):
-    class Meta:
-        model = RareDiseaseReport
-        fields = ('requires_validation', 'id',)
-        widgets = {
-            'id': HiddenInput(),
-            'requires_validation': CheckboxInput()
-        }
 
 class AddNewAttendee(forms.Form):
     name = forms.CharField()
