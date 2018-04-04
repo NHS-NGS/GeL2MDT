@@ -4,6 +4,8 @@ from ..models import *
 from django.urls import reverse
 from ..factories import *
 
+
+# TODO Test validation list, pullt3, variantAdder, validationchange,
 class ViewTests(TestCase):
     """
     Testing the views
@@ -208,7 +210,7 @@ class ViewTests(TestCase):
         See MDT proband view
         """
         response = self.client.get(reverse('mdt-proband-view', args=[self.mdt.id,
-                                                                     self.gel_ir.id]))
+                                                                     self.gel_ir.id, 1]))
         self.assertContains(response, self.proband.gel_id)
         self.assertContains(response, self.transcript1.gene)
         self.assertEquals(response.status_code, 200)
@@ -309,6 +311,15 @@ class ViewTests(TestCase):
         self.assertContains(response, 'Clinical Report Version:')
         self.assertContains(response, 'Panel Version:')
         self.assertEquals(response.status_code, 200)
+
+    def test_validation_list(self):
+        """
+        Test you can see the variants which require validation
+        """
+        response = self.client.get(reverse('validation-list'))
+        self.assertContains(response, self.transcript1.gene)
+        self.assertContains(response, self.tv1.hgvs_p)
+        self.assertEqual(response.status_code, 200)
 
 
 
