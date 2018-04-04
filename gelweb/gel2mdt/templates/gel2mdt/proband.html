@@ -344,6 +344,7 @@
                                 <th>HGVSp</th>
                                 <th>Genotype</th>
                                 <th>Inheritance</th>
+                                <th>Requires Validation</th>
                             </tr>
                         </thead>
                         <tbody style='font-size: 75%'>
@@ -425,6 +426,7 @@
                             <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv.get_transcript_variant.hgvs_p}}</td>
                             <td>{{pv.zygosity}}</td>
                             <td>{{pv.inheritance}}</td>
+                            <td><a href="/variant_for_validation/{{pv.id}}"><i class="fas fa-pencil-alt"></i></a></span>{{pv.requires_validation }}</td>
                        </tr>
                     {% endfor %}
 

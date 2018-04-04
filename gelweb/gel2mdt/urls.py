@@ -17,6 +17,8 @@ urlpatterns = [
     path('pull_t3_variants/<int:report_id>', views.pull_t3_variants, name='pull-t3-variants'),
     path('proband/<int:report_id>/negative_report', views.negative_report, name='negative_report'),
     path('update_proband/<int:report_id>', views.update_proband, name='update-proband'),
+    path('variant_for_validation/<int:pv_id>', views.variant_for_validation, name='variant-for-validation'),
+    path('validation_list', views.validation_list, name='validation-list'),
 
     path('variant/<int:variant_id>', views.variant_view, name='variant-view'),
 
