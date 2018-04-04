@@ -19,8 +19,7 @@ import os, json, csv
 from .exports import write_mdt_outcome_template, write_mdt_export
 from io import BytesIO, StringIO
 from .vep_utils.run_vep_batch import CaseVariant
-from .tasks import VariantAdder
-from .database_utils.multiple_case_adder import MultipleCaseAdder
+from .tasks import VariantAdder, update_for_t3
 # Create your views here.
 
 def register(request):
@@ -94,12 +93,13 @@ def profile(request):
     :return:
     '''
     role = None
+    rolename = None
+
     cs = ClinicalScientist.objects.filter(email=request.user.email).first()
     other = OtherStaff.objects.filter(email=request.user.email).first()
     clinician = Clinician.objects.filter(email=request.user.email).first()
 
     my_cases = GELInterpretationReport.objects.filter(assigned_user__username=request.user.username)
-
 
     if cs:
         rolename = 'Clinical Scientist'
@@ -134,7 +134,10 @@ def profile(request):
             messages.add_message(request,25, 'Profile Updated')
             return HttpResponseRedirect('/profile')
     else:
-        form = ProfileForm(initial={'role': rolename, 'hospital':role.hospital})
+        if role:
+            form = ProfileForm(initial={'role': rolename, 'hospital': role.hospital})
+        else:
+            form = ProfileForm(initial={'role': 'Unknown', 'hospital': 'Unknown'})
     return render(request, 'gel2mdt/profile.html', {'form': form,
                                                     'role':role,
                                                     'my_cases': my_cases,
@@ -142,13 +145,10 @@ def profile(request):
 
 @login_required
 def remove_case(request, case_id):
-
     case = GELInterpretationReport.objects.get(id=case_id)
     case.assigned_user = None
     case.save()
-
     return redirect('profile')
-
 
 
 @login_required
@@ -160,7 +160,6 @@ def cancer_main(request):
     '''
     return render(request, 'gel2mdt/cancer_main.html', {})
 
-
 @login_required
 def rare_disease_main(request):
     '''
@@ -168,13 +167,15 @@ def rare_disease_main(request):
     :param request:
     :return:
     '''
+    config_dict = load_config.LoadConfig().load()
     rd_case_families = InterpretationReportFamily.objects.prefetch_related().all()
     rd_case_families = [rd_case_family for rd_case_family in rd_case_families]
     rd_cases = [
         GELInterpretationReport.objects.filter(ir_family=ir_family).latest("polled_at_datetime")
         for ir_family in rd_case_families
     ]
-    return render(request, 'gel2mdt/rare_disease_main.html', {'rd_cases': rd_cases})
+    return render(request, 'gel2mdt/rare_disease_main.html', {'rd_cases': rd_cases,
+                                                              'config_dict': config_dict})
 
 @login_required
 def proband_view(request, report_id):
@@ -184,7 +185,7 @@ def proband_view(request, report_id):
     :param report_id: GEL Report ID
     :return:
     '''
-
+    config_dict = load_config.LoadConfig().load()
     report = GELInterpretationReport.objects.get(id=report_id)
 
     # POST request from Demographic Update Form
@@ -217,13 +218,31 @@ def proband_view(request, report_id):
                                                     'case_assign_form': case_assign_form,
                                                     'proband_variants': proband_variants,
                                                     'proband_mdt': proband_mdt,
-                                                    'panels': panels})
+                                                    'panels': panels,
+                                                    'config_dict':config_dict})
+
+@login_required
+def variant_for_validation(request, pv_id):
+    proband_variant = ProbandVariant.objects.get(id=pv_id)
+    if proband_variant.requires_validation:
+        proband_variant.requires_validation = False
+    else:
+        proband_variant.requires_validation = True
+    proband_variant.save()
+    messages.add_message(request, 25, 'Validation Status Updated')
+    return HttpResponseRedirect(f'/proband/{proband_variant.interpretation_report.id}')
+
+@login_required
+def validation_list(request):
+    config_dict = load_config.LoadConfig().load()
+    proband_variants = ProbandVariant.objects.filter(requires_validation=True)
+    return render(request, 'gel2mdt/validation_list.html', {'proband_variants':proband_variants,
+                                                            'config_dict': config_dict})
 
 @login_required
 def pull_t3_variants(request, report_id):
-    report = GELInterpretationReport.objects.get(id=report_id)
-    mca = MultipleCaseAdder(pullt3=True, sample=report.ir_family.participant_family.proband.gel_id)
-    mca.update_database()
+    update_for_t3.delay(report_id)
+    messages.add_message(request, 25, 'Please reload this page in a few minutes to see your Tier 3 Variants')
     return HttpResponseRedirect(f'/proband/{report_id}')
 
 
@@ -589,14 +608,18 @@ def recent_mdts(request):
     :return:
     '''
     recent_mdt = list(MDT.objects.all().order_by('-date_of_mdt'))
-
+    config_dict = load_config.LoadConfig().load()
     # Need to get which probands were in MDT
     probands_in_mdt = {}
     for mdt in recent_mdt:
         probands_in_mdt[mdt.id] = []
         report_list = MDTReport.objects.filter(MDT=mdt.id)
         for report in report_list:
-            probands_in_mdt[mdt.id].append((report.interpretation_report.id,
+            if config_dict['cip_as_id'] == 'True':
+                probands_in_mdt[mdt.id].append((report.interpretation_report.id,
+                                                report.interpretation_report.ir_family.ir_family_id))
+            else:
+                probands_in_mdt[mdt.id].append((report.interpretation_report.id,
                                             report.interpretation_report.ir_family.participant_family.proband.gel_id))
 
     return render(request, 'gel2mdt/recent_mdts.html', {'recent_mdt': recent_mdt,

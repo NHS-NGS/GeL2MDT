@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.urls import path
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 from .api.api_urls import *
 
@@ -15,6 +17,8 @@ urlpatterns = [
     path('pull_t3_variants/<int:report_id>', views.pull_t3_variants, name='pull-t3-variants'),
     path('proband/<int:report_id>/negative_report', views.negative_report, name='negative_report'),
     path('update_proband/<int:report_id>', views.update_proband, name='update-proband'),
+    path('variant_for_validation/<int:pv_id>', views.variant_for_validation, name='variant-for-validation'),
+    path('validation_list', views.validation_list, name='validation-list'),
 
     path('variant/<int:variant_id>', views.variant_view, name='variant-view'),
 
@@ -49,6 +53,6 @@ urlpatterns = [
     path('add_new_attendee/', views.add_new_attendee, name='add-new-attendee'),
 
     path(r'genomics_england_report/<int:report_id>', views.genomics_england_report, name='genomics-england-report'),
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_DIR)
 
 urlpatterns += api_urlpatterns

@@ -12,7 +12,11 @@
 <div class="tab-content">
     <div id="proband" class="tab-pane fade in active">
         <div class="container-fluid" >
+            {% if config_dict|get_item:'cip_as_id' == 'True' %}
+            <h1>{{report.ir_family.ir_family_id}}</h1>
+            {% else %}
             <h1>{{report.ir_family.participant_family.proband.gel_id}}</h1>
+            {% endif %}
             <form role="form" method="post" enctype="multipart/form-data" action="/update_proband/{{ report.id }}">
                 {% csrf_token %}
                 <div class="row">
@@ -278,7 +282,11 @@
 
     <div id="variants" class="tab-pane fade">
         <div class="container-fluid" >
-            <h1> {{ report.ir_family.participant_family.proband.gel_id }}</h1>
+            {% if config_dict|get_item:'cip_as_id' == 'True' %}
+            <h1>{{report.ir_family.ir_family_id}}</h1>
+            {% else %}
+            <h1>{{report.ir_family.participant_family.proband.gel_id}}</h1>
+            {% endif %}
             <div class="row">
 
                 <div class="col-md-12">
@@ -336,6 +344,7 @@
                                 <th>HGVSp</th>
                                 <th>Genotype</th>
                                 <th>Inheritance</th>
+                                <th>Requires Validation</th>
                             </tr>
                         </thead>
                         <tbody style='font-size: 75%'>
@@ -417,6 +426,7 @@
                             <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv.get_transcript_variant.hgvs_p}}</td>
                             <td>{{pv.zygosity}}</td>
                             <td>{{pv.inheritance}}</td>
+                            <td><a href="/variant_for_validation/{{pv.id}}"><i class="fas fa-pencil-alt"></i></a></span>{{pv.requires_validation }}</td>
                        </tr>
                     {% endfor %}
 
