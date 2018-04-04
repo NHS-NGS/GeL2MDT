@@ -14,6 +14,7 @@ class ClinicianFactory(factory.django.DjangoModelFactory):
     name = factory.Faker('last_name', locale='en-GB')
     email = 'unknown'
     hospital = factory.Faker('lexify', text='???', letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+    added_by_user = True
 
 
 class OtherStaffFactory(factory.django.DjangoModelFactory):
@@ -258,6 +259,7 @@ class ProbandVariantFactory(factory.django.DjangoModelFactory):
     variant = factory.SubFactory(VariantFactory)
     max_tier = random.randint(0,3)
     somatic = False
+    requires_validation = True
 
     interpretation_report = factory.SubFactory(GELInterpretationReportFactory)
 
