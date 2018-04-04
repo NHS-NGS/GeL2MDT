@@ -427,6 +427,7 @@ class ProbandVariant(models.Model):
 
     interpretation_report = models.ForeignKey(
         GELInterpretationReport, on_delete=models.CASCADE)
+    requires_validation = models.BooleanField(db_column='Requires_Validation', default=False)
 
     zygosity = models.CharField(
         # zygosity may also be 'unk' or 'missing', but this will default to
@@ -508,7 +509,6 @@ class RareDiseaseReport(models.Model):
         ('SE', 'Secondary'),
     ), default='NA')
     change_med = models.NullBooleanField(db_column='Change_med')
-    requires_validation = models.NullBooleanField(db_column='Requires_Validation')
     surgical_option = models.NullBooleanField(db_column='Surgical_Option')
     add_surveillance_for_relatives = models.NullBooleanField(db_column='Add_surveillance_for_relatives')
     clinical_trial = models.NullBooleanField(db_column='Clinical_trial')
@@ -672,7 +672,7 @@ class OtherStaff(models.Model):
 
 class MDT(models.Model):
     date_of_mdt = models.DateTimeField()
-
+    description = models.CharField(db_column='description', max_length=255, null=True, blank=True)
     # attending staff
     clinical_scientists = models.ManyToManyField(
         ClinicalScientist)

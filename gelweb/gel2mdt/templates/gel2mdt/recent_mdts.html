@@ -17,7 +17,9 @@
                 <ul class="nav navbar-nav">
                     <li><a href="#" ><i class="fas fa-tachometer-alt"></i> Audit</a></li>
                     </ul>
-
+                <ul class="nav navbar-nav">
+                    <li><a href="/validation_list" ><i class="fas fa-check-circle"></i> Validation</a></li>
+                    </ul>
 {% endblock %}
 
 
@@ -38,7 +40,7 @@
                     <thead>
                         <tr>
                             <th>MDT ID </th>
-                            <th>MDT Name</th>
+                            <th>Description</th>
                             <th>Date</th>
                             <th>Patients Discussed</th>
                             <th>Status</th>
@@ -49,7 +51,11 @@
                         {% for mdt in recent_mdt %}
                         <tr>
                             <td><a href="/mdt_view/{{mdt.id}}">{{mdt.id}}</a></td>
+                            {% if mdt.description %}
+                            <td>{{mdt.description}}</td>
+                            {% else %}
                             <td></td>
+                            {% endif %}
                             <td>{{mdt.date_of_mdt|date}}</td>
                             <td>{% for report_list in probands_in_mdt|get_item:mdt.id %}
                                     <a href="/proband/{{report_list.0}}"> {{ report_list.1}}</a>

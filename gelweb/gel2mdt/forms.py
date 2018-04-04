@@ -30,7 +30,8 @@ class UserForm(forms.ModelForm):
 class ProfileForm(forms.Form):
     role_choices = (('Clinician', 'Clinician'),
                     ('Clinical Scientist', 'Clinical Scientist'),
-                    ('Other Staff', 'Other Staff'))
+                    ('Other Staff', 'Other Staff'),
+                    ('Unknown', 'Unknown'),)
     role = forms.ChoiceField(choices=role_choices)
     #Hospital options from config
     config_dict = load_config.LoadConfig().load()
@@ -60,13 +61,10 @@ class CaseAssignForm(forms.ModelForm):
         model = GELInterpretationReport
         fields = ["assigned_user"]
 
-
-
 class MdtForm(forms.ModelForm):
-
     class Meta:
         model = MDT
-        fields = ['date_of_mdt', 'status']
+        fields = ['description', 'date_of_mdt', 'status']
 
 
 class ProbandMDTForm(forms.ModelForm):
@@ -86,7 +84,7 @@ class RareDiseaseMDTForm(forms.ModelForm):
     class Meta:
         model = RareDiseaseReport
         fields = ('contribution_to_phenotype', 'change_med',
-                  'clinical_trial', 'requires_validation',
+                  'clinical_trial',
                   'inform_reproductive_choice', 'surgical_option',
                   'add_surveillance_for_relatives',
                   'classification', 'id',)
@@ -94,7 +92,6 @@ class RareDiseaseMDTForm(forms.ModelForm):
                    'id': HiddenInput(),
                    'surgical_option': CheckboxInput(),
                    'change_med': CheckboxInput(),
-                   'requires_validation': CheckboxInput(),
                    'add_surveillance_for_relatives': CheckboxInput(),
                    'clinical_trial': CheckboxInput(),
                    'inform_reproductive_choice': CheckboxInput(),
