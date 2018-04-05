@@ -243,12 +243,21 @@ class GELInterpretationReport(models.Model):
         archived_reports = GELInterpretationReport.objects.filter(
             ir_family=self.ir_family)
         if archived_reports.exists():
+            # update the latest saved version.
             latest_report = archived_reports.latest('polled_at_datetime')
-            self.archived_version = latest_report.archived_version + 1
+            latest_report.archived_version += 1
+            latest_report.status = self.status
+            latest_report.updated = self.updated
+            latest_report.sample_type = self.sample_type
+            latest_report.max_tier = self.max_tier
+            latest_report.assembly = self.assembly
+            latest_report.sha_hash = self.sha_hash
+            latest_report.polled_at_datetime = timezone.now()
+            latest_report.user = self.user
+            super(GELInterpretationReport, latest_report).save(*args, **kwargs)
         else:
             self.archived_version = 1
-
-        super(GELInterpretationReport, self).save(*args, **kwargs)
+            super(GELInterpretationReport, self).save(*args, **kwargs)
 
     def __str__(self):
         return str(self.ir_family.ir_family_id + " v" + str(self.archived_version))
