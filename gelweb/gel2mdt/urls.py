@@ -8,6 +8,7 @@ from .api.api_urls import *
 
 urlpatterns = [
     path('', views.rare_disease_main, name='rare-disease-main'),
+    path('gel2me/', views.rare_disease_main, name='rare-disease-main'),
     path('register/', views.register, name='register'),
     path('profile/', views.profile, name='profile'),
     path('profile/remove_case/<int:case_id>', views.remove_case, name='remove-case'),
