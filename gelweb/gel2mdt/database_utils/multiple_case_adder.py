@@ -380,10 +380,11 @@ class MultipleCaseAdder(object):
                 for attribute_dict
                 in new_attributes])]
         # save database entries from the list of unique new attributes
+
+
         for attributes in new_attributes:
-            model_type.objects.create(
-                **attributes
-            )
+            obj = model_type(**attributes)
+            obj.save()
 
     def bulk_create_new(self, model_type, model_list):
         """
