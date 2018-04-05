@@ -293,6 +293,7 @@
                     <div class="panel panel-default">
                         <div class="panel-heading">Participant Information</div>
                         <div class="panel-body">
+                            {% if config_dict|get_item:'center' == 'GOSH' %}
                             <div class="col-md-2">
                                 {% bootstrap_label "GEL ID" %}
                                 <div class="block">
@@ -323,6 +324,32 @@
                                     <a href="/pull_t3_variants/{{report.id}}">Link</a>
                                 </div>
                             </div>
+                        {% elif config_dict|get_item:'center' == 'BIRM' %}
+                             <div class="col-md-3">
+                                {% bootstrap_label "GEL ID" %}
+                                <div class="block">
+                                    {{report.ir_family.participant_family.proband.gel_id}}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                {% bootstrap_label "Forename" %}
+                                <div class="block">
+                                    {{report.ir_family.participant_family.proband.forename}}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                {% bootstrap_label "Surname" %}
+                                <div class="block">
+                                    {{report.ir_family.participant_family.proband.surname}}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                {% bootstrap_label "CIP ID" %}
+                                <div class="block">
+                                    <a href="https://cipapi.genomicsengland.nhs.uk/interpretationportal/#/participant/{{report.ir_family.ir_family_id}}" target="_blank">{{report.ir_family.ir_family_id}}</a>
+                                </div>
+                            </div>
+                        {% endif %}
                         </div>
                     </div>
                 </div>
