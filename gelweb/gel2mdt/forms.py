@@ -33,7 +33,6 @@ class ProfileForm(forms.Form):
                     ('Other Staff', 'Other Staff'),
                     ('Unknown', 'Unknown'),)
     role = forms.ChoiceField(choices=role_choices)
-    #Hospital options from config
     config_dict = load_config.LoadConfig().load()
     if config_dict['center'] == 'GOSH':
         choices = config_dict['GMC'].split(',')
@@ -55,6 +54,9 @@ class DemogsForm(forms.ModelForm):
     class Meta:
         model = Proband
         fields = ['nhs_number', 'lab_number', 'forename', 'surname', 'date_of_birth', 'sex', 'local_id', 'gmc']
+
+class PanelForm(forms.Form):
+    panel = forms.ModelChoiceField(queryset=PanelVersion.objects.order_by('panel'))
 
 class CaseAssignForm(forms.ModelForm):
     class Meta:
