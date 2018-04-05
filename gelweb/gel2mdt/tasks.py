@@ -8,6 +8,8 @@ from .database_utils.multiple_case_adder import GeneManager, MultipleCaseAdder
 from gelweb.celery import app
 from celery.schedules import crontab
 from celery.task import periodic_task
+import json
+from json import JSONDecodeError
 
 def get_gel_content(ir, ir_version):
     # otherwise get uname and password from a file
@@ -24,13 +26,18 @@ def get_gel_content(ir, ir_version):
         try:
             latest = max(analysis_versions)
         except ValueError as e:
-            print(e)
-            return None
+            latest = 1
 
     html_report = PollAPI(
         "cip_api_for_report", f"ClinicalReport/{ir}/{ir_version}/{latest}/"
     )
     gel_content = html_report.get_json_response(content=True)
+    try:
+        gel_json_content = json.loads(gel_content)
+        if gel_json_content['detail'].startswith('Not found'):
+            return None
+    except JSONDecodeError as e:
+        pass
 
     analysis_panels = {}
 
