@@ -181,9 +181,12 @@
                                         </br>
                                 <button type="submit" name="variant_update" class="btn btn-primary btn">Save</button> {% endif %}
 
+
+                                {% if config_dict|get_item:'center' == 'GOSH' %}
                                 <span style="float: right">
                                     <a href="/genomics_england_report/{{report.id}}" target="_blank" class="btn btn-warning" role="button">Clinical Report</a>
                                 </span>
+                                {% endif %} 
 
                                 <span style="float: right">
                                     <a href="/proband/{{report.id}}/negative_report" target="_blank" class="btn btn-info" role="button">Negative Report</a>
