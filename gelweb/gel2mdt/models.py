@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-from django.contrib.auth.models import User
+from django.conf import settings
 from .model_utils.choices import ChoiceEnum
 from .config import load_config
 
@@ -229,7 +229,7 @@ class GELInterpretationReport(models.Model):
     assembly = models.ForeignKey(ToolOrAssemblyVersion, on_delete=models.CASCADE)
 
     user = models.CharField(max_length=200)
-    assigned_user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    assigned_user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
 
     # sha hash to allow quick determination of differences each update
     sha_hash = models.CharField(max_length=200)
@@ -691,7 +691,7 @@ class MDT(models.Model):
 
     # outcome: should the variant be reported?
     to_report = models.NullBooleanField()
-    creator = models.ForeignKey(User, on_delete=models.CASCADE)  # Change to user foreignkey?
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # Change to user foreignkey?
     status = models.CharField(db_column='Status', max_length=50, choices=(
         ('A', 'Active'), ('C', 'Completed')), default='A')
     gatb = models.NullBooleanField()
