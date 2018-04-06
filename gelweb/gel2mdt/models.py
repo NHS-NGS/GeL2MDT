@@ -207,6 +207,8 @@ class InterpretationReportFamilyPanel(models.Model):
     ir_family = models.ForeignKey(InterpretationReportFamily, on_delete=models.CASCADE)
     panel = models.ForeignKey(PanelVersion, on_delete=models.CASCADE)
 
+    custom = models.BooleanField(default=False)
+
     average_coverage = models.DecimalField(max_digits=6, decimal_places=2, null=True)
     proportion_above_15x = models.DecimalField(max_digits=6, decimal_places=5, null=True)
 
