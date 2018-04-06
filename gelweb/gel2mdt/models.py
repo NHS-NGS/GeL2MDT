@@ -252,6 +252,7 @@ class GELInterpretationReport(models.Model):
             latest_report.max_tier = self.max_tier
             latest_report.assembly = self.assembly
             latest_report.sha_hash = self.sha_hash
+            latest_report.assigned_user = self.assigned_user
             latest_report.polled_at_datetime = timezone.now()
             latest_report.user = self.user
             super(GELInterpretationReport, latest_report).save(*args, **kwargs)
