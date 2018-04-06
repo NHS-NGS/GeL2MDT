@@ -201,6 +201,7 @@ def proband_view(request, report_id):
             irfp, created = InterpretationReportFamilyPanel.objects.get_or_create(panel=panel_form.cleaned_data['panel'],
                                                                                   ir_family=report.ir_family,
                                                                                   defaults={
+                                                                                    'custom': True,
                                                                                    'average_coverage':None,
                                                                                    'proportion_above_15x':None,
                                                                                    'genes_failing_coverage':None})
