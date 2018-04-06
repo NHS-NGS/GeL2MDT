@@ -75,7 +75,7 @@ class Family(models.Model):
     """
     Represents a family within the CIP API: proband and relatives (if present)
     link to a particular family. Holds information about which panels have been
-o   applied to this case, which should be concordant with the phenotype of the
+    applied to this case, which should be concordant with the phenotype of the
     proband.
     """
     class Meta:
