@@ -1,4 +1,5 @@
 import os
+import inspect
 
 class LoadConfig():
     """
@@ -10,7 +11,14 @@ class LoadConfig():
         :return: dict containing key:configuration option value:configuration value
         """
         config_dict = {}
-        with open(os.path.join(os.getcwd(), "gel2mdt/config/config.txt"), 'r') as config_file:
+        with open(
+            os.path.join(
+                os.path.dirname(
+                    os.path.abspath(
+                        inspect.stack()[0][1]
+                    )
+                ),
+                "config.txt"), 'r') as config_file:
             for line in config_file:
                 line = line.strip().split('=', 1)
                 config_dict[line[0]] = line[1]
