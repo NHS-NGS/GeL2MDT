@@ -30,8 +30,500 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="models">
-<h1>Models<a class="headerlink" href="#models" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-gel2mdt.models">
+<span id="models"></span><h1>Models<a class="headerlink" href="#module-gel2mdt.models" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="gel2mdt.models.CancerReport">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">CancerReport</code><span class="sig-paren">(</span><em>id</em>, <em>discussion</em>, <em>action</em>, <em>classification</em>, <em>proband_variant</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.CancerReport" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="exception">
+<dt id="gel2mdt.models.CancerReport.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.CancerReport.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.CancerReport.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.CancerReport.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.ClinicalScientist">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">ClinicalScientist</code><span class="sig-paren">(</span><em>id</em>, <em>name</em>, <em>hospital</em>, <em>email</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.ClinicalScientist" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="exception">
+<dt id="gel2mdt.models.ClinicalScientist.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.ClinicalScientist.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.ClinicalScientist.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.ClinicalScientist.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.Clinician">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">Clinician</code><span class="sig-paren">(</span><em>id</em>, <em>name</em>, <em>hospital</em>, <em>email</em>, <em>added_by_user</em>, <em>relates_to</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.Clinician" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="exception">
+<dt id="gel2mdt.models.Clinician.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.Clinician.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.Clinician.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.Clinician.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.Family">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">Family</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.Family" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a family within the CIP API: proband and relatives (if present)
+link to a particular family. Holds information about which panels have been
+applied to this case, which should be concordant with the phenotype of the
+proband.</p>
+<dl class="exception">
+<dt id="gel2mdt.models.Family.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.Family.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.Family.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.Family.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.FamilyPhenotype">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">FamilyPhenotype</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.FamilyPhenotype" title="Permalink to this definition">¶</a></dt>
+<dd><p>A linkage table for Family and Phenotype.</p>
+<dl class="exception">
+<dt id="gel2mdt.models.FamilyPhenotype.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.FamilyPhenotype.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.FamilyPhenotype.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.FamilyPhenotype.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.GELInterpretationReport">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">GELInterpretationReport</code><span class="sig-paren">(</span><em>id</em>, <em>ir_family</em>, <em>archived_version</em>, <em>status</em>, <em>updated</em>, <em>sample_type</em>, <em>max_tier</em>, <em>assembly</em>, <em>user</em>, <em>assigned_user</em>, <em>sha_hash</em>, <em>polled_at_datetime</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.GELInterpretationReport" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="exception">
+<dt id="gel2mdt.models.GELInterpretationReport.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.GELInterpretationReport.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.GELInterpretationReport.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.GELInterpretationReport.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gel2mdt.models.GELInterpretationReport.save">
+<code class="descname">save</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.GELInterpretationReport.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overwrite the model’s save method to auto-increment versions for
+duplicate ir_familys. Pass in a InterpretationReportFamily entry.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.Gene">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">Gene</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.Gene" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents an individual gene. Whilst HGNC names may change, use of the
+Ensembl ID hopes to be able to reference any gene consistently despite
+future name changes - the ENSG should not change.</p>
+<dl class="exception">
+<dt id="gel2mdt.models.Gene.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.Gene.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.Gene.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.Gene.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.Inheritance">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">Inheritance</code><a class="headerlink" href="#gel2mdt.models.Inheritance" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of choices for whether a variant is inherited, de novo, or unknown.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.InterpretationReportFamily">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">InterpretationReportFamily</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.InterpretationReportFamily" title="Permalink to this definition">¶</a></dt>
+<dd><p>Acts as a container for all of the data for a particular report
+as it moves through the CIP workflow, allowing us to see how the
+data has changed as the status changes.</p>
+<dl class="exception">
+<dt id="gel2mdt.models.InterpretationReportFamily.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.InterpretationReportFamily.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.InterpretationReportFamily.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.InterpretationReportFamily.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.InterpretationReportFamilyPanel">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">InterpretationReportFamilyPanel</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.InterpretationReportFamilyPanel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linkages table to connect IRF with a Panel to allow M2M relationships
+that are still amenable to addition via the MCA.</p>
+<dl class="exception">
+<dt id="gel2mdt.models.InterpretationReportFamilyPanel.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.InterpretationReportFamilyPanel.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.InterpretationReportFamilyPanel.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.InterpretationReportFamilyPanel.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.ListUpdate">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">ListUpdate</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.ListUpdate" title="Permalink to this definition">¶</a></dt>
+<dd><p>A table containing a single field which displays the each time the
+results list was updated.</p>
+<dl class="exception">
+<dt id="gel2mdt.models.ListUpdate.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.ListUpdate.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.ListUpdate.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.ListUpdate.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.MDT">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">MDT</code><span class="sig-paren">(</span><em>id</em>, <em>date_of_mdt</em>, <em>description</em>, <em>to_report</em>, <em>creator</em>, <em>status</em>, <em>gatb</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.MDT" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="exception">
+<dt id="gel2mdt.models.MDT.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.MDT.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.MDT.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.MDT.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.MDTReport">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">MDTReport</code><span class="sig-paren">(</span><em>id</em>, <em>interpretation_report</em>, <em>MDT</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.MDTReport" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="exception">
+<dt id="gel2mdt.models.MDTReport.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.MDTReport.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.MDTReport.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.MDTReport.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.ModesOfInheritance">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">ModesOfInheritance</code><a class="headerlink" href="#gel2mdt.models.ModesOfInheritance" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of choices for modes of inheritance that each variant can possibly
+have. These are taken from the panelApp API, where they are an attribute
+of each gene. Used in the Variant model.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.OtherStaff">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">OtherStaff</code><span class="sig-paren">(</span><em>id</em>, <em>name</em>, <em>hospital</em>, <em>email</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.OtherStaff" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="exception">
+<dt id="gel2mdt.models.OtherStaff.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.OtherStaff.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.OtherStaff.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.OtherStaff.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.Panel">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">Panel</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.Panel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a panel from panelApp which should be the panels used by GeL.
+Holds information about the relevant diseases.</p>
+<dl class="exception">
+<dt id="gel2mdt.models.Panel.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.Panel.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.Panel.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.Panel.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.PanelVersion">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">PanelVersion</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.PanelVersion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a version of a panel: holds a version number and list of
+genes for panel. Genes are listed here since they may change with each
+version.</p>
+<dl class="exception">
+<dt id="gel2mdt.models.PanelVersion.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.PanelVersion.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.PanelVersion.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.PanelVersion.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.PanelVersionGene">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">PanelVersionGene</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.PanelVersionGene" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linkage table to relate Panels and Genes via a Many to Many relationship
+which is still compatible with the MultipleCaseAdder.</p>
+<dl class="exception">
+<dt id="gel2mdt.models.PanelVersionGene.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.PanelVersionGene.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.PanelVersionGene.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.PanelVersionGene.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.Phenotype">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">Phenotype</code><span class="sig-paren">(</span><em>id</em>, <em>description</em>, <em>hpo_terms</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.Phenotype" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="exception">
+<dt id="gel2mdt.models.Phenotype.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.Phenotype.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.Phenotype.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.Phenotype.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.Primer">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">Primer</code><span class="sig-paren">(</span><em>id</em>, <em>tool</em>, <em>variant</em>, <em>primer_set</em>, <em>left_primer_seq</em>, <em>right_primer_seq</em>, <em>date_created</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.Primer" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="exception">
+<dt id="gel2mdt.models.Primer.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.Primer.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.Primer.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.Primer.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.Proband">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">Proband</code><span class="sig-paren">(</span><em>id</em>, <em>gel_id</em>, <em>family</em>, <em>nhs_number</em>, <em>lab_number</em>, <em>forename</em>, <em>surname</em>, <em>date_of_birth</em>, <em>sex</em>, <em>recruiting_disease</em>, <em>pilot_case</em>, <em>outcome</em>, <em>comment</em>, <em>discussion</em>, <em>action</em>, <em>episode</em>, <em>gmc</em>, <em>local_id</em>, <em>case_sent</em>, <em>status</em>, <em>mdt_status</em>, <em>deceased</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.Proband" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="exception">
+<dt id="gel2mdt.models.Proband.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.Proband.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.Proband.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.Proband.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.ProbandTranscriptVariant">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">ProbandTranscriptVariant</code><span class="sig-paren">(</span><em>id</em>, <em>transcript</em>, <em>proband_variant</em>, <em>selected</em>, <em>effect</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.ProbandTranscriptVariant" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="exception">
+<dt id="gel2mdt.models.ProbandTranscriptVariant.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.ProbandTranscriptVariant.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.ProbandTranscriptVariant.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.ProbandTranscriptVariant.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.ProbandVariant">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">ProbandVariant</code><span class="sig-paren">(</span><em>id</em>, <em>variant</em>, <em>max_tier</em>, <em>somatic</em>, <em>vaf</em>, <em>interpretation_report</em>, <em>requires_validation</em>, <em>zygosity</em>, <em>maternal_zygosity</em>, <em>paternal_zygosity</em>, <em>inheritance</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.ProbandVariant" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="exception">
+<dt id="gel2mdt.models.ProbandVariant.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.ProbandVariant.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.ProbandVariant.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.ProbandVariant.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.RareDiseaseReport">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">RareDiseaseReport</code><span class="sig-paren">(</span><em>id</em>, <em>discussion</em>, <em>action</em>, <em>contribution_to_phenotype</em>, <em>change_med</em>, <em>surgical_option</em>, <em>add_surveillance_for_relatives</em>, <em>clinical_trial</em>, <em>inform_reproductive_choice</em>, <em>classification</em>, <em>proband_variant</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.RareDiseaseReport" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="exception">
+<dt id="gel2mdt.models.RareDiseaseReport.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.RareDiseaseReport.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.RareDiseaseReport.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.RareDiseaseReport.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.Relative">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">Relative</code><span class="sig-paren">(</span><em>id</em>, <em>gel_id</em>, <em>relation_to_proband</em>, <em>affected_status</em>, <em>proband</em>, <em>nhs_number</em>, <em>lab_number</em>, <em>forename</em>, <em>surname</em>, <em>date_of_birth</em>, <em>sex</em>, <em>sequenced</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.Relative" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="exception">
+<dt id="gel2mdt.models.Relative.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.Relative.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.Relative.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.Relative.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.ReportEvent">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">ReportEvent</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.ReportEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a reported variant from the CIP. For each variant, there will
+likely be several report events, since the same gene is tested using different
+panels. This makes accessing key information harder for us but it’s just the
+way that the CIP-API is set up.</p>
+<dl class="exception">
+<dt id="gel2mdt.models.ReportEvent.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.ReportEvent.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.ReportEvent.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.ReportEvent.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.ToolOrAssemblyVersion">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">ToolOrAssemblyVersion</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.ToolOrAssemblyVersion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a tool used or genome build and version used in several use cases
+within the CIP workflow.</p>
+<dl class="exception">
+<dt id="gel2mdt.models.ToolOrAssemblyVersion.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.ToolOrAssemblyVersion.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.ToolOrAssemblyVersion.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.ToolOrAssemblyVersion.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.Transcript">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">Transcript</code><span class="sig-paren">(</span><em>id</em>, <em>name</em>, <em>canonical_transcript</em>, <em>strand</em>, <em>protein</em>, <em>location</em>, <em>gene</em>, <em>genome_assembly</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.Transcript" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="exception">
+<dt id="gel2mdt.models.Transcript.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.Transcript.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.Transcript.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.Transcript.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.TranscriptVariant">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">TranscriptVariant</code><span class="sig-paren">(</span><em>id</em>, <em>transcript</em>, <em>variant</em>, <em>af_max</em>, <em>hgvs_c</em>, <em>hgvs_p</em>, <em>hgvs_g</em>, <em>sift</em>, <em>polyphen</em>, <em>pathogenicity</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.TranscriptVariant" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="exception">
+<dt id="gel2mdt.models.TranscriptVariant.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.TranscriptVariant.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.TranscriptVariant.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.TranscriptVariant.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.Variant">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">Variant</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.Variant" title="Permalink to this definition">¶</a></dt>
+<dd><p>Variant Info</p>
+<dl class="exception">
+<dt id="gel2mdt.models.Variant.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.Variant.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.Variant.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.Variant.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.VariantReport">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">VariantReport</code><span class="sig-paren">(</span><em>id</em>, <em>proband_variant</em>, <em>primary_cs</em>, <em>secondary_cs</em>, <em>classification</em>, <em>alamut_screenshot_splicesites</em>, <em>alamut_screenshot_sanger</em>, <em>comments</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.VariantReport" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="exception">
+<dt id="gel2mdt.models.VariantReport.DoesNotExist">
+<em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.VariantReport.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gel2mdt.models.VariantReport.MultipleObjectsReturned">
+<em class="property">exception </em><code class="descname">MultipleObjectsReturned</code><a class="headerlink" href="#gel2mdt.models.VariantReport.MultipleObjectsReturned" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gel2mdt.models.Zygosities">
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">Zygosities</code><a class="headerlink" href="#gel2mdt.models.Zygosities" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of choices of zygosity that a variant can possibly have, used in the
+Variant model.</p>
+</dd></dl>
+
 </div>
 
 
