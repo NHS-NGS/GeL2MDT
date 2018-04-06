@@ -69,6 +69,7 @@
                                     </a>
                                     </p>
                                     {% endfor %}
+                                    <a href=# data-toggle="modal" data-target="#panelModal"><i class="fas fa-plus"></i></a>
 
                                 </div>
                                 </br>
@@ -146,7 +147,7 @@
                                     {% bootstrap_label "Assigned User" %}
                                     <br>
 
- <a href=# data-toggle="modal" data-target="#caseAssignModal"><i class="fas fa-user-plus"></i></a>                                   
+                                <a href=# data-toggle="modal" data-target="#caseAssignModal"><i class="fas fa-user-plus"></i></a>
                                     </a> {{ report.assigned_user.first_name }} {{ report.assigned_user.last_name }}
 
                                 </div>
@@ -513,5 +514,28 @@
         </div>
     </div>
 </div>
+
+<div id="panelModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
+                <h4 class="modal-title">Add Panel</h4>
+            </div>
+            <div class="modal-body">
+                <form action="/proband/{{ report.id }}" method="POST">
+                    {% csrf_token %}
+                    {% bootstrap_form panel_form %}
+                    {% buttons %}
+                    <button type="submit" class="btn btn-primary">
+                        Add
+                    </button>
+                    {% endbuttons %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 {% endblock %}

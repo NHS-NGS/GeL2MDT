@@ -192,10 +192,19 @@ def proband_view(request, report_id):
     if request.method == "POST":
         demogs_form = DemogsForm(request.POST, instance=report.ir_family.participant_family.proband)
         case_assign_form = CaseAssignForm(request.POST, instance=report)
+        panel_form = PanelForm(request.POST)
         if demogs_form.is_valid():
             demogs_form.save()
         if case_assign_form.is_valid():
             case_assign_form.save()
+        if panel_form.is_valid():
+            irfp, created = InterpretationReportFamilyPanel.objects.get_or_create(panel=panel_form.cleaned_data['panel'],
+                                                                                  ir_family=report.ir_family,
+                                                                                  defaults={
+                                                                                   'average_coverage':None,
+                                                                                   'proportion_above_15x':None,
+                                                                                   'genes_failing_coverage':None})
+            messages.add_message(request, 25, 'Panel Added')
 
     relatives = Relative.objects.filter(proband=report.ir_family.participant_family.proband)
     proband_form = ProbandForm(instance=report.ir_family.participant_family.proband)
@@ -203,7 +212,7 @@ def proband_view(request, report_id):
     proband_variants = ProbandVariant.objects.filter(interpretation_report=report)
     proband_mdt = MDTReport.objects.filter(interpretation_report=report)
     panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.ir_family)
-
+    panel_form = PanelForm()
     case_assign_form = CaseAssignForm(instance=report)
 
     if proband_form["status"].value() == "C":
@@ -219,7 +228,8 @@ def proband_view(request, report_id):
                                                     'proband_variants': proband_variants,
                                                     'proband_mdt': proband_mdt,
                                                     'panels': panels,
-                                                    'config_dict':config_dict})
+                                                    'config_dict':config_dict,
+                                                    'panel_form': panel_form})
 
 @login_required
 def variant_for_validation(request, pv_id):
