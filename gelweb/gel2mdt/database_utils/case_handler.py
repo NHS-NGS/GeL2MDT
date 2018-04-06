@@ -33,12 +33,17 @@ class Case(object):
 
         self.json_hash = self.hash_json()
         self.proband = self.get_proband_json()
-        self.proband_sample = self.proband["samples"][0]
         self.family_members = self.get_family_members()
         self.tools_and_versions = self.get_tools_and_versions()
         self.status = self.get_status_json()
-        self.json_variants \
-            = self.json_case_data["json_request"]["TieredVariants"]
+        if self.json["sample_type"] == 'raredisease':
+            self.proband_sample = self.proband["samples"][0]
+            self.json_variants \
+                = self.json_case_data["json_request"]["TieredVariants"]
+        elif self.json["sample_type"] == 'cancer':
+            self.proband_sample = self.proband["matchedSamples"][0]['tumourSampleId']
+            self.json_variants \
+                = self.json_case_data["json_request"]["tieredVariants"]
 
         self.panel_manager = panel_manager
         self.variant_manager = variant_manager
@@ -69,13 +74,15 @@ class Case(object):
         """
         Get the proband from the list of partcipants in the JSON.
         """
-        participant_jsons = \
-            self.json_case_data["json_request"]["pedigree"]["participants"]
         proband_json = None
-        for participant in participant_jsons:
-            if participant["isProband"]:
-                proband_json = participant
-
+        if self.json["sample_type"]=='raredisease':
+            participant_jsons = \
+                self.json_case_data["json_request"]["pedigree"]["participants"]
+            for participant in participant_jsons:
+                if participant["isProband"]:
+                    proband_json = participant
+        elif self.json["sample_type"]=='cancer':
+            proband_json = self.json_case_data["json_request"]["cancerParticipant"]
         return proband_json
 
     def get_family_members(self):
@@ -84,25 +91,26 @@ class Case(object):
         :return: A list of dictionaries containing family member details (gel ID, relationship and affection status)
         '''
         family_members = []
-        participant_jsons = \
-            self.json_case_data["json_request"]["pedigree"]["participants"]
-        for participant in participant_jsons:
-            if not participant["isProband"] and participant["additionalInformation"]:
-                if "relation_to_proband" not in participant["additionalInformation"]:
-                    continue
-                family_member = {'gel_id': participant["gelId"],
-                                 'relation_to_proband': participant["additionalInformation"]["relation_to_proband"],
-                                 'affection_status': participant["affectionStatus"],
-                                 'sequenced': False,
-                                 'sex': participant['sex'],
-                                 }
+        if self.json["sample_type"] == 'raredisease':
+            participant_jsons = \
+                self.json_case_data["json_request"]["pedigree"]["participants"]
+            for participant in participant_jsons:
+                if not participant["isProband"] and participant["additionalInformation"]:
+                    if "relation_to_proband" not in participant["additionalInformation"]:
+                        continue
+                    family_member = {'gel_id': participant["gelId"],
+                                     'relation_to_proband': participant["additionalInformation"]["relation_to_proband"],
+                                     'affection_status': participant["affectionStatus"],
+                                     'sequenced': False,
+                                     'sex': participant['sex'],
+                                     }
 
-                # determine if participant has undergone sequencing for trio
-                # calc
-                if participant["samples"]:
-                    # family member has undergone sequencing
-                    family_member["sequenced"] = True
-                family_members.append(family_member)
+                    # determine if participant has undergone sequencing for trio
+                    # calc
+                    if participant["samples"]:
+                        # family member has undergone sequencing
+                        family_member["sequenced"] = True
+                    family_members.append(family_member)
         return family_members
 
     def get_tools_and_versions(self):
@@ -110,7 +118,10 @@ class Case(object):
         Gets the genome build from the JSON. Details of other tools (VEP, Polyphen/SIFT) to be pulled from config file?
         :return: A dictionary of tools and versions used for the case
         '''
-        tools_dict = {'genome_build': self.json_request_data["genomeAssemblyVersion"]}
+        if self.json['sample_type'] == 'raredisease':
+            tools_dict = {'genome_build': self.json_request_data["genomeAssemblyVersion"]}
+        elif self.json['sample_type'] == 'cancer':
+            tools_dict = {'genome_build': self.json["assembly"]}
         return tools_dict
 
 
@@ -125,8 +136,11 @@ class Case(object):
         """
         Get the list of panels from the json
         """
-        json_request = self.json_case_data["json_request"]
-        return json_request["pedigree"]["analysisPanels"]
+        analysis_panels = []
+        if self.json["sample_type"] == 'raredisease':
+            json_request = self.json_case_data["json_request"]
+            analysis_panels = json_request["pedigree"]["analysisPanels"]
+        return analysis_panels
 
     def get_case_variants(self):
         """
@@ -138,18 +152,32 @@ class Case(object):
         case_variant_list = []
         # go through each variant in the json
         variant_object_count = 0
+        genome_build = None
+        if self.json['sample_type'] == 'cancer':
+            genome_build = self.json['assembly']
+        elif self.json['sample_type'] == 'raredisease':
+            genome_build = self.json_request_data["genomeAssemblyVersion"]
+
         for variant in json_variants:
             interesting_variant = False
             # check if it has any Tier1 or Tier2 Report Events
             variant_min_tier = None
-            for report_event in variant["reportEvents"]:
-                tier = int(report_event["tier"][-1])
-                if variant_min_tier is None:
-                    variant_min_tier = tier
-                elif tier < variant_min_tier:
-                    variant_min_tier = tier
-            variant["max_tier"] = variant_min_tier
+            if self.json['sample_type'] == 'raredisease':
+                for report_event in variant["reportEvents"]:
+                    tier = int(report_event["tier"][-1])
+                    if variant_min_tier is None:
+                        variant_min_tier = tier
+                    elif tier < variant_min_tier:
+                        variant_min_tier = tier
+            elif self.json['sample_type'] == 'cancer':
+                for report_event in variant['reportedVariantCancer']["reportEvents"]:
+                    tier = int(report_event["tier"][-1])
+                    if variant_min_tier is None:
+                        variant_min_tier = tier
+                    elif tier < variant_min_tier:
+                        variant_min_tier = tier
 
+            variant["max_tier"] = variant_min_tier
             if not self.pullt3:
                 if variant["max_tier"] < 3:
                     interesting_variant = True
@@ -157,17 +185,27 @@ class Case(object):
                 interesting_variant = True
             if interesting_variant:
                 variant_object_count += 1
-                case_variant = CaseVariant(
-                    chromosome=variant["chromosome"],
-                    position=variant["position"],
-                    ref=variant["reference"],
-                    alt=variant["alternate"],
-                    case_id=self.request_id,
-                    variant_count=str(variant_object_count),
-                    genome_build=self.json_request_data["genomeAssemblyVersion"]
-                )
+                if self.json['sample_type'] == 'raredisease':
+                    case_variant = CaseVariant(
+                        chromosome=variant["chromosome"],
+                        position=variant["position"],
+                        ref=variant["reference"],
+                        alt=variant["alternate"],
+                        case_id=self.request_id,
+                        variant_count=str(variant_object_count),
+                        genome_build=genome_build
+                    )
+                elif self.json['sample_type'] == 'cancer':
+                    case_variant = CaseVariant(
+                        chromosome=variant['reportedVariantCancer']["chromosome"],
+                        position=variant['reportedVariantCancer']["position"],
+                        ref=variant['reportedVariantCancer']["reference"],
+                        alt=variant['reportedVariantCancer']["alternate"],
+                        case_id=self.request_id,
+                        variant_count=str(variant_object_count),
+                        genome_build=genome_build
+                    )
                 case_variant_list.append(case_variant)
-                 # also add it to the dict within self.json_variants
                 variant["case_variant"] = case_variant
             else:
                 variant["case_variant"] = False
@@ -176,15 +214,26 @@ class Case(object):
         for interpreted_genome in self.json["interpreted_genome"]:
             for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
                 variant_object_count += 1
-                case_variant = CaseVariant(
-                    chromosome=variant["chromosome"],
-                    position=variant["position"],
-                    ref=variant["reference"],
-                    alt=variant["alternate"],
-                    case_id=self.request_id,
-                    variant_count=str(variant_object_count),
-                    genome_build=self.json_request_data["genomeAssemblyVersion"]
-                )
+                if self.json['sample_type'] == 'raredisease':
+                    case_variant = CaseVariant(
+                        chromosome=variant["chromosome"],
+                        position=variant["position"],
+                        ref=variant["reference"],
+                        alt=variant["alternate"],
+                        case_id=self.request_id,
+                        variant_count=str(variant_object_count),
+                        genome_build=genome_build
+                    )
+                elif self.json['sample_type'] == 'cancer':
+                    case_variant = CaseVariant(
+                        chromosome=variant['reportedVariantCancer']["chromosome"],
+                        position=variant['reportedVariantCancer']["position"],
+                        ref=variant['reportedVariantCancer']["reference"],
+                        alt=variant['reportedVariantCancer']["alternate"],
+                        case_id=self.request_id,
+                        variant_count=str(variant_object_count),
+                        genome_build=genome_build
+                    )
                 case_variant_list.append(case_variant)
                 # also add it to the dict within self.json_variants
                 variant["case_variant"] = case_variant
@@ -262,29 +311,46 @@ class CaseAttributeManager(object):
         Create a case model to handle adding/getting the clinician for case.
         """
         # family ID used to search for clinician details in labkey
-        family_id = self.case.json["family_id"]
-        # load in site specific details from config file
+        family_id = None
         config_dict = load_config.LoadConfig().load()
+        if self.case.json['sample_type']=='raredisease':
+            family_id = self.case.json["family_id"]
+            labkey_server_request = config_dict['labkey_server_request']
+        elif self.case.json['sample_type']=='cancer':
+            family_id = self.case.json["cancer_participant"]
+            labkey_server_request = config_dict['labkey_cancer_server_request']
+        # load in site specific details from config file
+
 
         if self.case.skip_demographics:
             # don't poll labkey
             clinician_details = {"name": "unknown", "hospital": "unknown"}
         elif not self.case.skip_demographics:
             # poll labkey
-            labkey_server_request = config_dict['labkey_server_request']
+
             server_context = lk.utils.create_server_context(
                 'gmc.genomicsengland.nhs.uk',
                 labkey_server_request,
                 '/labkey', use_ssl=True)
 
-            search_results = lk.query.select_rows(
-                server_context=server_context,
-                schema_name='gel_rare_diseases',
-                query_name='rare_diseases_registration',
-                filter_array=[
-                    lk.query.QueryFilter('family_id', family_id, 'contains')
-                ]
-            )
+            if self.case.json['sample_type']=='raredisease':
+                search_results = lk.query.select_rows(
+                    server_context=server_context,
+                    schema_name='gel_rare_diseases',
+                    query_name='rare_diseases_registration',
+                    filter_array=[
+                        lk.query.QueryFilter('family_id', family_id, 'contains')
+                    ]
+                )
+            elif self.case.json['sample_type']=='cancer':
+                search_results = lk.query.select_rows(
+                    server_context=server_context,
+                    schema_name='gel_cancer',
+                    query_name='cancer_registration',
+                    filter_array=[
+                        lk.query.QueryFilter('participant_id', family_id, 'contains')
+                    ]
+                )
             clinician_details = {"name": "unknown", "hospital": "unknown"}
             # The results contain multiple rows for each famliy member.
             # This code just takes the first entry. May need refining.
@@ -331,29 +397,36 @@ class CaseAttributeManager(object):
             }
 
         elif not self.case.skip_demographics:
+            participant_demographics = {
+                "surname": 'unknown',
+                "forename": 'unknown',
+                "date_of_birth": '2011/01/01',  # unknown but needs to be in date format
+                "nhs_num": 'unknown',
+            }
 
-            labkey_server_request = config_dict['labkey_server_request']
+            if self.case.json['sample_type'] == 'raredisease':
+                labkey_server_request = config_dict['labkey_server_request']
+                schema_name = 'gel_rare_diseases'
+            elif self.case.json['sample_type'] == 'cancer':
+                labkey_server_request = config_dict['labkey_cancer_server_request']
+                schema_name = 'gel_cancer'
+
             server_context = lk.utils.create_server_context(
                 'gmc.genomicsengland.nhs.uk',
                 labkey_server_request,
                 '/labkey', use_ssl=True)
 
-            participant_demographics = {
-                "surname": 'unknown',
-                "forename": 'unknown',
-                "date_of_birth": '2011/01/01', # unknown but needs to be in date format
-                "nhs_num": 'unknown',
-            }
 
             search_results = lk.query.select_rows(
                 server_context=server_context,
-                schema_name='gel_rare_diseases',
+                schema_name=schema_name,
                 query_name='participant_identifier',
                 filter_array=[
                     lk.query.QueryFilter(
                         'participant_id', participant_id, 'contains')
                 ]
             )
+
             try:
                 participant_demographics["surname"] = search_results['rows'][0].get(
                     'surname')
@@ -370,7 +443,11 @@ class CaseAttributeManager(object):
             except IndexError as e:
                 pass
             try:
-                if search_results['rows'][0].get('person_identifier_type').upper() == "NHSNUMBER":
+                if self.case.json['sample_type'] == 'raredisease':
+                    if search_results['rows'][0].get('person_identifier_type').upper() == "NHSNUMBER":
+                        participant_demographics["nhs_num"] = search_results['rows'][0].get(
+                            'person_identifier')
+                elif self.case.json['sample_type'] == 'cancer':
                     participant_demographics["nhs_num"] = search_results['rows'][0].get(
                         'person_identifier')
             except IndexError as e:
@@ -391,7 +468,15 @@ class CaseAttributeManager(object):
         else:
             # set up LabKey to get recruited disease
             config_dict = load_config.LoadConfig().load()
-            labkey_server_request = config_dict['labkey_server_request']
+            if self.case.json['sample_type'] == 'raredisease':
+                labkey_server_request = config_dict['labkey_server_request']
+                schema_name = 'gel_rare_diseases'
+                queryname = 'rare_diseases_diagnosis'
+            elif self.case.json['sample_type'] == 'cancer':
+                labkey_server_request = config_dict['labkey_cancer_server_request']
+                schema_name = 'gel_cancer'
+                queryname = 'cancer_diagnosis'
+
             server_context = lk.utils.create_server_context(
                 'gmc.genomicsengland.nhs.uk',
                 labkey_server_request,
@@ -400,8 +485,8 @@ class CaseAttributeManager(object):
             # search in LabKey for recruited disease
             search_results = lk.query.select_rows(
                 server_context=server_context,
-                schema_name='gel_rare_diseases',
-                query_name='rare_diseases_diagnosis',
+                schema_name=schema_name,
+                query_name=queryname,
                 filter_array=[
                     lk.query.QueryFilter('participant_identifiers_id', participant_id, 'eq')
                 ]
@@ -409,6 +494,7 @@ class CaseAttributeManager(object):
 
             recruiting_disease = None
             try:
+                print(search_results['rows'][0])
                 recruiting_disease = search_results['rows'][0].get('gel_disease_information_specific_disease', None)
             except IndexError as e:
                 pass
@@ -525,9 +611,13 @@ class CaseAttributeManager(object):
                     break
 
         clinician = self.case.attribute_managers[Clinician].case_model
+        if self.case.json['sample_type'] == 'raredisease':
+            family_id = self.case.json["family_id"]
+        elif self.case.json['sample_type'] == 'cancer':
+            family_id = self.case.json["cancer_participant"]
         family = CaseModel(Family, {
             "clinician": clinician.entry,
-            "gel_family_id": self.case.json["family_id"],
+            "gel_family_id": family_id,
             "trio_sequenced": self.case.trio_sequenced,
             "has_de_novo": self.case.has_de_novo
         }, self.model_objects)
@@ -537,12 +627,15 @@ class CaseAttributeManager(object):
         """
         Create a list of CaseModels for phenotypes for this case.
         """
-        phenotypes = ManyCaseModel(Phenotype, [
-            {"hpo_terms": phenotype["term"],
-             "description": "unknown"}
-            for phenotype in self.case.proband["hpoTermList"]
-            if phenotype["termPresence"] is True
-        ], self.model_objects)
+        if 'hpoTermList' in self.case.proband:
+            phenotypes = ManyCaseModel(Phenotype, [
+                {"hpo_terms": phenotype["term"],
+                 "description": "unknown"}
+                for phenotype in self.case.proband["hpoTermList"]
+                if phenotype["termPresence"] is True
+            ], self.model_objects)
+        else:
+            phenotypes = ManyCaseModel(Phenotype, [], self.model_objects)
         return phenotypes
 
     def get_family_phenotyes(self):
@@ -862,7 +955,8 @@ class CaseAttributeManager(object):
                 )),
             "user": self.case.status["user"],
             "max_tier": self.case.max_tier,
-            "assembly": genome_assembly
+            "assembly": genome_assembly,
+            'sample_type': self.case.json['sample_type']
         }, self.model_objects)
         return ir
 
@@ -885,9 +979,14 @@ class CaseAttributeManager(object):
         # loop through all variants and check that they have a case_variant
         for variant in self.case.json_variants:
             if variant["case_variant"]:
-                if variant['dbSNPid']:
-                    if not re.match('rs\d+', str(variant['dbSNPid'])):
-                        variant['dbSNPid'] = None
+                if self.case.json['sample_type'] == 'cancer':
+                    variant['dbSNPid'] = variant['reportedVariantCancer']['dbSnpId']
+
+                if 'dbSNPid' in variant:
+                    if variant['dbSNPid']:
+                        if not re.match('rs\d+', str(variant['dbSNPid'])):
+                            variant['dbSNPid'] = None
+
                 tiered_variant = {
                     "genome_assembly": genome_assembly,
                     "alternate": variant["case_variant"].alt,
@@ -1025,31 +1124,46 @@ class CaseAttributeManager(object):
         tiered_proband_variants = []
         for json_variant in self.case.json_variants:
             # some json_variants won't have an entry (T3), so:
+            json_variant['somatic'] = False
             json_variant["variant_entry"] = None
             # for those that do, fetch from list of entries:
             # variant in json matches variant entry
             for variant in variant_entries:
-                if (
-                    json_variant["chromosome"] == variant.chromosome and
-                    json_variant["position"] == variant.position and
-                    json_variant["reference"] == variant.reference and
-                    json_variant["alternate"] == variant.alternate
-                ):
-                    # variant in json matches variant entry
-                    json_variant["variant_entry"] = variant
+                if self.case.json['sample_type'] == 'raredisease':
+                    if (
+                        json_variant["chromosome"] == variant.chromosome and
+                        json_variant["position"] == variant.position and
+                        json_variant["reference"] == variant.reference and
+                        json_variant["alternate"] == variant.alternate
+                    ):
+                        # variant in json matches variant entry
+                        json_variant["variant_entry"] = variant
+                elif self.case.json['sample_type'] == 'cancer':
+                    if (
+                        json_variant['reportedVariantCancer']["chromosome"] == variant.chromosome and
+                        json_variant['reportedVariantCancer']["position"] == variant.position and
+                        json_variant['reportedVariantCancer']["reference"] == variant.reference and
+                        json_variant['reportedVariantCancer']["alternate"] == variant.alternate
+                    ):
+                        # variant in json matches variant entry
+                        json_variant["variant_entry"] = variant
                 json_variant['zygosity'] = 'unknown'
                 json_variant['maternal_zygosity'] = 'unknown'
                 json_variant['paternal_zygosity'] = 'unknown'
 
-                for genotype in json_variant["calledGenotypes"]:
-                    genotype_gelid = genotype.get('gelId', None)
-                    if genotype_gelid == proband_manager.case_model.entry.gel_id:
-                        json_variant['zygosity'] = genotype["genotype"]
-                    elif genotype_gelid == self.case.mother.get("gel_id", None):
-                        json_variant['maternal_zygosity'] = genotype["genotype"]
-                    elif genotype_gelid == self.case.father.get("gel_id", None):
-                        json_variant['paternal_zygosity'] = genotype["genotype"]
+                if 'calledGenotypes' in json_variant:
+                    for genotype in json_variant["calledGenotypes"]:
+                        genotype_gelid = genotype.get('gelId', None)
+                        if genotype_gelid == proband_manager.case_model.entry.gel_id:
+                            json_variant['zygosity'] = genotype["genotype"]
+                        elif genotype_gelid == self.case.mother.get("gel_id", None):
+                            json_variant['maternal_zygosity'] = genotype["genotype"]
+                        elif genotype_gelid == self.case.father.get("gel_id", None):
+                            json_variant['paternal_zygosity'] = genotype["genotype"]
 
+                if 'alleleOrigins' in json_variant:
+                    if json_variant['alleleOrigins'][0] == 'somatic_variant':
+                        json_variant['somatic'] = True
 
         for variant in self.case.json_variants:
             if variant["variant_entry"]:
@@ -1059,6 +1173,7 @@ class CaseAttributeManager(object):
                     "zygosity": variant["zygosity"],
                     "maternal_zygosity": variant["maternal_zygosity"],
                     "paternal_zygosity": variant["paternal_zygosity"],
+                    "somatic": variant["somatic"],
                 }
                 tiered_proband_variants.append(tiered_proband_variant)
 
@@ -1066,41 +1181,59 @@ class CaseAttributeManager(object):
         cip_proband_variants = []
         for interpreted_genome in self.case.json["interpreted_genome"]:
             for json_variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
+                json_variant['somatic'] = False
                 # all CIP flagged variants should have a variant entry.
                 json_variant["variant_entry"] = None
                 # variant in json matches variant entry
                 for variant in variant_entries:
-                    if (
-                        json_variant["chromosome"] == variant.chromosome and
-                        json_variant["position"] == variant.position and
-                        json_variant["reference"] == variant.reference and
-                        json_variant["alternate"] == variant.alternate
-                    ):
-                        # variant in json matches variant entry
-                        json_variant["variant_entry"] = variant
+                    if self.case.json['sample_type'] == 'raredisease':
+                        if (
+                                json_variant["chromosome"] == variant.chromosome and
+                                json_variant["position"] == variant.position and
+                                json_variant["reference"] == variant.reference and
+                                json_variant["alternate"] == variant.alternate
+                        ):
+                            # variant in json matches variant entry
+                            json_variant["variant_entry"] = variant
+                    elif self.case.json['sample_type'] == 'cancer':
+                        if (
+                                json_variant['reportedVariantCancer']["chromosome"] == variant.chromosome and
+                                json_variant['reportedVariantCancer']["position"] == variant.position and
+                                json_variant['reportedVariantCancer']["reference"] == variant.reference and
+                                json_variant['reportedVariantCancer']["alternate"] == variant.alternate
+                        ):
+                            # variant in json matches variant entry
+                            json_variant["variant_entry"] = variant
                     json_variant['zygosity'] = 'unknown'
                     json_variant['maternal_zygosity'] = 'unknown'
                     json_variant['paternal_zygosity'] = 'unknown'
 
-                    for genotype in json_variant["calledGenotypes"]:
-                        genotype_gelid = genotype.get('gelId', None)
-                        if genotype_gelid == proband_manager.case_model.entry.gel_id:
-                            json_variant['zygosity'] = genotype["genotype"]
-                        elif genotype_gelid == self.case.mother.get("gel_id", None):
-                            json_variant['maternal_zygosity'] = genotype.get("genotype", 'unknown')
-                        elif genotype_gelid == self.case.father.get("gel_id", None):
-                            json_variant['paternal_zygosity'] = genotype.get('genotype', 'unknown')
+                    if 'calledGenotypes' in json_variant:
+                        for genotype in json_variant["calledGenotypes"]:
+                            genotype_gelid = genotype.get('gelId', None)
+                            if genotype_gelid == proband_manager.case_model.entry.gel_id:
+                                json_variant['zygosity'] = genotype["genotype"]
+                            elif genotype_gelid == self.case.mother.get("gel_id", None):
+                                json_variant['maternal_zygosity'] = genotype.get("genotype", 'unknown')
+                            elif genotype_gelid == self.case.father.get("gel_id", None):
+                                json_variant['paternal_zygosity'] = genotype.get('genotype', 'unknown')
 
-            for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
-                if variant["variant_entry"]:
-                    cip_proband_variant = {
-                        "max_tier": 0,  # CIP flagged variants assigned tier 0
-                        "variant": variant["variant_entry"],
-                        "zygosity": variant["zygosity"],
-                        "maternal_zygosity": variant["maternal_zygosity"],
-                        "paternal_zygosity": variant["paternal_zygosity"],
-                    }
-                    cip_proband_variants.append(cip_proband_variant)
+                    if 'alleleOrigins' in json_variant:
+                        if json_variant['alleleOrigins'][0] == 'somatic_variant':
+                            json_variant['somatic'] = True
+
+            if 'reportedVariants' in interpreted_genome["interpreted_genome_data"]:
+                for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
+                    if variant["variant_entry"]:
+                        cip_proband_variant = {
+                            "max_tier": 0,  # CIP flagged variants assigned tier 0
+                            "variant": variant["variant_entry"],
+                            "zygosity": variant["zygosity"],
+                            "maternal_zygosity": variant["maternal_zygosity"],
+                            "paternal_zygosity": variant["paternal_zygosity"],
+                            "somatic": variant["somatic"],
+                        }
+                        cip_proband_variants.append(cip_proband_variant)
 
         # remove CIP tiered variants which are in cip variants
         tiered_and_cip_proband_variants = []
@@ -1136,7 +1269,7 @@ class CaseAttributeManager(object):
             "maternal_zygosity": variant["maternal_zygosity"],
             "paternal_zygosity": variant["paternal_zygosity"],
             "inheritance": self.determine_variant_inheritance(variant),
-            "somatic": False
+            "somatic": variant["somatic"]
         } for variant in tiered_and_cip_proband_variants], self.model_objects)
 
         return proband_variants
@@ -1190,10 +1323,12 @@ class CaseAttributeManager(object):
         for variant in self.case.json_variants:
             interesting_variant = False
             if not self.case.pullt3:
+                print(variant['max_tier'])
                 if variant["max_tier"] < 3:
                     interesting_variant = True
             else:
                 interesting_variant=True
+            print(variant['max_tier'], interesting_variant)
             if interesting_variant:
                 # go through each RE in the variant
                 for report_event in variant["reportEvents"]:
@@ -1385,9 +1520,6 @@ class CaseAttributeManager(object):
         Get the ProbandTranscriptVariants associated with this case and return
         a MCM containing them.
         """
-
-        # get the transcript_variants
-
         # associat a proband_variant with a transcript
         proband_variants = [proband_variant.entry for proband_variant
                             in self.case.attribute_managers[ProbandVariant].case_model.case_models]
@@ -1396,6 +1528,18 @@ class CaseAttributeManager(object):
             for proband_variant in proband_variants:
                 if proband_variant.variant == transcript.variant_entry:
                     transcript.proband_variant_entry = proband_variant
+
+        if self.case.json['sample_type'] == 'cancer':
+            for transcript in self.case.transcripts:
+                if transcript.transcript_entry:
+                    for variant in self.case.json_variants:
+                        if variant['variant_entry'] == transcript.variant_entry:
+                            for reportevent in variant['reportedVariantCancer']['reportEvents']:
+                                if 'genomicFeatureCancer' in reportevent:
+                                    if transcript.transcript_name == reportevent['genomicFeatureCancer']['ensemblId']:
+                                        transcript.transcript_entry.canonical_transcript = True
+                                    else:
+                                        transcript.transcript_entry.canonical_transcript = False
 
         proband_transcript_variants = ManyCaseModel(ProbandTranscriptVariant, [{
             "transcript": transcript.transcript_entry,

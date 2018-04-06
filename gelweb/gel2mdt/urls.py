@@ -12,6 +12,7 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('profile/', views.profile, name='profile'),
     path('profile/remove_case/<int:case_id>', views.remove_case, name='remove-case'),
+    path('cancer-main', views.cancer_main, name='cancer-main'),
     path('rare-disease-main', views.rare_disease_main, name='rare-disease-main'),
     path('gel2me/', RedirectView.as_view(url='/', permanent=False), name='gel2me'),
     path('proband/<int:report_id>', views.proband_view, name='proband-view'),
