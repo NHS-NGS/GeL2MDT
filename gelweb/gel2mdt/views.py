@@ -193,6 +193,8 @@ def proband_view(request, report_id):
         demogs_form = DemogsForm(request.POST, instance=report.ir_family.participant_family.proband)
         case_assign_form = CaseAssignForm(request.POST, instance=report)
         panel_form = PanelForm(request.POST)
+        clinician_form = ClinicianForm(request.POST)
+        add_clinician_form = AddClinicianForm(request.POST)
         if demogs_form.is_valid():
             demogs_form.save()
         if case_assign_form.is_valid():
@@ -206,6 +208,19 @@ def proband_view(request, report_id):
                                                                                    'proportion_above_15x':None,
                                                                                    'genes_failing_coverage':None})
             messages.add_message(request, 25, 'Panel Added')
+        if clinician_form.is_valid():
+            family = report.ir_family.participant_family
+            family.clinician = clinician_form.cleaned_data['clinician']
+            family.save()
+            messages.add_message(request, 25, 'Clinician Changed')
+        if add_clinician_form.is_valid():
+            clinician, created = Clinician.objects.get_or_create(email=add_clinician_form.cleaned_data['email'],
+                                                                 defaults={
+                                                                     'name': add_clinician_form.cleaned_data['name'],
+                                                                     'hospital':add_clinician_form.cleaned_data['hospital'],
+                                                                     'added_by_user': True
+                                                                 })
+            messages.add_message(request, 25, 'Clinician Created')
 
     relatives = Relative.objects.filter(proband=report.ir_family.participant_family.proband)
     proband_form = ProbandForm(instance=report.ir_family.participant_family.proband)
@@ -215,7 +230,8 @@ def proband_view(request, report_id):
     panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.ir_family)
     panel_form = PanelForm()
     case_assign_form = CaseAssignForm(instance=report)
-
+    clinician_form = ClinicianForm()
+    add_clinician_form = AddClinicianForm()
 
     if not request.user.is_staff:
         if proband_form["status"].value() == "C":
@@ -232,7 +248,9 @@ def proband_view(request, report_id):
                                                     'proband_mdt': proband_mdt,
                                                     'panels': panels,
                                                     'config_dict':config_dict,
-                                                    'panel_form': panel_form})
+                                                    'panel_form': panel_form,
+                                                    'clinician_form':clinician_form,
+                                                    'add_clinician_form':add_clinician_form})
 
 @login_required
 def variant_for_validation(request, pv_id):
