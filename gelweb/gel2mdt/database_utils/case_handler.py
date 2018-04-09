@@ -460,6 +460,7 @@ class CaseAttributeManager(object):
         Create a case model to handle adding/getting the proband for case.
         """
         participant_id = self.case.json["proband"]
+
         demographics = self.get_paricipant_demographics(participant_id)
         family = self.case.attribute_managers[Family].case_model
 
@@ -498,7 +499,6 @@ class CaseAttributeManager(object):
                 recruiting_disease = search_results['rows'][0].get('gel_disease_information_specific_disease', None)
             except IndexError as e:
                 pass
-
         proband = CaseModel(Proband, {
             "gel_id": participant_id,
             "family": family.entry,
@@ -614,7 +614,7 @@ class CaseAttributeManager(object):
         if self.case.json['sample_type'] == 'raredisease':
             family_id = self.case.json["family_id"]
         elif self.case.json['sample_type'] == 'cancer':
-            family_id = self.case.json["cancer_participant"]
+            family_id = self.case.json["proband"]
         family = CaseModel(Family, {
             "clinician": clinician.entry,
             "gel_family_id": family_id,
@@ -892,7 +892,6 @@ class CaseAttributeManager(object):
             str_genes_failing_coverage += gene + ', '
         str_genes_failing_coverage = str_genes_failing_coverage[:-2]
         str_genes_failing_coverage += '.'
-
 
         ir_family= self.case.attribute_managers[InterpretationReportFamily].case_model
         try:
