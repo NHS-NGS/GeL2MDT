@@ -10,6 +10,9 @@ from celery.schedules import crontab
 from celery.task import periodic_task
 import json
 from json import JSONDecodeError
+import labkey as lk
+from datetime import datetime
+import time
 
 def get_gel_content(ir, ir_version):
     # otherwise get uname and password from a file
@@ -252,3 +255,122 @@ class VariantAdder(object):
                                                                             proband_variant=transcript.proband_variant_entry,
                                                                      defaults={"selected": transcript.transcript_entry.canonical_transcript,
                                                                                 "effect": transcript.proband_transcript_variant_effect})
+
+
+class UpdateDemographics(object):
+    def __init__(self, report_id):
+        self.report = GELInterpretationReport.objects.get(id=report_id)
+        self.clinician = None
+        config_dict = load_config.LoadConfig().load()
+        # poll labkey
+        labkey_server_request = config_dict['labkey_server_request']
+        self.server_context = lk.utils.create_server_context(
+            'gmc.genomicsengland.nhs.uk',
+            labkey_server_request,
+            '/labkey', use_ssl=True)
+
+    def update_clinician(self):
+        clinician_details = {}
+        search_results = lk.query.select_rows(
+            server_context=self.server_context,
+            schema_name='gel_rare_diseases',
+            query_name='rare_diseases_registration',
+            filter_array=[
+                lk.query.QueryFilter('family_id',
+                                     self.report.ir_family.participant_family.gel_family_id,
+                                     'contains')
+            ]
+        )
+        try:
+            clinician_details['name'] = search_results['rows'][0].get(
+                'consultant_details_full_name_of_responsible_consultant')
+        except IndexError as e:
+            pass
+        try:
+            clinician_details['hospital'] = search_results['rows'][0].get(
+                'consultant_details_hospital_of_responsible_consultant')
+        except IndexError as e:
+            pass
+
+        if 'name' in clinician_details and 'hospital' in clinician_details:
+            clinician, saved = Clinician.objects.get_or_create(name= clinician_details['name'],
+                                                                defaults={
+                                                                "email": "unknown",  # clinicain email not on labkey
+                                                                "hospital": clinician_details['hospital'],
+                                                                "added_by_user": False})
+            self.clinician = clinician
+            family = self.report.ir_family.participant_family
+            family.clinician = clinician
+            family.save()
+            return clinician
+        else:
+            return None
+
+    def update_demographics(self):
+        participant_demographics = {
+            "surname": 'unknown',
+            "forename": 'unknown',
+            "date_of_birth": '2011/01/01',  # unknown but needs to be in date format
+            "nhs_num": 'unknown',
+        }
+
+        search_results = lk.query.select_rows(
+            server_context=self.server_context,
+            schema_name='gel_rare_diseases',
+            query_name='participant_identifier',
+            filter_array=[
+                lk.query.QueryFilter(
+                    'participant_id', self.report.ir_family.participant_family.proband.gel_id, 'contains')
+            ]
+        )
+        try:
+            participant_demographics["surname"] = search_results['rows'][0].get(
+                'surname')
+        except IndexError as e:
+            pass
+        try:
+            participant_demographics["forename"] = search_results['rows'][0].get(
+                'forenames')
+        except IndexError as e:
+            pass
+        try:
+            participant_demographics["date_of_birth"] = search_results['rows'][0].get(
+                'date_of_birth').split(' ')[0]
+        except IndexError as e:
+            pass
+        try:
+            if search_results['rows'][0].get('person_identifier_type').upper() == "NHSNUMBER":
+                participant_demographics["nhs_num"] = search_results['rows'][0].get(
+                    'person_identifier')
+        except IndexError as e:
+            pass
+
+        search_results = lk.query.select_rows(
+            server_context=self.server_context,
+            schema_name='gel_rare_diseases',
+            query_name='rare_diseases_diagnosis',
+            filter_array=[
+                lk.query.QueryFilter('participant_identifiers_id',
+                                     self.report.ir_family.participant_family.proband.gel_id, 'eq')
+            ]
+        )
+
+        recruiting_disease = None
+        try:
+            recruiting_disease = search_results['rows'][0].get('gel_disease_information_specific_disease', None)
+        except IndexError as e:
+            pass
+
+        if participant_demographics['surname'] != 'unknown' and participant_demographics['nhs_num'] != 'unknown':
+            proband = self.report.ir_family.participant_family.proband
+            proband.nhs_number = participant_demographics['nhs_num']
+            proband.surname = participant_demographics['surname']
+            proband.forename = participant_demographics['forename']
+            proband.date_of_birth = datetime.strptime(participant_demographics["date_of_birth"],
+                                                               "%Y/%m/%d").date()
+            proband.recruiting_disease = recruiting_disease
+            proband.save()
+            return proband
+        else:
+            return None
+
