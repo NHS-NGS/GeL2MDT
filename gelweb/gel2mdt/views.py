@@ -216,10 +216,12 @@ def proband_view(request, report_id):
     panel_form = PanelForm()
     case_assign_form = CaseAssignForm(instance=report)
 
-    if proband_form["status"].value() == "C":
-        for field in proband_form.__dict__["fields"]:
-            proband_form.fields[field].widget.attrs['readonly'] = True
-            proband_form.fields[field].widget.attrs['disabled'] = True
+
+    if not request.user.is_staff:
+        if proband_form["status"].value() == "C":
+            for field in proband_form.__dict__["fields"]:
+                proband_form.fields[field].widget.attrs['readonly'] = True
+                proband_form.fields[field].widget.attrs['disabled'] = True
 
     return render(request, 'gel2mdt/proband.html', {'report': report,
                                                     'relatives': relatives,
