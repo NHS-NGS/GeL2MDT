@@ -97,6 +97,8 @@
                                     {% bootstrap_label "Clinician" %}
                                     <div class="block">
                                         {{report.ir_family.participant_family.clinician}}
+                                        <a href=# data-toggle="modal" data-target="#changeclinicianModal"><i class="fas fa-pencil-alt"></i></a>
+                                        <a href=# data-toggle="modal" data-target="#addclinicianModal"><i class="fas fa-plus"></i></a>
                                     </div>
 
                                 </div>
@@ -528,7 +530,7 @@
                     {% bootstrap_form panel_form %}
                     {% buttons %}
                     <button type="submit" class="btn btn-primary">
-                        Add
+                        Change
                     </button>
                     {% endbuttons %}
                 </form>
@@ -536,6 +538,51 @@
         </div>
     </div>
 </div>
+
+<div id="changeclinicianModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
+                <h4 class="modal-title">Change Clinician</h4>
+            </div>
+            <div class="modal-body">
+                <form action="/proband/{{ report.id }}" method="POST">
+                    {% csrf_token %}
+                    {% bootstrap_form clinician_form %}
+                    {% buttons %}
+                    <button type="submit" class="btn btn-primary">
+                        Change Clinician
+                    </button>
+                    {% endbuttons %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="addclinicianModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
+                <h4 class="modal-title">Add New Clinician</h4>
+            </div>
+            <div class="modal-body">
+                <form action="/proband/{{ report.id }}" method="POST">
+                    {% csrf_token %}
+                    {% bootstrap_form add_clinician_form %}
+                    {% buttons %}
+                    <button type="submit" class="btn btn-primary">
+                        Add New Clinician
+                    </button>
+                    {% endbuttons %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 
 {% endblock %}
