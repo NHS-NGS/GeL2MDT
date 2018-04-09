@@ -19,7 +19,7 @@ import os, json, csv
 from .exports import write_mdt_outcome_template, write_mdt_export
 from io import BytesIO, StringIO
 from .vep_utils.run_vep_batch import CaseVariant
-from .tasks import VariantAdder, update_for_t3
+from .tasks import VariantAdder, update_for_t3, UpdateDemographics
 # Create your views here.
 
 def register(request):
@@ -251,6 +251,13 @@ def proband_view(request, report_id):
                                                     'panel_form': panel_form,
                                                     'clinician_form':clinician_form,
                                                     'add_clinician_form':add_clinician_form})
+
+@login_required
+def update_demographics(request, report_id):
+    update_demo = UpdateDemographics(report_id=report_id)
+    update_demo.update_clinician()
+    update_demo.update_demographics()
+    return HttpResponseRedirect(f'/proband/{report_id}')
 
 @login_required
 def variant_for_validation(request, pv_id):

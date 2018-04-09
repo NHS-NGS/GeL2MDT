@@ -24,7 +24,11 @@
                     <div class="col-md-12">
                         <div class="panel panel-default">
                             {% if proband_form.status.value != "C" %}
-                            <div class="panel-heading">Participant Information <span style="float:right"><a href=# data-toggle="modal" data-target="#demogModal"><i class="fas fa-pencil-alt"></i></a></span></div>
+                            <div class="panel-heading">Participant Information <span style="float:right">
+                                {% if request.user.is_staff %}
+                                <a href="/update_demographics/{{report.id}}" class="btn btn-xs btn-info"> Update Demographics   </a>
+                                       {% endif %}
+                                <a href=# data-toggle="modal" data-target="#demogModal"><i class="fas fa-pencil-alt"></i></a></span></div>
                             {% else %}
                             <div class="panel-heading">Participant Information</div>
                             {% endif %}
