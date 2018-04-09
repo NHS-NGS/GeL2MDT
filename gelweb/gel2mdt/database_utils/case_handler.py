@@ -317,7 +317,7 @@ class CaseAttributeManager(object):
             family_id = self.case.json["family_id"]
             labkey_server_request = config_dict['labkey_server_request']
         elif self.case.json['sample_type']=='cancer':
-            family_id = self.case.json["cancer_participant"]
+            family_id = self.case.json["proband"]
             labkey_server_request = config_dict['labkey_cancer_server_request']
         # load in site specific details from config file
 
@@ -348,7 +348,7 @@ class CaseAttributeManager(object):
                     schema_name='gel_cancer',
                     query_name='cancer_registration',
                     filter_array=[
-                        lk.query.QueryFilter('participant_id', family_id, 'contains')
+                        lk.query.QueryFilter('participant_identifiers_id', family_id, 'contains')
                     ]
                 )
             clinician_details = {"name": "unknown", "hospital": "unknown"}
@@ -489,13 +489,12 @@ class CaseAttributeManager(object):
                 schema_name=schema_name,
                 query_name=queryname,
                 filter_array=[
-                    lk.query.QueryFilter('participant_identifiers_id', participant_id, 'eq')
+                    lk.query.QueryFilter('participant_id', participant_id, 'eq')
                 ]
             )
 
             recruiting_disease = None
             try:
-                print(search_results['rows'][0])
                 recruiting_disease = search_results['rows'][0].get('gel_disease_information_specific_disease', None)
             except IndexError as e:
                 pass
