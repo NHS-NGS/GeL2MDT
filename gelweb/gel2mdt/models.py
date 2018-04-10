@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-from django.contrib.auth.models import User
+from django.conf import settings
 from .model_utils.choices import ChoiceEnum
 from .config import load_config
 
@@ -18,6 +18,11 @@ class ListUpdate(models.Model):
 
     error = models.TextField(null=True)
 
+    class Meta:
+        managed = True
+        db_table = 'ListUpdate'
+        app_label= 'gel2mdt'
+
 
 class ToolOrAssemblyVersion(models.Model):
     """
@@ -28,6 +33,7 @@ class ToolOrAssemblyVersion(models.Model):
         verbose_name_plural = "Tool and assembly versions"
         managed = True
         db_table = 'ToolOrAssemblyVersion'
+        app_label= 'gel2mdt'
 
     tool_name = models.CharField(max_length=200)
     version_number = models.CharField(max_length=200)
@@ -46,6 +52,7 @@ class Phenotype(models.Model):
     class Meta:
         managed = True
         db_table = 'Phenotype'
+        app_label= 'gel2mdt'
 
 
 class Clinician(models.Model):
@@ -61,19 +68,21 @@ class Clinician(models.Model):
     class Meta:
         managed = True
         db_table = 'Clinician'
+        app_label= 'gel2mdt'
 
 
 class Family(models.Model):
     """
     Represents a family within the CIP API: proband and relatives (if present)
     link to a particular family. Holds information about which panels have been
-o   applied to this case, which should be concordant with the phenotype of the
+    applied to this case, which should be concordant with the phenotype of the
     proband.
     """
     class Meta:
         verbose_name_plural = "Families"
         db_table = 'Family'
         managed = True
+        app_label= 'gel2mdt'
     gel_family_id = models.CharField(max_length=200, unique=True)
 
     clinician = models.ForeignKey(Clinician, on_delete=models.CASCADE)
@@ -91,6 +100,7 @@ class FamilyPhenotype(models.Model):
     class Meta:
         managed = True
         db_table='FamilyPhenotype'
+        app_label= 'gel2mdt'
 
     family = models.ForeignKey(Family, on_delete=models.CASCADE)
     phenotype = models.ForeignKey(Phenotype, on_delete=models.CASCADE)
@@ -113,6 +123,7 @@ class Gene(models.Model):
     class Meta:
         managed = True
         db_table = 'Gene'
+        app_label= 'gel2mdt'
 
 
 class Panel(models.Model):
@@ -131,6 +142,7 @@ class Panel(models.Model):
     class Meta:
         managed = True
         db_table = 'Panel'
+        app_label= 'gel2mdt'
 
 
 class PanelVersion(models.Model):
@@ -148,6 +160,7 @@ class PanelVersion(models.Model):
     class Meta:
         managed = True
         db_table = 'PanelVersion'
+        app_label= 'gel2mdt'
 
 
 class PanelVersionGene(models.Model):
@@ -157,6 +170,7 @@ class PanelVersionGene(models.Model):
     """
     class Meta:
         managed = True
+        app_label= 'gel2mdt'
 
     panel_version = models.ForeignKey(PanelVersion, on_delete=models.CASCADE)
     gene = models.ForeignKey(Gene, on_delete=models.CASCADE)
@@ -174,6 +188,7 @@ class InterpretationReportFamily(models.Model):
         verbose_name_plural = "Interpretation report families"
         managed = True
         db_table = 'InterpretationReportFamily'
+        app_label= 'gel2mdt'
 
     ir_family_id = models.CharField(max_length=10, unique=True)
     participant_family = models.ForeignKey(
@@ -203,6 +218,7 @@ class InterpretationReportFamilyPanel(models.Model):
     """
     class Meta:
         managed=True
+        app_label= 'gel2mdt'
 
     ir_family = models.ForeignKey(InterpretationReportFamily, on_delete=models.CASCADE)
     panel = models.ForeignKey(PanelVersion, on_delete=models.CASCADE)
@@ -231,7 +247,7 @@ class GELInterpretationReport(models.Model):
     assembly = models.ForeignKey(ToolOrAssemblyVersion, on_delete=models.CASCADE)
 
     user = models.CharField(max_length=200)
-    assigned_user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    assigned_user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
 
     # sha hash to allow quick determination of differences each update
     sha_hash = models.CharField(max_length=200)
@@ -268,6 +284,7 @@ class GELInterpretationReport(models.Model):
     class Meta:
         managed = True
         db_table = 'GELInterpretationReport'
+        app_label= 'gel2mdt'
 
 
 class ClinicalScientist(models.Model):
@@ -281,6 +298,7 @@ class ClinicalScientist(models.Model):
     class Meta:
         managed = True
         db_table = 'ClinicalScientist'
+        app_label= 'gel2mdt'
 
 
 class Proband(models.Model):
@@ -330,6 +348,7 @@ class Proband(models.Model):
     class Meta:
         managed = True
         db_table = 'Proband'
+        app_label= 'gel2mdt'
 
 
 class Relative(models.Model):
@@ -354,6 +373,7 @@ class Relative(models.Model):
     class Meta:
         managed = True
         db_table = 'Relative'
+        app_label= 'gel2mdt'
 
 
 class Variant(models.Model):
@@ -376,6 +396,7 @@ class Variant(models.Model):
     class Meta:
         managed = True
         db_table = 'Variant'
+        app_label= 'gel2mdt'
 
 
 class Transcript(models.Model):
@@ -392,6 +413,7 @@ class Transcript(models.Model):
         managed = True
         db_table = 'Transcript'
         unique_together = (('name', 'genome_assembly'),)
+        app_label= 'gel2mdt'
 
 
 class TranscriptVariant(models.Model):
@@ -410,6 +432,7 @@ class TranscriptVariant(models.Model):
     class Meta:
         managed = True
         db_table = 'TranscriptVariant'
+        app_label= 'gel2mdt'
 
 
 class Zygosities(ChoiceEnum):
@@ -507,6 +530,7 @@ class ProbandVariant(models.Model):
     class Meta:
         managed = True
         db_table = 'ProbandVariant'
+        app_label= 'gel2mdt'
 
 
 class RareDiseaseReport(models.Model):
@@ -533,6 +557,7 @@ class RareDiseaseReport(models.Model):
     class Meta:
         managed = True
         db_table = 'RareDiseaseReport'
+        app_label= 'gel2mdt'
 
 
 class CancerReport(models.Model):
@@ -546,6 +571,7 @@ class CancerReport(models.Model):
     class Meta:
         managed = True
         db_table = 'CancerReport'
+        app_label= 'gel2mdt'
 
 
 class ProbandTranscriptVariant(models.Model):
@@ -562,6 +588,7 @@ class ProbandTranscriptVariant(models.Model):
     class Meta:
         managed = True
         db_table = 'ProbandTranscriptVariant'
+        app_label= 'gel2mdt'
 
 # classes for choice
 class ModesOfInheritance(ChoiceEnum):
@@ -612,6 +639,7 @@ class ReportEvent(models.Model):
     class Meta:
         managed = True
         db_table = 'ReportEvent'
+        app_label= 'gel2mdt'
 
 
 class Primer(models.Model):
@@ -630,6 +658,7 @@ class Primer(models.Model):
     class Meta:
         managed = True
         db_table = 'Primer'
+        app_label= 'gel2mdt'
 
 
 class VariantReport(models.Model):
@@ -664,6 +693,7 @@ class VariantReport(models.Model):
     class Meta:
         managed = True
         db_table = 'VariantReport'
+        app_label= 'gel2mdt'
 
 
 class OtherStaff(models.Model):
@@ -680,6 +710,7 @@ class OtherStaff(models.Model):
     class Meta:
         managed = True
         db_table = 'OtherStaff'
+        app_label= 'gel2mdt'
 
 
 class MDT(models.Model):
@@ -693,7 +724,7 @@ class MDT(models.Model):
 
     # outcome: should the variant be reported?
     to_report = models.NullBooleanField()
-    creator = models.ForeignKey(User, on_delete=models.CASCADE)  # Change to user foreignkey?
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # Change to user foreignkey?
     status = models.CharField(db_column='Status', max_length=50, choices=(
         ('A', 'Active'), ('C', 'Completed')), default='A')
     gatb = models.NullBooleanField()
@@ -704,6 +735,7 @@ class MDT(models.Model):
     class Meta:
         managed = True
         db_table = 'MDT'
+        app_label= 'gel2mdt'
 
 class MDTReport(models.Model):
     interpretation_report = models.ForeignKey(GELInterpretationReport, on_delete=models.CASCADE)
@@ -712,4 +744,5 @@ class MDTReport(models.Model):
     class Meta:
         managed = True
         db_table = 'MDTReport'
+        app_label= 'gel2mdt'
 

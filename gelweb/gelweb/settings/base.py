@@ -37,10 +37,10 @@ DEBUG = True
 # Application definition
 
 INSTALLED_APPS = [
-    'gel2mdt',
+    'gel2mdt.apps.Gel2MdtConfig',
+    'django.contrib.contenttypes',
     'django.contrib.admin',
     'django.contrib.auth',
-    'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
