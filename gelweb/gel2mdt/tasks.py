@@ -45,16 +45,17 @@ def get_gel_content(ir, ir_version):
     analysis_panels = {}
 
     panel_app_panel_query_version = 'https://bioinfo.extge.co.uk/crowdsourcing/WebServices/get_panel/{panelhash}/?version={version}'
-    if interp_json['interpretation_request_data']['json_request']['pedigree']['analysisPanels']:
-        for panel_section in interp_json['interpretation_request_data']['json_request']['pedigree']['analysisPanels']:
-            panel_name = panel_section['panelName']
-            version = panel_section['panelVersion']
-            analysis_panels[panel_name] = {}
-            panel_details = requests.get(panel_app_panel_query_version.format(panelhash=panel_name, version=version),
-                                         verify=False).json()
-            analysis_panels[panel_name][panel_details['result']['SpecificDiseaseName']] = []
-            for gene in panel_details['result']['Genes']:
-                analysis_panels[panel_name][panel_details['result']['SpecificDiseaseName']].append(gene['GeneSymbol'])
+    if 'pedigree' in interp_json['interpretation_request_data']['json_request']:
+        if interp_json['interpretation_request_data']['json_request']['pedigree']['analysisPanels']:
+            for panel_section in interp_json['interpretation_request_data']['json_request']['pedigree']['analysisPanels']:
+                panel_name = panel_section['panelName']
+                version = panel_section['panelVersion']
+                analysis_panels[panel_name] = {}
+                panel_details = requests.get(panel_app_panel_query_version.format(panelhash=panel_name, version=version),
+                                             verify=False).json()
+                analysis_panels[panel_name][panel_details['result']['SpecificDiseaseName']] = []
+                for gene in panel_details['result']['Genes']:
+                    analysis_panels[panel_name][panel_details['result']['SpecificDiseaseName']].append(gene['GeneSymbol'])
 
     gene_panels = {}
     for panel, details in analysis_panels.items():
@@ -73,8 +74,8 @@ def get_gel_content(ir, ir_version):
     # Add a div for the panels  Table tag to be inserted after the report annex
     div_tag = gel_content.new_tag("div")
     div_tag['class'] = "content-div"
-
-    annex.insert_after(div_tag)
+    if annex:
+        annex.insert_after(div_tag)
 
     # panel_keys = fake_panels.keys()
     panel_keys = list(gene_panels.keys())
