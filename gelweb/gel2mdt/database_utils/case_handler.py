@@ -908,6 +908,7 @@ class CaseAttributeManager(object):
         ir_family_panels = ManyCaseModel(InterpretationReportFamilyPanel, [{
             "ir_family": ir_family.entry,
             "panel": panel.entry,
+            "custom": False,
             "average_coverage": average_coverage,
             "proportion_above_15x": proportion_above_15x,
             "genes_failing_coverage": str_genes_failing_coverage
