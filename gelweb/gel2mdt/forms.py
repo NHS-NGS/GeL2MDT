@@ -49,6 +49,11 @@ class ProbandForm(forms.ModelForm):
         model = Proband
         fields = ['episode', 'outcome', 'comment', 'status', 'mdt_status', 'pilot_case', 'case_sent']
 
+class RelativeForm(forms.ModelForm):
+    class Meta:
+        model = Relative
+        fields = ['forename', 'surname', 'date_of_birth', 'nhs_number',
+                  'sex', 'affected_status']
 
 class DemogsForm(forms.ModelForm):
     class Meta:

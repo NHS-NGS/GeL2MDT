@@ -255,6 +255,17 @@ def proband_view(request, report_id):
                                                     'add_clinician_form':add_clinician_form})
 
 @login_required
+def edit_relatives(request, relative_id):
+    relative = Relative.objects.get(id=relative_id)
+    relative_form = RelativeForm(instance=relative)
+    if request.method == "POST":
+        relative_form = RelativeForm(request.POST, instance=relative)
+        if relative_form.is_valid():
+            relative_form.save()
+            return HttpResponseRedirect(f'/edit_relative/{relative_id}')
+    return render(request, 'gel2mdt/relative.html', {'relative_form': relative_form})
+
+@login_required
 def update_demographics(request, report_id):
     update_demo = UpdateDemographics(report_id=report_id)
     update_demo.update_clinician()

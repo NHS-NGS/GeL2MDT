@@ -229,7 +229,7 @@
                                         <td><a href="/mdt_view/{{ mdt.MDT.id }}">{{ mdt.MDT.id }}</a></td>
                                         <td>{{mdt.MDT.date_of_mdt|date}}</td>
                                             <td>{{mdt.MDT.get_status_display}}</td>
-                                        <td>{{mdt.MDT.creator}}</td
+                                        <td>{{mdt.MDT.creator}}</td>
 
                                     </tr>
                                 {% endfor %}
@@ -254,7 +254,7 @@
                             <table width="100%" class="table table-striped table-bordered table-hover">
                                 <thead>
                                     <tr>
-
+˜
                                         <th>Relationship</th>
                                         <th>Forename</th>
                                         <th>Surname</th>
@@ -262,6 +262,7 @@
                                         <th>NHS number</th>
                                         <th>ID</th>
                                         <th>Affection_status</th>
+                                        <th>Edit Relative</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -274,7 +275,8 @@
                                     <td>{{relative.date_of_birth|date}}</td>
                                     <td>{{relative.nhs_number}}</td>
                                     <td>{{relative.gel_id}}</td>
-                                    <td>{{relative.affected_status}}</td>
+                                        <td>{{relative.affected_status}}</td>
+                                    <td><a href="/edit_relative/{{ relative.id }}" class="btn btn-xs btn-danger">Edit</a></td>
                                 </tr>
                             {% endfor %}
                                 </tbody>
