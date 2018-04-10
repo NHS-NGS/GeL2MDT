@@ -264,24 +264,43 @@ class UpdateDemographics(object):
         self.clinician = None
         config_dict = load_config.LoadConfig().load()
         # poll labkey
-        labkey_server_request = config_dict['labkey_server_request']
-        self.server_context = lk.utils.create_server_context(
-            'gmc.genomicsengland.nhs.uk',
-            labkey_server_request,
-            '/labkey', use_ssl=True)
+        if self.report.sample_type == 'raredisease':
+            labkey_server_request = config_dict['labkey_server_request']
+            self.server_context = lk.utils.create_server_context(
+                'gmc.genomicsengland.nhs.uk',
+                labkey_server_request,
+                '/labkey', use_ssl=True)
+        elif self.report.sample_type == 'cancer':
+            labkey_server_request = config_dict['labkey_cancer_server_request']
+            self.server_context = lk.utils.create_server_context(
+                'gmc.genomicsengland.nhs.uk',
+                labkey_server_request,
+                '/labkey', use_ssl=True)
 
     def update_clinician(self):
         clinician_details = {}
-        search_results = lk.query.select_rows(
-            server_context=self.server_context,
-            schema_name='gel_rare_diseases',
-            query_name='rare_diseases_registration',
-            filter_array=[
-                lk.query.QueryFilter('family_id',
-                                     self.report.ir_family.participant_family.gel_family_id,
-                                     'contains')
-            ]
-        )
+        if self.report.sample_type=='raredisease':
+            search_results = lk.query.select_rows(
+                server_context=self.server_context,
+                schema_name='gel_rare_diseases',
+                query_name='rare_diseases_registration',
+                filter_array=[
+                    lk.query.QueryFilter('family_id',
+                                         self.report.ir_family.participant_family.gel_family_id,
+                                         'contains')
+                ]
+            )
+        elif self.report.sample_type=='cancer':
+            search_results = lk.query.select_rows(
+                server_context=self.server_context,
+                schema_name='gel_cancer',
+                query_name='cancer_registration',
+                filter_array=[
+                    lk.query.QueryFilter('participant_identifiers_id',
+                                         self.report.ir_family.participant_family.proband.gel_id,
+                                         'contains')
+                ]
+            )
         try:
             clinician_details['name'] = search_results['rows'][0].get(
                 'consultant_details_full_name_of_responsible_consultant')
@@ -294,6 +313,7 @@ class UpdateDemographics(object):
             pass
 
         if 'name' in clinician_details and 'hospital' in clinician_details:
+            print(clinician_details)
             clinician, saved = Clinician.objects.get_or_create(name= clinician_details['name'],
                                                                 defaults={
                                                                 "email": "unknown",  # clinicain email not on labkey
@@ -315,9 +335,13 @@ class UpdateDemographics(object):
             "nhs_num": 'unknown',
         }
 
+        if self.report.sample_type == 'cancer':
+            schema = 'gel_cancer'
+        elif self.report.sample_type == 'raredisease':
+            schema = 'gel_rare_diseases'
         search_results = lk.query.select_rows(
             server_context=self.server_context,
-            schema_name='gel_rare_diseases',
+            schema_name=schema,
             query_name='participant_identifier',
             filter_array=[
                 lk.query.QueryFilter(
@@ -339,26 +363,39 @@ class UpdateDemographics(object):
                 'date_of_birth').split(' ')[0]
         except IndexError as e:
             pass
+
         try:
-            if search_results['rows'][0].get('person_identifier_type').upper() == "NHSNUMBER":
+            if self.report.sample_type == 'raredisease':
+                if search_results['rows'][0].get('person_identifier_type').upper() == "NHSNUMBER":
+                    participant_demographics["nhs_num"] = search_results['rows'][0].get(
+                        'person_identifier')
+            elif self.report.sample_type == 'cancer':
                 participant_demographics["nhs_num"] = search_results['rows'][0].get(
                     'person_identifier')
         except IndexError as e:
             pass
 
+        recruiting_disease = None
+        if self.report.sample_type == 'raredisease':
+            schema_name = 'gel_rare_diseases',
+            query_name = 'rare_diseases_diagnosis'
+        elif self.report.sample_type == 'cancer':
+            schema_name = 'gel_cancer',
+            query_name = 'cancer_diagnosis'
         search_results = lk.query.select_rows(
             server_context=self.server_context,
-            schema_name='gel_rare_diseases',
-            query_name='rare_diseases_diagnosis',
+            schema_name=schema_name,
+            query_name=query_name,
             filter_array=[
                 lk.query.QueryFilter('participant_identifiers_id',
                                      self.report.ir_family.participant_family.proband.gel_id, 'eq')
             ]
         )
-
-        recruiting_disease = None
         try:
-            recruiting_disease = search_results['rows'][0].get('gel_disease_information_specific_disease', None)
+            if self.report.sample_type == 'raredisease':
+                recruiting_disease = search_results['rows'][0].get('gel_disease_information_specific_disease', None)
+            elif self.report.sample_type == 'cancer':
+                recruiting_disease = search_results['rows'][0].get('diagnosis_icd_code', None)
         except IndexError as e:
             pass
 
@@ -370,6 +407,7 @@ class UpdateDemographics(object):
             proband.date_of_birth = datetime.strptime(participant_demographics["date_of_birth"],
                                                                "%Y/%m/%d").date()
             proband.recruiting_disease = recruiting_disease
+            proband.gmc = self.clinician.hospital
             proband.save()
             return proband
         else:
