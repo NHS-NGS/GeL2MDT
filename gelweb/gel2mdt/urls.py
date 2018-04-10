@@ -16,6 +16,7 @@ urlpatterns = [
     path('rare-disease-main', views.rare_disease_main, name='rare-disease-main'),
     path('gel2me/', RedirectView.as_view(url='/', permanent=False), name='gel2me'),
     path('proband/<int:report_id>', views.proband_view, name='proband-view'),
+    path('edit_relative/<int:relative_id>', views.edit_relatives, name='edit-relatives'),
     path('pull_t3_variants/<int:report_id>', views.pull_t3_variants, name='pull-t3-variants'),
     path('proband/<int:report_id>/negative_report', views.negative_report, name='negative_report'),
     path('update_proband/<int:report_id>', views.update_proband, name='update-proband'),
