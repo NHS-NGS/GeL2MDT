@@ -1,6 +1,5 @@
 PROJECT-SPECIFIC
 /gelweb/gelweb/settings/*_db.py
-gelweb/gel2mdt/migrations/*
 *.sqlite3
 *.sqlite3-journal
 .idea
