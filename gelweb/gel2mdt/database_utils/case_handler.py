@@ -327,7 +327,7 @@ class CaseAttributeManager(object):
             clinician_details = {"name": "unknown", "hospital": "unknown"}
         elif not self.case.skip_demographics:
             # poll labkey
-
+            time.sleep(10)
             server_context = lk.utils.create_server_context(
                 'gmc.genomicsengland.nhs.uk',
                 labkey_server_request,
@@ -397,6 +397,7 @@ class CaseAttributeManager(object):
             }
 
         elif not self.case.skip_demographics:
+            time.sleep(10)
             participant_demographics = {
                 "surname": 'unknown',
                 "forename": 'unknown',
@@ -463,6 +464,7 @@ class CaseAttributeManager(object):
 
         demographics = self.get_paricipant_demographics(participant_id)
         family = self.case.attribute_managers[Family].case_model
+        clinician = self.case.attribute_managers[Clinician].case_model
 
         if self.case.skip_demographics:
             recruiting_disease = None
@@ -489,15 +491,19 @@ class CaseAttributeManager(object):
                 schema_name=schema_name,
                 query_name=queryname,
                 filter_array=[
-                    lk.query.QueryFilter('participant_id', participant_id, 'eq')
+                    lk.query.QueryFilter('participant_identifiers_id', participant_id, 'eq')
                 ]
             )
 
             recruiting_disease = None
             try:
-                recruiting_disease = search_results['rows'][0].get('gel_disease_information_specific_disease', None)
+                if self.case.json['sample_type'] == 'raredisease':
+                    recruiting_disease = search_results['rows'][0].get('gel_disease_information_specific_disease', None)
+                elif self.case.json['sample_type'] == 'cancer':
+                    recruiting_disease = search_results['rows'][0].get('diagnosis_icd_code', None)
             except IndexError as e:
                 pass
+            
         proband = CaseModel(Proband, {
             "gel_id": participant_id,
             "family": family.entry,
@@ -507,7 +513,8 @@ class CaseAttributeManager(object):
             "date_of_birth": datetime.strptime(demographics["date_of_birth"], "%Y/%m/%d").date(),
             "sex": self.case.proband["sex"],
             "status": 'N', # initialised to not started? (N)
-            "recruiting_disease": recruiting_disease
+            "recruiting_disease": recruiting_disease,
+            "gmc": clinician.entry.hospital
         }, self.model_objects)
         return proband
 
