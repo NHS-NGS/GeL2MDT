@@ -177,15 +177,7 @@ def rare_disease_main(request):
     :return:
     '''
     config_dict = load_config.LoadConfig().load()
-    rd_case_families = InterpretationReportFamily.objects.prefetch_related().all()
-    rd_case_families = [rd_case_family for rd_case_family in rd_case_families]
-    rd_cases = [
-        GELInterpretationReport.objects.filter(ir_family=ir_family,
-                                               sample_type='raredisease').latest("polled_at_datetime")
-        for ir_family in rd_case_families
-    ]
-    return render(request, 'gel2mdt/rare_disease_main.html', {'rd_cases': rd_cases,
-                                                              'config_dict': config_dict})
+    return render(request, 'gel2mdt/rare_disease_main.html', {'config_dict': config_dict})
 
 @login_required
 def proband_view(request, report_id):
