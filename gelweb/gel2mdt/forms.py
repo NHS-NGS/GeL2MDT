@@ -58,6 +58,25 @@ class DemogsForm(forms.ModelForm):
 class PanelForm(forms.Form):
     panel = forms.ModelChoiceField(queryset=PanelVersion.objects.order_by('panel'))
 
+class ClinicianForm(forms.Form):
+    clinician = forms.ModelChoiceField(queryset=Clinician.objects.filter(added_by_user=True).order_by('name'))
+
+class AddClinicianForm(forms.ModelForm):
+    config_dict = load_config.LoadConfig().load()
+    if config_dict['center'] == 'GOSH':
+        choices = config_dict['GMC'].split(',')
+        gmc_choices = []
+        for choice in choices:
+            choice = choice.strip(' ')
+            gmc_choices.append((choice, choice))
+        hospital = forms.ChoiceField(choices=gmc_choices)
+    else:
+        hospital = forms.CharField()
+    class Meta:
+        model = Clinician
+        fields = ['name', 'hospital', 'email']
+
+
 class CaseAssignForm(forms.ModelForm):
     class Meta:
         model = GELInterpretationReport
