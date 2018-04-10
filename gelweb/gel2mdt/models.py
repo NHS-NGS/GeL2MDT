@@ -207,6 +207,8 @@ class InterpretationReportFamilyPanel(models.Model):
     ir_family = models.ForeignKey(InterpretationReportFamily, on_delete=models.CASCADE)
     panel = models.ForeignKey(PanelVersion, on_delete=models.CASCADE)
 
+    custom = models.BooleanField(default=False)
+
     average_coverage = models.DecimalField(max_digits=6, decimal_places=2, null=True)
     proportion_above_15x = models.DecimalField(max_digits=6, decimal_places=5, null=True)
 
@@ -252,6 +254,7 @@ class GELInterpretationReport(models.Model):
             latest_report.max_tier = self.max_tier
             latest_report.assembly = self.assembly
             latest_report.sha_hash = self.sha_hash
+            latest_report.assigned_user = self.assigned_user
             latest_report.polled_at_datetime = timezone.now()
             latest_report.user = self.user
             super(GELInterpretationReport, latest_report).save(*args, **kwargs)
