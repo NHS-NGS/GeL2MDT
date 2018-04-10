@@ -842,6 +842,7 @@ class CaseAttributeManager(object):
         for transcript in case_transcripts:
             # convert canonical to bools:
             transcript.canonical = transcript.transcript_canonical == "YES"
+            transcript.selected = transcript.transcript_canonical == "YES"
             if not transcript.gene_hgnc_id:
                 # if the transcript has no recognised gene associated
                 continue  # don't bother checking genes
@@ -1541,15 +1542,15 @@ class CaseAttributeManager(object):
                             for reportevent in variant['reportedVariantCancer']['reportEvents']:
                                 if 'genomicFeatureCancer' in reportevent:
                                     if transcript.transcript_name == reportevent['genomicFeatureCancer']['ensemblId']:
-                                        transcript.transcript_entry.canonical_transcript = True
+                                        transcript.selected = True
                                     else:
-                                        transcript.transcript_entry.canonical_transcript = False
+                                        transcript.selected = False
 
         proband_transcript_variants = ManyCaseModel(ProbandTranscriptVariant, [{
             "transcript": transcript.transcript_entry,
             "proband_variant": transcript.proband_variant_entry,
             # default is true if assoc. tx is canonical
-            "selected": transcript.transcript_entry.canonical_transcript,
+            "selected": transcript.selected,
             "effect": transcript.proband_transcript_variant_effect
         } for transcript
             in self.case.transcripts
