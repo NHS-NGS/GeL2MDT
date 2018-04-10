@@ -3,21 +3,22 @@ from django.urls import path
 from . import views
 from django.conf import settings
 from django.conf.urls.static import static
-
+from django.views.generic.base import RedirectView
 from .api.api_urls import *
 
 urlpatterns = [
     path('', views.rare_disease_main, name='rare-disease-main'),
-    path('gel2me/', views.rare_disease_main, name='rare-disease-main'),
+
     path('register/', views.register, name='register'),
     path('profile/', views.profile, name='profile'),
     path('profile/remove_case/<int:case_id>', views.remove_case, name='remove-case'),
     path('rare-disease-main', views.rare_disease_main, name='rare-disease-main'),
-
+    path('gel2me/', RedirectView.as_view(url='/', permanent=False), name='gel2me'),
     path('proband/<int:report_id>', views.proband_view, name='proband-view'),
     path('pull_t3_variants/<int:report_id>', views.pull_t3_variants, name='pull-t3-variants'),
     path('proband/<int:report_id>/negative_report', views.negative_report, name='negative_report'),
     path('update_proband/<int:report_id>', views.update_proband, name='update-proband'),
+    path(r'update_demographics/<int:report_id>', views.update_demographics, name='update-demographics'),
     path('variant_for_validation/<int:pv_id>', views.variant_for_validation, name='variant-for-validation'),
     path('validation_list', views.validation_list, name='validation-list'),
 

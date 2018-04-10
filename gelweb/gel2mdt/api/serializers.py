@@ -70,6 +70,14 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
         source="ir_family.ir_family_id",
         read_only=True
     )
+    gmc = serializers.CharField(
+        source="ir_family.participant_family.proband.gmc",
+        read_only=True
+    )
+    clinician = serializers.CharField(
+        source="ir_family.participant_family.clinician",
+        read_only=True
+    )
     forename = serializers.CharField(
         source="ir_family.participant_family.proband.forename",
         read_only=True
@@ -117,6 +125,8 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
             'id',
             'gel_id',
             'cip_id',
+            'gmc',
+            'clinician',
             'forename',
             'surname',
             'date_of_birth',
