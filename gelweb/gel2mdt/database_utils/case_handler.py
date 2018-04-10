@@ -327,7 +327,6 @@ class CaseAttributeManager(object):
             clinician_details = {"name": "unknown", "hospital": "unknown"}
         elif not self.case.skip_demographics:
             # poll labkey
-            time.sleep(10)
             server_context = lk.utils.create_server_context(
                 'gmc.genomicsengland.nhs.uk',
                 labkey_server_request,
@@ -397,7 +396,6 @@ class CaseAttributeManager(object):
             }
 
         elif not self.case.skip_demographics:
-            time.sleep(10)
             participant_demographics = {
                 "surname": 'unknown',
                 "forename": 'unknown',
