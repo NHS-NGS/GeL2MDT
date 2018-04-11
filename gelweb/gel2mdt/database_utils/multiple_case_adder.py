@@ -44,6 +44,7 @@ class MultipleCaseAdder(object):
         # -----------------------------------------
         # are we using test data files? defaults False (no)
         self.test_data = test_data
+        self.sample = sample
         # are we polling labkey? defaults False (yes)
         self.skip_demographics = skip_demographics
         # are we only getting a certain number of cases? defaults None (no)
@@ -69,8 +70,8 @@ class MultipleCaseAdder(object):
             self.cases_to_skip = set(self.list_of_cases) - \
                                  set(self.cases_to_add) - \
                                  set(self.cases_to_update)
-        elif sample:
-            interpretation_list_poll = InterpretationList(sample_type=sample_type)
+        elif self.sample:
+            interpretation_list_poll = InterpretationList(sample_type=sample_type, sample=self.sample)
             self.cases_to_poll = interpretation_list_poll.cases_to_poll
             self.list_of_cases = self.fetch_api_data()
             self.cases_to_update = self.list_of_cases
