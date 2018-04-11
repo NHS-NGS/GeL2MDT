@@ -45,28 +45,37 @@
             <span class="icon-bar"></span>
           </button>
 
-          <a class="navbar-brand" href="/rare-disease-main"><i class="fas fa-paper-plane fa-1x"></i>
+          <a class="navbar-brand" href="{% url 'index' %}"><i class="fas fa-paper-plane fa-1x"></i>
               <em><strong>GeL2MDT v0.1</strong></em>
           </a>
         </div>
             {% if user.is_authenticated %}
-            <div  class="navbar-collapse collapse">
-                 {% block tabs %}
-                <ul class="nav navbar-nav">
-                    <li><a href="/rare-disease-main"><i class="fas fa-home"></i></span> Cases</a></li>
-                    </ul>
-               <ul class="nav navbar-nav">
-                   <li><a href="/start_mdt" ><i class="fas fa-comments"></i> Start MDT</a></li>
-                    </ul>
-                <ul class="nav navbar-nav">
-                    <li><a href="/recent_mdts" ><i class="fas fa-history"></i> Recent MDTs</a></li>
-                    </ul>
-               <ul class="nav navbar-nav">
-                    <li><a href="#" ><i class="fas fa-tachometer-alt"></i> Audit</a></li>
-                    </ul>
-                <ul class="nav navbar-nav">
-                    <li><a href="/validation_list" ><i class="fas fa-check-circle"></i> Validation</a></li>
-                    </ul>
+
+                <div  class="navbar-collapse collapse">
+                     {% block tabs %}
+                     {% if sample_type %}
+                    <ul class="nav navbar-nav">
+                        {% if sample_type == 'cancer' %}
+                            <li><a href="{% url 'cancer-main' %}"><i class="fas fa-home"></i></span> Cases</a></li>
+                            </ul>
+                        {% elif sample_type == 'raredisease' %}
+                            <li><a href="{% url 'rare-disease-main' %}"><i class="fas fa-home"></i></span> Cases</a></li>
+                            </ul>
+                        {% endif %}
+
+                   <ul class="nav navbar-nav">
+                       <li><a href="{% url 'start-mdt' sample_type=sample_type %}" ><i class="fas fa-comments"></i> Start MDT</a></li>
+                        </ul>
+                    <ul class="nav navbar-nav">
+                        <li><a href="{% url 'recent-mdt' sample_type=sample_type %}" ><i class="fas fa-history"></i> Recent MDTs</a></li>
+                        </ul>
+                   <ul class="nav navbar-nav">
+                        <li><a href="#" ><i class="fas fa-tachometer-alt"></i> Audit</a></li>
+                        </ul>
+                    <ul class="nav navbar-nav">
+                        <li><a href="{% url 'validation-list' sample_type=sample_type %}" ><i class="fas fa-check-circle"></i> Validation</a></li>
+                        </ul>
+                    {% endif %}
 
 
                 {% endblock %}
@@ -112,7 +121,7 @@
     });
 </script>
 
-
+{% if sample_type %}
 <script charset="utf-8">
 // intialise the table at document ready time
 $(document).ready(initaliseTable());
@@ -291,7 +300,7 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
     console.log("Loading table through initaliseTable()!")
     var table = $('#rare-disease-main').DataTable( {                 
         "ajax": {
-            "url": '{% url 'rare-disease-json' %}',
+            "url": '{% url 'gelir-json' sample_type=sample_type %}',
             "dataSrc": ''
         },
         "columns": [
@@ -354,7 +363,7 @@ function getRadioValue(radioElementName) {
     return checked_radio.value
 }
 </script>
-
+{% endif %}
 <script>
     $(document).ready(function() {
         $('#dataTables-pv').DataTable({
