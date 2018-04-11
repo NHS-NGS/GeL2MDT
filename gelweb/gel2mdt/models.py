@@ -341,6 +341,7 @@ class Proband(models.Model):
     mdt_status = models.CharField( max_length=50, choices=(
         ('R', 'Required'), ('N', 'Not Required'), ('I', 'In Progress'), ('D', 'Done'),), default='R')
     deceased = models.NullBooleanField()
+    sample_id = models.CharField(max_length=200, null=True, blank=True)
 
     def __str__(self):
         return str(self.gel_id)
