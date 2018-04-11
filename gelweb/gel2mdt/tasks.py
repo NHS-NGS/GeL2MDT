@@ -6,8 +6,6 @@ from .vep_utils import run_vep_batch
 from .models import *
 from .database_utils.multiple_case_adder import GeneManager, MultipleCaseAdder
 from gelweb.celery import app
-from celery.schedules import crontab
-from celery.task import periodic_task
 import json
 from json import JSONDecodeError
 import labkey as lk
@@ -135,16 +133,20 @@ def panel_app(gene_panel, gp_version):
     gene_panel_info = {'gene_list': gene_list, 'panel_length': len(gene_list)}
     return gene_panel_info
 
-@app.task
+
+#@app.task
 def update_for_t3(report_id):
     report = GELInterpretationReport.objects.get(id=report_id)
-    mca = MultipleCaseAdder(pullt3=True, sample=report.ir_family.participant_family.proband.gel_id)
+    mca = MultipleCaseAdder(sample_type=report.sample_type, pullt3=True, sample=report.ir_family.participant_family.proband.gel_id)
     mca.update_database()
 
-@periodic_task(run_every=crontab(minute=0, hour=0))
+#@app.task
 def update_cases():
-    mca = MultipleCaseAdder(pullt3=False, skip_demographics=False)
+    mca = MultipleCaseAdder(sample_type='raredisease', pullt3=False, skip_demographics=False)
     mca.update_database()
+    mca = MultipleCaseAdder(sample_type='cancer', pullt3=False, skip_demographics=False)
+    mca.update_database()
+
 
 class VariantAdder(object):
     """
