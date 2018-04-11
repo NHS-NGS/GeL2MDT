@@ -212,13 +212,16 @@ class ViewTests(TestCase):
         response = self.client.get(reverse('mdt-proband-view', args=[self.mdt.id,
                                                                      self.gel_ir.id, 1]))
         self.assertContains(response, self.proband.gel_id)
-        self.assertContains(response, self.transcript1.gene)
+        self.assertContains(response, self.transcript2.gene)
         self.assertEquals(response.status_code, 200)
 
     def test_edit_mdt_proband(self):
         """
         Editing MDT proband discussion and actions
         """
+        session = self.client.session
+        session['mdt_id'] = self.mdt.id
+        session.save()
         response = self.client.post(reverse('edit-mdt-proband', args=[self.gel_ir.id]),
                                     {'discussion': 'asdjkasjkdjska',
                                      'action': 'dakflajdfkl'})
@@ -319,6 +322,14 @@ class ViewTests(TestCase):
         response = self.client.get(reverse('validation-list'))
         self.assertContains(response, self.transcript1.gene)
         self.assertContains(response, self.tv1.hgvs_p)
+        self.assertEqual(response.status_code, 200)
+
+    def test_variant_for_validation(self):
+        '''
+        Test you can change the validation status of a variant and it will be found in the validation list
+        '''
+        response = self.client.post(reverse('variant-for-validation', args=[self.proband_variant.id]), follow=True)
+        self.assertContains(response, 'Validation Status Updated')
         self.assertEqual(response.status_code, 200)
 
 
