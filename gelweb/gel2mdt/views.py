@@ -252,16 +252,39 @@ def proband_view(request, report_id):
                                                     'add_clinician_form':add_clinician_form,
                                                     'sample_type': report.sample_type})
 
+# @login_required
+# def edit_relatives(request, relative_id):
+#     relative = Relative.objects.get(id=relative_id)
+#     relative_form = RelativeForm(instance=relative)
+#     if request.method == "POST":
+#         relative_form = RelativeForm(request.POST, instance=relative)
+#         if relative_form.is_valid():
+#             relative_form.save()
+#             return HttpResponseRedirect(f'/edit_relative/{relative_id}')
+#     return render(request, 'gel2mdt/relative.html', {'relative_form': relative_form})
+
 @login_required
 def edit_relatives(request, relative_id):
+    """
+    :param request:
+    :param pk: Sample ID
+    :return: Edits the proband discussion and actions in the MDT
+    """
+    data = {}
     relative = Relative.objects.get(id=relative_id)
     relative_form = RelativeForm(instance=relative)
-    if request.method == "POST":
+    if request.method == 'POST':
         relative_form = RelativeForm(request.POST, instance=relative)
         if relative_form.is_valid():
             relative_form.save()
-            return HttpResponseRedirect(f'/edit_relative/{relative_id}')
-    return render(request, 'gel2mdt/relative.html', {'relative_form': relative_form})
+            data['form_is_valid'] = True
+    context = {'relative_form': relative_form, 'relative': relative}
+    html_form = render_to_string('gel2mdt/modals/relative_form.html',
+                                 context,
+                                 request=request,
+                                 )
+    data['html_form'] = html_form
+    return JsonResponse(data)
 
 @login_required
 def update_demographics(request, report_id):
@@ -642,7 +665,7 @@ def edit_mdt_proband(request, report_id):
         proband_form = ProbandMDTForm(instance=report.ir_family.participant_family.proband)
 
     context = {'proband_form': proband_form,
-               'report':report}
+               'report': report}
 
     html_form = render_to_string('gel2mdt/modals/mdt_proband_form.html',
                                  context,

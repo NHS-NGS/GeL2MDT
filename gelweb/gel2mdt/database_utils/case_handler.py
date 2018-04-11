@@ -502,11 +502,6 @@ class CaseAttributeManager(object):
             except IndexError as e:
                 pass
 
-        tumour_sample_id = None
-        germline_sample_id = None
-        if self.case.json['sample_type'] == 'cancer':
-            self.case.proband
-            
         proband = CaseModel(Proband, {
             "gel_id": participant_id,
             "family": family.entry,
@@ -517,8 +512,7 @@ class CaseAttributeManager(object):
             "sex": self.case.proband["sex"],
             "status": 'N', # initialised to not started? (N)
             "recruiting_disease": recruiting_disease,
-            "gmc": clinician.entry.hospital,
-            'sample_id': self.case.proband_sample
+            "gmc": clinician.entry.hospital
         }, self.model_objects)
         return proband
 
@@ -878,7 +872,8 @@ class CaseAttributeManager(object):
             "participant_family": family.entry,
             "cip": self.case.json["cip"],
             "ir_family_id": self.case.request_id,
-            "priority": self.case.json["case_priority"]
+            "priority": self.case.json["case_priority"],
+            "gel_sample_id": self.case.proband_sample
         }, self.model_objects)
         return ir_family
 
