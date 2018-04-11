@@ -13,7 +13,7 @@
 
 <div style="text-align:center">
     {% if mdt_form.status.value != "C" %}
-    <form action="/edit_mdt/{{ mdt_id }}" role="form">
+    <form action="/{{sample_type}}/edit_mdt/{{ mdt_id }}" role="form">
         {% csrf_token %} {% bootstrap_button "Edit Samples in MDT" button_type="submit" button_class=" btn-warning" %}
     </form>
     <form action="/delete_mdt/{{ mdt_id }}" role="form" method="post" onclick="return confirm('Are you sure?')">

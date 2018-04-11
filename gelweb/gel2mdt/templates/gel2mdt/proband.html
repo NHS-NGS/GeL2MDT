@@ -186,7 +186,11 @@
                                 <div class="col-md-12">
                                     {% if proband_form.status.value != "C" %}
                                         </br>
-                                <button type="submit" name="variant_update" class="btn btn-primary btn">Save</button> {% endif %}
+                                <button type="submit" name="variant_update" class="btn btn-primary btn">Save</button>
+                                     {% elif request.user.is_staff %}
+                                     </br>
+                                    <button type="submit" name="variant_update" class="btn btn-primary btn">Save</button>
+                                    {% endif %}
 
 
                                 {% if config_dict|get_item:'center' == 'GOSH' %}

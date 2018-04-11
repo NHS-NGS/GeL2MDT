@@ -715,6 +715,8 @@ class OtherStaff(models.Model):
 
 class MDT(models.Model):
     date_of_mdt = models.DateTimeField()
+    sample_type = models.CharField(max_length=200, choices=(('cancer', 'cancer'),
+                                                            ('raredisease', 'raredisease')))
     description = models.CharField(db_column='description', max_length=255, null=True, blank=True)
     # attending staff
     clinical_scientists = models.ManyToManyField(

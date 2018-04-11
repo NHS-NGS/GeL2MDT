@@ -1,0 +1,23 @@
+{% extends 'gel2mdt/base.html' %}
+{% load bootstrap3 %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid" >
+    <div class="col-md-3">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Edit Relative
+            </div>
+            <!-- /.panel-heading -->
+            <div class="panel-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            {% bootstrap_form relative_form %}
+                            <button type="submit">Submit</button>
+                          </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
