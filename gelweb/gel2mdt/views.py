@@ -252,17 +252,6 @@ def proband_view(request, report_id):
                                                     'add_clinician_form':add_clinician_form,
                                                     'sample_type': report.sample_type})
 
-# @login_required
-# def edit_relatives(request, relative_id):
-#     relative = Relative.objects.get(id=relative_id)
-#     relative_form = RelativeForm(instance=relative)
-#     if request.method == "POST":
-#         relative_form = RelativeForm(request.POST, instance=relative)
-#         if relative_form.is_valid():
-#             relative_form.save()
-#             return HttpResponseRedirect(f'/edit_relative/{relative_id}')
-#     return render(request, 'gel2mdt/relative.html', {'relative_form': relative_form})
-
 @login_required
 def edit_relatives(request, relative_id):
     """
@@ -279,10 +268,7 @@ def edit_relatives(request, relative_id):
             relative_form.save()
             data['form_is_valid'] = True
     context = {'relative_form': relative_form, 'relative': relative}
-    html_form = render_to_string('gel2mdt/modals/relative_form.html',
-                                 context,
-                                 request=request,
-                                 )
+    html_form = render_to_string('gel2mdt/modals/relative_form.html', context, request=request)
     data['html_form'] = html_form
     return JsonResponse(data)
 
@@ -621,7 +607,8 @@ def mdt_proband_view(request, mdt_id, pk, important):
                                                              'mdt_instance': mdt_instance,
                                                              'proband_form': proband_form,
                                                              'variant_formset': variant_formset,
-                                                             'panels': panels})
+                                                             'panels': panels,
+                                                             'sample_type':report.sample_type})
 
 @login_required
 def edit_mdt_proband(request, report_id):
@@ -715,7 +702,7 @@ def delete_mdt(request, mdt_id):
         MDTReport.objects.filter(MDT=mdt_instance).delete()
         mdt_instance.delete()
         messages.error(request, 'MDT Deleted')
-    return HttpResponseRedirect('/recent_mdts')
+    return HttpResponseRedirect(f'/{mdt_instance.sample_type}/recent_mdts')
 
 @login_required
 def select_attendees_for_mdt(request, mdt_id):
@@ -834,7 +821,8 @@ def add_new_attendee(request):
             if 'mdt_id' in request.session:
                 return HttpResponseRedirect('/select_attendees_for_mdt/{}'.format(request.session.get('mdt_id')))
             else:
-                return HttpResponseRedirect('/recent_mdts/')
+                return redirect('index')
+
     else:
         form = AddNewAttendee()
     return render(request, 'gel2mdt/add_new_attendee.html', {'form': form})
