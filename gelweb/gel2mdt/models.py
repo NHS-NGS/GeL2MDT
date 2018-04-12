@@ -193,7 +193,6 @@ class InterpretationReportFamily(models.Model):
     ir_family_id = models.CharField(max_length=10, unique=True)
     participant_family = models.ForeignKey(
         Family, on_delete=models.CASCADE, null=True)
-    gel_sample_id = models.CharField(max_length=200, null=True, blank=True)
 
     priority = models.CharField(max_length=200)
     # some fields nullable to allow bulk saving before Panel and Family objects added
@@ -243,6 +242,7 @@ class GELInterpretationReport(models.Model):
 
     sample_type = models.CharField(max_length=200, choices=(('cancer', 'cancer'),
                                                             ('raredisease', 'raredisease')))
+    sample_id = models.CharField(max_length=200, null=True, blank=True)
 
     max_tier = models.CharField(max_length=1)
     assembly = models.ForeignKey(ToolOrAssemblyVersion, on_delete=models.CASCADE)

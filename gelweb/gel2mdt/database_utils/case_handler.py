@@ -872,8 +872,7 @@ class CaseAttributeManager(object):
             "participant_family": family.entry,
             "cip": self.case.json["cip"],
             "ir_family_id": self.case.request_id,
-            "priority": self.case.json["case_priority"],
-            "gel_sample_id": self.case.proband_sample
+            "priority": self.case.json["case_priority"]
         }, self.model_objects)
         return ir_family
 
@@ -962,7 +961,8 @@ class CaseAttributeManager(object):
             "user": self.case.status["user"],
             "max_tier": self.case.max_tier,
             "assembly": genome_assembly,
-            'sample_type': self.case.json['sample_type']
+            'sample_type': self.case.json['sample_type'],
+            "sample_id": self.case.proband_sample
         }, self.model_objects)
         return ir
 
