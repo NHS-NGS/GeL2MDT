@@ -254,7 +254,7 @@ class GELInterpretationReport(models.Model):
     sha_hash = models.CharField(max_length=200)
     polled_at_datetime = models.DateTimeField(default=timezone.now)
 
-    def save(self, *args, **kwargs):
+    def save(self, overwrite=False, *args, **kwargs):
         """
         Overwrite the model's save method to auto-increment versions for
         duplicate ir_familys. Pass in a InterpretationReportFamily entry.
@@ -262,18 +262,22 @@ class GELInterpretationReport(models.Model):
         archived_reports = GELInterpretationReport.objects.filter(
             ir_family=self.ir_family)
         if archived_reports.exists():
-            # update the latest saved version.
             latest_report = archived_reports.latest('polled_at_datetime')
-            latest_report.archived_version += 1
             latest_report.status = self.status
             latest_report.updated = self.updated
             latest_report.sample_type = self.sample_type
+            latest_report.sample_id = self.sample_id
             latest_report.max_tier = self.max_tier
             latest_report.assembly = self.assembly
             latest_report.sha_hash = self.sha_hash
             latest_report.assigned_user = self.assigned_user
             latest_report.polled_at_datetime = timezone.now()
             latest_report.user = self.user
+            if overwrite:
+                latest_report.archived_version = self.archived_version
+            else:
+                # update the latest saved version.
+                latest_report.archived_version += 1
             super(GELInterpretationReport, latest_report).save(*args, **kwargs)
         else:
             self.archived_version = 1
