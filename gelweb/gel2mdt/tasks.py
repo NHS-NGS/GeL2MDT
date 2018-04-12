@@ -472,9 +472,8 @@ class UpdaterFromStorage(object):
         return proband_sample
 
     def insert_into_db(self, report):
-        irf = report.ir_family
-        irf.gel_sample_id = self.proband_sample
-        irf.save()
+        report.sample_id = self.proband_sample
+        report.save()
 
 
 
