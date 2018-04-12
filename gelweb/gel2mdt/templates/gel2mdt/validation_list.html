@@ -6,21 +6,26 @@
 {% block tabs %}
 
     <ul class="nav navbar-nav">
-                    <li><a href="/rare-disease-main"><i class="fas fa-home"></i></span> Cases</a></li>
-                    </ul>
-               <ul class="nav navbar-nav">
-                   <li><a href="/start_mdt" ><i class="fas fa-comments"></i> Start MDT</a></li>
-                    </ul>
-                <ul class="nav navbar-nav">
-                    <li><a href="/recent_mdts" ><i class="fas fa-history"></i> Recent MDTs</a></li>
-                    </ul>
-                <ul class="nav navbar-nav">
-                    <li><a href="#" ><i class="fas fa-tachometer-alt"></i> Audit</a></li>
-                    </ul>
-                <ul class="nav navbar-nav">
-                    <li class="active"><a href="/validation_list" ><i class="fas fa-check-circle"></i> Validation</a></li>
-                    </ul>
+                   {% if sample_type == 'cancer' %}
+                            <li><a href="{% url 'cancer-main' %}"><i class="fas fa-home"></i></span> Cases</a></li>
+                            </ul>
+                        {% elif sample_type == 'raredisease' %}
+                            <li><a href="{% url 'rare-disease-main' %}"><i class="fas fa-home"></i></span> Cases</a></li>
+                            </ul>
+                        {% endif %}
 
+                   <ul class="nav navbar-nav">
+                       <li><a href="{% url 'start-mdt' sample_type=sample_type %}" ><i class="fas fa-comments"></i> Start MDT</a></li>
+                        </ul>
+                    <ul class="nav navbar-nav">
+                        <li><a href="{% url 'recent-mdt' sample_type=sample_type %}" ><i class="fas fa-history"></i> Recent MDTs</a></li>
+                        </ul>
+                   <ul class="nav navbar-nav">
+                        <li><a href="#" ><i class="fas fa-tachometer-alt"></i> Audit</a></li>
+                        </ul>
+                    <ul class="nav navbar-nav">
+                        <li class="active"><a href="{% url 'validation-list' sample_type=sample_type %}" ><i class="fas fa-check-circle"></i> Validation</a></li>
+                        </ul>
 {% endblock %}
 
 

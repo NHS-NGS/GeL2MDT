@@ -144,12 +144,15 @@ def profile(request):
                                                     'rolename':rolename})
 
 @login_required
+def index(request):
+    return render(request, 'gel2mdt/index.html', {'sample_type': None})
+
+@login_required
 def remove_case(request, case_id):
     case = GELInterpretationReport.objects.get(id=case_id)
     case.assigned_user = None
     case.save()
     return redirect('profile')
-
 
 @login_required
 def cancer_main(request):
@@ -159,15 +162,8 @@ def cancer_main(request):
     :return:
     '''
     config_dict = load_config.LoadConfig().load()
-    rd_case_families = InterpretationReportFamily.objects.prefetch_related().all()
-    rd_case_families = [rd_case_family for rd_case_family in rd_case_families]
-    rd_cases = [
-        GELInterpretationReport.objects.filter(ir_family=ir_family,
-                                               sample_type='cancer').latest("polled_at_datetime")
-        for ir_family in rd_case_families
-    ]
-    return render(request, 'gel2mdt/cancer_main.html', {'rd_cases': rd_cases,
-                                                        'config_dict': config_dict})
+    return render(request, 'gel2mdt/cancer_main.html', {'config_dict': config_dict,
+                                                        'sample_type': 'cancer'})
 
 @login_required
 def rare_disease_main(request):
@@ -177,7 +173,8 @@ def rare_disease_main(request):
     :return:
     '''
     config_dict = load_config.LoadConfig().load()
-    return render(request, 'gel2mdt/rare_disease_main.html', {'config_dict': config_dict})
+    return render(request, 'gel2mdt/rare_disease_main.html', {'config_dict': config_dict,
+                                                              'sample_type': 'raredisease'})
 
 @login_required
 def proband_view(request, report_id):
@@ -252,18 +249,28 @@ def proband_view(request, report_id):
                                                     'config_dict':config_dict,
                                                     'panel_form': panel_form,
                                                     'clinician_form':clinician_form,
-                                                    'add_clinician_form':add_clinician_form})
+                                                    'add_clinician_form':add_clinician_form,
+                                                    'sample_type': report.sample_type})
 
 @login_required
 def edit_relatives(request, relative_id):
+    """
+    :param request:
+    :param pk: Sample ID
+    :return: Edits the proband discussion and actions in the MDT
+    """
+    data = {}
     relative = Relative.objects.get(id=relative_id)
     relative_form = RelativeForm(instance=relative)
-    if request.method == "POST":
+    if request.method == 'POST':
         relative_form = RelativeForm(request.POST, instance=relative)
         if relative_form.is_valid():
             relative_form.save()
-            return HttpResponseRedirect(f'/edit_relative/{relative_id}')
-    return render(request, 'gel2mdt/relative.html', {'relative_form': relative_form})
+            data['form_is_valid'] = True
+    context = {'relative_form': relative_form, 'relative': relative}
+    html_form = render_to_string('gel2mdt/modals/relative_form.html', context, request=request)
+    data['html_form'] = html_form
+    return JsonResponse(data)
 
 @login_required
 def update_demographics(request, report_id):
@@ -284,11 +291,12 @@ def variant_for_validation(request, pv_id):
     return HttpResponseRedirect(f'/proband/{proband_variant.interpretation_report.id}')
 
 @login_required
-def validation_list(request):
+def validation_list(request, sample_type):
     config_dict = load_config.LoadConfig().load()
     proband_variants = ProbandVariant.objects.filter(requires_validation=True)
     return render(request, 'gel2mdt/validation_list.html', {'proband_variants':proband_variants,
-                                                            'config_dict': config_dict})
+                                                            'config_dict': config_dict,
+                                                            'sample_type': sample_type})
 
 @login_required
 def pull_t3_variants(request, report_id):
@@ -438,20 +446,20 @@ def add_variant(request, report_id):
 
 
 @login_required
-def start_mdt_view(request):
+def start_mdt_view(request, sample_type):
     '''
     Creates a new MDT instance
     :param request:
     :return:
     '''
-    mdt_instance = MDT(creator=request.user, date_of_mdt=datetime.now())
+    mdt_instance = MDT(creator=request.user, date_of_mdt=datetime.now(), sample_type=sample_type)
     mdt_instance.save()
 
-    return HttpResponseRedirect(f'/edit_mdt/{mdt_instance.id}')
+    return HttpResponseRedirect(f'/{sample_type}/edit_mdt/{mdt_instance.id}')
 
 
 @login_required
-def edit_mdt(request, mdt_id):
+def edit_mdt(request, sample_type, mdt_id):
     '''
     Allows users to select which cases they want to bring to MDT
     :param request:
@@ -459,13 +467,14 @@ def edit_mdt(request, mdt_id):
     :return:
     '''
 
-    gel_ir_list = GELInterpretationReport.objects.all()
+    gel_ir_list = GELInterpretationReport.objects.filter(sample_type=sample_type)
     mdt_instance = MDT.objects.get(id=mdt_id)
     reports_in_mdt = MDTReport.objects.filter(MDT=mdt_instance).values_list('interpretation_report', flat=True)
 
     return render(request, 'gel2mdt/mdt_ir_select.html', {'gel_ir_list': gel_ir_list,
                                                           'reports_in_mdt': reports_in_mdt,
-                                                          'mdt_id': mdt_id})
+                                                          'mdt_id': mdt_id,
+                                                          'sample_type': sample_type})
 
 
 @login_required
@@ -487,7 +496,7 @@ def add_ir_to_mdt(request, mdt_id, irreport_id):
         for pv in proband_variants:
             pv.create_rare_disease_report()
 
-        return HttpResponseRedirect(f'/edit_mdt/{mdt_id}')
+        return HttpResponseRedirect(f'/{mdt_instance.sample_type}/edit_mdt/{mdt_id}')
 
 
 @login_required
@@ -504,7 +513,7 @@ def remove_ir_from_mdt(request, mdt_id, irreport_id):
         report_instance = GELInterpretationReport.objects.get(id=irreport_id)
 
         MDTReport.objects.filter(MDT=mdt_instance, interpretation_report=report_instance).delete()
-        return HttpResponseRedirect(f'/edit_mdt/{mdt_id}')
+        return HttpResponseRedirect(f'/{mdt_instance.sample_type}/edit_mdt/{mdt_id}')
 
 
 @login_required
@@ -555,7 +564,8 @@ def mdt_view(request, mdt_id):
                                                       'reports': reports,
                                                       'mdt_form': mdt_form,
                                                       'mdt_id': mdt_id,
-                                                      'attendees': attendees})
+                                                      'attendees': attendees,
+                                                     'sample_type': mdt_instance.sample_type})
 
 @login_required
 def mdt_proband_view(request, mdt_id, pk, important):
@@ -597,7 +607,8 @@ def mdt_proband_view(request, mdt_id, pk, important):
                                                              'mdt_instance': mdt_instance,
                                                              'proband_form': proband_form,
                                                              'variant_formset': variant_formset,
-                                                             'panels': panels})
+                                                             'panels': panels,
+                                                             'sample_type':report.sample_type})
 
 @login_required
 def edit_mdt_proband(request, report_id):
@@ -641,7 +652,7 @@ def edit_mdt_proband(request, report_id):
         proband_form = ProbandMDTForm(instance=report.ir_family.participant_family.proband)
 
     context = {'proband_form': proband_form,
-               'report':report}
+               'report': report}
 
     html_form = render_to_string('gel2mdt/modals/mdt_proband_form.html',
                                  context,
@@ -652,13 +663,13 @@ def edit_mdt_proband(request, report_id):
 
 
 @login_required
-def recent_mdts(request):
+def recent_mdts(request, sample_type):
     '''
     Shows table of recent MDTs
     :param request:
     :return:
     '''
-    recent_mdt = list(MDT.objects.all().order_by('-date_of_mdt'))
+    recent_mdt = list(MDT.objects.filter(sample_type=sample_type).order_by('-date_of_mdt'))
     config_dict = load_config.LoadConfig().load()
     # Need to get which probands were in MDT
     probands_in_mdt = {}
@@ -674,7 +685,8 @@ def recent_mdts(request):
                                             report.interpretation_report.ir_family.participant_family.proband.gel_id))
 
     return render(request, 'gel2mdt/recent_mdts.html', {'recent_mdt': recent_mdt,
-                                                        'probands_in_mdt': probands_in_mdt})
+                                                        'probands_in_mdt': probands_in_mdt,
+                                                        'sample_type': sample_type})
 
 @login_required
 def delete_mdt(request, mdt_id):
@@ -690,7 +702,7 @@ def delete_mdt(request, mdt_id):
         MDTReport.objects.filter(MDT=mdt_instance).delete()
         mdt_instance.delete()
         messages.error(request, 'MDT Deleted')
-    return HttpResponseRedirect('/recent_mdts')
+    return HttpResponseRedirect(f'/{mdt_instance.sample_type}/recent_mdts')
 
 @login_required
 def select_attendees_for_mdt(request, mdt_id):
@@ -809,7 +821,8 @@ def add_new_attendee(request):
             if 'mdt_id' in request.session:
                 return HttpResponseRedirect('/select_attendees_for_mdt/{}'.format(request.session.get('mdt_id')))
             else:
-                return HttpResponseRedirect('/recent_mdts/')
+                return redirect('index')
+
     else:
         form = AddNewAttendee()
     return render(request, 'gel2mdt/add_new_attendee.html', {'form': form})

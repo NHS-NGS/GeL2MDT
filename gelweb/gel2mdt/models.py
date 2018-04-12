@@ -242,6 +242,7 @@ class GELInterpretationReport(models.Model):
 
     sample_type = models.CharField(max_length=200, choices=(('cancer', 'cancer'),
                                                             ('raredisease', 'raredisease')))
+    sample_id = models.CharField(max_length=200, null=True, blank=True)
 
     max_tier = models.CharField(max_length=1)
     assembly = models.ForeignKey(ToolOrAssemblyVersion, on_delete=models.CASCADE)
@@ -715,6 +716,8 @@ class OtherStaff(models.Model):
 
 class MDT(models.Model):
     date_of_mdt = models.DateTimeField()
+    sample_type = models.CharField(max_length=200, choices=(('cancer', 'cancer'),
+                                                            ('raredisease', 'raredisease')))
     description = models.CharField(db_column='description', max_length=255, null=True, blank=True)
     # attending staff
     clinical_scientists = models.ManyToManyField(

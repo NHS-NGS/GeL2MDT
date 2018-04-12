@@ -4,7 +4,7 @@ PROJECT-SPECIFIC
 *.sqlite3-journal
 .idea
 *.bak
-
+*.DS_Store
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

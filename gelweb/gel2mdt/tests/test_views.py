@@ -31,6 +31,7 @@ class ViewTests(TestCase):
 
     def setUp(self):
         self.client = Client()
+        self.sample_type = 'raredisease'
         self.client.login(username='test', password='defaultpassword')
         self.family = FamilyFactory()
         self.proband = ProbandFactory(family=self.family)
@@ -56,8 +57,7 @@ class ViewTests(TestCase):
                                            variant=self.variant)
         self.reportevent = ReportEventFactory(proband_variant=self.proband_variant,
                                               panel=self.ir_panels.panel)
-        self.client.get(reverse('start-mdt'), follow=True)
-        self.mdt = MDT.objects.all().first()
+        self.mdt = MDTFactory()
 
     def test_index_view(self):
         """
@@ -66,14 +66,13 @@ class ViewTests(TestCase):
         response = self.client.get(reverse('rare-disease-main'),
                                    content_type='application/json',
                                    HTTP_X_REQUESTED_WITH='XMLHttpRequest')
-        #self.assertContains(response, self.proband.gel_id)  # Not working, maybe due to ajax?
         self.assertEquals(response.status_code, 200)
 
     def test_rare_disease_api(self):
         """
         Test that you can get json of the rare disease cases
         """
-        response = self.client.get(reverse('rare-disease-json'))
+        response = self.client.get(reverse('gelir-json', args=[self.sample_type]))
         self.assertContains(response, self.proband.gel_id)
         self.assertEquals(response.status_code, 200)
 
@@ -106,7 +105,6 @@ class ViewTests(TestCase):
         self.assertContains(response, self.variant.db_snp_id)
         self.assertContains(response, self.proband.gel_id)
         self.assertContains(response, self.variant.reference)
-        #self.assertContains(response, self.variant.position)
         self.assertEquals(response.status_code, 200)
 
     def test_update_sample(self):
@@ -153,7 +151,7 @@ class ViewTests(TestCase):
         """
         View for starting mdt
         """
-        response = self.client.get(reverse('start-mdt'), follow=True)
+        response = self.client.get(reverse('start-mdt', args=[self.sample_type]), follow=True)
         self.assertContains(response, self.proband.gel_id)
         self.assertEqual(response.status_code, 200)
 
@@ -161,7 +159,7 @@ class ViewTests(TestCase):
         """
         Allows you to edit samples in MDT
         """
-        response = self.client.get(reverse('edit-mdt', args=[self.mdt.id]))
+        response = self.client.get(reverse('edit-mdt', args=[self.sample_type, self.mdt.id]))
         self.assertContains(response, self.proband.gel_id)
         self.assertEqual(response.status_code, 200)
 
@@ -180,6 +178,9 @@ class ViewTests(TestCase):
         """
         Removing case to MDT
         """
+        response = self.client.post(reverse('add-ir-to-mdt',
+                                            args=[self.mdt.id, self.gel_ir.id]),
+                                    follow=True)
         response = self.client.post(reverse('remove-ir-from-mdt',
                                             args=[self.mdt.id, self.gel_ir.id]),
                                     follow=True)
@@ -209,6 +210,12 @@ class ViewTests(TestCase):
         """
         See MDT proband view
         """
+        session = self.client.session
+        session['mdt_id'] = self.mdt.id
+        session.save()
+        self.client.post(reverse('add-ir-to-mdt',
+                                 args=[self.mdt.id, self.gel_ir.id]),
+                         follow=True)
         response = self.client.get(reverse('mdt-proband-view', args=[self.mdt.id,
                                                                      self.gel_ir.id, 1]))
         self.assertContains(response, self.proband.gel_id)
@@ -232,7 +239,7 @@ class ViewTests(TestCase):
         """
         You can see recent mdt's
         """
-        response = self.client.get(reverse('recent-mdt'))
+        response = self.client.get(reverse('recent-mdt', args=[self.sample_type]))
         self.assertContains(response, self.mdt.id)
         self.assertEquals(response.status_code, 200)
 
@@ -260,9 +267,12 @@ class ViewTests(TestCase):
         """
         Can add a new attendee
         """
+        session = self.client.session
+        session['mdt_id'] = self.mdt.id
+        session.save()
         response = self.client.post(reverse('add-new-attendee'),
                                     {'name': 'Paddy',
-                                        'hospital':'GOSH',
+                                     'hospital':'GOSH',
                                      'email': 'gosh@gosh.nhs.uk',
                                      'role': 'Clinician'}, follow=True)
         self.assertContains(response, 'Attendee Added')
@@ -319,7 +329,7 @@ class ViewTests(TestCase):
         """
         Test you can see the variants which require validation
         """
-        response = self.client.get(reverse('validation-list'))
+        response = self.client.get(reverse('validation-list', args=[self.sample_type]))
         self.assertContains(response, self.transcript1.gene)
         self.assertContains(response, self.tv1.hgvs_p)
         self.assertEqual(response.status_code, 200)

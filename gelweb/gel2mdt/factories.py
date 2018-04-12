@@ -408,6 +408,7 @@ class MDTFactory(factory.django.DjangoModelFactory):
 
     date_of_mdt = factory.Faker('past_date', start_date='-30d')
     creator = factory.SubFactory(UserFactory)
+    sample_type = factory.Faker('random_element', elements=('raredisease', 'cancer'))
 
 
 class RareDiseaseReportFactory(factory.django.DjangoModelFactory):
