@@ -6,12 +6,11 @@ from .vep_utils import run_vep_batch
 from .models import *
 from .database_utils.multiple_case_adder import GeneManager, MultipleCaseAdder
 from gelweb.celery import app
-from celery.schedules import crontab
-from celery.task import periodic_task
 import json
 from json import JSONDecodeError
 import labkey as lk
 from datetime import datetime
+import json
 import time
 
 def get_gel_content(ir, ir_version):
@@ -134,15 +133,18 @@ def panel_app(gene_panel, gp_version):
     gene_panel_info = {'gene_list': gene_list, 'panel_length': len(gene_list)}
     return gene_panel_info
 
-@app.task
+
+#@app.task
 def update_for_t3(report_id):
     report = GELInterpretationReport.objects.get(id=report_id)
-    mca = MultipleCaseAdder(pullt3=True, sample=report.ir_family.participant_family.proband.gel_id)
+    mca = MultipleCaseAdder(sample_type=report.sample_type, pullt3=True, sample=report.ir_family.participant_family.proband.gel_id)
     mca.update_database()
 
-@periodic_task(run_every=crontab(minute=0, hour=0))
+#@app.task
 def update_cases():
-    mca = MultipleCaseAdder(pullt3=False, skip_demographics=False)
+    mca = MultipleCaseAdder(sample_type='raredisease', pullt3=False, skip_demographics=False)
+    mca.update_database()
+    mca = MultipleCaseAdder(sample_type='cancer', pullt3=False, skip_demographics=False)
     mca.update_database()
 
 
@@ -257,8 +259,10 @@ class VariantAdder(object):
                                                                      defaults={"selected": transcript.transcript_entry.canonical_transcript,
                                                                                 "effect": transcript.proband_transcript_variant_effect})
 
-
 class UpdateDemographics(object):
+    '''
+    Repolls labkey for a case. Should not be visible to all users due to labkey issues
+    '''
     def __init__(self, report_id):
         self.report = GELInterpretationReport.objects.get(id=report_id)
         self.clinician = None
@@ -412,4 +416,69 @@ class UpdateDemographics(object):
             return proband
         else:
             return None
+
+class UpdaterFromStorage(object):
+    '''
+    Utility class to allow you to use the local jsons to insert something new into the database
+    Done for gel_sequence_id but will obviously need to be edited for any other value
+    '''
+
+    def __init__(self):
+        self.reports = GELInterpretationReport.objects.all().prefetch_related(
+            *[
+                'ir_family',
+                'ir_family__participant_family__proband',
+            ]
+        )
+        config_dict = load_config.LoadConfig().load()
+        self.cip_api_storage = config_dict['cip_api_storage']
+        for report in self.reports:
+            self.json = self.load_json_data(report)
+            self.json_case_data = self.json["interpretation_request_data"]
+            self.proband = self.get_proband_json()
+            self.proband_sample = self.get_gel_sequence_id()
+            self.insert_into_db(report)
+
+    def load_json_data(self, report):
+        '''
+        :return: Dict with key as CIPid and value as value_of_interest
+        '''
+        json_path = os.path.join(self.cip_api_storage, '{}.json'.format(report.ir_family.ir_family_id +  "-" +  str(report.archived_version)))
+        with open(json_path, 'r') as f:
+            return json.load(f)
+
+    def get_proband_json(self):
+        """
+        Get the proband from the list of partcipants in the JSON.
+        """
+        proband_json = None
+        if self.json["sample_type"]=='raredisease':
+
+            participant_jsons = \
+                self.json_case_data["json_request"]["pedigree"]["participants"]
+            for participant in participant_jsons:
+                if participant["isProband"]:
+                    proband_json = participant
+        elif self.json["sample_type"]=='cancer':
+            proband_json = self.json_case_data["json_request"]["cancerParticipant"]
+        return proband_json
+
+    def get_gel_sequence_id(self):
+        proband_sample = None
+        if self.json["sample_type"] == 'raredisease':
+            proband_sample = self.proband["samples"][0]
+        elif self.json["sample_type"] == 'cancer':
+            proband_sample = self.proband["matchedSamples"][0]['tumourSampleId']
+        return proband_sample
+
+    def insert_into_db(self, report):
+        report.sample_id = self.proband_sample
+        report.save()
+
+
+
+
+
+
+
 

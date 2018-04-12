@@ -501,7 +501,7 @@ class CaseAttributeManager(object):
                     recruiting_disease = search_results['rows'][0].get('diagnosis_icd_code', None)
             except IndexError as e:
                 pass
-            
+
         proband = CaseModel(Proband, {
             "gel_id": participant_id,
             "family": family.entry,
@@ -961,7 +961,8 @@ class CaseAttributeManager(object):
             "user": self.case.status["user"],
             "max_tier": self.case.max_tier,
             "assembly": genome_assembly,
-            'sample_type': self.case.json['sample_type']
+            'sample_type': self.case.json['sample_type'],
+            "sample_id": self.case.proband_sample
         }, self.model_objects)
         return ir
 

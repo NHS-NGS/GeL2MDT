@@ -4,9 +4,9 @@ from . import api_views
 
 api_urlpatterns = [
     path(
-        'api/rare-disease',
+        'api/gelir/<str:sample_type>',
         api_views.RareDiseaseCases.as_view(),
-        name='rare-disease-json'
+        name='gelir-json'
     ),
     path(
         'api/user-rare-disease',
