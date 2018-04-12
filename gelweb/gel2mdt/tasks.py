@@ -427,25 +427,30 @@ class UpdaterFromStorage(object):
         self.reports = GELInterpretationReport.objects.all().prefetch_related(
             *[
                 'ir_family',
-                'ir_family__participant_family__proband',
             ]
         )
+        print(self.reports.count())
         config_dict = load_config.LoadConfig().load()
         self.cip_api_storage = config_dict['cip_api_storage']
         for report in self.reports:
             self.json = self.load_json_data(report)
-            self.json_case_data = self.json["interpretation_request_data"]
-            self.proband = self.get_proband_json()
-            self.proband_sample = self.get_gel_sequence_id()
-            self.insert_into_db(report)
+            if self.json:
+                self.json_case_data = self.json["interpretation_request_data"]
+                self.proband = self.get_proband_json()
+                self.proband_sample = self.get_gel_sequence_id()
+                self.insert_into_db(report)
 
     def load_json_data(self, report):
         '''
         :return: Dict with key as CIPid and value as value_of_interest
         '''
         json_path = os.path.join(self.cip_api_storage, '{}.json'.format(report.ir_family.ir_family_id +  "-" +  str(report.archived_version)))
-        with open(json_path, 'r') as f:
-            return json.load(f)
+        if os.path.isfile(json_path):
+            with open(json_path, 'r') as f:
+                return json.load(f)
+        else:
+            print('{}.json'.format(report.ir_family.ir_family_id +  "-" +  str(report.archived_version)))
+            return None
 
     def get_proband_json(self):
         """
@@ -473,7 +478,8 @@ class UpdaterFromStorage(object):
 
     def insert_into_db(self, report):
         report.sample_id = self.proband_sample
-        report.save()
+        print(self.proband_sample)
+        report.save(overwrite=True)
 
 
 
