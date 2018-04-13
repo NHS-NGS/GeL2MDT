@@ -18,12 +18,15 @@ class RareDiseaseCases(generics.ListAPIView):
     List all rare disease cases in our database.
     """
 
-    queryset = GELInterpretationReport.objects.all().prefetch_related(
-        *[
-            'ir_family',
-            'ir_family__participant_family__proband',
-        ]
-    )
+    def get_queryset(self):
+        sample_type = self.kwargs['sample_type']
+        queryset = GELInterpretationReport.objects.filter(sample_type=sample_type).prefetch_related(
+            *[
+                'ir_family',
+                'ir_family__participant_family__proband',
+            ]
+        )
+        return queryset
     serializer_class = GELInterpretationReportSerializer
 
 

@@ -38,6 +38,7 @@ class CaseTranscript:
         self.gene_model = None
         self.transcript_entry = None
         self.proband_variant_entry = None
+        self.selected = False
 
 
 def generate_vcf(variants):

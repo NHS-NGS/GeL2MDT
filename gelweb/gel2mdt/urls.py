@@ -7,20 +7,22 @@ from django.views.generic.base import RedirectView
 from .api.api_urls import *
 
 urlpatterns = [
-    path('', views.rare_disease_main, name='rare-disease-main'),
+    path('', views.index, name='index'),
 
     path('register/', views.register, name='register'),
     path('profile/', views.profile, name='profile'),
     path('profile/remove_case/<int:case_id>', views.remove_case, name='remove-case'),
+    path('cancer-main', views.cancer_main, name='cancer-main'),
     path('rare-disease-main', views.rare_disease_main, name='rare-disease-main'),
     path('gel2me/', RedirectView.as_view(url='/', permanent=False), name='gel2me'),
     path('proband/<int:report_id>', views.proband_view, name='proband-view'),
+    path('edit_relative/<int:relative_id>', views.edit_relatives, name='edit-relatives'),
     path('pull_t3_variants/<int:report_id>', views.pull_t3_variants, name='pull-t3-variants'),
     path('proband/<int:report_id>/negative_report', views.negative_report, name='negative_report'),
     path('update_proband/<int:report_id>', views.update_proband, name='update-proband'),
-    path(r'update_demographics/<int:report_id>', views.update_demographics, name='update-demographics'),
+    path('update_demographics/<int:report_id>', views.update_demographics, name='update-demographics'),
     path('variant_for_validation/<int:pv_id>', views.variant_for_validation, name='variant-for-validation'),
-    path('validation_list', views.validation_list, name='validation-list'),
+    path('<str:sample_type>/validation_list', views.validation_list, name='validation-list'),
 
     path('variant/<int:variant_id>', views.variant_view, name='variant-view'),
 
@@ -30,8 +32,8 @@ urlpatterns = [
     path('update_transcript/<int:report_id>/<int:pv_id>/<int:transcript_id>', views.update_transcript,
          name='update-transcript'),
 
-    path('start_mdt/', views.start_mdt_view, name='start-mdt'),
-    path('edit_mdt/<int:mdt_id>', views.edit_mdt, name='edit-mdt'),
+    path('<str:sample_type>/start_mdt/', views.start_mdt_view, name='start-mdt'),
+    path('<str:sample_type>/edit_mdt/<int:mdt_id>', views.edit_mdt, name='edit-mdt'),
     path('mdt_view/<int:mdt_id>', views.mdt_view, name='mdt-view'),
     path('mdt_proband_view/<int:mdt_id>/<int:pk>/<int:important>', views.mdt_proband_view, name='mdt-proband-view'),
 
@@ -40,7 +42,7 @@ urlpatterns = [
 
     path('edit_mdt_proband/<int:report_id>', views.edit_mdt_proband, name='edit-mdt-proband'),
 
-    path('recent_mdts/', views.recent_mdts, name='recent-mdt'),
+    path('<str:sample_type>/recent_mdts/', views.recent_mdts, name='recent-mdt'),
     path('add_variant/<int:report_id>', views.add_variant, name='add-variant'),
 
     path('delete_mdt/<int:mdt_id>', views.delete_mdt, name='delete-mdt'),

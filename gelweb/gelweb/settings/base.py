@@ -37,10 +37,10 @@ DEBUG = True
 # Application definition
 
 INSTALLED_APPS = [
-    'gel2mdt',
+    'gel2mdt.apps.Gel2MdtConfig',
+    'django.contrib.contenttypes',
     'django.contrib.admin',
     'django.contrib.auth',
-    'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
@@ -183,3 +183,12 @@ MESSAGE_TAGS = {
     messages.WARNING: 'alert-warning',
     messages.ERROR: 'alert-danger',
 }
+
+# shell_plus
+
+SHELL_PLUS = 'ipython'
+NOTEBOOK_ARGUMENTS = [
+    '--ip', '0.0.0.0',
+    '--port', '8888',
+    '--no-browser',
+]
