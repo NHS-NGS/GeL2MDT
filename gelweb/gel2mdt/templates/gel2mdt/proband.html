@@ -55,6 +55,11 @@
                                     <div class="block">
                                         {{report.ir_family.participant_family.proband.date_of_birth|date}}
                                     </div>
+                                    </br>
+                                    {% bootstrap_label "GEL Sample ID" %}
+                                    <div class="block">
+                                        {{report.sample_id}}
+                                    </div>
                                 </div>
                                 <div class="col-md-3">
                                     {% bootstrap_label "Forename" %}
