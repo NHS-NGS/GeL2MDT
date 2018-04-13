@@ -7,7 +7,8 @@ class InterpretationList(object):
     a list of case numbers by status along with the hash of the current case
     data.
     """
-    def __init__(self):
+    def __init__(self, sample_type):
+        self.sample_type = sample_type
         self.all_cases = self.get_all_cases()
         self.cases_to_poll = self.get_poll_cases()
 
@@ -37,7 +38,7 @@ class InterpretationList(object):
                 "last_status":
                     result["last_status"]}
                 for result in request_list_results
-                if result["sample_type"] == "raredisease"
+                if result["sample_type"] == self.sample_type
                 and result["last_status"] != "blocked"]
 
             if request_list_poll.response_json["next"]:
