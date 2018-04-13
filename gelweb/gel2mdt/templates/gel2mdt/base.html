@@ -46,7 +46,7 @@
           </button>
 
           <a class="navbar-brand" href="{% url 'index' %}"><i class="fas fa-paper-plane fa-1x"></i>
-              <em><strong>GeL2MDT v0.1</strong></em>
+              <em><strong>GeL2MDT</strong></em>
           </a>
         </div>
             {% if user.is_authenticated %}
@@ -113,6 +113,12 @@
             {% block content %}
             {% endblock %}
         </div>
+
+<footer>
+    <p align="center" style="color:gray;">
+    GeL2MDT v0.3.1, build d32ce70. &copy; Theo Cole, Patrick Lombard, Ed Stone.
+    </p>
+</footer>
 
 {% block head-javascript %}
 <script>
