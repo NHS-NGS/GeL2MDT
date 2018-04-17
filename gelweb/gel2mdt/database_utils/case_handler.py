@@ -238,6 +238,33 @@ class Case(object):
                 # also add it to the dict within self.json_variants
                 variant["case_variant"] = case_variant
 
+        for clinical_report in self.json['clinical_report']:
+            for variant in clinical_report['clinical_report_data']['candidateVariants']:
+                variant_object_count += 1
+                if self.json['sample_type'] == 'raredisease':
+                    case_variant = CaseVariant(
+                        chromosome=variant["chromosome"],
+                        position=variant["position"],
+                        ref=variant["reference"],
+                        alt=variant["alternate"],
+                        case_id=self.request_id,
+                        variant_count=str(variant_object_count),
+                        genome_build=genome_build
+                    )
+                elif self.json['sample_type'] == 'cancer':
+                    case_variant = CaseVariant(
+                        chromosome=variant['reportedVariantCancer']["chromosome"],
+                        position=variant['reportedVariantCancer']["position"],
+                        ref=variant['reportedVariantCancer']["reference"],
+                        alt=variant['reportedVariantCancer']["alternate"],
+                        case_id=self.request_id,
+                        variant_count=str(variant_object_count),
+                        genome_build=genome_build
+                    )
+                case_variant_list.append(case_variant)
+                # also add it to the dict within self.json_variants
+                variant["case_variant"] = case_variant
+
         return case_variant_list
 
 
@@ -597,6 +624,18 @@ class CaseAttributeManager(object):
             # cip-flagged variants
             for interpreted_genome in self.case.json["interpreted_genome"]:
                 for json_variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
+                    json_variant['maternal_zygosity'] = 'unknown'
+                    json_variant['paternal_zygosity'] = 'unknown'
+                    for genotype in json_variant["calledGenotypes"]:
+                        genotype_gelid = genotype.get('gelId', None)
+                        if genotype_gelid == self.case.mother["gel_id"]:
+                            json_variant['maternal_zygosity'] = genotype["genotype"]
+                        elif genotype_gelid == self.case.father["gel_id"]:
+                            json_variant['paternal_zygosity'] = genotype["genotype"]
+                    variants_to_check.append(json_variant)
+
+            for clinical_report in self.case.json["clinical_report"]:
+                for json_variant in clinical_report['clinical_report_data']['candidateVariants']:
                     json_variant['maternal_zygosity'] = 'unknown'
                     json_variant['paternal_zygosity'] = 'unknown'
                     for genotype in json_variant["calledGenotypes"]:
@@ -1016,6 +1055,18 @@ class CaseAttributeManager(object):
                 }
                 variants_list.append(cip_variant)
 
+        for clinical_report in self.case.json["clinical_report"]:
+            for variant in clinical_report['clinical_report_data']['candidateVariants']:
+                cip_variant = {
+                    "genome_assembly": genome_assembly,
+                    "alternate": variant["case_variant"].alt,
+                    "chromosome": variant["case_variant"].chromosome,
+                    "db_snp_id": variant["dbSNPid"],
+                    "reference": variant["case_variant"].ref,
+                    "position": variant["case_variant"].position,
+                }
+                variants_list.append(cip_variant)
+
         for variant in variants_list:
             self.case.variant_manager.add_variant(variant)
 
@@ -1184,62 +1235,71 @@ class CaseAttributeManager(object):
                 tiered_proband_variants.append(tiered_proband_variant)
 
         # cip flagged variants
-        cip_proband_variants = []
+
+
+        all_flagged_variants = []
         for interpreted_genome in self.case.json["interpreted_genome"]:
             for json_variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
-                json_variant['somatic'] = False
-                # all CIP flagged variants should have a variant entry.
-                json_variant["variant_entry"] = None
-                # variant in json matches variant entry
-                for variant in variant_entries:
-                    if self.case.json['sample_type'] == 'raredisease':
-                        if (
-                                json_variant["chromosome"] == variant.chromosome and
-                                json_variant["position"] == variant.position and
-                                json_variant["reference"] == variant.reference and
-                                json_variant["alternate"] == variant.alternate
-                        ):
-                            # variant in json matches variant entry
-                            json_variant["variant_entry"] = variant
-                    elif self.case.json['sample_type'] == 'cancer':
-                        if (
-                                json_variant['reportedVariantCancer']["chromosome"] == variant.chromosome and
-                                json_variant['reportedVariantCancer']["position"] == variant.position and
-                                json_variant['reportedVariantCancer']["reference"] == variant.reference and
-                                json_variant['reportedVariantCancer']["alternate"] == variant.alternate
-                        ):
-                            # variant in json matches variant entry
-                            json_variant["variant_entry"] = variant
-                    json_variant['zygosity'] = 'unknown'
-                    json_variant['maternal_zygosity'] = 'unknown'
-                    json_variant['paternal_zygosity'] = 'unknown'
+                all_flagged_variants.append(json_variant)
+        for clinical_report in self.case.json["clinical_report"]:
+            for variant in clinical_report['clinical_report_data']['candidateVariants']:
+                all_flagged_variants.append(variant)
 
-                    if 'calledGenotypes' in json_variant:
-                        for genotype in json_variant["calledGenotypes"]:
-                            genotype_gelid = genotype.get('gelId', None)
-                            if genotype_gelid == proband_manager.case_model.entry.gel_id:
-                                json_variant['zygosity'] = genotype["genotype"]
-                            elif genotype_gelid == self.case.mother.get("gel_id", None):
-                                json_variant['maternal_zygosity'] = genotype.get("genotype", 'unknown')
-                            elif genotype_gelid == self.case.father.get("gel_id", None):
-                                json_variant['paternal_zygosity'] = genotype.get('genotype', 'unknown')
+        cip_proband_variants = []
 
-                    if 'alleleOrigins' in json_variant:
-                        if json_variant['alleleOrigins'][0] == 'somatic_variant':
-                            json_variant['somatic'] = True
+        for json_variant in all_flagged_variants:
+            json_variant['somatic'] = False
+            # all CIP flagged variants should have a variant entry.
+            json_variant["variant_entry"] = None
+            # variant in json matches variant entry
+            for variant in variant_entries:
+                if self.case.json['sample_type'] == 'raredisease':
+                    if (
+                            json_variant["chromosome"] == variant.chromosome and
+                            json_variant["position"] == variant.position and
+                            json_variant["reference"] == variant.reference and
+                            json_variant["alternate"] == variant.alternate
+                    ):
+                        # variant in json matches variant entry
+                        json_variant["variant_entry"] = variant
+                elif self.case.json['sample_type'] == 'cancer':
+                    if (
+                            json_variant['reportedVariantCancer']["chromosome"] == variant.chromosome and
+                            json_variant['reportedVariantCancer']["position"] == variant.position and
+                            json_variant['reportedVariantCancer']["reference"] == variant.reference and
+                            json_variant['reportedVariantCancer']["alternate"] == variant.alternate
+                    ):
+                        # variant in json matches variant entry
+                        json_variant["variant_entry"] = variant
+                json_variant['zygosity'] = 'unknown'
+                json_variant['maternal_zygosity'] = 'unknown'
+                json_variant['paternal_zygosity'] = 'unknown'
 
-            if 'reportedVariants' in interpreted_genome["interpreted_genome_data"]:
-                for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
-                    if variant["variant_entry"]:
-                        cip_proband_variant = {
-                            "max_tier": 0,  # CIP flagged variants assigned tier 0
-                            "variant": variant["variant_entry"],
-                            "zygosity": variant["zygosity"],
-                            "maternal_zygosity": variant["maternal_zygosity"],
-                            "paternal_zygosity": variant["paternal_zygosity"],
-                            "somatic": variant["somatic"],
-                        }
-                        cip_proband_variants.append(cip_proband_variant)
+                if 'calledGenotypes' in json_variant:
+                    for genotype in json_variant["calledGenotypes"]:
+                        genotype_gelid = genotype.get('gelId', None)
+                        if genotype_gelid == proband_manager.case_model.entry.gel_id:
+                            json_variant['zygosity'] = genotype["genotype"]
+                        elif genotype_gelid == self.case.mother.get("gel_id", None):
+                            json_variant['maternal_zygosity'] = genotype.get("genotype", 'unknown')
+                        elif genotype_gelid == self.case.father.get("gel_id", None):
+                            json_variant['paternal_zygosity'] = genotype.get('genotype', 'unknown')
+
+                if 'alleleOrigins' in json_variant:
+                    if json_variant['alleleOrigins'][0] == 'somatic_variant':
+                        json_variant['somatic'] = True
+
+        for variant in all_flagged_variants:
+            if variant["variant_entry"]:
+                cip_proband_variant = {
+                    "max_tier": 0,  # CIP flagged variants assigned tier 0
+                    "variant": variant["variant_entry"],
+                    "zygosity": variant["zygosity"],
+                    "maternal_zygosity": variant["maternal_zygosity"],
+                    "paternal_zygosity": variant["paternal_zygosity"],
+                    "somatic": variant["somatic"],
+                }
+                cip_proband_variants.append(cip_proband_variant)
 
         # remove CIP tiered variants which are in cip variants
         tiered_and_cip_proband_variants = []
@@ -1256,7 +1316,6 @@ class CaseAttributeManager(object):
                 seen_variants.append(variant['variant'])
 
         return tiered_and_cip_proband_variants
-
 
     def get_proband_variants(self):
         """
