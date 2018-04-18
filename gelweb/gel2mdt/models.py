@@ -309,7 +309,7 @@ class ClinicalScientist(models.Model):
 class Proband(models.Model):
     # these set to null to allow creation then updating later
     config_dict = load_config.LoadConfig().load()
-    if config_dict['center'] == 'GOSH':
+    if config_dict['GMC'] != 'None':
         choices = config_dict['GMC'].split(',')
         gmc_choices = []
         for choice in choices:
@@ -333,7 +333,7 @@ class Proband(models.Model):
     discussion = models.TextField(blank=True)
     action = models.TextField(blank=True)
     episode = models.CharField(max_length=255, blank=True)
-    if config_dict['center'] == 'GOSH':
+    if config_dict['GMC'] != 'None':
         gmc = models.CharField(max_length=255, choices=gmc_choices, default='Unknown', null=True, blank=True)
     else:
         gmc = models.CharField(max_length=255, null=True, blank=True)

@@ -75,7 +75,8 @@ Here are the options and what they pertain to:
     remote_username=User name for remote server
     remote_password=Password for remote server
     remote_directory=Folder for writing and transferring VEP output
-    
+    GMC=Either a list of GMC's if intending to give users set options for GMC or 'None' to leave it as CharField. 
+    pull_T3=Boolean; This gives users the option to download T3 so only set to False if you are not pulling T3's routinely
 
 Once these have been edited, please save the file. 
 

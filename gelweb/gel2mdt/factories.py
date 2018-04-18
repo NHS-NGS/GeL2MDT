@@ -242,7 +242,7 @@ class VariantFactory(factory.django.DjangoModelFactory):
     chromosome = factory.Faker('random_element', elements=(
         '1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','X','Y','MT','M')
     )
-    position = random.randint(0,32000000000)
+    position = random.randint(0,32000000)
 
     reference = factory.Faker('lexify', text='?', letters='ATCG')
     alternate = factory.Faker('lexify', text='?', letters='ATCG')

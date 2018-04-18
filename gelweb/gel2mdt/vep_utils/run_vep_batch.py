@@ -162,8 +162,8 @@ def run_vep_remotely(infile, config_dict):
 
             print('stdin:', stdin, 'stdout:', stdout.read(), 'stderr:', stderr.read())
             sftp.get('{remote_destination}/hg19_output.txt'.format(
-                remote_destination=config_dict['remote_directory']
-            ))
+                remote_destination=config_dict['remote_directory']), hg19_outfile
+            )
             annotated_variant_dict['hg19_vep'] = hg19_outfile
     # run VEP for hg38 variants
     if 'hg38_vcf' in infile:
@@ -188,7 +188,8 @@ def run_vep_remotely(infile, config_dict):
             stdin, stdout, stderr = ssh.exec_command(cmd)
 
             print('stdin:', stdin, 'stdout:', stdout.read(), 'stderr:', stderr.read())
-            sftp.get('{remote_destination}/hg38_output.txt'.format(remote_destination=config_dict['remote_directory']))
+            sftp.get('{remote_destination}/hg38_output.txt'.format(remote_destination=config_dict['remote_directory']),
+                     hg38_outfile)
             annotated_variant_dict['hg38_vep'] = hg38_outfile
 
     sftp.close()

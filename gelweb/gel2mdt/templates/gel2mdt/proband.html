@@ -202,7 +202,7 @@
                                     {% endif %}
 
 
-                                {% if config_dict|get_item:'center' == 'GOSH' %}
+                                {% if config_dict|get_item:'show_clinical_report' == 'True' %}
                                 <span style="float: right">
                                     <a href="/genomics_england_report/{{report.id}}" target="_blank" class="btn btn-warning" role="button">Clinical Report</a>
                                 </span>
@@ -267,7 +267,6 @@
                             <table width="100%" class="table table-striped table-bordered table-hover" id="relative-table">
                                 <thead>
                                     <tr>
-˜
                                         <th>Relationship</th>
                                         <th>Forename</th>
                                         <th>Surname</th>
@@ -321,7 +320,7 @@
                     <div class="panel panel-default">
                         <div class="panel-heading">Participant Information</div>
                         <div class="panel-body">
-                            {% if config_dict|get_item:'center' == 'GOSH' %}
+
                             <div class="col-md-2">
                                 {% bootstrap_label "GEL ID" %}
                                 <div class="block">
@@ -346,38 +345,20 @@
                                     <a href="https://cipapi.genomicsengland.nhs.uk/interpretationportal/#/participant/{{report.ir_family.ir_family_id}}" target="_blank">{{report.ir_family.ir_family_id}}</a>
                                 </div>
                             </div>
+                             {% if config_dict|get_item:'pull_T3' == 'False' %}
                             <div class="col-md-2">
                                 {% bootstrap_label "Pull Tier3 Variants" %}
                                 <div class="block">
                                     <a href="/pull_t3_variants/{{report.id}}">Link</a>
                                 </div>
                             </div>
-                        {% elif config_dict|get_item:'center' == 'BIRM' %}
-                             <div class="col-md-3">
-                                {% bootstrap_label "GEL ID" %}
+                            {% endif %}
+                             <div class="col-md-2">
+                                {% bootstrap_label "Add a new variant" %}
                                 <div class="block">
-                                    {{report.ir_family.participant_family.proband.gel_id}}
+                                    <a href=# data-toggle="modal" data-target="#addvariantModal"><i class="fas fa-plus"></i></a>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                {% bootstrap_label "Forename" %}
-                                <div class="block">
-                                    {{report.ir_family.participant_family.proband.forename}}
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                {% bootstrap_label "Surname" %}
-                                <div class="block">
-                                    {{report.ir_family.participant_family.proband.surname}}
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                {% bootstrap_label "CIP ID" %}
-                                <div class="block">
-                                    <a href="https://cipapi.genomicsengland.nhs.uk/interpretationportal/#/participant/{{report.ir_family.ir_family_id}}" target="_blank">{{report.ir_family.ir_family_id}}</a>
-                                </div>
-                            </div>
-                        {% endif %}
                         </div>
                     </div>
                 </div>
@@ -604,6 +585,29 @@
         </div>
     </div>
 </div>
+
+<div id="addvariantModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
+                <h4 class="modal-title">Add New Variant</h4>
+            </div>
+            <div class="modal-body">
+                <form action="/proband/{{ report.id }}" method="POST">
+                    {% csrf_token %}
+                    {% bootstrap_form add_variant_form %}
+                    {% buttons %}
+                    <button type="submit" class="btn btn-primary">
+                        Add New Variant
+                    </button>
+                    {% endbuttons %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <div class="modal fade" id="modal-relative">
     <div class="modal-dialog">
