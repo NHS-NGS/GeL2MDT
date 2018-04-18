@@ -1045,6 +1045,11 @@ class CaseAttributeManager(object):
         # loop through all variants
         for interpreted_genome in self.case.json["interpreted_genome"]:
             for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
+                if self.case.json['sample_type'] == 'cancer':
+                    variant['dbSNPid'] = variant['reportedVariantCancer']['dbSnpId']
+                if variant['dbSNPid']:
+                    if not re.match('rs\d+', str(variant['dbSNPid'])):
+                        variant['dbSNPid'] = None
                 cip_variant = {
                     "genome_assembly": genome_assembly,
                     "alternate": variant["case_variant"].alt,
@@ -1057,6 +1062,11 @@ class CaseAttributeManager(object):
 
         for clinical_report in self.case.json["clinical_report"]:
             for variant in clinical_report['clinical_report_data']['candidateVariants']:
+                if self.case.json['sample_type'] == 'cancer':
+                    variant['dbSNPid'] = variant['reportedVariantCancer']['dbSnpId']
+                if variant['dbSNPid']:
+                    if not re.match('rs\d+', str(variant['dbSNPid'])):
+                        variant['dbSNPid'] = None
                 cip_variant = {
                     "genome_assembly": genome_assembly,
                     "alternate": variant["case_variant"].alt,
