@@ -24,9 +24,9 @@ from .tasks import VariantAdder, update_for_t3, UpdateDemographics
 
 def register(request):
     '''
-    Registers a new user
+    Registers a new user and adds them to a role table
     :param request:
-    :return:
+    :return: The user will then have to contact admin to authenticate them
     '''
     registered = False
     username = ''
@@ -88,7 +88,7 @@ def register(request):
 @login_required
 def profile(request):
     '''
-    Profile page
+    Profile page. Users can see their cases assigned to them and role info
     :param request:
     :return:
     '''
@@ -145,10 +145,23 @@ def profile(request):
 
 @login_required
 def index(request):
+    '''
+    A choice between the raredisease and cancer portal
+
+    :param request:
+    :return:
+    '''
     return render(request, 'gel2mdt/index.html', {'sample_type': None})
 
 @login_required
 def remove_case(request, case_id):
+    '''
+    Users can remove a case from their assigned cases
+
+    :param request:
+    :param case_id: Report id of case that they want to remove
+    :return: Back to profile page
+    '''
     case = GELInterpretationReport.objects.get(id=case_id)
     case.assigned_user = None
     case.save()
@@ -158,6 +171,7 @@ def remove_case(request, case_id):
 def cancer_main(request):
     '''
     Shows all the Cancer cases the user has access to and allows easy searching of cases
+
     :param request:
     :return:
     '''
@@ -169,6 +183,7 @@ def cancer_main(request):
 def rare_disease_main(request):
     '''
     Shows all the RD cases the user has access to and allows easy searching of cases
+
     :param request:
     :return:
     '''
@@ -180,6 +195,7 @@ def rare_disease_main(request):
 def proband_view(request, report_id):
     '''
     Shows details about a particular proband, some fields are editable by clinical scientists
+
     :param request:
     :param report_id: GEL Report ID
     :return:
@@ -194,6 +210,7 @@ def proband_view(request, report_id):
         panel_form = PanelForm(request.POST)
         clinician_form = ClinicianForm(request.POST)
         add_clinician_form = AddClinicianForm(request.POST)
+        add_variant_form = AddVariantForm(request.POST)
         if demogs_form.is_valid():
             demogs_form.save()
         if case_assign_form.is_valid():
@@ -220,6 +237,21 @@ def proband_view(request, report_id):
                                                                      'added_by_user': True
                                                                  })
             messages.add_message(request, 25, 'Clinician Created')
+        if add_variant_form.is_valid():
+            variant = CaseVariant(add_variant_form.cleaned_data['chromosome'],
+                                  add_variant_form.cleaned_data['position'],
+                                  report_id,
+                                  1,
+                                  add_variant_form.cleaned_data['reference'],
+                                  add_variant_form.cleaned_data['alternate'],
+                                  str(report.assembly))
+            variant_entry = add_variant_form.save(commit=False)
+            variant_entry.genome_assembly = report.assembly
+            variant_entry.save()
+            VariantAdder(variant_entry=variant_entry,
+                         report=report,
+                         variant=variant)
+            messages.add_message(request, 25, 'Variant Added to Report')
 
     relatives = Relative.objects.filter(proband=report.ir_family.participant_family.proband)
     proband_form = ProbandForm(instance=report.ir_family.participant_family.proband)
@@ -231,6 +263,7 @@ def proband_view(request, report_id):
     case_assign_form = CaseAssignForm(instance=report)
     clinician_form = ClinicianForm()
     add_clinician_form = AddClinicianForm()
+    add_variant_form = AddVariantForm()
 
     if not request.user.is_staff:
         if proband_form["status"].value() == "C":
@@ -250,14 +283,17 @@ def proband_view(request, report_id):
                                                     'panel_form': panel_form,
                                                     'clinician_form':clinician_form,
                                                     'add_clinician_form':add_clinician_form,
-                                                    'sample_type': report.sample_type})
+                                                    'sample_type': report.sample_type,
+                                                    'add_variant_form': add_variant_form})
 
 @login_required
 def edit_relatives(request, relative_id):
     """
+    Allows users to edit relative demographic information
+
     :param request:
-    :param pk: Sample ID
-    :return: Edits the proband discussion and actions in the MDT
+    :param relative_id: Relative ID
+    :return:
     """
     data = {}
     relative = Relative.objects.get(id=relative_id)
@@ -274,6 +310,12 @@ def edit_relatives(request, relative_id):
 
 @login_required
 def update_demographics(request, report_id):
+    '''
+    Allows staff users to redo labkey lookup
+    :param request:
+    :param report_id: Report to redo lookup for
+    :return: Back to proband page
+    '''
     update_demo = UpdateDemographics(report_id=report_id)
     update_demo.update_clinician()
     update_demo.update_demographics()
@@ -281,6 +323,12 @@ def update_demographics(request, report_id):
 
 @login_required
 def variant_for_validation(request, pv_id):
+    '''
+    Adds a proband variant to the list for validation
+    :param request:
+    :param pv_id: Proband Variant id
+    :return: Back to proband page
+    '''
     proband_variant = ProbandVariant.objects.get(id=pv_id)
     if proband_variant.requires_validation:
         proband_variant.requires_validation = False
@@ -292,6 +340,12 @@ def variant_for_validation(request, pv_id):
 
 @login_required
 def validation_list(request, sample_type):
+    '''
+    Returns the list of proband variants that require validation
+    :param request:
+    :param sample_type: Either raredisease or cancer
+    :return: View containing proband variants
+    '''
     config_dict = load_config.LoadConfig().load()
     proband_variants = ProbandVariant.objects.filter(requires_validation=True)
     return render(request, 'gel2mdt/validation_list.html', {'proband_variants':proband_variants,
@@ -300,6 +354,12 @@ def validation_list(request, sample_type):
 
 @login_required
 def pull_t3_variants(request, report_id):
+    '''
+    Allows users to download T3 variants for a case
+    :param request:
+    :param report_id: GEL Interpretationreport id
+    :return: Back to proband page
+    '''
     update_for_t3.delay(report_id)
     messages.add_message(request, 25, 'Please reload this page in a few minutes to see your Tier 3 Variants')
     return HttpResponseRedirect(f'/proband/{report_id}')
@@ -317,54 +377,27 @@ def panel_view(request, panelversion_id):
 @login_required
 def variant_view(request, variant_id):
     '''
-    Shows details about a particular proband, some fields are editable by clinical scientists
+    Shows details about a particular variant and also probands it is present in
     :param request:
-    :param report_id: GEL Report ID
+    :param variant_id: Variant ID
     :return:
     '''
-    if request.method == "POST":
-        # if not models.objects.filter(gel_id=proband_id):
-        print("Designing primers")
-        #report_event = ReportEvent.objects.filter(variant=variant_id)
-        variant = Variant.objects.get(id=variant_id)
-        # currently just takes first hit from above query set.
-        gene_symbol = ''
-        chromosome = "chr" + getattr(variant, "chromosome")
-        position = str(getattr(variant, "position"))
-        assembly = str(getattr(variant, "genome_assembly"))
-        print(assembly)
-        designed_primers = singletarget.design_primers(chromosome, position, assembly, gene_symbol)
-        count = 1
-        # tool id currently not set properly
-        for designed_primer in designed_primers:
-            primer = Primer(variant=variant, primer_set=chromosome + ":" + position + "-" + str(count),
-                            left_primer_seq=designed_primer.forward_seq, right_primer_seq=designed_primer.reverse_seq,
-                            date_created=datetime.today(), tool_id=1)
-            primer.save()
-            # variant.primers.add(primer)
-            # variant.save()
-            print("primer added to database:")
-            print(primer.primer_set)
-            count += 1
-
-    primers = Primer.objects.filter(variant=variant_id)
     variant = Variant.objects.get(id=variant_id)
     transcript_variant = TranscriptVariant.objects.filter(variant=variant_id)[:1].get() #gets one (for hgvs_g)
     proband_variants = ProbandVariant.objects.filter(variant=variant)
 
     return render(request, 'gel2mdt/variant.html', {'variant': variant,
                                                     'transcript_variant': transcript_variant,
-                                                    'proband_variants': proband_variants,
-                                                    'primers': primers})
+                                                    'proband_variants': proband_variants})
 
 
 @login_required
 def update_proband(request, report_id):
     '''
-    Updates the Proband page
+    Updates the Proband page for fields used by clinical scientists such as status and outcomes
     :param request:
     :param report_id: GEL Report ID
-    :return:
+    :return: Proband view
     '''
     report = GELInterpretationReport.objects.get(id=report_id)
     if request.method == "POST":
@@ -375,13 +408,15 @@ def update_proband(request, report_id):
             messages.add_message(request, 25, 'Proband Updated')
             return HttpResponseRedirect(f'/proband/{report_id}')
 
+
 @login_required
 def select_transcript(request, report_id, pv_id):
     '''
     Shows the transcript table and allows a user to select preferred transcript
     :param request:
-    :param pv_id:
-    :return:
+    :param report_id: GEL Interpretationreport id
+    :param pv_id: ProbandVariant id
+    :return: View containing list of transcripts
     '''
     proband_transcript_variants = ProbandTranscriptVariant.objects.filter(proband_variant__id=pv_id)
     # Just selecting first selected transcript
@@ -404,8 +439,10 @@ def update_transcript(request, report_id, pv_id, transcript_id):
     '''
     Updates the selected transcript
     :param request:
-    :param pv_id:
-    :return:
+    :param report_id: GEL Interpretationreport id
+    :param pv_id: ProbandVariant id
+    :param transcript_id: Transcript id of the selected transcript
+    :return: Select Transcript view
     '''
     transcript = Transcript.objects.get(id=transcript_id)
     proband_variant = ProbandVariant.objects.get(id=pv_id)
@@ -415,42 +452,12 @@ def update_transcript(request, report_id, pv_id, transcript_id):
 
 
 @login_required
-def add_variant(request, report_id):
-    '''
-    Adds a variant to a report
-    :param request:
-    :param report_id:
-    :return:
-    '''
-
-    if request.method == 'POST':
-        variant_form = VariantForm(request.POST)
-        if variant_form.is_valid():
-            report = GELInterpretationReport.objects.get(id=report_id)
-            variant = CaseVariant(variant_form.cleaned_data['chromosome'],
-                                  variant_form.cleaned_data['position'],
-                                  report_id,
-                                  1,
-                                  variant_form.cleaned_data['reference'],
-                                  variant_form.cleaned_data['alternate'],
-                                  str(report.assembly))
-            variant_entry = variant_form.save(commit=False)
-            variant_entry.genome_assembly = report.assembly
-            variant_entry.save()
-            VariantAdder(variant_entry=variant_entry,
-                         report=report,
-                         variant=variant)
-    else:
-        variant_form = VariantForm()
-    return render(request, 'gel2mdt/add_variant.html', {'variant_form': variant_form})
-
-
-@login_required
 def start_mdt_view(request, sample_type):
     '''
     Creates a new MDT instance
     :param request:
-    :return:
+    :param sample_type: Either raredisease or Cancer MDT will be created
+    :return: View allowing users choose cases
     '''
     mdt_instance = MDT(creator=request.user, date_of_mdt=datetime.now(), sample_type=sample_type)
     mdt_instance.save()
@@ -463,8 +470,9 @@ def edit_mdt(request, sample_type, mdt_id):
     '''
     Allows users to select which cases they want to bring to MDT
     :param request:
-    :param mdt_id:
-    :return:
+    :param sample_type: Either raredisease or cancer and will filter which cases appear in list
+    :param mdt_id: MDT instance id
+    :return: List of GELIR cases
     '''
 
     gel_ir_list = GELInterpretationReport.objects.filter(sample_type=sample_type)
@@ -480,8 +488,9 @@ def edit_mdt(request, sample_type, mdt_id):
 @login_required
 def add_ir_to_mdt(request, mdt_id, irreport_id):
     """
+    Adds a GELInterpretation report to a MDT
     :param request:
-    :param mdt_id: MDT ID
+    :param mdt_id: MDT Instance ID
     :param irreport_id: GelIR ID
     :return: Add this report to the MDT
     """
@@ -519,6 +528,7 @@ def remove_ir_from_mdt(request, mdt_id, irreport_id):
 @login_required
 def mdt_view(request, mdt_id):
     """
+    Main MDT view where users see the cases added to MDT
     :param request:
     :param mdt_id: MDT ID
     :return: Main MDT page
@@ -569,6 +579,14 @@ def mdt_view(request, mdt_id):
 
 @login_required
 def mdt_proband_view(request, mdt_id, pk, important):
+    '''
+    MDT proband view where users can edit proband specific questions at MDT
+    :param request:
+    :param mdt_id: MDT instance id
+    :param pk: GEL Interpretation report id
+    :param important: Either 1 or 0; Whether to display T3 or non T3 variants
+    :return:
+    '''
     mdt_instance = MDT.objects.get(id=mdt_id)
     report = GELInterpretationReport.objects.get(id=pk)
     if important ==1:
@@ -613,8 +631,9 @@ def mdt_proband_view(request, mdt_id, pk, important):
 @login_required
 def edit_mdt_proband(request, report_id):
     """
+    Used for modal at MDT view to edit proband specific discussion and actions
     :param request:
-    :param pk: Sample ID
+    :param report_id: GEL IR id
     :return: Edits the proband discussion and actions in the MDT
     """
     data = {}
@@ -667,7 +686,8 @@ def recent_mdts(request, sample_type):
     '''
     Shows table of recent MDTs
     :param request:
-    :return:
+    :param sample_type: Either cancer or raredisease
+    :return: A list of cancer or raredisease MDTs
     '''
     recent_mdt = list(MDT.objects.filter(sample_type=sample_type).order_by('-date_of_mdt'))
     config_dict = load_config.LoadConfig().load()
@@ -688,12 +708,13 @@ def recent_mdts(request, sample_type):
                                                         'probands_in_mdt': probands_in_mdt,
                                                         'sample_type': sample_type})
 
+
 @login_required
 def delete_mdt(request, mdt_id):
     '''
     Deletes a selected MDT
     :param request:
-    :param mdt_id:
+    :param mdt_id: MDT ID
     :return: Back to recent MDTs
     '''
     if request.method == "POST":
@@ -704,12 +725,13 @@ def delete_mdt(request, mdt_id):
         messages.error(request, 'MDT Deleted')
     return HttpResponseRedirect(f'/{mdt_instance.sample_type}/recent_mdts')
 
+
 @login_required
 def select_attendees_for_mdt(request, mdt_id):
     '''
     Adds a CS/Clinician/Other to a MDT
     :param request:
-    :param mdt_id:
+    :param mdt_id: MDT ID
     :return: Table showing all users
     '''
     clinicians = (Clinician.objects.filter(added_by_user=True)
@@ -739,14 +761,16 @@ def select_attendees_for_mdt(request, mdt_id):
     return render(request, 'gel2mdt/select_attendee_for_mdt.html', {'attendees': attendees, 'mdt_id': mdt_id,
                                                                     'currently_added_to_mdt': currently_added_to_mdt})
 
+
 @login_required
 def add_attendee_to_mdt(request, mdt_id, attendee_id, role):
     '''
-
+    Adds a attendee to a MDT
     :param request:
-    :param mdt_id:
-    :param attendee_id:
-    :return:
+    :param mdt_id: MDT instance id
+    :param attendee_id: Attendee ID
+    :param role: Either Clinician, Clinical Scientist or Other Staff
+    :return: To view where users can add attendees
     '''
     if request.method == 'POST':
         mdt_instance = MDT.objects.get(id=mdt_id)
@@ -768,11 +792,12 @@ def add_attendee_to_mdt(request, mdt_id, attendee_id, role):
 @login_required
 def remove_attendee_from_mdt(request, mdt_id, attendee_id, role):
     '''
-
+    Removes a attendee from an MDT
     :param request:
-    :param mdt_id:
-    :param attendee_id:
-    :return:
+    :param mdt_id: MDT instance id
+    :param attendee_id: Attendee ID
+    :param role: Either Clinician, Clinical Scientist or Other Staff
+    :return: To view where users can add attendees
     '''
     if request.method == 'POST':
         mdt_instance = MDT.objects.get(id=mdt_id)
@@ -792,7 +817,7 @@ def add_new_attendee(request):
     '''
     Add a new attendee to the 3 attendee models
     :param request:
-    :return:
+    :return: Either to select attendees view if mdt_id in request.session or back to index if not
     '''
     if request.method == 'POST':
 
@@ -827,8 +852,15 @@ def add_new_attendee(request):
         form = AddNewAttendee()
     return render(request, 'gel2mdt/add_new_attendee.html', {'form': form})
 
+
 @login_required
 def export_mdt(request, mdt_id):
+    '''
+    Returns MDT information in CSV format
+    :param request:
+    :param mdt_id: MDT instance
+    :return: CSV file
+    '''
     if request.method == "POST":
         mdt_instance = MDT.objects.get(id=mdt_id)
         mdt_reports = MDTReport.objects.filter(MDT=mdt_instance)
@@ -838,8 +870,15 @@ def export_mdt(request, mdt_id):
         writer = write_mdt_export(writer, mdt_instance, mdt_reports)
         return response
 
+
 @login_required
 def export_mdt_outcome_form(request, report_id):
+    '''
+    Exports MDT outcome form which is proband specific after a case has been to MDT
+    :param request:
+    :param report_id:  GEL Interpretation report
+    :return: DOCX format file
+    '''
     report = GELInterpretationReport.objects.get(id=report_id)
     document, mdt = write_mdt_outcome_template(report)
     f = BytesIO()
@@ -859,10 +898,11 @@ def export_mdt_outcome_form(request, report_id):
     response['Content-Length'] = length
     return response
 
+
 @login_required
 def negative_report(request, report_id):
     '''
-    Shows details about a particular proband, some fields are editable by clinical scientists
+    Printer friendly negative report template
     :param request:
     :param report_id: GEL Report ID
     :return:
@@ -890,7 +930,9 @@ def negative_report(request, report_id):
 
 @login_required
 def genomics_england_report(request, report_id):
-    """Render a page to enter genomics england samples """
+    """
+    Render a page to enter genomics england samples
+    """
     report = GELInterpretationReport.objects.get(id=report_id)
     cip_id = report.ir_family.ir_family_id.split('-')
     gel_content = get_gel_content(cip_id[0], cip_id[1])
