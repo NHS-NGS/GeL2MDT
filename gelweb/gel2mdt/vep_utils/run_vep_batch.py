@@ -142,44 +142,53 @@ def run_vep_remotely(infile, config_dict):
         hg19_vcf = infile['hg19_vcf']
         hg19_outfile = 'VEP/hg19_results.vcf'
         if os.stat(hg19_vcf).st_size != 0:
-            sftp.put(hg19_vcf, '/home/chris/gel2mdt_testing/hg19_destination_file.txt'.format(hg19_vcf))
+            sftp.put(hg19_vcf, '{remote_destination}/hg19_destination_file.txt'.format(
+                remote_destination=config_dict['remote_directory']
+            ))
 
-            cmd = "{vep} -i /home/chris/gel2mdt_testing/hg19_destination_file.txt " \
-                  " -o /home/chris/gel2mdt_testing/hg19_output.txt --species homo_sapiens "  \
+            cmd = "{vep} -i {remote_destination}/hg19_destination_file.txt " \
+                  " -o {remote_destination}/hg19_output.txt --species homo_sapiens "  \
                   " --force_overwrite --cache --dir_cache {cache} --fork 4 --vcf --flag_pick --assembly GRCh37 " \
                   " --exclude_predicted --everything --hgvsg --dont_skip --total_length --offline --fasta {fasta_loc} ".format(
                     vep=config_dict['vep'],
                     cache=config_dict['cache'],
                     fasta_loc=config_dict['hg19_fasta_loc'],
+                    remote_destination=config_dict['remote_directory']
+
             )
             if config_dict["mergedVEP"] == 'True':
                 cmd += ' --merged'
             stdin, stdout, stderr = ssh.exec_command(cmd)
 
             print('stdin:', stdin, 'stdout:', stdout.read(), 'stderr:', stderr.read())
-            sftp.get('/home/chris/gel2mdt_testing/hg19_output.txt', hg19_outfile)
+            sftp.get('{remote_destination}/hg19_output.txt'.format(
+                remote_destination=config_dict['remote_directory']
+            ))
             annotated_variant_dict['hg19_vep'] = hg19_outfile
     # run VEP for hg38 variants
     if 'hg38_vcf' in infile:
         hg38_vcf = infile['hg38_vcf']
         hg38_outfile = 'VEP/hg38_results.vcf'
         if os.stat(hg38_vcf).st_size != 0:
-            sftp.put(hg38_vcf, '/home/chris/gel2mdt_testing/hg38_destination_file.txt'.format(hg38_vcf))
+            sftp.put(hg38_vcf, '{remote_destination}/hg38_destination_file.txt'.format(
+                remote_destination=config_dict['remote_directory']
+            ))
 
-            cmd = "{vep} -i /home/chris/gel2mdt_testing/hg38_destination_file.txt " \
-                  " -o /home/chris/gel2mdt_testing/hg38_output.txt --species homo_sapiens "  \
+            cmd = "{vep} -i {remote_destination}/hg38_destination_file.txt " \
+                  " -o {remote_destination}/hg38_output.txt --species homo_sapiens "  \
                   " --force_overwrite --cache --dir_cache {cache} --fork 4 --vcf --flag_pick --assembly GRCh38 " \
                   " --exclude_predicted --everything --hgvsg --dont_skip --total_length --offline --fasta {fasta_loc} ".format(
                     vep=config_dict['vep'],
                     cache=config_dict['cache'],
                     fasta_loc=config_dict['hg38_fasta_loc'],
+                    remote_destination=config_dict['remote_directory']
             )
             if config_dict["mergedVEP"] == 'True':
                 cmd += ' --merged'
             stdin, stdout, stderr = ssh.exec_command(cmd)
 
             print('stdin:', stdin, 'stdout:', stdout.read(), 'stderr:', stderr.read())
-            sftp.get('/home/chris/gel2mdt_testing/hg38_output.txt', hg38_outfile)
+            sftp.get('{remote_destination}/hg38_output.txt'.format(remote_destination=config_dict['remote_directory']))
             annotated_variant_dict['hg38_vep'] = hg38_outfile
 
     sftp.close()
