@@ -3,7 +3,17 @@ from gel2mdt.models import *
 
 
 class ProbandSerializer(serializers.ModelSerializer):
+    """
+    Serialiser for returning Proband detail JSONs through the REST framework.
+    """
     class Meta:
+        """
+        Meta class for ProbandSerializer, which defines the model and fields.
+
+        Attributes:
+            model (gel2mdt.models.Proband): class def for Proband model
+            fields (tuple): tuple of strings related to Proband model attrs
+        """
         model = Proband
         fields = (
             'gel_id',
@@ -18,6 +28,32 @@ class ProbandSerializer(serializers.ModelSerializer):
 
 
 class ProbandVariantSerializer(serializers.ModelSerializer):
+    """
+    Serialiser for returning ProbandVariant detail JSONs via REST framework.
+
+    Because not all desired fields come from the ProbandVariant model itself,
+    the defined attributes are required to set a source for a human-readable
+    represenation of the serialised field.
+
+    Attributes:
+        variant (serializers.CharField): defines source of string repr of the
+            genomic position of the variant.
+        interpretation (serializers.CharField): defines source of string repr
+            of the interpretation request as an ID of format XXXX-X.
+        gene (serializers.CharField): defines source of string repr of the gene
+            associated with the particular ProbandVariant - typically HGNC name.
+        transcript (serializers.CharField): defines source of string repr of the
+            transcript as ENSTID based on a ProbandVariant's get_transcript
+            class method.
+        hgvs_c (serializers.CharField): defines source of string repr of the
+            HGVSc for a particular ProbandVariant, which comes from the
+            associated Variant via ProbandVariant's get_transcript_variant class
+            method.
+        hgvs_p (serializers.CharField): defines source of string repr of the
+            HGVSp for a particular ProbandVariant, which comes from the
+            associated Variant via ProbandVariant's get_transcript_variant class
+            method.
+    """
     variant = serializers.CharField(
         source="variant.id",
         read_only=True)
@@ -39,6 +75,15 @@ class ProbandVariantSerializer(serializers.ModelSerializer):
 
 
     class Meta:
+        """
+        Meta class for ProbandSerializer, which defines the model and fields.
+
+        Attributes:
+            model (gel2mdt.models.ProbandVariant): class def for ProbandVariant
+                model
+            fields (tuple): tuple of strings related to ProbandVariant model
+                attrs
+        """
         model = ProbandVariant
         fields = (
             "variant",
@@ -53,15 +98,57 @@ class ProbandVariantSerializer(serializers.ModelSerializer):
 
 
 class GELInterpretationReportSerializer(serializers.ModelSerializer):
+    """
+    Serialiser for returning GEL IR detail JSONs via REST framework.
 
-    # fetch the IR family in a readable form
+    This serialiser feeds the /api/gelir/raredisease and /api/gelir/cancer
+    endpoints.
+
+    Because not all desired fields come from the GELInterpretationReport model
+    itself, the defined attributes are required to set a source for a
+    human-readable  represenation of the serialised field.
+
+    Attributes:
+        ir_family (serializers.CharField): define source of GeL family ID as
+            string repr as e.g. 2100XXXXX code.
+        assembly (serializers.CharField): define source of genome build as
+            string repr (GRCh37 or GRCh38).
+        gel_id (serializers.CharField): define source of GeL proband ID as
+             string repr as e.g. 2100XXXXX code; typically the same as ir_family
+             code.
+        cip_id (serializers.CharField): define source of GEL IR ID as string
+            repr in form XXXX-X
+        gmc (serializers.CharField): define source of string repr for case's
+            genomic medicine centre code (e.g. RRK for Birmingham).
+        clinician (serializers.CharField): define source of string repr for
+            case's related clinician, given as name in string format.
+        forename (serializers.CharField): define source of string repr of cases'
+            patient forename.
+        surname (serializers.CharField): define source of string repr of cases'
+            patient surname.
+        date_of_birth (serializers.DateTimeField): define source of DT repr of
+            cases' patient date of birth.
+        case_status (serializers.CharField): define source of string repr of
+            the status of the case, as manually set by users.
+        trio_sequenced (serializer.BooleanField): define source of bool repr of
+            whether (T) or not (F) a case has a proband, mother, and father
+            sequenced.
+        has_de_novo (serializer.BooleanField): defines source of bool repr of
+            whether (T) or not (F) a case has ProbandVariants which are de novo.
+        case_type (serializer.CharField): defines source of str repr of the
+            case type, either <str:raredisease> or <str:cancer>.
+        updated (serializer.DateTimeField): defines source of DT repr of
+            when the JSON was last changed in the CIP-API.
+        assigned_user (serializer.StringRelatedField): defines source of
+            the user account assigned to this case, given as <str:username>
+
+    """
     ir_family = serializers.CharField(
         source="ir_family.ir_family_id",
         read_only=True
     )
     assembly = serializers.StringRelatedField()
 
-    # get proband information
     gel_id = serializers.CharField(
         source="ir_family.participant_family.proband.gel_id",
         read_only=True
@@ -120,6 +207,15 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
 
 
     class Meta:
+        """
+        Meta for GELInterpretationReportSerializer, defines the model and fields.
+
+        Attributes:
+            model (gel2mdt.models.GELInterpretationReport): class def for
+                GELInterpretationReport model
+            fields (tuple): tuple of strings related to ProbandVariant model
+                attrs
+        """
         model = GELInterpretationReport
         fields = (
             'id',
