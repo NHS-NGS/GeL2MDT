@@ -20,6 +20,8 @@ class LoadConfig():
                 ),
                 "config.txt"), 'r') as config_file:
             for line in config_file:
-                line = line.strip().split('=', 1)
-                config_dict[line[0]] = line[1]
+                if not line.startswith('#'):
+                    line = line.strip().split('=', 1)
+                    if len(line) == 2:
+                        config_dict[line[0]] = line[1]
         return config_dict
