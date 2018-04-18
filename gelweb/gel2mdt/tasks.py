@@ -318,11 +318,10 @@ class UpdateDemographics(object):
 
         if 'name' in clinician_details and 'hospital' in clinician_details:
             print(clinician_details)
-            clinician, saved = Clinician.objects.get_or_create(name= clinician_details['name'],
-                                                                defaults={
-                                                                "email": "unknown",  # clinicain email not on labkey
-                                                                "hospital": clinician_details['hospital'],
-                                                                "added_by_user": False})
+            clinician, saved = Clinician.objects.get_or_create(
+                name=clinician_details['name'],
+                hospital = clinician_details['hospital']
+            )
             self.clinician = clinician
             family = self.report.ir_family.participant_family
             family.clinician = clinician
