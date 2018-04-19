@@ -1,0 +1,21 @@
+vep=vep
+cache=/home/patrick/.vep/
+hg19_fasta_loc=/home/patrick/.vep/Homo_sapiens.GRCh37.dna.primary_assembly.fa
+hg38_fasta_loc=/home/patrick/.vep/Homo_sapiens.GRCh38.dna.primary_assembly.fa
+labkey_server_request=Genomics England Portal/North Thames/MeRCURy/Rare Diseases/Core
+labkey_cancer_server_request=Genomics England Portal/North Thames/MeRCURy/Cancer/Core
+cip_api_storage=/home/patrick/GeL2MDT/cip_api_storage
+panelapp_storage=/home/patrick/GeL2MDT/panelapp_storage
+gene_storage=/home/patrick/GeL2MDT/gene_storage
+GMC=None
+pull_T3=False
+cip_as_id=True
+mergedVEP=True
+#These we anticipate would be rarely used options
+bypass_VEP=False
+remoteVEP=True
+remote_ip=127.0.0.1
+remote_username=patrick
+remote_password=password
+remote_directory=/home/patrick/vep_output/
+show_clinical_report=False
