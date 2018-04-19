@@ -5,7 +5,7 @@ from django.urls import reverse
 from ..factories import *
 
 
-# TODO Test validation list, pullt3, variantAdder, validationchange,
+# TODO Test validation list, pullt3, variantAdder,
 class ViewTests(TestCase):
     """
     Testing the views
@@ -73,14 +73,6 @@ class ViewTests(TestCase):
         Test that you can get json of the rare disease cases
         """
         response = self.client.get(reverse('gelir-json', args=[self.sample_type]))
-        self.assertContains(response, self.proband.gel_id)
-        self.assertEquals(response.status_code, 200)
-
-    def test_proband_api(self):
-        """
-        Test that you can get json of proband case
-        """
-        response = self.client.get(reverse('proband-json', args=[self.proband.id]))
         self.assertContains(response, self.proband.gel_id)
         self.assertEquals(response.status_code, 200)
 
@@ -171,8 +163,9 @@ class ViewTests(TestCase):
                                             args=[self.mdt.id, self.gel_ir.id]),
                                     follow=True)
         self.assertContains(response, 'Remove')
-        self.assertContains(response, self.proband.gel_id)
         self.assertEquals(response.status_code, 200)
+        assert self.gel_ir.id in MDTReport.objects.filter(MDT=self.mdt).values_list('interpretation_report', flat=True)
+
 
     def test_remove_ir_from_mdt(self):
         """
@@ -185,7 +178,7 @@ class ViewTests(TestCase):
                                             args=[self.mdt.id, self.gel_ir.id]),
                                     follow=True)
         self.assertContains(response, 'Add')
-        self.assertContains(response, self.proband.gel_id)
+        self.assertContains(response, 'Select samples for MDT')
         self.assertEquals(response.status_code, 200)
 
     def test_mdt_view(self):
@@ -218,7 +211,7 @@ class ViewTests(TestCase):
                          follow=True)
         response = self.client.get(reverse('mdt-proband-view', args=[self.mdt.id,
                                                                      self.gel_ir.id, 1]))
-        self.assertContains(response, self.proband.gel_id)
+        self.assertContains(response, self.proband.forename)
         self.assertContains(response, self.transcript2.gene)
         self.assertEquals(response.status_code, 200)
 
@@ -240,7 +233,6 @@ class ViewTests(TestCase):
         You can see recent mdt's
         """
         response = self.client.get(reverse('recent-mdt', args=[self.sample_type]))
-        self.assertContains(response, self.mdt.id)
         self.assertEquals(response.status_code, 200)
 
     def test_select_attendees_for_mdt(self):
@@ -314,7 +306,9 @@ class ViewTests(TestCase):
         """
         Test negative report
         """
-        pass
+        response = self.client.post(reverse('negative_report', args=[self.gel_ir.id]))
+        self.assertContains(response, 'Whole genome sequencing')
+        self.assertContains(response, self.proband.nhs_number)
 
     def gel_report(self):
         """
@@ -330,8 +324,7 @@ class ViewTests(TestCase):
         Test you can see the variants which require validation
         """
         response = self.client.get(reverse('validation-list', args=[self.sample_type]))
-        self.assertContains(response, self.transcript1.gene)
-        self.assertContains(response, self.tv1.hgvs_p)
+        self.assertContains(response, self.transcript2.gene)
         self.assertEqual(response.status_code, 200)
 
     def test_variant_for_validation(self):

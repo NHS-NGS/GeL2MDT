@@ -69,10 +69,9 @@ class InterpretationList(object):
         Removes cases from self.all_cases which are not of interest, ie. keep
         only 'sent_to_gmcs', 'report_generated', 'report_sent'.
         """
+        status_lookup = {'raredisease': [ "sent_to_gmcs", "report_generated", "report_sent"],
+                         'cancer': ['interpretation_generated', "sent_to_gmcs", "report_generated", "report_sent"]}
         cases_to_poll = [
-            case for case in self.all_cases if case["last_status"] in [
-                "sent_to_gmcs",
-                "report_generated",
-                "report_sent"]]
+            case for case in self.all_cases if case["last_status"] in status_lookup[self.sample_type]]
 
         return cases_to_poll
