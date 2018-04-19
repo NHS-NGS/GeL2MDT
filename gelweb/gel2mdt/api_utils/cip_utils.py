@@ -7,8 +7,9 @@ class InterpretationList(object):
     a list of case numbers by status along with the hash of the current case
     data.
     """
-    def __init__(self, sample_type):
+    def __init__(self, sample_type, sample=None):
         self.sample_type = sample_type
+        self.sample = sample
         self.all_cases = self.get_all_cases()
         self.cases_to_poll = self.get_poll_cases()
 
@@ -29,17 +30,31 @@ class InterpretationList(object):
             request_list_poll.get_json_response()
             request_list_results = request_list_poll.response_json["results"]
 
-            all_cases += [{
-                # add the ir_id, sample type, and latest status to dict
-                "interpretation_request_id":
-                    result["interpretation_request_id"],
-                "sample_type":
-                    result["sample_type"],
-                "last_status":
-                    result["last_status"]}
-                for result in request_list_results
-                if result["sample_type"] == self.sample_type
-                and result["last_status"] != "blocked"]
+            if self.sample:
+                all_cases += [{
+                    # add the ir_id, sample type, and latest status to dict
+                    "interpretation_request_id":
+                        result["interpretation_request_id"],
+                    "sample_type":
+                        result["sample_type"],
+                    "last_status":
+                        result["last_status"]}
+                    for result in request_list_results
+                    if result["sample_type"] == self.sample_type
+                    and result['proband'] == self.sample
+                       and result["last_status"] != "blocked"]
+            else:
+                all_cases += [{
+                    # add the ir_id, sample type, and latest status to dict
+                    "interpretation_request_id":
+                        result["interpretation_request_id"],
+                    "sample_type":
+                        result["sample_type"],
+                    "last_status":
+                        result["last_status"]}
+                    for result in request_list_results
+                    if result["sample_type"] == self.sample_type
+                    and result["last_status"] != "blocked"]
 
             if request_list_poll.response_json["next"]:
                 page += 1

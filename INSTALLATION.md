@@ -34,7 +34,6 @@ You can set up a conda environment called gel2mdt using the commands:
     
     git clone XXX
     cd gel2mdt
-    #To install requirements
     pip install -r requirements
         
 ### 3) Setup Storage Locations
@@ -55,7 +54,6 @@ This is where you can customise the application to your requirements.
 
 Here are the options and what they pertain to:
 
-    center: Text; Name of your center
     vep: Path to VEP executable
     hg19_cache: Path to hg19 VEP cache
     hg19_fasta_loc: Path to hg19 fasta files
@@ -68,7 +66,6 @@ Here are the options and what they pertain to:
     gene_storage: Folder for storing genenames results
     bypass_VEP: Boolean; For testing usage, whether or not to byPass VEP
     cip_as_id: Boolean; By default the app uses GeL participant ID as primary ID of a proband. This changes the ID to CIP ID
-    all_case_filtering: Boolean; Whether you want the main page to show all results
     mergedVEP=Boolean; Whether to use merged VEP cache directory with Ensembl and Refseq Transcripts
     remoteVEP=Boolean; Use if you want to run VEP on another server. The following options all refer to this
     remote_ip=IP address of remote server

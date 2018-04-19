@@ -366,6 +366,12 @@ def pull_t3_variants(request, report_id):
 
 
 def panel_view(request, panelversion_id):
+    '''
+    Replicates panelapp but specifc for panel Version
+    :param request:
+    :param panelversion_id: PanelVersion ID
+    :return: Panel View details
+    '''
     panel = PanelVersion.objects.get(id=panelversion_id)
     config_dict = load_config.LoadConfig().load()
     panelapp_file = f'{config_dict["panelapp_storage"]}/{panel.panel.panelapp_id}_{panel.version_number}.json'

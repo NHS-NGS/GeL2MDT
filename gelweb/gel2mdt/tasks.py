@@ -5,7 +5,7 @@ from .api_utils.poll_api import PollAPI
 from .vep_utils import run_vep_batch
 from .models import *
 from .database_utils.multiple_case_adder import GeneManager, MultipleCaseAdder
-from gelweb.celery import app
+from celery import task
 import json
 from json import JSONDecodeError
 import labkey as lk
@@ -14,6 +14,12 @@ import json
 import time
 
 def get_gel_content(ir, ir_version):
+    '''
+    Downloads and formats the GEL Clinical Report. Removes warning signs and inserts the genes in the panel
+    :param ir: Interpretation report ID or CIP id
+    :param ir_version: Version of CIP id
+    :return: Beatitful soup version of the report
+    '''
     # otherwise get uname and password from a file
 
     interpretation_reponse = PollAPI(
@@ -123,6 +129,12 @@ def get_gel_content(ir, ir_version):
     return gel_content.prettify()
 
 def panel_app(gene_panel, gp_version):
+    '''
+    Returns the list of genes associated with a panel in a dictionary which are then placed in the GEL clinical report
+    :param gene_panel: PanelName
+    :param gp_version: PanelVersion
+    :return: Dict with gene list and len of gene list
+    '''
     gene_list = []
     panel_app_panel_query_version = 'https://bioinfo.extge.co.uk/crowdsourcing/WebServices/get_panel/{gene_panel}/?version={gp_version}'
     panel_details = requests.get(
@@ -134,14 +146,25 @@ def panel_app(gene_panel, gp_version):
     return gene_panel_info
 
 
-#@app.task
+
+@task
 def update_for_t3(report_id):
+    '''
+    Utility function designed to be run with celery.  Pulls T3 variants for a GEL Report
+    :param report_id: GEL InterpretationReport ID
+    :return: Nothing
+    '''
     report = GELInterpretationReport.objects.get(id=report_id)
     mca = MultipleCaseAdder(sample_type=report.sample_type, pullt3=True, sample=report.ir_family.participant_family.proband.gel_id)
     mca.update_database()
 
-#@app.task
+@task
 def update_cases():
+    '''
+    Utility function designed to be run with celery as a replacement for a cronjob. Should be run every day to update
+    the database with new cases
+    :return:
+    '''
     mca = MultipleCaseAdder(sample_type='raredisease', pullt3=False, skip_demographics=False)
     mca.update_database()
     mca = MultipleCaseAdder(sample_type='cancer', pullt3=False, skip_demographics=False)

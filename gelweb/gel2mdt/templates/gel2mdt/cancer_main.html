@@ -41,7 +41,6 @@
                                             <td>
                                                 <div class="btn-group" data-toggle="buttons">
 
-                                                    {% if config_dict|get_item:'all_case_filtering' == 'True' %}
                                                     <label class="btn btn-success active">
                                                         <input type="radio" name="caseType" id="casetype_all" autocomplete="off" value="" checked>
                                                         All
@@ -50,16 +49,6 @@
                                                         <input type="radio" name="caseType" id="casetype_main" autocomplete="off" value="false" >
                                                         Main
                                                     </label>
-                                                    {% else %}
-                                                    <label class="btn btn-success ">
-                                                        <input type="radio" name="caseType" id="casetype_all" autocomplete="off" value="" >
-                                                        All
-                                                    </label>
-                                                    <label class="btn btn-success active ">
-                                                        <input type="radio" name="caseType" id="casetype_main" autocomplete="off" value="false" checked>
-                                                        Main
-                                                    </label>
-                                                    {% endif %}
                                                     <label class="btn btn-success">
                                                         <input type="radio" name="caseType" id="casetype_pilot" autocomplete="off" value="true">
                                                         Pilot
@@ -102,7 +91,6 @@
                                                         <input type="radio" name="maxTier" id="tier_1" autocomplete="off" value="1">
                                                         1
                                                     </label>
-                                                     {% if config_dict|get_item:'all_case_filtering' == 'True' %}
                                                     <label name="maxTierLabel" class="btn btn-success ">
                                                         <input type="radio" name="maxTier" id="tier_2" autocomplete="off" value="2" >
                                                         2
@@ -112,17 +100,6 @@
                                                         <input type="radio" name="maxTier" id="tier_3" autocomplete="off" value="3" checked>
                                                         3
                                                     </label>
-                                                    {% else %}
-                                                    <label name="maxTierLabel" class="btn btn-success active">
-                                                        <input type="radio" name="maxTier" id="tier_2" autocomplete="off" value="2" checked>
-                                                        2
-                                                    </label>
-
-                                                    <label name="maxTierLabel" class="btn btn-success">
-                                                        <input type="radio" name="maxTier" id="tier_3" autocomplete="off" value="3">
-                                                        3
-                                                    </label>
-                                                    {% endif %}
                                                 </div>
 
                                                 <div class="btn-group" data-toggle="buttons">
