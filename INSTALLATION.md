@@ -7,13 +7,11 @@ These have been tested on a clean installation of Ubuntu 16.04.4 LTS
 ### 1) VEP
 
 
-    git clone https://github.com/Ensembl/ensembl-vep.git
+Please go [here](https://github.com/Ensembl/ensembl-vep) to download and install VEP. Only versions 91 and 92 of VEP have been tested with GEL2MDT. 
 
-Follow the onscreen instructions and install the cache directories for the latest release of the hg19 and hg38 repositories. 
+When using the INSTALL.pl script, please download a homo_sapiens cache. The refseq versions of these caches are not supported. The merged cache is supported and recommended if users want to see refseq transcripts. 
 
-To see the options for repositories, you can navigate to [here](ftp://ftp.ensembl.org/pub/release-X/variation/VEP/) where X is the latest release number.
-
-Locally we have used the homo_sapiens_merged_vep_X_Y.tar.gz cache sources but the homo_sapiens_vep_91_GRCh38.tar.gz will work as well. 
+To see the list of repositories to download, you can navigate to [here](ftp://ftp.ensembl.org/pub/release-X/variation/VEP/) where X is the latest release number.
 
 We recommended running the convert_cache.pl script on the downloaded cache to speed up VEP queries. For more information see [here](http://www.ensembl.org/info/docs/tools/vep/script/vep_cache.html#cache)
 
@@ -23,11 +21,15 @@ For more information about installing VEP, please see [here](http://www.ensembl.
 
 ### 2) Anaconda
 
-We recommend running GEL2MDT in a conda environment. For instructions about using conda, please see [here](https://docs.anaconda.com/anaconda/install/)
+We recommend running GEL2MDT in a conda environment. For instructions about installing conda, please see [here](https://docs.anaconda.com/anaconda/install/)
 
-You can set up a conda environment called gel2mdt using the commands: 
+Once you have conda installed, to can set up a conda environment called gel2mdt use the commands: 
     
     conda create -n gel2mdt python=3.6
+    
+To activate it, use the following:
+    
+    source activate gel2mdt
     
 ### 3) Clone the GEL2MDT repository:
     
@@ -44,13 +46,13 @@ Before configuring GEL2MDT, you will need to create directories for storing data
 - A directory for storing genes which are downloaded from the genenames API
 - A directory for storing PanelApp JSON files
 
-We download all these files to ensure that we have a record of what we get from each of these APIs. 
+We download all these files to ensure there is a record of what is obtained from these APIs. 
 
 ### 4) Configuring GEL2MDT
 
-GEL2MDT has a config file which can be found in gelweb/gel2mdt/config/config.txt
+To configure GEL2MDT, please edit gelweb/gel2mdt/config/example_config.txt and rename it to gelweb/gel2mdt/config/config.txt
 
-This is where you can customise the application to your requirements. 
+If contributing to the project, please do not commit your configuration files and instead edit the example_config.txt file. 
 
 Here are the options and what they pertain to:
 
@@ -75,7 +77,7 @@ Here are the options and what they pertain to:
     GMC=Either a list of GMC's if intending to give users set options for GMC or 'None' to leave it as CharField. 
     pull_T3=Boolean; This gives users the option to download T3 so only set to False if you are not pulling T3's routinely
 
-Once these have been edited, please save the file. 
+Please do not use quotation marks in this file.
 
 ### 5) Database Setup
 
@@ -87,15 +89,58 @@ Then in the settings file gelweb/gelweb/settings/base.py add the DATABASE settin
 
 An example of these can be found [here](https://docs.djangoproject.com/en/2.0/ref/settings/#databases)
 
-For Postgres, the following instructions can assist with the installation [Link](https://www.digitalocean.com/community/tutorials/how-to-use-postgresql-with-your-django-application-on-ubuntu-14-04)
+There are multiple tutorials online about setting up a database for django and we would ask you to refer to those at this stage. 
+
+Once you have a database setup, django will creates the tables and database structure for you. Users will have to run the following commands within your virtual environment:
+
+    python manage.py makemigrations gel2mdt
+    python manage.py migrate
+    
+If your settings are correct, you should see output similar to what is printed below:
+    
+    Running migrations:
+      Applying contenttypes.0001_initial... OK
+      Applying auth.0001_initial... OK
+      Applying admin.0001_initial... OK
+      Applying admin.0002_logentry_remove_auto_add... OK
+      Applying contenttypes.0002_remove_content_type_name... OK
+      Applying auth.0002_alter_permission_name_max_length... OK
+      Applying auth.0003_alter_user_email_max_length... OK
+      Applying auth.0004_alter_user_username_opts... OK
+      Applying auth.0005_alter_user_last_login_null... OK
+      Applying auth.0006_require_contenttypes_0002... OK
+      Applying auth.0007_alter_validators_add_error_messages... OK
+      Applying auth.0008_alter_user_username_max_length... OK
+      Applying auth.0009_alter_user_last_name_max_length... OK
+      Applying easyaudit.0001_initial... OK
+      Applying easyaudit.0002_auto_20170125_0759... OK
+      Applying easyaudit.0003_auto_20170228_1505... OK
+      Applying easyaudit.0004_auto_20170620_1354... OK
+      Applying easyaudit.0005_auto_20170713_1155... OK
+      Applying easyaudit.0006_auto_20171018_1242... OK
+      Applying gel2mdt.0001_initial... OK
+      Applying gel2mdt.0002_auto_20180406_0741... OK
+      Applying gel2mdt.0003_interpretationreportfamilypanel_custom... OK
+      Applying gel2mdt.0004_auto_20180406_0746... OK
+      Applying gel2mdt.0005_auto_20180410_0859... OK
+      Applying gel2mdt.0006_auto_20180410_1054... OK
+      Applying gel2mdt.0007_auto_20180411_0817... OK
+      Applying gel2mdt.0008_gelinterpretationreport_sample_id... OK
+      Applying gel2mdt.0009_auto_20180417_1546... OK
+      Applying sessions.0001_initial... OK
+
 
 ### 6) CIP API Setup
 
-In the file DAILY_UPDATE.sh, add the following lines:
+It is not recommended to keep CIP API credentials in source code which is why they are set as environment variables.
 
+They can be set using the commands:
+    
     export cip_api_username='username'
     export cip_api_password='password'
     
+As a convenience, you could also add these lines to the DAILY_UPDATE.sh file. 
+
 ### 7) Configuring MultipleCaseAdder (MCA)
 
 The settings for MCA can be specified in run_batch_update.py
@@ -109,14 +154,17 @@ MCA is the class which controls which cases are downloaded. The options are MCA 
     sample: Optional TextField; The GELID of the single case you want to add from the CIPAPI
     pullt3: Boolean; Whether you want to pull Tier3 Variants for cases. Note there can be hundreds of T3 variants per case. 
     
-    
-The DAILY_UPDATE.sh script is a wrapper for running run_batch_update.py
 
 For example the command to pull all raredisease cases from the CIPAPI is: 
     
     mca = MultipleCaseAdder(sample_type='raredisease', skip_demographics=False)
 
-To run this, please use the command:
+If this command is successful, the following output should appear:
 
-    sh DAILY_UPDATE.sh
+    Polling API for case 6234-1
+    Polling API for case 6240-1
+    Polling API for case 6248-1
+    ... 
+    
+The DAILY_UPDATE.sh script is a wrapper for running run_batch_update.py which could be added to your cronjobs and run every day.
 
