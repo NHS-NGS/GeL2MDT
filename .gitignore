@@ -1,6 +1,8 @@
 PROJECT-SPECIFIC
 /gelweb/gelweb/settings/*_db.py
 /gelweb/gel2mdt/migrations/*
+/gelweb/gel2mdt/config/config.txt
+/gelweb/celerybeat-schedule*
 *.sqlite3
 *.sqlite3-journal
 .idea
