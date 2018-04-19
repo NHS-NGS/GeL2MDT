@@ -4,8 +4,10 @@ from django.contrib.auth.models import User
 from django.forms import HiddenInput, Textarea, CheckboxInput
 from django.forms import BaseFormSet
 
+
 class UserForm(forms.ModelForm):
-    """ User registration form
+    """
+    User registration form
     """
     password = forms.CharField(widget=forms.PasswordInput())
     role_choices = (('Clinician', 'Clinician'),
@@ -13,7 +15,7 @@ class UserForm(forms.ModelForm):
                     ('Other Staff', 'Other Staff'))
     role = forms.ChoiceField(choices=role_choices)
     config_dict = load_config.LoadConfig().load()
-    if config_dict['center'] == 'GOSH':
+    if config_dict['GMC'] != 'None':
         choices = config_dict['GMC'].split(',')
         gmc_choices = []
         for choice in choices:
@@ -27,14 +29,19 @@ class UserForm(forms.ModelForm):
         model = User
         fields = ('first_name', 'last_name', 'email', 'password')
 
+
 class ProfileForm(forms.Form):
+    """
+    Allows users to change their info.
+    TODO - Remove this as could be security risk if 2 permission layers are introduced
+    """
     role_choices = (('Clinician', 'Clinician'),
                     ('Clinical Scientist', 'Clinical Scientist'),
                     ('Other Staff', 'Other Staff'),
                     ('Unknown', 'Unknown'),)
     role = forms.ChoiceField(choices=role_choices)
     config_dict = load_config.LoadConfig().load()
-    if config_dict['center'] == 'GOSH':
+    if config_dict['GMC'] != 'None':
         choices = config_dict['GMC'].split(',')
         gmc_choices = []
         for choice in choices:
@@ -44,31 +51,55 @@ class ProfileForm(forms.Form):
     else:
         hospital = forms.CharField()
 
+
 class ProbandForm(forms.ModelForm):
+    '''
+    Form used for allowing users edit proband information
+    '''
     class Meta:
         model = Proband
         fields = ['episode', 'outcome', 'comment', 'status', 'mdt_status', 'pilot_case', 'case_sent']
 
+
 class RelativeForm(forms.ModelForm):
+    '''
+    Form used for allowing users edit Relative demographics
+    '''
     class Meta:
         model = Relative
         fields = ['forename', 'surname', 'date_of_birth', 'nhs_number',
                   'sex', 'affected_status']
 
+
 class DemogsForm(forms.ModelForm):
+    '''
+    Form used for allowing users edit proband demographics
+    '''
     class Meta:
         model = Proband
         fields = ['nhs_number', 'lab_number', 'forename', 'surname', 'date_of_birth', 'sex', 'local_id', 'gmc']
 
+
 class PanelForm(forms.Form):
+    '''
+    Form used for allowing users to add a panel to a proband
+    '''
     panel = forms.ModelChoiceField(queryset=PanelVersion.objects.order_by('panel'))
 
+
 class ClinicianForm(forms.Form):
+    '''
+    Form used for allowing users to change a probands clinician
+    '''
     clinician = forms.ModelChoiceField(queryset=Clinician.objects.filter(added_by_user=True).order_by('name'))
 
+
 class AddClinicianForm(forms.ModelForm):
+    '''
+    Form used in Proband View to allow users add a new Clinician
+    '''
     config_dict = load_config.LoadConfig().load()
-    if config_dict['center'] == 'GOSH':
+    if config_dict['GMC'] != 'None':
         choices = config_dict['GMC'].split(',')
         gmc_choices = []
         for choice in choices:
@@ -77,23 +108,34 @@ class AddClinicianForm(forms.ModelForm):
         hospital = forms.ChoiceField(choices=gmc_choices)
     else:
         hospital = forms.CharField()
+
     class Meta:
         model = Clinician
         fields = ['name', 'hospital', 'email']
 
 
 class CaseAssignForm(forms.ModelForm):
+    '''
+    Form for specifying which user a case is assigned to
+    '''
     class Meta:
         model = GELInterpretationReport
         fields = ["assigned_user"]
 
+
 class MdtForm(forms.ModelForm):
+    '''
+    Form which edits MDT instance specific fields such as date and status
+    '''
     class Meta:
         model = MDT
         fields = ['description', 'date_of_mdt', 'status']
 
 
 class ProbandMDTForm(forms.ModelForm):
+    '''
+    Form used in Proband View at MDT which allows users to fill in proband textfields
+    '''
     class Meta:
         model = Proband
         fields = ('discussion', 'action', 'status')
@@ -106,7 +148,11 @@ class ProbandMDTForm(forms.ModelForm):
         super(ProbandMDTForm, self).__init__(*args, **kwargs)
         self.fields['status'].required = False
 
+
 class RareDiseaseMDTForm(forms.ModelForm):
+    '''
+    Form used in Proband View at MDT which allows users to fill in exit questionaire questions
+    '''
     class Meta:
         model = RareDiseaseReport
         fields = ('contribution_to_phenotype', 'change_med',
@@ -123,10 +169,14 @@ class RareDiseaseMDTForm(forms.ModelForm):
                    'inform_reproductive_choice': CheckboxInput(),
                    }
 
+
 class AddNewAttendee(forms.Form):
+    '''
+    Form for allowing users to add new attendee which would then  be inserted into CS, Clinician or OtherStaff table
+    '''
     name = forms.CharField()
     config_dict = load_config.LoadConfig().load()
-    if config_dict['center'] == 'GOSH':
+    if config_dict['GMC'] != 'None':
         choices = config_dict['GMC'].split(',')
         gmc_choices = []
         for choice in choices:
@@ -140,8 +190,13 @@ class AddNewAttendee(forms.Form):
                                       ('Clinical Scientist', 'Clinical Scientist'),
                                       ('Other Staff', 'Other Staff')))
 
-class VariantForm(forms.ModelForm):
 
+class AddVariantForm(forms.ModelForm):
+    '''
+    Allows users to add a variant to a report. Users have to enter
+    chromosome, position, reference, alternate, dbsnp
+    TODO should check everything users enters for consistancy
+    '''
     def clean_reference(self):
         data = self.cleaned_data['reference'].strip()
         if not all([f in ['A', 'T', 'G', 'C'] for f in data]):
@@ -174,10 +229,3 @@ class GenomicsEnglandform(forms.Form):
     # Version number of the interpretation
     ir_version = forms.IntegerField(label='Version')
     report_version = forms.IntegerField(label='Clinical Report Version')
-
-
-class PanelAppform(forms.Form):
-    """ Search field for panel app """
-    gene_panel = forms.CharField(max_length=255, label="Gene Panel")
-    # Panel version number as a float
-    gp_version = forms.FloatField(label="Panel Version")

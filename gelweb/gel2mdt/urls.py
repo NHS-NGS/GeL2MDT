@@ -43,7 +43,6 @@ urlpatterns = [
     path('edit_mdt_proband/<int:report_id>', views.edit_mdt_proband, name='edit-mdt-proband'),
 
     path('<str:sample_type>/recent_mdts/', views.recent_mdts, name='recent-mdt'),
-    path('add_variant/<int:report_id>', views.add_variant, name='add-variant'),
 
     path('delete_mdt/<int:mdt_id>', views.delete_mdt, name='delete-mdt'),
     path('export_mdt/<int:mdt_id>', views.export_mdt, name='export-mdt'),
