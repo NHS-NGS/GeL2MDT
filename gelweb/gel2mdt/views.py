@@ -19,7 +19,14 @@ from .exports import write_mdt_outcome_template, write_mdt_export
 from io import BytesIO, StringIO
 from .vep_utils.run_vep_batch import CaseVariant
 from .tasks import VariantAdder, update_for_t3, UpdateDemographics
+from django.contrib.auth.models import User, Group
+from django.contrib.auth.decorators import user_passes_test
 # Create your views here.
+
+
+def clinical_scientist_check(user):
+    user_group = user.groups.values_list('name', flat=True)
+    return 'clinical_scientist' in user_group
 
 def register(request):
     '''
@@ -32,6 +39,8 @@ def register(request):
 
     if request.method == 'POST':
         user_form = UserForm(data=request.POST)
+        clinician_group, created = Group.objects.get_or_create(name='clinicians')
+        clinical_scientist_group, created = Group.objects.get_or_create(name='clinical_scientist')
 
         if user_form.is_valid():
             first_name = user_form.cleaned_data['first_name']
@@ -58,6 +67,7 @@ def register(request):
                     cs.name = full_name,
                     cs.hospital = hospital
                     cs.save()
+                    clinical_scientist_group.user_set.add(user)
 
                 elif role == 'Clinician':
                     clinician, created = Clinician.objects.get_or_create(
@@ -66,12 +76,16 @@ def register(request):
                     clinician.hospital = hospital
                     clinician.added_by_user = True
                     clinician.save()
+                    clinician_group.user_set.add(user)
+
                 elif role == 'Other Staff':
                     other, created = OtherStaff.objects.get_or_create(
                         email=email)
                     other.name = full_name,
                     other.hospital = hospital
                     other.save()
+                    clinician_group.user_set.add(user)
+
             except IntegrityError:
                 messages.error(request, 'If you have already registered, '
                                         'please contact Bioinformatics to activate your account')
@@ -142,6 +156,7 @@ def profile(request):
                                                     'my_cases': my_cases,
                                                     'rolename':rolename})
 
+
 @login_required
 def index(request):
     '''
@@ -150,7 +165,11 @@ def index(request):
     :param request:
     :return:
     '''
-    return render(request, 'gel2mdt/index.html', {'sample_type': None})
+    if clinical_scientist_check(request.user):
+        return render(request, 'gel2mdt/index.html', {'sample_type': None})
+    else:
+        return redirect('gel2clin:index')
+
 
 @login_required
 def remove_case(request, case_id):
@@ -167,6 +186,7 @@ def remove_case(request, case_id):
     return redirect('profile')
 
 @login_required
+@user_passes_test(clinical_scientist_check, login_url='index')
 def cancer_main(request):
     '''
     Shows all the Cancer cases the user has access to and allows easy searching of cases
@@ -179,6 +199,7 @@ def cancer_main(request):
                                                         'sample_type': 'cancer'})
 
 @login_required
+@user_passes_test(clinical_scientist_check, login_url='index')
 def rare_disease_main(request):
     '''
     Shows all the RD cases the user has access to and allows easy searching of cases
@@ -191,6 +212,7 @@ def rare_disease_main(request):
                                                               'sample_type': 'raredisease'})
 
 @login_required
+@user_passes_test(clinical_scientist_check, login_url='index')
 def proband_view(request, report_id):
     '''
     Shows details about a particular proband, some fields are editable by clinical scientists
@@ -286,6 +308,7 @@ def proband_view(request, report_id):
                                                     'add_variant_form': add_variant_form})
 
 @login_required
+@user_passes_test(clinical_scientist_check, login_url='index')
 def edit_relatives(request, relative_id):
     """
     Allows users to edit relative demographic information
@@ -307,7 +330,9 @@ def edit_relatives(request, relative_id):
     data['html_form'] = html_form
     return JsonResponse(data)
 
+
 @login_required
+@user_passes_test(clinical_scientist_check, login_url='index')
 def update_demographics(request, report_id):
     '''
     Allows staff users to redo labkey lookup
@@ -320,7 +345,9 @@ def update_demographics(request, report_id):
     update_demo.update_demographics()
     return HttpResponseRedirect(f'/proband/{report_id}')
 
+
 @login_required
+@user_passes_test(clinical_scientist_check, login_url='index')
 def variant_for_validation(request, pv_id):
     '''
     Adds a proband variant to the list for validation
@@ -337,7 +364,9 @@ def variant_for_validation(request, pv_id):
     messages.add_message(request, 25, 'Validation Status Updated')
     return HttpResponseRedirect(f'/proband/{proband_variant.interpretation_report.id}')
 
+
 @login_required
+@user_passes_test(clinical_scientist_check, login_url='index')
 def validation_list(request, sample_type):
     '''
     Returns the list of proband variants that require validation
@@ -351,7 +380,9 @@ def validation_list(request, sample_type):
                                                             'config_dict': config_dict,
                                                             'sample_type': sample_type})
 
+
 @login_required
+@user_passes_test(clinical_scientist_check, login_url='index')
 def pull_t3_variants(request, report_id):
     '''
     Allows users to download T3 variants for a case
@@ -379,6 +410,7 @@ def panel_view(request, panelversion_id):
         return render(request, 'gel2mdt/panel.html', {'panel':panel,
                                                       'genes': panelapp_json['result']['Genes']})
 
+
 @login_required
 def variant_view(request, variant_id):
     '''
@@ -397,6 +429,7 @@ def variant_view(request, variant_id):
 
 
 @login_required
+@user_passes_test(clinical_scientist_check)
 def update_proband(request, report_id):
     '''
     Updates the Proband page for fields used by clinical scientists such as status and outcomes
@@ -415,6 +448,7 @@ def update_proband(request, report_id):
 
 
 @login_required
+@user_passes_test(clinical_scientist_check)
 def select_transcript(request, report_id, pv_id):
     '''
     Shows the transcript table and allows a user to select preferred transcript
@@ -440,6 +474,7 @@ def select_transcript(request, report_id, pv_id):
                    'report': report})
 
 @login_required
+@user_passes_test(clinical_scientist_check)
 def update_transcript(request, report_id, pv_id, transcript_id):
     '''
     Updates the selected transcript
@@ -582,6 +617,7 @@ def mdt_view(request, mdt_id):
                                                       'attendees': attendees,
                                                      'sample_type': mdt_instance.sample_type})
 
+
 @login_required
 def mdt_proband_view(request, mdt_id, pk, important):
     '''
@@ -632,6 +668,7 @@ def mdt_proband_view(request, mdt_id, pk, important):
                                                              'variant_formset': variant_formset,
                                                              'panels': panels,
                                                              'sample_type':report.sample_type})
+
 
 @login_required
 def edit_mdt_proband(request, report_id):
@@ -794,6 +831,7 @@ def add_attendee_to_mdt(request, mdt_id, attendee_id, role):
             mdt_instance.save()
         return HttpResponseRedirect(f'/select_attendees_for_mdt/{mdt_id}')
 
+
 @login_required
 def remove_attendee_from_mdt(request, mdt_id, attendee_id, role):
     '''
@@ -816,6 +854,7 @@ def remove_attendee_from_mdt(request, mdt_id, attendee_id, role):
             other = OtherStaff.objects.get(id=attendee_id)
             mdt_instance.other_staff.remove(other)
         return HttpResponseRedirect(f'/select_attendees_for_mdt/{mdt_id}')
+
 
 @login_required
 def add_new_attendee(request):
