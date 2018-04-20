@@ -10,7 +10,6 @@ from django.template.loader import render_to_string
 from django.http import JsonResponse
 from django.db.models import Q
 from .database_utils.multiple_case_adder import MultipleCaseAdder
-from .primer_utils import singletarget
 from .tasks import get_gel_content, panel_app
 from .api.api_views import *
 from django.forms import modelformset_factory
