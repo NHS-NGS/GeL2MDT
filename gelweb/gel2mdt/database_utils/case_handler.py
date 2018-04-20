@@ -16,11 +16,85 @@ import pprint
 
 class Case(object):
     """
-    Representation of a single case which can be added to the database,
-    updated in the database, or skipped dependent on whether a matching
-    case/case family is found.
+    Entity object which represents a case and it's associated details.
+
+    Cases are instantiated by MultipleCaseAdder with basic init attributes,
+    then details will be added if the case information needs to be added to or
+    updated in the DB.
+
+    Attributes:
+        json (dict): upon initialisation of the Case, this is the full json
+            response from PollAPI. This is edited during the database update
+            process to keep relevant information together in the datastructure.
+        raw_json (dict): a deepcopy of the json, which remains unmodified, for
+            the purpose of saving the json to disk once a Case has been added
+            or updated in the database.
+        json_case_data (dict): a sub-dict within the json which refers to the
+            interpretation_request_data.
+        json_request_data (dict): a sub-dict of json_case_data which holds the
+            tiered variant information. case_data and request_data are set as
+            attributes during init mostly to avoid long dict accessors in the
+            code itself.
+        request_id (str): the XXXX-X CIP-ID of the Interpretation Request.
+        json_hash (str): the MD5 hash of the json file, which has been sorted
+            to maintain consistency of values (which would change the hash).
+        proband (dict): sub-dict of json which holds the information about the
+            proband only.
+        proband_sample (str): the sample ID used for sequencing of the proband,
+            obtained from the JSON.
+        family_members (list): list of sub-dicts of the json which hold
+            information about all relatives of the proband's relative
+        tools_and_versions (dict): k-v pair of tools used by GeL/CIP (key) and
+            the version that was used (value)
+        status (str): the status of the case according the CIP-API, choice of
+            waiting_payload, interpretation_generated, dispatched, blocked,
+            files_copied, transfer_ready, transfer_complete,
+            rejected_wrong_format, gel_qc_failed, gel_qc_passed, sent_to_gmcs,
+            report_generated, or report_sent.
+        panel_manager (multiple_case_adder.PanelManager): instance of the class
+            PanelManager, which is used to hold new panels polled from PanelApp
+            during a cycle of the Cases' overseeing MultipleCaseAdder to avoid
+            polling PanelApp for the same new panel twice, before it can be
+            detected by check_found_in_db()
+        variant_manager (multiple_case_adder.VariantManager): instance of the
+            class VariantManager, which checks all variants from VEP 37 which
+            can conflict with VEP 38, then ensures the same variant (ie at the
+            same genomic position) has identical information between b37/b38
+            cases.
+        gene_manager (multiple_case_adder.GeneManager): instance of the control
+            class GeneManager, which ensures that GeneNames is not polled twice
+            for the same gene in one run of the MCA, ie. before a new gene is
+            added the database and hence won't be found by check_found_in_db
+        panels (dict): the "analysisPanels" section of the JSON. This only
+            applies for rare disease cases; cancer cases do not have panels so
+            this attribute is None in those cases.
+        skip_demographics (bool): whether (T) or not (F) we should poll LabKey
+            for demographic information for database entries. If not, Proband,
+            Relative, and Clinician will have "unknown" set as their values for
+            all LabKey-sourced fields.
+        pullt3 (bool): whether (T) or not (F) Tier 3 variants should be pulled
+            out of the JSON and added to the database. This is mostly to save
+            time, since in the case of !pullt3, there will be a huge reduction
+            in number of variants passed to VEP/variant annotater.
+        attribute_managers (dict): k-v pairing of each database model being
+            updated for each case, and the CaseAttributeManager for that model
+            for this case (e.g. {gel2mdt.models.Proband: CaseAttributeManager}.
+            attribute_managers are not created at first, so this starts as an
+            empty dictionary. When MCA determines the case needs to be added or
+            updated in the database, then the MCA will create (in the correct
+            order) CaseAttributeManagers for each model type for each case.
     """
     def __init__(self, case_json, panel_manager, variant_manager, gene_manager, skip_demographics=False, pullt3=True):
+        """
+        Initialise a Case with the json, then pull out relevant sections.
+
+        The JSON is deepcopied for raw_json, then the relevant sections are
+        extracted by dictionary accessors or standalone functions (in the case
+        of proband, family_members, tools_and_versions). A SHA512 hash is also
+        calculated for the JSON, to later check if the JSON used for a case
+        has changed in the CIP API.
+        """
+
         self.json = case_json
         # raw json created to dump at the end; json attr is modified
         self.pullt3 = pullt3
