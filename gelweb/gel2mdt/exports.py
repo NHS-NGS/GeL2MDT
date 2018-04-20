@@ -5,7 +5,15 @@ from django.conf import settings
 import os
 from docx.shared import Pt
 
+
 def write_mdt_export(writer, mdt_instance, mdt_reports):
+    '''
+    Writes a summary of the cases which are being brought to MDT
+    :param writer: CSV file writer
+    :param mdt_instance:  MDT instance
+    :param mdt_reports: List of reports which are present in MDT
+    :return: CSV file Writer
+    '''
     writer.writerow(['CIP_ID', 'Forename', 'Surname', 'DOB', 'Hospital_ID',
                      'Variant/Zygosity', 'Panel'])
 
@@ -45,8 +53,8 @@ def write_mdt_export(writer, mdt_instance, mdt_reports):
 
 def write_mdt_outcome_template(report):
     """
-    :param pk: Sample Gel Participant ID
-    :return: Reads a template and writes it out to the user
+    :param pk: GEL Interpretationreport instance
+    :return: Writes a docx template file for summarising proband MDT outcomes
     """
     document = Document()
     document.add_picture(os.path.join(settings.STATIC_DIR, 'nhs_image.png'))
