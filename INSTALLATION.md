@@ -95,6 +95,7 @@ Once you have a database setup, django will creates the tables and database stru
 
     python manage.py makemigrations gel2mdt
     python manage.py migrate
+    python manage.py createinitialrevisions
     
 If your settings are correct, you should see output similar to what is printed below:
     
