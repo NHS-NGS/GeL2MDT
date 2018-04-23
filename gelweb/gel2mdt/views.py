@@ -546,7 +546,10 @@ def add_ir_to_mdt(request, mdt_id, irreport_id):
 
         proband_variants = ProbandVariant.objects.filter(interpretation_report=report_instance)
         for pv in proband_variants:
-            pv.create_rare_disease_report()
+            if mdt_instance.sample_type == 'raredisease':
+                pv.create_rare_disease_report()
+            elif mdt_instance.sample_type == 'cancer':
+                pv.create_cancer_report()
 
         return HttpResponseRedirect(f'/{mdt_instance.sample_type}/edit_mdt/{mdt_id}')
 
