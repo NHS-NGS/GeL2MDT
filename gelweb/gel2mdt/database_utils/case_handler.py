@@ -567,6 +567,16 @@ class CaseAttributeManager(object):
 
         if self.case.skip_demographics:
             recruiting_disease = None
+            disease_subtype = None
+            try:
+                if self.case.json['sample_type'] == 'cancer':
+                    if 'cancerParticipant' in self.case.json_request_data:
+                        if 'primaryDiagnosisDisease' in self.case.json_request_data['cancerParticipant']:
+                            recruiting_disease = self.case.json_request_data['cancerParticipant']['primaryDiagnosisDisease']
+                        if 'primaryDiagnosisSubDisease' in self.case.json_request_data['cancerParticipant']:
+                            disease_subtype = self.case.json_request_data['cancerParticipant']['primaryDiagnosisSubDisease']
+            except IndexError as e:
+                pass
         else:
             # set up LabKey to get recruited disease
             config_dict = load_config.LoadConfig().load()
@@ -595,11 +605,16 @@ class CaseAttributeManager(object):
             )
 
             recruiting_disease = None
+            disease_subtype = None
             try:
                 if self.case.json['sample_type'] == 'raredisease':
                     recruiting_disease = search_results['rows'][0].get('gel_disease_information_specific_disease', None)
                 elif self.case.json['sample_type'] == 'cancer':
-                    recruiting_disease = search_results['rows'][0].get('diagnosis_icd_code', None)
+                    if 'cancerParticipant' in self.case.json_request_data:
+                        if 'primaryDiagnosisDisease' in self.case.json_request_data['cancerParticipant']:
+                            recruiting_disease = self.case.json_request_data['cancerParticipant']['primaryDiagnosisDisease']
+                        if 'primaryDiagnosisSubDisease' in self.case.json_request_data['cancerParticipant']:
+                            disease_subtype = self.case.json_request_data['cancerParticipant']['primaryDiagnosisSubDisease']
             except IndexError as e:
                 pass
 
@@ -613,6 +628,7 @@ class CaseAttributeManager(object):
             "sex": self.case.proband["sex"],
             "status": 'N', # initialised to not started? (N)
             "recruiting_disease": recruiting_disease,
+            'disease_subtype': disease_subtype,
             "gmc": clinician.entry.hospital
         }, self.model_objects)
         return proband
@@ -1061,6 +1077,11 @@ class CaseAttributeManager(object):
             if variant["max_tier"] < self.case.max_tier:
                 self.case.max_tier = variant["max_tier"]
 
+        tumour_content = None
+        if self.case.json['sample_type'] == 'cancer':
+            print( self.case.proband)
+            tumour_content = self.case.proband['tumourSamples'][0]['tumourContent']
+
         ir = CaseModel(GELInterpretationReport, {
             "ir_family": ir_family.entry,
             "polled_at_datetime": timezone.now(),
@@ -1075,7 +1096,8 @@ class CaseAttributeManager(object):
             "max_tier": self.case.max_tier,
             "assembly": genome_assembly,
             'sample_type': self.case.json['sample_type'],
-            "sample_id": self.case.proband_sample
+            "sample_id": self.case.proband_sample,
+            'tumour_content': tumour_content
         }, self.model_objects)
         return ir
 

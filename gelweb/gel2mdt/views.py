@@ -639,11 +639,16 @@ def mdt_proband_view(request, mdt_id, pk, important):
     else:
         proband_variants = ProbandVariant.objects.filter(interpretation_report=report,
                                                          max_tier=3)
-    proband_variant_reports = RareDiseaseReport.objects.filter(proband_variant__in=proband_variants)
+    if mdt_instance.sample_type == 'raredisease':
+        proband_variant_reports = RareDiseaseReport.objects.filter(proband_variant__in=proband_variants)
+        VariantForm = modelformset_factory(RareDiseaseReport, form=RareDiseaseMDTForm, extra=0)
+    elif mdt_instance.sample_type == 'cancer':
+        proband_variant_reports = CancerReport.objects.filter(proband_variant__in=proband_variants)
+        VariantForm = modelformset_factory(CancerReport, form=CancerMDTForm, extra=0)
+    variant_formset = VariantForm(queryset=proband_variant_reports)
 
     proband_form = ProbandMDTForm(instance=report.ir_family.participant_family.proband)
-    VariantForm = modelformset_factory(RareDiseaseReport, form=RareDiseaseMDTForm, extra=0)
-    variant_formset = VariantForm(queryset=proband_variant_reports)
+
     panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.ir_family)
 
     if mdt_instance.status == "C":
