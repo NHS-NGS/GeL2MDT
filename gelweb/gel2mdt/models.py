@@ -534,6 +534,14 @@ class ProbandVariant(models.Model):
         else:
             return self.rarediseasereport
 
+    def create_cancer_report(self):
+        if not hasattr(self, 'cancerreport'):
+            report = CancerReport(proband_variant=self)
+            report.save()
+            return report
+        else:
+            return self.cancerreport
+
     class Meta:
         managed = True
         db_table = 'ProbandVariant'
