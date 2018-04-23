@@ -1,19 +1,5 @@
-from django.core.exceptions import PermissionDenied
 from functools import wraps
 from django.shortcuts import render, redirect
-
-def sample_permission(function):
-    def wrap(request, *args, **kwargs):
-        print(function, args, kwargs)
-        user_group = request.user.groups.values_list('name', flat=True)
-        if 'clinician' in user_group:
-            return function(request, *args, **kwargs)
-        else:
-            return PermissionDenied
-    wrap.__doc__ = function.__doc__
-    wrap.__name__ = function.__name__
-    return wrap
-
 
 def user_is_clinician(url=None):
     """
