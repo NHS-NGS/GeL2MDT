@@ -142,7 +142,7 @@ If your settings are correct, you should see output similar to what is printed b
 
 Please note these commands may need to be rerun when you update GeL2MDT to reflect the changes in the database. 
 
-### 6) CIP API Setup
+### 6) CIP API and Labkey Setup
 
 It is not recommended to keep CIP API credentials in source code which is why they are set as environment variables.
 
@@ -152,6 +152,12 @@ They can be set using the commands:
     export cip_api_password='password'
     
 As a convenience, you could also add these lines to the DAILY_UPDATE.sh file. 
+
+For Labkey, create the following file at ~/.netrc
+
+    machine gmc.genomicsengland.nhs.uk
+    login <login email address>
+    password <login password>
 
 ### 7) Configuring MultipleCaseAdder (MCA)
 
