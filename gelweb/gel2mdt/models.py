@@ -327,6 +327,7 @@ class Proband(models.Model):
     date_of_birth = models.DateTimeField('date_of_birth')
     sex = models.CharField(max_length=10, null=True, blank=True)
     recruiting_disease = models.CharField(max_length=200, null=True, blank=True)
+    disease_subtype = models.CharField(max_length=200, null=True, blank=True)
     pilot_case = models.BooleanField(default=False)
     outcome = models.TextField(blank=True)
     comment = models.TextField(blank=True)
@@ -572,6 +573,10 @@ class CancerReport(models.Model):
         ('NA', 'NA'), ('1', '1'), ('2', '2'), ('3', '3'), ('4', '4'), ('5', '5'),
     ), default='NA')
     proband_variant = models.OneToOneField(ProbandVariant, on_delete=models.CASCADE)
+    variant_use = models.CharField(max_length=200, null=True, blank=True)
+    action_type = models.CharField(max_length=200, null=True, blank=True)
+    validated = models.BooleanField(default=False)
+    validated_assay_type = models.CharField(max_length=200, null=True, blank=True)
 
     class Meta:
         managed = True
