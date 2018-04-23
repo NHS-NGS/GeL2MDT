@@ -1,5 +1,6 @@
 from functools import wraps
 from django.shortcuts import render, redirect
+from .models import Clinician
 
 def user_is_clinician(url=None):
     """
@@ -9,8 +10,8 @@ def user_is_clinician(url=None):
     def decorator(view_func):
         @wraps(view_func)
         def wrap(request, *args, **kwargs):
-            user_group = request.user.groups.values_list('name', flat=True)
-            if 'clinicians' in user_group:
+            clinicians_emails = Clinician.objects.all().values_list('email', flat=True)
+            if request.user.email in clinicians_emails:
                 if 'report_id' in kwargs:
                     return redirect(f'gel2clin:{url}', kwargs['report_id'])
                 else:
