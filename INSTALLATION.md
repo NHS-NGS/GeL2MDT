@@ -79,7 +79,7 @@ Here are the options and what they pertain to:
 
 Please do not use quotation marks in this file.
 
-### 5) Database Setup
+### 5) Database Setup and editing settings file
 
 GEL2MDT has been tested in MySQL and PostgreSQL. Whichever one of these you choose, create a database called gel2mdt_db.
 
@@ -89,10 +89,19 @@ Then in the settings file gelweb/gelweb/settings/base.py add the DATABASE settin
 
 An example of these can be found [here](https://docs.djangoproject.com/en/2.0/ref/settings/#databases)
 
+In gelweb/gelweb/settings/base.py, please enter a SECRET_KEY which used for hashing the website and is a long string. More information can be found [here](https://docs.djangoproject.com/en/2.0/ref/settings/#std:setting-SECRET_KEY). An example would be:
+
+    SECRET_KEY = 'igfaddys&qa-myx=8%$d$$u!&w472)v!@at@ysahs)+4sx%h95'
+
+In gelweb/gelweb/settings/base.py, please enter an ALLOWED_HOSTS which is the IP address of the machine you are running GeL2MDT. An example would be:
+    
+    ALLOwED_HOSTS = ['127.0.0.1']
+
 There are multiple tutorials online about setting up a database for django and we would ask you to refer to those at this stage. 
 
 Once you have a database setup, django will creates the tables and database structure for you. Users will have to run the following commands within your virtual environment:
-
+    
+    cd gelweb/
     python manage.py makemigrations gel2mdt
     python manage.py migrate
     python manage.py createinitialrevisions
@@ -131,6 +140,8 @@ If your settings are correct, you should see output similar to what is printed b
       Applying sessions.0001_initial... OK
 
 
+Please note these commands may need to be rerun when you update GeL2MDT to reflect the changes in the database. 
+
 ### 6) CIP API Setup
 
 It is not recommended to keep CIP API credentials in source code which is why they are set as environment variables.
@@ -144,7 +155,7 @@ As a convenience, you could also add these lines to the DAILY_UPDATE.sh file.
 
 ### 7) Configuring MultipleCaseAdder (MCA)
 
-The settings for MCA can be specified in run_batch_update.py
+The settings for MCA can be specified in gelweb/run_batch_update.py
 
 MCA is the class which controls which cases are downloaded. The options are MCA are listed below:
 
@@ -169,3 +180,14 @@ If this command is successful, the following output should appear:
     
 The DAILY_UPDATE.sh script is a wrapper for running run_batch_update.py which could be added to your cronjobs and run every day.
 
+### 8) Running GeL2MDT website
+
+To create a superuser, please run the following and follow the prompts:
+    
+      python manage.py createsuperuser
+      
+To view the GeL2MDT website locally please run the following command and enter your credentials:
+    
+      python manage.py runserver
+      
+To deploy the website a webserver such as Apache/Nginx, please look up documentation for those tools.   
