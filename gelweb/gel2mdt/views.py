@@ -36,8 +36,6 @@ def register(request):
 
     if request.method == 'POST':
         user_form = UserForm(data=request.POST)
-        clinician_group, created = Group.objects.get_or_create(name='clinicians')
-        clinical_scientist_group, created = Group.objects.get_or_create(name='clinical_scientist')
 
         if user_form.is_valid():
             first_name = user_form.cleaned_data['first_name']
@@ -64,7 +62,6 @@ def register(request):
                     cs.name = full_name,
                     cs.hospital = hospital
                     cs.save()
-                    clinical_scientist_group.user_set.add(user)
 
                 elif role == 'Clinician':
                     clinician, created = Clinician.objects.get_or_create(
@@ -73,7 +70,6 @@ def register(request):
                     clinician.hospital = hospital
                     clinician.added_by_user = True
                     clinician.save()
-                    clinician_group.user_set.add(user)
 
                 elif role == 'Other Staff':
                     other, created = OtherStaff.objects.get_or_create(
@@ -81,7 +77,6 @@ def register(request):
                     other.name = full_name,
                     other.hospital = hospital
                     other.save()
-                    clinician_group.user_set.add(user)
 
             except IntegrityError:
                 messages.error(request, 'If you have already registered, '
@@ -162,9 +157,8 @@ def index(request):
     :param request:
     :return:
     '''
-    user_group = request.user.groups.values_list('name', flat=True)
-    print(user_group)
-    if 'clinicians' in user_group:
+    clinicians_emails = Clinician.objects.all().values_list('email', flat=True)
+    if request.user.email in clinicians_emails:
         return redirect('gel2clin:index')
     else:
         return render(request, 'gel2mdt/index.html', {'sample_type': None})
