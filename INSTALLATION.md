@@ -19,7 +19,7 @@ You will also need to download fasta files pertaining the the hg19 and hg38 cach
 
 For more information about installing VEP, please see [here](http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html)
 
-### 2) Anaconda
+### 2) Anaconda/Miniconda
 
 We recommend running GEL2MDT in a conda environment. For instructions about installing conda, please see [here](https://docs.anaconda.com/anaconda/install/)
 
