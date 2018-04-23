@@ -21,12 +21,9 @@ from .vep_utils.run_vep_batch import CaseVariant
 from .tasks import VariantAdder, update_for_t3, UpdateDemographics
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import user_passes_test
+from .decorators import user_is_clinician
 # Create your views here.
 
-
-def clinical_scientist_check(user):
-    user_group = user.groups.values_list('name', flat=True)
-    return 'clinical_scientist' in user_group
 
 def register(request):
     '''
@@ -165,10 +162,13 @@ def index(request):
     :param request:
     :return:
     '''
-    if clinical_scientist_check(request.user):
-        return render(request, 'gel2mdt/index.html', {'sample_type': None})
-    else:
+    user_group = request.user.groups.values_list('name', flat=True)
+    print(user_group)
+    if 'clinicians' in user_group:
         return redirect('gel2clin:index')
+    else:
+        return render(request, 'gel2mdt/index.html', {'sample_type': None})
+
 
 
 @login_required
@@ -185,8 +185,9 @@ def remove_case(request, case_id):
     case.save()
     return redirect('profile')
 
+
 @login_required
-@user_passes_test(clinical_scientist_check, login_url='index')
+@user_is_clinician(url='cancer-main')
 def cancer_main(request):
     '''
     Shows all the Cancer cases the user has access to and allows easy searching of cases
@@ -198,8 +199,9 @@ def cancer_main(request):
     return render(request, 'gel2mdt/cancer_main.html', {'config_dict': config_dict,
                                                         'sample_type': 'cancer'})
 
+
 @login_required
-@user_passes_test(clinical_scientist_check, login_url='index')
+@user_is_clinician(url='rare-disease-main')
 def rare_disease_main(request):
     '''
     Shows all the RD cases the user has access to and allows easy searching of cases
@@ -211,8 +213,9 @@ def rare_disease_main(request):
     return render(request, 'gel2mdt/rare_disease_main.html', {'config_dict': config_dict,
                                                               'sample_type': 'raredisease'})
 
+
 @login_required
-@user_passes_test(clinical_scientist_check, login_url='index')
+@user_is_clinician(url='proband-view')
 def proband_view(request, report_id):
     '''
     Shows details about a particular proband, some fields are editable by clinical scientists
@@ -307,8 +310,9 @@ def proband_view(request, report_id):
                                                     'sample_type': report.sample_type,
                                                     'add_variant_form': add_variant_form})
 
+
 @login_required
-@user_passes_test(clinical_scientist_check, login_url='index')
+@user_is_clinician(url='index')
 def edit_relatives(request, relative_id):
     """
     Allows users to edit relative demographic information
@@ -332,7 +336,7 @@ def edit_relatives(request, relative_id):
 
 
 @login_required
-@user_passes_test(clinical_scientist_check, login_url='index')
+@user_is_clinician(url='proband-view')
 def update_demographics(request, report_id):
     '''
     Allows staff users to redo labkey lookup
@@ -347,7 +351,7 @@ def update_demographics(request, report_id):
 
 
 @login_required
-@user_passes_test(clinical_scientist_check, login_url='index')
+@user_is_clinician(url='index')
 def variant_for_validation(request, pv_id):
     '''
     Adds a proband variant to the list for validation
@@ -366,7 +370,6 @@ def variant_for_validation(request, pv_id):
 
 
 @login_required
-@user_passes_test(clinical_scientist_check, login_url='index')
 def validation_list(request, sample_type):
     '''
     Returns the list of proband variants that require validation
@@ -382,7 +385,7 @@ def validation_list(request, sample_type):
 
 
 @login_required
-@user_passes_test(clinical_scientist_check, login_url='index')
+@user_is_clinician(url='proband-view')
 def pull_t3_variants(request, report_id):
     '''
     Allows users to download T3 variants for a case
@@ -429,7 +432,7 @@ def variant_view(request, variant_id):
 
 
 @login_required
-@user_passes_test(clinical_scientist_check)
+@user_is_clinician(url='proband-view')
 def update_proband(request, report_id):
     '''
     Updates the Proband page for fields used by clinical scientists such as status and outcomes
@@ -448,7 +451,7 @@ def update_proband(request, report_id):
 
 
 @login_required
-@user_passes_test(clinical_scientist_check)
+@user_is_clinician(url='proband-view')
 def select_transcript(request, report_id, pv_id):
     '''
     Shows the transcript table and allows a user to select preferred transcript
@@ -474,7 +477,7 @@ def select_transcript(request, report_id, pv_id):
                    'report': report})
 
 @login_required
-@user_passes_test(clinical_scientist_check)
+@user_is_clinician(url='proband-view')
 def update_transcript(request, report_id, pv_id, transcript_id):
     '''
     Updates the selected transcript
