@@ -3,7 +3,7 @@ from django.test import TestCase, Client
 from ..models import *
 from django.urls import reverse
 from ..factories import *
-
+import factory
 
 # TODO Test validation list, pullt3, variantAdder,
 class ViewTests(TestCase):
@@ -44,7 +44,7 @@ class ViewTests(TestCase):
         self.ir_family = InterpretationReportFamilyFactory(participant_family=self.family)
         self.gel_ir = GELInterpretationReportFactory(ir_family=self.ir_family)
         self.ir_panels = InterpretationReportFamilyPanelFactory(ir_family=self.ir_family)
-        self.gene = GeneFactory()
+        self.gene = GeneFactory(hgnc_name='KJHAKDS')
         self.transcript1 = TranscriptFactory(gene=self.gene)
         self.transcript2 = TranscriptFactory(gene=self.gene)
         self.variant = VariantFactory()
@@ -162,6 +162,9 @@ class ViewTests(TestCase):
                                      follow=True)
         self.assertContains(response, 'Proband Updated')
         self.assertEquals(response.status_code, 200)
+        proband = Proband.objects.get(id=self.proband.id)
+        self.assertEqual(proband.comment, 'testcomment')
+        self.assertEqual(proband.outcome, 'testoutcome')
 
     def test_select_transcript(self):
         """
