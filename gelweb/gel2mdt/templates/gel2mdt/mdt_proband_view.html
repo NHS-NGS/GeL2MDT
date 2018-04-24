@@ -2,7 +2,6 @@
 {% load bootstrap3 %}
 {% load static %}
 {% block content %}
-{% if mdt_form.status.value != "C" %}
 {% block javascript %}
   <script src="{% static 'js/custom.js' %}"></script>
 {% endblock %}
@@ -192,7 +191,6 @@
                                     </table>
                                 </div>
 
-{% endif %}
 </div>
     </div>
     <div class="row" align="right">
