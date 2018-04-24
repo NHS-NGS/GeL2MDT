@@ -158,10 +158,13 @@ def index(request):
     :return:
     '''
     clinicians_emails = Clinician.objects.all().values_list('email', flat=True)
-    if request.user.email in clinicians_emails:
-        return redirect('gel2clin:index')
-    else:
+    if request.user.is_staff:
         return render(request, 'gel2mdt/index.html', {'sample_type': None})
+    elif request.user.email not in clinicians_emails:
+        return render(request, 'gel2mdt/index.html', {'sample_type': None})
+    else:
+        return redirect('gel2clin:index')
+
 
 
 
@@ -231,6 +234,7 @@ def proband_view(request, report_id):
         add_variant_form = AddVariantForm(request.POST)
         if demogs_form.is_valid():
             demogs_form.save()
+            messages.add_message(request, 25, 'Proband Updated')
         if case_assign_form.is_valid():
             case_assign_form.save()
         if panel_form.is_valid():
