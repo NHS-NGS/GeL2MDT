@@ -40,7 +40,7 @@ def register(request):
         if user_form.is_valid():
             first_name = user_form.cleaned_data['first_name']
             last_name = user_form.cleaned_data['last_name']
-            full_name = str(first_name + ' ' + last_name)
+            full_name = f'{first_name} {last_name}'
             if len(last_name) >= 6:
                 username = (last_name[:5] + first_name[0]).lower()
             else:
@@ -59,7 +59,7 @@ def register(request):
                 if role == 'Clinical Scientist':
                     cs, created = ClinicalScientist.objects.get_or_create(
                         email=email)
-                    cs.name = full_name,
+                    cs.name = full_name
                     cs.hospital = hospital
                     cs.save()
 
@@ -74,7 +74,7 @@ def register(request):
                 elif role == 'Other Staff':
                     other, created = OtherStaff.objects.get_or_create(
                         email=email)
-                    other.name = full_name,
+                    other.name = full_name
                     other.hospital = hospital
                     other.save()
 

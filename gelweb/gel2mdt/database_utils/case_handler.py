@@ -1079,7 +1079,6 @@ class CaseAttributeManager(object):
 
         tumour_content = None
         if self.case.json['sample_type'] == 'cancer':
-            print( self.case.proband)
             tumour_content = self.case.proband['tumourSamples'][0]['tumourContent']
 
         ir = CaseModel(GELInterpretationReport, {
