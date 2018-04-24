@@ -1,6 +1,7 @@
 import os
 import inspect
 
+
 class LoadConfig():
     """
      Representation of an instance when loading the config file
