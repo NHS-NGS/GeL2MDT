@@ -193,8 +193,7 @@ def cancer_main(request):
     :return:
     '''
     config_dict = load_config.LoadConfig().load()
-    return render(request, 'gel2mdt/cancer_main.html', {'config_dict': config_dict,
-                                                        'sample_type': 'cancer'})
+    return render(request, 'gel2mdt/cancer_main.html', {'sample_type': 'cancer'})
 
 
 @login_required
@@ -206,9 +205,7 @@ def rare_disease_main(request):
     :param request:
     :return:
     '''
-    config_dict = load_config.LoadConfig().load()
-    return render(request, 'gel2mdt/rare_disease_main.html', {'config_dict': config_dict,
-                                                              'sample_type': 'raredisease'})
+    return render(request, 'gel2mdt/rare_disease_main.html', {'sample_type': 'raredisease'})
 
 
 @login_required
@@ -301,7 +298,6 @@ def proband_view(request, report_id):
                                                     'proband_variants': proband_variants,
                                                     'proband_mdt': proband_mdt,
                                                     'panels': panels,
-                                                    'config_dict':config_dict,
                                                     'panel_form': panel_form,
                                                     'clinician_form':clinician_form,
                                                     'add_clinician_form':add_clinician_form,
@@ -378,7 +374,6 @@ def validation_list(request, sample_type):
     config_dict = load_config.LoadConfig().load()
     proband_variants = ProbandVariant.objects.filter(requires_validation=True)
     return render(request, 'gel2mdt/validation_list.html', {'proband_variants':proband_variants,
-                                                            'config_dict': config_dict,
                                                             'sample_type': sample_type})
 
 
