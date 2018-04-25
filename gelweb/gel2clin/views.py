@@ -17,9 +17,7 @@ def cancer_main(request):
     :param request:
     :return:
     '''
-    config_dict = load_config.LoadConfig().load()
-    return render(request, 'gel2clin/cancer_main.html', {'config_dict': config_dict,
-                                                        'sample_type': 'cancer'})
+    return render(request, 'gel2clin/cancer_main.html', {'sample_type': 'cancer'})
 
 
 @login_required
@@ -29,9 +27,7 @@ def rare_disease_main(request):
     :param request:
     :return:
     '''
-    config_dict = load_config.LoadConfig().load()
-    return render(request, 'gel2clin/rare_disease_main.html', {'config_dict': config_dict,
-                    'sample_type': 'raredisease'})
+    return render(request, 'gel2clin/rare_disease_main.html', {'sample_type': 'raredisease'})
 
 
 @login_required
@@ -43,7 +39,6 @@ def proband_view(request, report_id):
     :param report_id: GEL Report ID
     :return:
     '''
-    config_dict = load_config.LoadConfig().load()
     report = GELInterpretationReport.objects.get(id=report_id)
 
     relatives = Relative.objects.filter(proband=report.ir_family.participant_family.proband)
@@ -56,5 +51,4 @@ def proband_view(request, report_id):
                                                     'proband_variants': proband_variants,
                                                     'proband_mdt': proband_mdt,
                                                     'panels': panels,
-                                                    'config_dict':config_dict,
                                                     'sample_type': report.sample_type})

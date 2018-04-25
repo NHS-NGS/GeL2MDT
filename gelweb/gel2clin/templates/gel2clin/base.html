@@ -1,5 +1,6 @@
 {% load static %}
 {% load bootstrap3 %}
+{% load gel2mdt_extras %}
 
 <html>
   <head>
@@ -90,7 +91,7 @@
                             <li><a href="/profile"><i class="fas fa-user"></i> Profile</a><li>
                             <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                             <li><a href="#"><i class="fas fa-question-circle"></i> Help</a><li>
-                            <li><a href="mailto:{{config|get_item:'email_address'}}?&subject=GeL2MDT%20Bug%20Report&body=Please%20include%20a%20description%20of%20what%20happened%20along%20with%20a%20screenshot."><i class="fas fa-bug"></i> Report Bug</a><li>
+                            <li><a href="mailto:{{config_dict|get_item:'email_address'}}?&subject=GeL2MDT%20Bug%20Report&body=Please%20include%20a%20description%20of%20what%20happened%20along%20with%20a%20screenshot."><i class="fas fa-bug"></i> Report Bug</a><li>
                         </ul>
                     </li>
                 </ul>
