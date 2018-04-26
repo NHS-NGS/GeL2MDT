@@ -158,12 +158,7 @@ class ProbandFactory(factory.django.DjangoModelFactory):
         end_date='-3y')
     sex = factory.Faker('random_element', elements=('Male','Female'))
 
-    pilot_case = factory.Faker('boolean', chance_of_getting_true=85)
-
     gmc = factory.Faker('lexify', text='???', letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ')
-
-    status = 'Not Started'
-    mdt_status = 'Required'
 
 
 class RelativeFactory(factory.django.DjangoModelFactory):
@@ -234,8 +229,10 @@ class GELInterpretationReportFactory(factory.django.DjangoModelFactory):
     assembly = factory.SubFactory(GenomeBuildFactory)
     user = factory.Faker('last_name')
     sha_hash = factory.Faker('sha256')
+    pilot_case = factory.Faker('boolean', chance_of_getting_true=85)
     polled_at_datetime = datetime.datetime.now()
-
+    case_status = 'Not Started'
+    mdt_status = 'Required'
 
 class VariantFactory(factory.django.DjangoModelFactory):
     class Meta:

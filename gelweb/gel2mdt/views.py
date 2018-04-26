@@ -286,7 +286,7 @@ def proband_view(request, report_id):
     add_variant_form = AddVariantForm()
 
     if not request.user.is_staff:
-        if proband_form["status"].value() == "C":
+        if report.case_status == "C":
             for field in proband_form.__dict__["fields"]:
                 proband_form.fields[field].widget.attrs['readonly'] = True
                 proband_form.fields[field].widget.attrs['disabled'] = True
@@ -442,7 +442,10 @@ def update_proband(request, report_id):
             proband_form.save()
             gelir_form.save()
             messages.add_message(request, 25, 'Proband Updated')
-            return HttpResponseRedirect(f'/proband/{report_id}')
+        else:
+            print(proband_form.errors)
+        return HttpResponseRedirect(f'/proband/{report_id}')
+
 
 
 @login_required
