@@ -23,7 +23,6 @@ class ProbandSerializer(serializers.ModelSerializer):
             'surname',
             'date_of_birth',
             'local_id',
-            'pilot_case'
         )
 
 
@@ -178,10 +177,6 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
         read_only=True,
         format='%Y/%m/%d'
     )
-    case_status = serializers.CharField(
-        source="ir_family.participant_family.proband.get_status_display",
-        read_only=True
-    )
 
     trio_sequenced = serializers.CharField(
         source="ir_family.participant_family.trio_sequenced",
@@ -190,11 +185,6 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
 
     has_de_novo = serializers.BooleanField(
         source="ir_family.participant_family.has_de_novo",
-        read_only=True
-    )
-
-    case_type = serializers.BooleanField(
-        source="ir_family.participant_family.proband.pilot_case",
         read_only=True
     )
 
@@ -229,7 +219,7 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
             'case_status',
             'trio_sequenced',
             'has_de_novo',
-            'case_type',
+            'pilot_case',
             'ir_family',
             'archived_version',
             'status',
