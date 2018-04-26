@@ -363,15 +363,6 @@ class Proband(models.Model):
     local_id = models.CharField(max_length=255, null=True, blank=True)
 
     deceased = models.NullBooleanField()
-    case_sent = models.BooleanField(default=False)
-    status = models.CharField(max_length=50, choices=(
-        ('N', 'Not Started'), ('U', 'Under Review'), ('M', 'Awaiting MDT'), ('V', 'Awaiting Validation'),
-        ('R', 'Awaiting Reporting'), ('P', 'Reported'), ('C', 'Completed'), ('E', 'External')), default='N')
-
-    mdt_status = models.CharField(max_length=50, choices=(
-        ('U', 'Unknown'),
-        ('R', 'Required'), ('N', 'Not Required'), ('I', 'In Progress'), ('D', 'Done'),), default='U')
-    pilot_case = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.gel_id)
