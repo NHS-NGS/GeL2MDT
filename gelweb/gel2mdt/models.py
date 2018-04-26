@@ -355,7 +355,6 @@ class Proband(models.Model):
     comment = models.TextField(blank=True)
     discussion = models.TextField(blank=True)
     action = models.TextField(blank=True)
-    episode = models.CharField(max_length=255, blank=True)
     if config_dict['GMC'] != 'None':
         gmc = models.CharField(max_length=255, choices=gmc_choices, default='Unknown', null=True, blank=True)
     else:

@@ -58,7 +58,7 @@ class ProbandForm(forms.ModelForm):
     '''
     class Meta:
         model = Proband
-        fields = ['episode', 'outcome', 'comment']
+        fields = ['outcome', 'comment']
 
 
 class GELIRForm(forms.ModelForm):
