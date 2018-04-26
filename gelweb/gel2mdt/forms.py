@@ -147,15 +147,15 @@ class ProbandMDTForm(forms.ModelForm):
     '''
     class Meta:
         model = Proband
-        fields = ('discussion', 'action', 'status')
+        fields = ('discussion', 'action')
         widgets = {
             'discussion': Textarea(attrs={'rows': '3'}),
             'action': Textarea(attrs={'rows': '3'}),
         }
 
-    def __init__(self, *args, **kwargs):
-        super(ProbandMDTForm, self).__init__(*args, **kwargs)
-        self.fields['status'].required = False
+    # def __init__(self, *args, **kwargs):
+    #     super(ProbandMDTForm, self).__init__(*args, **kwargs)
+    #     self.fields['status'].required = False
 
 
 class RareDiseaseMDTForm(forms.ModelForm):

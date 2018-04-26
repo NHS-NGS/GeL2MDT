@@ -27,7 +27,7 @@
 
                     <div class="col-md-12">
                         <div class="panel panel-default">
-                            {% if proband_form.status.value != "C" %}
+                            {% if gelir_form.case_status.value != "C" %}
                             <div class="panel-heading">Participant Information <span style="float:right">
                                 {% if request.user.is_staff %}
                                 <a href="/update_demographics/{{report.id}}" class="btn btn-xs btn-info"> Update Demographics   </a>
@@ -451,7 +451,7 @@
                             <td>{{ pv.max_tier }}</td>
 
                             <td>
-                                {% if proband_form.status.value != "C" %}
+                                {% if gelir_form.case_status.value != "C" %}
                                 <a href="/select_transcript/{{report.id}}/{{pv.id }}"><i class="fas fa-pencil-alt"></i></a></span>{{pv.get_transcript.name }}
                                 {% else%}
                                 {{pv.get_transcript.name }}
