@@ -170,6 +170,20 @@ class RareDiseaseMDTForm(forms.ModelForm):
                    }
 
 
+class CancerMDTForm(forms.ModelForm):
+    '''
+    Form used in Proband View at MDT which allows users to fill in exit questionaire questions
+    '''
+    class Meta:
+        model = CancerReport
+        fields = ('variant_use', 'action_type', 'validated',
+                  'validated_assay_type',
+                  'classification', 'id',)
+        widgets = {'id': HiddenInput(),
+                   'validated': CheckboxInput(),
+                   }
+
+
 class AddNewAttendee(forms.Form):
     '''
     Form for allowing users to add new attendee which would then  be inserted into CS, Clinician or OtherStaff table

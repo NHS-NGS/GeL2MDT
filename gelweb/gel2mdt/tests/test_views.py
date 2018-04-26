@@ -3,7 +3,7 @@ from django.test import TestCase, Client
 from ..models import *
 from django.urls import reverse
 from ..factories import *
-
+import factory
 
 # TODO Test validation list, pullt3, variantAdder,
 class ViewTests(TestCase):
@@ -18,13 +18,18 @@ class ViewTests(TestCase):
             password='defaultpassword')
         user.is_active = True
         user.save()
+        clinician_user = User.objects.create_user(
+            username='test2', email='test2@gmail.com',
+            password='defaultpassword')
+        user.is_active = True
+        user.save()
 
     def test_registration(self):
         response = self.client.post(reverse('register'), {'first_name': 'test',
                                                           'last_name': 'test2',
                                                           'email': 'test@gmail.com',
                                                           'password': 'password',
-                                                          'role': 'Clinical Scientist',
+                                                          'role': 'Clinician',
                                                           'hospital': 'GOSH'}, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertIn('Thank you for registering', response.content.decode())
@@ -32,13 +37,14 @@ class ViewTests(TestCase):
     def setUp(self):
         self.client = Client()
         self.sample_type = 'raredisease'
+        self.clinician = ClinicianFactory(email='test2@gmail.com')
         self.client.login(username='test', password='defaultpassword')
         self.family = FamilyFactory()
         self.proband = ProbandFactory(family=self.family)
         self.ir_family = InterpretationReportFamilyFactory(participant_family=self.family)
         self.gel_ir = GELInterpretationReportFactory(ir_family=self.ir_family)
         self.ir_panels = InterpretationReportFamilyPanelFactory(ir_family=self.ir_family)
-        self.gene = GeneFactory()
+        self.gene = GeneFactory(hgnc_name='KJHAKDS')
         self.transcript1 = TranscriptFactory(gene=self.gene)
         self.transcript2 = TranscriptFactory(gene=self.gene)
         self.variant = VariantFactory()
@@ -63,14 +69,56 @@ class ViewTests(TestCase):
         """
         Tests whether the index page can be accessed
         """
+        response = self.client.get(reverse('index'))
+        self.assertEquals(response.status_code, 200)
+
+    def test_clin_index_view(self):
+        self.client.login(username='test2', password='defaultpassword')
+        response = self.client.get(reverse('index'), follow=True)
+        self.assertRedirects(response, '/clinician/', status_code=302,
+                             target_status_code=200, fetch_redirect_response=True)
+
+    def test_rare_disease_main(self):
+        """
+        Tests whether the rare disease page can be accessed
+        """
         response = self.client.get(reverse('rare-disease-main'),
                                    content_type='application/json',
                                    HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEquals(response.status_code, 200)
 
-    def test_rare_disease_api(self):
+    def test_clin_rare_disease_main(self):
         """
-        Test that you can get json of the rare disease cases
+        Tests whether the rare disease page can be accessed when user is clinician
+        """
+        self.client.login(username='test2', password='defaultpassword')
+        response = self.client.get(reverse('rare-disease-main'),
+                                   follow=True)
+        self.assertRedirects(response, '/clinician/rare-disease-main', status_code=302,
+                             target_status_code=200, fetch_redirect_response=True)
+
+    def test_cancer_main(self):
+        """
+        Tests whether the cancer page can be accessed
+        """
+        response = self.client.get(reverse('cancer-main'),
+                                   content_type='application/json',
+                                   HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEquals(response.status_code, 200)
+
+    def test_clin_cancer_main(self):
+        """
+        Tests whether the cancer page can be accessed when user is clinician
+        """
+        self.client.login(username='test2', password='defaultpassword')
+        response = self.client.get(reverse('cancer-main'),
+                                   follow=True)
+        self.assertRedirects(response, '/clinician/cancer-main', status_code=302,
+                             target_status_code=200, fetch_redirect_response=True)
+
+    def test_gelir_api(self):
+        """
+        Test that access to GELIR API is available
         """
         response = self.client.get(reverse('gelir-json', args=[self.sample_type]))
         self.assertContains(response, self.proband.gel_id)
@@ -114,6 +162,9 @@ class ViewTests(TestCase):
                                      follow=True)
         self.assertContains(response, 'Proband Updated')
         self.assertEquals(response.status_code, 200)
+        proband = Proband.objects.get(id=self.proband.id)
+        self.assertEqual(proband.comment, 'testcomment')
+        self.assertEqual(proband.outcome, 'testoutcome')
 
     def test_select_transcript(self):
         """
@@ -335,6 +386,7 @@ class ViewTests(TestCase):
         self.assertContains(response, 'Validation Status Updated')
         self.assertEqual(response.status_code, 200)
 
-
-
-
+    def test_clinician_redirect(self):
+        '''
+        Tests that when you are a clinician, you get redirected to the correct view
+        '''

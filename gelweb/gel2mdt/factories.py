@@ -70,6 +70,7 @@ class PanelFactory(factory.django.DjangoModelFactory):
     disease_group = factory.Faker('sentence', nb_words=1)
     disease_subgroup = factory.Faker('sentence', nb_words=1)
 
+
 class PanelVersionFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.PanelVersion
@@ -86,6 +87,7 @@ class GeneFactory(factory.django.DjangoModelFactory):
     hgnc_name = factory.Faker('bothify', text='????#', letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ')
     hgnc_id = factory.Faker('numerify', text='#####')
     description = factory.Faker('sentence')
+
 
 class PanelVersionGene(factory.django.DjangoModelFactory):
     class Meta:
@@ -119,6 +121,7 @@ class GenomeBuildFactory(factory.django.DjangoModelFactory):
 
     tool_name = 'genome build'
     version_number = factory.Faker('random_element', elements=('GRCh37','GRCh38'))
+
 
 class TranscriptFactory(factory.django.DjangoModelFactory):
     class Meta:
@@ -191,7 +194,6 @@ class RelativeFactory(factory.django.DjangoModelFactory):
         start_date='-75y',
         end_date='-3y')
     sex = factory.Faker('random_element', elements=('Male','Female'))
-
 
 
 class InterpretationReportFamilyFactory(factory.django.DjangoModelFactory):
@@ -394,6 +396,7 @@ class ListUpdateFactory(factory.django.DjangoModelFactory):
 
     cases_added = random.randint(0,15)
     cases_updated = random.randint(0,15)
+
 
 class UserFactory(factory.django.DjangoModelFactory):
     class Meta:

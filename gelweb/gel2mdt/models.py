@@ -243,6 +243,7 @@ class GELInterpretationReport(models.Model):
     sample_type = models.CharField(max_length=200, choices=(('cancer', 'cancer'),
                                                             ('raredisease', 'raredisease')))
     sample_id = models.CharField(max_length=200, null=True, blank=True)
+    tumour_content = models.CharField(max_length=200, blank=True, null=True)
 
     max_tier = models.CharField(max_length=1)
     assembly = models.ForeignKey(ToolOrAssemblyVersion, on_delete=models.CASCADE)
@@ -327,6 +328,15 @@ class Proband(models.Model):
     date_of_birth = models.DateTimeField('date_of_birth')
     sex = models.CharField(max_length=10, null=True, blank=True)
     recruiting_disease = models.CharField(max_length=200, null=True, blank=True)
+    disease_subtype = models.CharField(max_length=200, null=True, blank=True)
+    disease_stage = models.CharField(max_length=200, null=True, blank=True)
+    disease_grade = models.IntegerField(null=True, blank=True)
+    previous_treatment = models.TextField(blank=True, null=True)
+    currently_in_clinical_trial = models.BooleanField(default=False)
+    current_clinical_trial_info = models.CharField(max_length=250, null=True, blank=True)
+    suitable_for_clinical_trial = models.BooleanField(default=False)
+    previous_testing = models.TextField(blank=True, null=True)
+    
     pilot_case = models.BooleanField(default=False)
     outcome = models.TextField(blank=True)
     comment = models.TextField(blank=True)
@@ -532,6 +542,14 @@ class ProbandVariant(models.Model):
         else:
             return self.rarediseasereport
 
+    def create_cancer_report(self):
+        if not hasattr(self, 'cancerreport'):
+            report = CancerReport(proband_variant=self)
+            report.save()
+            return report
+        else:
+            return self.cancerreport
+
     class Meta:
         managed = True
         db_table = 'ProbandVariant'
@@ -566,12 +584,20 @@ class RareDiseaseReport(models.Model):
 
 
 class CancerReport(models.Model):
+    action_choices = (('Not Significant', 'Not Significant'),
+                      ('No Validation Required', 'No Validation Required'),
+                      ('Validation Required', 'Validation Required'),
+                      ('Unable to Validate', 'Unable to Validate'))
     discussion = models.TextField(db_column='Discussion', blank=True)
     action = models.TextField(db_column='Action', blank=True)
     classification = models.CharField(db_column='classification', max_length=2, choices=(
         ('NA', 'NA'), ('1', '1'), ('2', '2'), ('3', '3'), ('4', '4'), ('5', '5'),
     ), default='NA')
     proband_variant = models.OneToOneField(ProbandVariant, on_delete=models.CASCADE)
+    variant_use = models.CharField(max_length=200, null=True, blank=True)
+    action_type = models.CharField(max_length=200, null=True, blank=True, choices=action_choices)
+    validated = models.BooleanField(default=False)
+    validated_assay_type = models.CharField(max_length=200, null=True, blank=True)
 
     class Meta:
         managed = True
@@ -743,6 +769,7 @@ class MDT(models.Model):
         managed = True
         db_table = 'MDT'
         app_label= 'gel2mdt'
+
 
 class MDTReport(models.Model):
     interpretation_report = models.ForeignKey(GELInterpretationReport, on_delete=models.CASCADE)
