@@ -188,6 +188,10 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
         read_only=True
     )
 
+    case_status = serializers.CharField(
+        source="get_case_status_display",
+        read_only=True
+    )
     updated = serializers.DateTimeField(
         format='%Y/%m/%d',
         read_only=True
