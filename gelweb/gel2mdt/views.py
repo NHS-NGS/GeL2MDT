@@ -443,9 +443,6 @@ def update_proband(request, report_id):
             gelir_form.save()
             messages.add_message(request, 25, 'Proband Updated')
             return HttpResponseRedirect(f'/proband/{report_id}')
-        else:
-            print(proband_form.errors)
-            print(gelir_form.errors)
 
 
 @login_required
@@ -649,7 +646,7 @@ def mdt_proband_view(request, mdt_id, pk, important):
     variant_formset = VariantForm(queryset=proband_variant_reports)
 
     proband_form = ProbandMDTForm(instance=report.ir_family.participant_family.proband)
-
+    gelir_form = GELIRMDTForm(instance=report)
     panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.ir_family)
 
     if mdt_instance.status == "C":
@@ -664,10 +661,16 @@ def mdt_proband_view(request, mdt_id, pk, important):
     if request.method == 'POST':
         variant_formset = VariantForm(request.POST)
         proband_form = ProbandMDTForm(request.POST, instance=report.ir_family.participant_family.proband)
-        if variant_formset.is_valid() and proband_form.is_valid():
+        gelir_form = GELIRMDTForm(request.POST, instance=report)
+        if variant_formset.is_valid() and proband_form.is_valid() and gelir_form.is_valid():
             variant_formset.save()
             proband_form.save()
+            gelir_form.save()
             messages.add_message(request, 25, 'Proband Updated')
+        else:
+            print(gelir_form.errors)
+            print(proband_form.errors)
+            print(variant_formset.errors)
         return HttpResponseRedirect(f'/mdt_proband_view/{mdt_id}/{pk}/{important}')
     return render(request, 'gel2mdt/mdt_proband_view.html', {'proband_variants': proband_variants,
                                                              'report': report,
@@ -676,7 +679,8 @@ def mdt_proband_view(request, mdt_id, pk, important):
                                                              'proband_form': proband_form,
                                                              'variant_formset': variant_formset,
                                                              'panels': panels,
-                                                             'sample_type':report.sample_type})
+                                                             'sample_type':report.sample_type,
+                                                             'gelir_form':gelir_form})
 
 
 @login_required

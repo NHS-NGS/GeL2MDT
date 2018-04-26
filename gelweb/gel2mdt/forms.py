@@ -153,9 +153,18 @@ class ProbandMDTForm(forms.ModelForm):
             'action': Textarea(attrs={'rows': '3'}),
         }
 
-    # def __init__(self, *args, **kwargs):
-    #     super(ProbandMDTForm, self).__init__(*args, **kwargs)
-    #     self.fields['status'].required = False
+class GELIRMDTForm(forms.ModelForm):
+    '''
+    Form used in Proband View at MDT which allows users to fill in proband textfields
+    '''
+
+    class Meta:
+        model = GELInterpretationReport
+        fields = ('case_status',)
+
+    def __init__(self, *args, **kwargs):
+        super(GELIRMDTForm, self).__init__(*args, **kwargs)
+        self.fields['case_status'].required = False
 
 
 class RareDiseaseMDTForm(forms.ModelForm):
