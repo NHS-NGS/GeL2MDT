@@ -177,15 +177,15 @@
                             <div class="panel-heading">Status</div>
                             <div class="panel-body">
                                 <div class="col-md-12">
-                                    {% bootstrap_field proband_form.status %}
-                                    {% bootstrap_field proband_form.mdt_status %}
+                                    {% bootstrap_field gelir_form.case_status %}
+                                    {% bootstrap_field gelir_form.mdt_status %}
                                 </div>
 
                                 <div class="col-md-2">
-                                    {% bootstrap_field proband_form.case_sent %}
+                                    {% bootstrap_field gelir_form.case_sent %}
                                 </div>
                                 <div class="col-md-2">
-                                    {% bootstrap_field proband_form.pilot_case %}
+                                    {% bootstrap_field gelir_form.pilot_case %}
                                 </div>
                                 {% if proband_mdt|length > 0 %}
                                 <div class="col-md-2">
@@ -193,7 +193,7 @@
                                 </div>
                                 {% endif %}
                                 <div class="col-md-12">
-                                    {% if proband_form.status.value != "C" %}
+                                    {% if gelir_form.case_status.value != "C" %}
                                         </br>
                                 <button type="submit" name="variant_update" class="btn btn-primary btn">Save</button>
                                      {% elif request.user.is_staff %}
