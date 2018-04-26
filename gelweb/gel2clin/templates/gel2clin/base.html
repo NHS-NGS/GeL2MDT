@@ -46,8 +46,8 @@
             <span class="icon-bar"></span>
           </button>
 
-          <a class="navbar-brand" href="{% url 'index' %}"><i class="fas fa-paper-plane fa-1x"></i>
-              <em><strong>GeL2MDT</strong></em>
+          <a class="navbar-brand" href="{% url 'gel2clin:index' %}"><i class="fas fa-paper-plane fa-1x"></i>
+              <em><strong>GeL2MDT v0.1</strong></em>
           </a>
         </div>
             {% if user.is_authenticated %}
@@ -57,10 +57,10 @@
                      {% if sample_type %}
                     <ul class="nav navbar-nav">
                         {% if sample_type == 'cancer' %}
-                            <li><a href="{% url 'cancer-main' %}"><i class="fas fa-home"></i></span> Cases</a></li>
+                            <li><a href="{% url 'gel2clin:cancer-main' %}"><i class="fas fa-home"></i></span> Cases</a></li>
                             </ul>
                         {% elif sample_type == 'raredisease' %}
-                            <li><a href="{% url 'rare-disease-main' %}"><i class="fas fa-home"></i></span> Cases</a></li>
+                            <li><a href="{% url 'gel2clin:rare-disease-main' %}"><i class="fas fa-home"></i></span> Cases</a></li>
                             </ul>
                         {% endif %}
 
@@ -82,7 +82,7 @@
                 {% endblock %}
                 <ul class="nav navbar-nav navbar-right">
                     <li class="dropdown">
-                        <a class="dropdown-toggle" 
+                        <a class="dropdown-toggle"
                            data-toggle="dropdown"
                            href="/"><strong>{{user.username}} </strong>
                             <i class="fas fa-chevron-circle-down"></i>
@@ -115,16 +115,10 @@
             {% endblock %}
         </div>
 
-<div class="footer">
-    <p align="center" style="color:gray">
-    GeL2MDT v0.3.1, build d32ce70. &copy; Theo Cole, Patrick Lombard, Ed Stone.
-    </p>
-</div>
-
 {% block head-javascript %}
 <script>
     $(document).ready(function(){
-        $('[data-toggle="tooltip"]').tooltip(); 
+        $('[data-toggle="tooltip"]').tooltip();
     });
 </script>
 
@@ -132,7 +126,6 @@
 <script charset="utf-8">
 // intialise the table at document ready time
 $(document).ready(initaliseTable());
-
 // define the filter and redraw functions
 function redrawCaseType(table,caseType) {
     // select the DataTable API object
@@ -140,8 +133,6 @@ function redrawCaseType(table,caseType) {
         .column(8)
         .search(caseType);
     table.draw();
-
-
     // warn users of pilot mode
     if (caseType == 'true') {
         $('#pilotWarning').html('<div class="alert alert-danger" role="alert"><strong>Only displaying pilot cases</strong></div>');
@@ -151,7 +142,6 @@ function redrawCaseType(table,caseType) {
         $('#pilotWarning').html("");
     }
 };
-
 function redrawGenomeBuild(table, genomeBuild) {
     // select the DataTable API object
     table
@@ -159,17 +149,13 @@ function redrawGenomeBuild(table, genomeBuild) {
         .column(6)
         .search(genomeBuild);
     table.draw();
-
     // change the HTML text for build
     if (genomeBuild == '') {
         $('#genomeBuildSpec').text("all genome builds");
     } else {
         $('#genomeBuildSpec').text("build " + genomeBuild);
     }
-
-
 };
-
 function redrawMaxTier(table, maxTier) {
     // select the DataTable API object
     // define search regex based on desired max tier
@@ -183,13 +169,11 @@ function redrawMaxTier(table, maxTier) {
     } else if (maxTier == 0) {
         searchRegex = '0';
     }
-
     // search and redraw the datatable API
     table
         .column(5)
         .search(searchRegex, regex=true);
     table.draw();
-
     // change the HTML text for max tier
     if (maxTier == 0) {
         $('#maxTierSpec').text("CIP candidate variants only");
@@ -197,7 +181,6 @@ function redrawMaxTier(table, maxTier) {
         $('#maxTierSpec').text("at least Tier " + maxTier);
     }
 };
-
 function redrawCaseStatus(table, caseStatus) {
     console.log(caseStatus);
     // select the DataTable API object
@@ -206,16 +189,13 @@ function redrawCaseStatus(table, caseStatus) {
         .column(7)
         .search(caseStatus);
     table.draw();
-
     // change the HTML text for status
     if (caseStatus == '') {
         $('#caseStatusSpec').text("All");
     } else {
         $('#caseStatusSpec').text(caseStatus);
     }
-
 };
-
 function redrawTrioStatus(table, trioStatus) {
     console.log(trioStatus)
     table
@@ -223,7 +203,6 @@ function redrawTrioStatus(table, trioStatus) {
         .search(trioStatus);
     table.draw()
 }
-
 function redrawTier3Only(table, tier3Only) {
     console.log(tier3Only)
     if (tier3Only) {
@@ -241,7 +220,6 @@ function redrawTier3Only(table, tier3Only) {
         redrawMaxTier(table, maxTier);
     }
 }
-
 function redrawDeNovoStatus(table, deNovoStatus) {
     console.log(deNovoStatus)
     table
@@ -249,7 +227,6 @@ function redrawDeNovoStatus(table, deNovoStatus) {
         .search(deNovoStatus);
     table.draw()
 }
-
 // filter value change listeners
 $("input[name='caseType']").change(function() {
     var table = $('#rare-disease-main').DataTable()
@@ -279,10 +256,6 @@ $("input[name='deNovoStatus']").change(function() {
     var table = $('#rare-disease-main').DataTable()
     redrawDeNovoStatus(table, $(this).val());
 });
-
-
-
-
 function initaliseTable() {
     var caseType = getRadioValue("caseType");
     var genomeBuild = getRadioValue("genomeBuild");
@@ -290,10 +263,10 @@ function initaliseTable() {
     var caseStatus = getRadioValue("caseStatus");
     var trioStatus = getRadioValue("trioStatus");
     var deNovoStatus = getRadioValue("deNovoStatus");
-    
+
     // create the datatable
     var table = fetchDataTable(caseType, genomeBuild, maxTier, caseStatus)
-    
+
     // once DataTable is fetched from API, apply active filters and redraw
     redrawCaseType(table, caseType);
     redrawGenomeBuild(table, genomeBuild);
@@ -302,16 +275,15 @@ function initaliseTable() {
     redrawTrioStatus(table, trioStatus);
     redrawDeNovoStatus(table, deNovoStatus);
 }
-
 function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
     console.log("Loading table through initaliseTable()!")
-    var table = $('#rare-disease-main').DataTable( {                 
+    var table = $('#rare-disease-main').DataTable( {
         "ajax": {
             "url": '{% url 'gelir-json' sample_type=sample_type %}',
             "dataSrc": ''
         },
         "columns": [
-            { 
+            {
                 "data": "id",
                 "render": function(data, type, row, meta){
                     if(type === 'display'){
@@ -326,21 +298,21 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
             { "data": "surname" },
             { "data": "date_of_birth",
                 "type": "date " },
-            { 
+            {
                 "data": "max_tier",
                 "type": "num"
             },
-            { 
+            {
                 "data": "assembly",
                 "visible": false
             },
             { "data": "case_status" },
-            { 
+            {
                 "data": "case_type",
                 "visible": false,
                 "type": "string"
             },
-            { 
+            {
                 "data": "trio_sequenced",
                 "visible": false,
             },
@@ -358,7 +330,6 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
     } );
     return table
 }
-
 function getRadioValue(radioElementName) {
     var radios = document.getElementsByName(radioElementName);
     for (var i = 0, length=radios.length; i < length; i++) {

@@ -38,6 +38,7 @@ DEBUG = True
 
 INSTALLED_APPS = [
     'gel2mdt.apps.Gel2MdtConfig',
+    'gel2clin.apps.Gel2ClinConfig',
     'django.contrib.contenttypes',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -73,6 +74,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'gel2mdt.context_processors.config_access',
             ],
         },
     },
