@@ -58,7 +58,16 @@ class ProbandForm(forms.ModelForm):
     '''
     class Meta:
         model = Proband
-        fields = ['episode', 'outcome', 'comment', 'status', 'mdt_status', 'pilot_case', 'case_sent']
+        fields = ['episode', 'outcome', 'comment']
+
+
+class GELIRForm(forms.ModelForm):
+    '''
+    Form used for allowing users edit proband information
+    '''
+    class Meta:
+        model = GELInterpretationReport
+        fields = ['case_status', 'mdt_status', 'pilot_case', 'case_sent']
 
 
 class RelativeForm(forms.ModelForm):
