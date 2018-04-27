@@ -1,0 +1,299 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>GeL2MDT &#8212; GeL2MDT 0.3.1 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Views" href="views.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="views.html" title="Views"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">GeL2MDT 0.3.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="gel2mdt">
+<span id="gel2mdt"></span><h1>GeL2MDT<a class="headerlink" href="#gel2mdt" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="instructions-to-install-gel2mdt">
+<span id="instructions-to-install-gel2mdt"></span><h2>Instructions to install GEL2MDT<a class="headerlink" href="#instructions-to-install-gel2mdt" title="Permalink to this headline">¶</a></h2>
+<p>These have been tested on a clean installation of Ubuntu 16.04.4 LTS</p>
+</div>
+<div class="section" id="vep">
+<span id="vep"></span><h2>1) VEP<a class="headerlink" href="#vep" title="Permalink to this headline">¶</a></h2>
+<p>Please go <a class="reference external" href="https://github.com/Ensembl/ensembl-vep">here</a> to download and install VEP. Only versions 91 and 92 of VEP have been tested with GEL2MDT.</p>
+<p>When using the INSTALL.pl script, please download a homo_sapiens cache. The refseq versions of these caches are not supported. The merged cache is supported and recommended if users want to see refseq transcripts.</p>
+<p>To see the list of repositories to download, you can navigate to <a class="reference external" href="ftp://ftp.ensembl.org/pub/release-X/variation/VEP/">here</a> where X is the latest release number.</p>
+<p>We recommended running the convert_cache.pl script on the downloaded cache to speed up VEP queries. For more information see <a class="reference external" href="http://www.ensembl.org/info/docs/tools/vep/script/vep_cache.html#cache">here</a></p>
+<p>You will also need to download fasta files pertaining the the hg19 and hg38 caches you have downloaded.</p>
+<p>For more information about installing VEP, please see <a class="reference external" href="http://www.ensembl.org/info/docs/tools/vep/script/vep_download.html">here</a></p>
+</div>
+<div class="section" id="anaconda-miniconda">
+<span id="anaconda-miniconda"></span><h2>2) Anaconda/Miniconda<a class="headerlink" href="#anaconda-miniconda" title="Permalink to this headline">¶</a></h2>
+<p>We recommend running GEL2MDT in a conda environment. For instructions about installing conda, please see <a class="reference external" href="https://docs.anaconda.com/anaconda/install/">here</a></p>
+<p>Once you have conda installed, to can set up a conda environment called gel2mdt use the commands:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">gel2mdt</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.6</span>
+</pre></div>
+</div>
+<p>To activate it, use the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="n">activate</span> <span class="n">gel2mdt</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="clone-the-gel2mdt-repository">
+<span id="clone-the-gel2mdt-repository"></span><h2>3) Clone the GEL2MDT repository:<a class="headerlink" href="#clone-the-gel2mdt-repository" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">XXX</span>
+<span class="n">cd</span> <span class="n">gel2mdt</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">requirements</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="setup-storage-locations">
+<span id="setup-storage-locations"></span><h2>3) Setup Storage Locations<a class="headerlink" href="#setup-storage-locations" title="Permalink to this headline">¶</a></h2>
+<p>Before configuring GEL2MDT, you will need to create directories for storing data. The directories you will need to create are:</p>
+<ul class="simple">
+<li>A directory for storing JSON files you download from the CIP-API</li>
+<li>A directory for storing genes which are downloaded from the genenames API</li>
+<li>A directory for storing PanelApp JSON files</li>
+</ul>
+<p>We download all these files to ensure there is a record of what is obtained from these APIs.</p>
+</div>
+<div class="section" id="configuring-gel2mdt">
+<span id="configuring-gel2mdt"></span><h2>4) Configuring GEL2MDT<a class="headerlink" href="#configuring-gel2mdt" title="Permalink to this headline">¶</a></h2>
+<p>To configure GEL2MDT, please edit gelweb/gel2mdt/config/example_config.txt and rename it to gelweb/gel2mdt/config/config.txt</p>
+<p>If contributing to the project, please do not commit your configuration files and instead edit the example_config.txt file.</p>
+<p>Here are the options and what they pertain to:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">vep</span><span class="p">:</span> <span class="n">Path</span> <span class="n">to</span> <span class="n">VEP</span> <span class="n">executable</span>
+<span class="n">hg19_cache</span><span class="p">:</span> <span class="n">Path</span> <span class="n">to</span> <span class="n">hg19</span> <span class="n">VEP</span> <span class="n">cache</span>
+<span class="n">hg19_fasta_loc</span><span class="p">:</span> <span class="n">Path</span> <span class="n">to</span> <span class="n">hg19</span> <span class="n">fasta</span> <span class="n">files</span>
+<span class="n">hg38_cache</span><span class="p">:</span> <span class="n">Path</span> <span class="n">to</span> <span class="n">hg38</span> <span class="n">VEP</span> <span class="n">cache</span>
+<span class="n">hg38_fasta_loc</span><span class="p">:</span> <span class="n">Path</span> <span class="n">to</span> <span class="n">hg38</span> <span class="n">fasta</span> <span class="n">files</span>
+<span class="n">labkey_server_request</span><span class="p">:</span> <span class="n">Labkey</span> <span class="n">server</span> <span class="n">path</span><span class="p">,</span> <span class="k">for</span> <span class="n">example</span><span class="p">:</span>  <span class="n">Genomics</span> <span class="n">England</span> <span class="n">Portal</span><span class="o">/</span><span class="n">West</span> <span class="n">Midlands</span><span class="o">/</span><span class="n">MeRCURy</span><span class="o">/</span><span class="n">Rare</span> <span class="n">Diseases</span><span class="o">/</span><span class="n">Core</span>
+<span class="n">labkey_cancer_server_request</span><span class="p">:</span> <span class="n">Labkey</span> <span class="n">server</span> <span class="n">path</span> <span class="k">for</span> <span class="n">cancer</span> <span class="n">cases</span><span class="o">.</span> <span class="n">Similar</span> <span class="n">to</span> <span class="n">the</span> <span class="n">one</span> <span class="n">above</span>
+<span class="n">cip_api_storage</span><span class="p">:</span> <span class="n">Folder</span> <span class="k">for</span> <span class="n">storing</span> <span class="n">CIP</span> <span class="n">API</span> <span class="n">JSONs</span>
+<span class="n">panelapp_storage</span><span class="p">:</span> <span class="n">Folder</span> <span class="k">for</span> <span class="n">storing</span> <span class="n">PanelAPP</span> <span class="n">JSONs</span>
+<span class="n">gene_storage</span><span class="p">:</span> <span class="n">Folder</span> <span class="k">for</span> <span class="n">storing</span> <span class="n">genenames</span> <span class="n">results</span>
+<span class="n">bypass_VEP</span><span class="p">:</span> <span class="n">Boolean</span><span class="p">;</span> <span class="n">For</span> <span class="n">testing</span> <span class="n">usage</span><span class="p">,</span> <span class="n">whether</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">to</span> <span class="n">byPass</span> <span class="n">VEP</span>
+<span class="n">cip_as_id</span><span class="p">:</span> <span class="n">Boolean</span><span class="p">;</span> <span class="n">By</span> <span class="n">default</span> <span class="n">the</span> <span class="n">app</span> <span class="n">uses</span> <span class="n">GeL</span> <span class="n">participant</span> <span class="n">ID</span> <span class="k">as</span> <span class="n">primary</span> <span class="n">ID</span> <span class="n">of</span> <span class="n">a</span> <span class="n">proband</span><span class="o">.</span> <span class="n">This</span> <span class="n">changes</span> <span class="n">the</span> <span class="n">ID</span> <span class="n">to</span> <span class="n">CIP</span> <span class="n">ID</span>
+<span class="n">mergedVEP</span><span class="o">=</span><span class="n">Boolean</span><span class="p">;</span> <span class="n">Whether</span> <span class="n">to</span> <span class="n">use</span> <span class="n">merged</span> <span class="n">VEP</span> <span class="n">cache</span> <span class="n">directory</span> <span class="k">with</span> <span class="n">Ensembl</span> <span class="ow">and</span> <span class="n">Refseq</span> <span class="n">Transcripts</span>
+<span class="n">remoteVEP</span><span class="o">=</span><span class="n">Boolean</span><span class="p">;</span> <span class="n">Use</span> <span class="k">if</span> <span class="n">you</span> <span class="n">want</span> <span class="n">to</span> <span class="n">run</span> <span class="n">VEP</span> <span class="n">on</span> <span class="n">another</span> <span class="n">server</span><span class="o">.</span> <span class="n">The</span> <span class="n">following</span> <span class="n">options</span> <span class="nb">all</span> <span class="n">refer</span> <span class="n">to</span> <span class="n">this</span>
+<span class="n">remote_ip</span><span class="o">=</span><span class="n">IP</span> <span class="n">address</span> <span class="n">of</span> <span class="n">remote</span> <span class="n">server</span>
+<span class="n">remote_username</span><span class="o">=</span><span class="n">User</span> <span class="n">name</span> <span class="k">for</span> <span class="n">remote</span> <span class="n">server</span>
+<span class="n">remote_password</span><span class="o">=</span><span class="n">Password</span> <span class="k">for</span> <span class="n">remote</span> <span class="n">server</span>
+<span class="n">remote_directory</span><span class="o">=</span><span class="n">Folder</span> <span class="k">for</span> <span class="n">writing</span> <span class="ow">and</span> <span class="n">transferring</span> <span class="n">VEP</span> <span class="n">output</span>
+<span class="n">GMC</span><span class="o">=</span><span class="n">Either</span> <span class="n">a</span> <span class="nb">list</span> <span class="n">of</span> <span class="n">GMC</span><span class="s1">&#39;s if intending to give users set options for GMC or &#39;</span><span class="kc">None</span><span class="s1">&#39; to leave it as CharField. </span>
+<span class="n">pull_T3</span><span class="o">=</span><span class="n">Boolean</span><span class="p">;</span> <span class="n">This</span> <span class="n">gives</span> <span class="n">users</span> <span class="n">the</span> <span class="n">option</span> <span class="n">to</span> <span class="n">download</span> <span class="n">T3</span> <span class="n">so</span> <span class="n">only</span> <span class="nb">set</span> <span class="n">to</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">you</span> <span class="n">are</span> <span class="ow">not</span> <span class="n">pulling</span> <span class="n">T3</span><span class="s1">&#39;s routinely</span>
+<span class="n">email_address</span><span class="p">:</span> <span class="n">Contact</span> <span class="n">email</span> <span class="n">address</span> <span class="k">for</span> <span class="n">users</span> <span class="n">to</span> <span class="n">submib</span> <span class="n">bug</span> <span class="n">reports</span>
+</pre></div>
+</div>
+<p>Please do not use quotation marks in this file.</p>
+</div>
+<div class="section" id="database-setup-and-editing-settings-file">
+<span id="database-setup-and-editing-settings-file"></span><h2>5) Database Setup and editing settings file<a class="headerlink" href="#database-setup-and-editing-settings-file" title="Permalink to this headline">¶</a></h2>
+<p>GEL2MDT has been tested in MySQL and PostgreSQL. Whichever one of these you choose, create a database called gel2mdt_db.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CREATE</span> <span class="n">DATABASE</span> <span class="n">gel2mdt_db</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Then in the settings file gelweb/gelweb/settings/base.py add the DATABASE settings.</p>
+<p>An example of these can be found <a class="reference external" href="https://docs.djangoproject.com/en/2.0/ref/settings/#databases">here</a></p>
+<p>In gelweb/gelweb/settings/base.py, please enter a SECRET_KEY which used for hashing the website and is a long string. More information can be found <a class="reference external" href="https://docs.djangoproject.com/en/2.0/ref/settings/#std:setting-SECRET_KEY">here</a>. An example would be:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SECRET_KEY</span> <span class="o">=</span> <span class="s1">&#39;igfaddys&amp;qa-myx=8%$d$$u!&amp;w472)v!@at@ysahs)+4sx%h95&#39;</span>
+</pre></div>
+</div>
+<p>In gelweb/gelweb/settings/base.py, please enter an ALLOWED_HOSTS which is the IP address of the machine you are running GeL2MDT. An example would be:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ALLOwED_HOSTS</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>There are multiple tutorials online about setting up a database for django and we would ask you to refer to those at this stage.</p>
+<p>Once you have a database setup, django will creates the tables and database structure for you. Users will have to run the following commands within your virtual environment:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">gelweb</span><span class="o">/</span>
+<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">makemigrations</span> <span class="n">gel2mdt</span>
+<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">migrate</span>
+<span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">createinitialrevisions</span>
+</pre></div>
+</div>
+<p>If your settings are correct, you should see output similar to what is printed below:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Running</span> <span class="n">migrations</span><span class="p">:</span>
+  <span class="n">Applying</span> <span class="n">contenttypes</span><span class="o">.</span><span class="mi">0001</span><span class="n">_initial</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">auth</span><span class="o">.</span><span class="mi">0001</span><span class="n">_initial</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">admin</span><span class="o">.</span><span class="mi">0001</span><span class="n">_initial</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">admin</span><span class="o">.</span><span class="mi">0002</span><span class="n">_logentry_remove_auto_add</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">contenttypes</span><span class="o">.</span><span class="mi">0002</span><span class="n">_remove_content_type_name</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">auth</span><span class="o">.</span><span class="mi">0002</span><span class="n">_alter_permission_name_max_length</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">auth</span><span class="o">.</span><span class="mi">0003</span><span class="n">_alter_user_email_max_length</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">auth</span><span class="o">.</span><span class="mi">0004</span><span class="n">_alter_user_username_opts</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">auth</span><span class="o">.</span><span class="mi">0005</span><span class="n">_alter_user_last_login_null</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">auth</span><span class="o">.</span><span class="mi">0006</span><span class="n">_require_contenttypes_0002</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">auth</span><span class="o">.</span><span class="mi">0007</span><span class="n">_alter_validators_add_error_messages</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">auth</span><span class="o">.</span><span class="mi">0008</span><span class="n">_alter_user_username_max_length</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">auth</span><span class="o">.</span><span class="mi">0009</span><span class="n">_alter_user_last_name_max_length</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">easyaudit</span><span class="o">.</span><span class="mi">0001</span><span class="n">_initial</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">easyaudit</span><span class="o">.</span><span class="mi">0002</span><span class="n">_auto_20170125_0759</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">easyaudit</span><span class="o">.</span><span class="mi">0003</span><span class="n">_auto_20170228_1505</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">easyaudit</span><span class="o">.</span><span class="mi">0004</span><span class="n">_auto_20170620_1354</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">easyaudit</span><span class="o">.</span><span class="mi">0005</span><span class="n">_auto_20170713_1155</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">easyaudit</span><span class="o">.</span><span class="mi">0006</span><span class="n">_auto_20171018_1242</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">gel2mdt</span><span class="o">.</span><span class="mi">0001</span><span class="n">_initial</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">gel2mdt</span><span class="o">.</span><span class="mi">0002</span><span class="n">_auto_20180406_0741</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">gel2mdt</span><span class="o">.</span><span class="mi">0003</span><span class="n">_interpretationreportfamilypanel_custom</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">gel2mdt</span><span class="o">.</span><span class="mi">0004</span><span class="n">_auto_20180406_0746</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">gel2mdt</span><span class="o">.</span><span class="mi">0005</span><span class="n">_auto_20180410_0859</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">gel2mdt</span><span class="o">.</span><span class="mi">0006</span><span class="n">_auto_20180410_1054</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">gel2mdt</span><span class="o">.</span><span class="mi">0007</span><span class="n">_auto_20180411_0817</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">gel2mdt</span><span class="o">.</span><span class="mi">0008</span><span class="n">_gelinterpretationreport_sample_id</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">gel2mdt</span><span class="o">.</span><span class="mi">0009</span><span class="n">_auto_20180417_1546</span><span class="o">...</span> <span class="n">OK</span>
+  <span class="n">Applying</span> <span class="n">sessions</span><span class="o">.</span><span class="mi">0001</span><span class="n">_initial</span><span class="o">...</span> <span class="n">OK</span>
+</pre></div>
+</div>
+<p>Please note these commands may need to be rerun when you update GeL2MDT to reflect the changes in the database.</p>
+</div>
+<div class="section" id="cip-api-and-labkey-setup">
+<span id="cip-api-and-labkey-setup"></span><h2>6) CIP API and Labkey Setup<a class="headerlink" href="#cip-api-and-labkey-setup" title="Permalink to this headline">¶</a></h2>
+<p>It is not recommended to keep CIP API credentials in source code which is why they are set as environment variables.</p>
+<p>They can be set using the commands:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">cip_api_username</span><span class="o">=</span><span class="s1">&#39;username&#39;</span>
+<span class="n">export</span> <span class="n">cip_api_password</span><span class="o">=</span><span class="s1">&#39;password&#39;</span>
+</pre></div>
+</div>
+<p>As a convenience, you could also add these lines to the DAILY_UPDATE.sh file.</p>
+<p>For Labkey, create the following file at ~/.netrc</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">machine</span> <span class="n">gmc</span><span class="o">.</span><span class="n">genomicsengland</span><span class="o">.</span><span class="n">nhs</span><span class="o">.</span><span class="n">uk</span>
+<span class="n">login</span> <span class="o">&lt;</span><span class="n">login</span> <span class="n">email</span> <span class="n">address</span><span class="o">&gt;</span>
+<span class="n">password</span> <span class="o">&lt;</span><span class="n">login</span> <span class="n">password</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="configuring-multiplecaseadder-mca">
+<span id="configuring-multiplecaseadder-mca"></span><h2>7) Configuring MultipleCaseAdder (MCA)<a class="headerlink" href="#configuring-multiplecaseadder-mca" title="Permalink to this headline">¶</a></h2>
+<p>The settings for MCA can be specified in gelweb/run_batch_update.py</p>
+<p>MCA is the class which controls which cases are downloaded. The options are MCA are listed below:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sample_type</span><span class="p">:</span> <span class="n">Choice</span><span class="p">;</span> <span class="n">Can</span> <span class="n">be</span> <span class="n">either</span> <span class="s1">&#39;raredisease&#39;</span> <span class="ow">or</span> <span class="s1">&#39;cancer&#39;</span>
+<span class="n">head</span><span class="p">:</span> <span class="n">Optional</span> <span class="n">Number</span><span class="p">;</span> <span class="n">used</span> <span class="k">for</span> <span class="n">downloading</span> <span class="n">the</span> <span class="n">first</span> <span class="n">number</span> <span class="n">of</span> <span class="n">cases</span> <span class="kn">from</span> <span class="nn">the</span> <span class="n">CIPAPI</span> 
+<span class="n">test_data</span><span class="p">:</span> <span class="n">Boolean</span><span class="p">;</span> <span class="n">Switches</span> <span class="kn">from</span> <span class="nn">polling</span> <span class="n">the</span> <span class="n">CIPAPI</span> <span class="n">to</span> <span class="n">use</span> <span class="n">the</span> <span class="n">JSONs</span> <span class="n">found</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">directory</span> <span class="n">gel2mdt</span><span class="o">/</span><span class="n">tests</span><span class="o">/</span><span class="n">test_files</span>
+<span class="n">skip_demographics</span><span class="p">:</span> <span class="n">Boolean</span><span class="p">;</span> <span class="n">Turns</span> <span class="n">off</span> <span class="n">labkey</span> <span class="n">querys</span> <span class="ow">and</span> <span class="n">inserts</span> <span class="s1">&#39;unknown&#39;</span> <span class="n">demographics</span> <span class="n">into</span> <span class="n">the</span> <span class="n">database</span>
+<span class="n">sample</span><span class="p">:</span> <span class="n">Optional</span> <span class="n">TextField</span><span class="p">;</span> <span class="n">The</span> <span class="n">GELID</span> <span class="n">of</span> <span class="n">the</span> <span class="n">single</span> <span class="n">case</span> <span class="n">you</span> <span class="n">want</span> <span class="n">to</span> <span class="n">add</span> <span class="kn">from</span> <span class="nn">the</span> <span class="n">CIPAPI</span>
+<span class="n">pullt3</span><span class="p">:</span> <span class="n">Boolean</span><span class="p">;</span> <span class="n">Whether</span> <span class="n">you</span> <span class="n">want</span> <span class="n">to</span> <span class="n">pull</span> <span class="n">Tier3</span> <span class="n">Variants</span> <span class="k">for</span> <span class="n">cases</span><span class="o">.</span> <span class="n">Note</span> <span class="n">there</span> <span class="n">can</span> <span class="n">be</span> <span class="n">hundreds</span> <span class="n">of</span> <span class="n">T3</span> <span class="n">variants</span> <span class="n">per</span> <span class="n">case</span><span class="o">.</span> 
+</pre></div>
+</div>
+<p>For example the command to pull all raredisease cases from the CIPAPI is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mca</span> <span class="o">=</span> <span class="n">MultipleCaseAdder</span><span class="p">(</span><span class="n">sample_type</span><span class="o">=</span><span class="s1">&#39;raredisease&#39;</span><span class="p">,</span> <span class="n">skip_demographics</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If this command is successful, the following output should appear:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Polling</span> <span class="n">API</span> <span class="k">for</span> <span class="n">case</span> <span class="mi">6234</span><span class="o">-</span><span class="mi">1</span>
+<span class="n">Polling</span> <span class="n">API</span> <span class="k">for</span> <span class="n">case</span> <span class="mi">6240</span><span class="o">-</span><span class="mi">1</span>
+<span class="n">Polling</span> <span class="n">API</span> <span class="k">for</span> <span class="n">case</span> <span class="mi">6248</span><span class="o">-</span><span class="mi">1</span>
+<span class="o">...</span> 
+</pre></div>
+</div>
+<p>The DAILY_UPDATE.sh script is a wrapper for running run_batch_update.py which could be added to your cronjobs and run every day.</p>
+</div>
+<div class="section" id="running-gel2mdt-website">
+<span id="running-gel2mdt-website"></span><h2>8) Running GeL2MDT website<a class="headerlink" href="#running-gel2mdt-website" title="Permalink to this headline">¶</a></h2>
+<p>To create a superuser, please run the following and follow the prompts:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>  <span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">createsuperuser</span>
+</pre></div>
+</div>
+<p>To view the GeL2MDT website locally please run the following command and enter your credentials:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>  <span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">runserver</span>
+</pre></div>
+</div>
+<p>To deploy the website a webserver such as Apache/Nginx, please look up documentation for those tools.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">GeL2MDT</a><ul>
+<li><a class="reference internal" href="#instructions-to-install-gel2mdt">Instructions to install GEL2MDT</a></li>
+<li><a class="reference internal" href="#vep">1) VEP</a></li>
+<li><a class="reference internal" href="#anaconda-miniconda">2) Anaconda/Miniconda</a></li>
+<li><a class="reference internal" href="#clone-the-gel2mdt-repository">3) Clone the GEL2MDT repository:</a></li>
+<li><a class="reference internal" href="#setup-storage-locations">3) Setup Storage Locations</a></li>
+<li><a class="reference internal" href="#configuring-gel2mdt">4) Configuring GEL2MDT</a></li>
+<li><a class="reference internal" href="#database-setup-and-editing-settings-file">5) Database Setup and editing settings file</a></li>
+<li><a class="reference internal" href="#cip-api-and-labkey-setup">6) CIP API and Labkey Setup</a></li>
+<li><a class="reference internal" href="#configuring-multiplecaseadder-mca">7) Configuring MultipleCaseAdder (MCA)</a></li>
+<li><a class="reference internal" href="#running-gel2mdt-website">8) Running GeL2MDT website</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="views.html"
+                        title="previous chapter">Views</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/modules/installation.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="views.html" title="Views"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">GeL2MDT 0.3.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Theo Cole, Patrick Lombard, Ed Stone.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.2.
+    </div>
+  </body>
+</html>

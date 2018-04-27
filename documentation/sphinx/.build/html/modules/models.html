@@ -15,6 +15,7 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Views" href="views.html" />
     <link rel="prev" title="Welcome to GeL2MDT’s documentation!" href="../index.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
@@ -26,6 +27,9 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="views.html" title="Views"
+             accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="../index.html" title="Welcome to GeL2MDT’s documentation!"
              accesskey="P">previous</a> |</li>
@@ -42,7 +46,7 @@
 <span id="models"></span><h1>Models<a class="headerlink" href="#module-gel2mdt.models" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="gel2mdt.models.CancerReport">
-<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">CancerReport</code><span class="sig-paren">(</span><em>id</em>, <em>discussion</em>, <em>action</em>, <em>classification</em>, <em>proband_variant</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.CancerReport" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">CancerReport</code><span class="sig-paren">(</span><em>id</em>, <em>discussion</em>, <em>action</em>, <em>classification</em>, <em>proband_variant</em>, <em>variant_use</em>, <em>action_type</em>, <em>validated</em>, <em>validated_assay_type</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.CancerReport" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="exception">
 <dt id="gel2mdt.models.CancerReport.DoesNotExist">
 <em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.CancerReport.DoesNotExist" title="Permalink to this definition">¶</a></dt>
@@ -122,7 +126,7 @@ proband.</p>
 
 <dl class="class">
 <dt id="gel2mdt.models.GELInterpretationReport">
-<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">GELInterpretationReport</code><span class="sig-paren">(</span><em>id</em>, <em>ir_family</em>, <em>archived_version</em>, <em>status</em>, <em>updated</em>, <em>sample_type</em>, <em>max_tier</em>, <em>assembly</em>, <em>user</em>, <em>assigned_user</em>, <em>sha_hash</em>, <em>polled_at_datetime</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.GELInterpretationReport" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">GELInterpretationReport</code><span class="sig-paren">(</span><em>id</em>, <em>ir_family</em>, <em>archived_version</em>, <em>status</em>, <em>updated</em>, <em>sample_type</em>, <em>sample_id</em>, <em>tumour_content</em>, <em>max_tier</em>, <em>assembly</em>, <em>user</em>, <em>assigned_user</em>, <em>sha_hash</em>, <em>polled_at_datetime</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.GELInterpretationReport" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="exception">
 <dt id="gel2mdt.models.GELInterpretationReport.DoesNotExist">
 <em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.GELInterpretationReport.DoesNotExist" title="Permalink to this definition">¶</a></dt>
@@ -135,7 +139,7 @@ proband.</p>
 
 <dl class="method">
 <dt id="gel2mdt.models.GELInterpretationReport.save">
-<code class="descname">save</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.GELInterpretationReport.save" title="Permalink to this definition">¶</a></dt>
+<code class="descname">save</code><span class="sig-paren">(</span><em>overwrite=False</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.GELInterpretationReport.save" title="Permalink to this definition">¶</a></dt>
 <dd><p>Overwrite the model’s save method to auto-increment versions for
 duplicate ir_familys. Pass in a InterpretationReportFamily entry.</p>
 </dd></dl>
@@ -220,7 +224,7 @@ results list was updated.</p>
 
 <dl class="class">
 <dt id="gel2mdt.models.MDT">
-<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">MDT</code><span class="sig-paren">(</span><em>id</em>, <em>date_of_mdt</em>, <em>description</em>, <em>to_report</em>, <em>creator</em>, <em>status</em>, <em>gatb</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.MDT" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">MDT</code><span class="sig-paren">(</span><em>id</em>, <em>date_of_mdt</em>, <em>sample_type</em>, <em>description</em>, <em>to_report</em>, <em>creator</em>, <em>status</em>, <em>gatb</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.MDT" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="exception">
 <dt id="gel2mdt.models.MDT.DoesNotExist">
 <em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.MDT.DoesNotExist" title="Permalink to this definition">¶</a></dt>
@@ -355,7 +359,7 @@ which is still compatible with the MultipleCaseAdder.</p>
 
 <dl class="class">
 <dt id="gel2mdt.models.Proband">
-<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">Proband</code><span class="sig-paren">(</span><em>id</em>, <em>gel_id</em>, <em>family</em>, <em>nhs_number</em>, <em>lab_number</em>, <em>forename</em>, <em>surname</em>, <em>date_of_birth</em>, <em>sex</em>, <em>recruiting_disease</em>, <em>pilot_case</em>, <em>outcome</em>, <em>comment</em>, <em>discussion</em>, <em>action</em>, <em>episode</em>, <em>gmc</em>, <em>local_id</em>, <em>case_sent</em>, <em>status</em>, <em>mdt_status</em>, <em>deceased</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.Proband" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">gel2mdt.models.</code><code class="descname">Proband</code><span class="sig-paren">(</span><em>id</em>, <em>gel_id</em>, <em>family</em>, <em>nhs_number</em>, <em>lab_number</em>, <em>forename</em>, <em>surname</em>, <em>date_of_birth</em>, <em>sex</em>, <em>recruiting_disease</em>, <em>disease_subtype</em>, <em>disease_stage</em>, <em>disease_grade</em>, <em>previous_treatment</em>, <em>currently_in_clinical_trial</em>, <em>current_clinical_trial_info</em>, <em>suitable_for_clinical_trial</em>, <em>previous_testing</em>, <em>pilot_case</em>, <em>outcome</em>, <em>comment</em>, <em>discussion</em>, <em>action</em>, <em>episode</em>, <em>gmc</em>, <em>local_id</em>, <em>case_sent</em>, <em>status</em>, <em>mdt_status</em>, <em>deceased</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.models.Proband" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="exception">
 <dt id="gel2mdt.models.Proband.DoesNotExist">
 <em class="property">exception </em><code class="descname">DoesNotExist</code><a class="headerlink" href="#gel2mdt.models.Proband.DoesNotExist" title="Permalink to this definition">¶</a></dt>
@@ -543,6 +547,9 @@ Variant model.</p>
   <h4>Previous topic</h4>
   <p class="topless"><a href="../index.html"
                         title="previous chapter">Welcome to GeL2MDT’s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="views.html"
+                        title="next chapter">Views</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -575,6 +582,9 @@ Variant model.</p>
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="views.html" title="Views"
+             >next</a> |</li>
         <li class="right" >
           <a href="../index.html" title="Welcome to GeL2MDT’s documentation!"
              >previous</a> |</li>
