@@ -417,7 +417,10 @@ def variant_view(request, variant_id):
     :return:
     '''
     variant = Variant.objects.get(id=variant_id)
-    transcript_variant = TranscriptVariant.objects.filter(variant=variant_id)[:1].get() #gets one (for hgvs_g)
+    try:
+        transcript_variant = TranscriptVariant.objects.filter(variant=variant_id)[:1].get() #gets one (for hgvs_g)
+    except TranscriptVariant.DoesNotExist:
+        transcript_variant = None
     proband_variants = ProbandVariant.objects.filter(variant=variant)
 
     return render(request, 'gel2mdt/variant.html', {'variant': variant,
