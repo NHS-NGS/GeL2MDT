@@ -58,7 +58,25 @@ class ProbandForm(forms.ModelForm):
     '''
     class Meta:
         model = Proband
-        fields = ['episode', 'outcome', 'comment', 'status', 'mdt_status', 'pilot_case', 'case_sent']
+        fields = ['outcome', 'comment']
+
+
+class GELIRForm(forms.ModelForm):
+    '''
+    Form used for allowing users edit proband information
+    '''
+    class Meta:
+        model = GELInterpretationReport
+        fields = ['case_status', 'mdt_status', 'pilot_case', 'case_sent']
+
+    def save(self):
+        gelir = self.instance
+        data = self.cleaned_data
+        gelir.case_status = data['case_status']
+        gelir.case_status = data['mdt_status']
+        gelir.case_status = data['pilot_case']
+        gelir.case_status = data['case_sent']
+        gelir.save(overwrite=True)
 
 
 class RelativeForm(forms.ModelForm):
@@ -122,6 +140,12 @@ class CaseAssignForm(forms.ModelForm):
         model = GELInterpretationReport
         fields = ["assigned_user"]
 
+    def save(self):
+        gelir = self.instance
+        data = self.cleaned_data
+        gelir.assigned_user = data['assigned_user']
+        gelir.save(overwrite=True)
+
 
 class MdtForm(forms.ModelForm):
     '''
@@ -138,15 +162,30 @@ class ProbandMDTForm(forms.ModelForm):
     '''
     class Meta:
         model = Proband
-        fields = ('discussion', 'action', 'status')
+        fields = ('discussion', 'action')
         widgets = {
             'discussion': Textarea(attrs={'rows': '3'}),
             'action': Textarea(attrs={'rows': '3'}),
         }
 
+class GELIRMDTForm(forms.ModelForm):
+    '''
+    Form used in Proband View at MDT which allows users to fill in proband textfields
+    '''
+
+    class Meta:
+        model = GELInterpretationReport
+        fields = ('case_status',)
+
     def __init__(self, *args, **kwargs):
-        super(ProbandMDTForm, self).__init__(*args, **kwargs)
-        self.fields['status'].required = False
+        super(GELIRMDTForm, self).__init__(*args, **kwargs)
+        self.fields['case_status'].required = False
+
+    def save(self):
+        gelir = self.instance
+        data = self.cleaned_data
+        gelir.case_status = data['case_status']
+        gelir.save(overwrite=True)
 
 
 class RareDiseaseMDTForm(forms.ModelForm):

@@ -45,7 +45,7 @@
                                     </br>
                                     {% bootstrap_label "Pilot Case" %}
                                     <div class="block">
-                                        {{report.ir_family.participant_family.proband.pilot_case}}
+                                        {{report.pilot_case}}
                                     </div>
                                     </br>
                                 </div>
@@ -75,7 +75,7 @@
                                 </br>
                                     {% bootstrap_label "Case Sent" %}
                                     <div class="block">
-                                        {{report.ir_family.participant_family.proband.case_sent}}
+                                        {{report.case_sent}}
                                     </div>
                                     </br>
 
@@ -106,7 +106,7 @@
                                     </br>
                                     {% bootstrap_label "Status" %}
                                     <div class="block">
-                                        {{report.ir_family.participant_family.proband.get_status_display}}
+                                        {{report.get_case_status_display}}
                                     </div>
                                     </br>
 
@@ -133,7 +133,7 @@
                                     </br>
                                     {% bootstrap_label "MDT Status" %}
                                     <div class="block">
-                                        {{report.ir_family.participant_family.proband.get_mdt_status_display}}
+                                        {{report.get_mdt_status_display}}
                                     </div>
                                     </br>
                                 </div>

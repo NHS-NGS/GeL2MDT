@@ -274,6 +274,7 @@ def proband_view(request, report_id):
 
     relatives = Relative.objects.filter(proband=report.ir_family.participant_family.proband)
     proband_form = ProbandForm(instance=report.ir_family.participant_family.proband)
+    gelir_form = GELIRForm(instance=report)
     demogs_form = DemogsForm(instance=report.ir_family.participant_family.proband)
     proband_variants = ProbandVariant.objects.filter(interpretation_report=report)
     proband_mdt = MDTReport.objects.filter(interpretation_report=report)
@@ -285,7 +286,7 @@ def proband_view(request, report_id):
     add_variant_form = AddVariantForm()
 
     if not request.user.is_staff:
-        if proband_form["status"].value() == "C":
+        if report.case_status == "C":
             for field in proband_form.__dict__["fields"]:
                 proband_form.fields[field].widget.attrs['readonly'] = True
                 proband_form.fields[field].widget.attrs['disabled'] = True
@@ -302,7 +303,8 @@ def proband_view(request, report_id):
                                                     'clinician_form':clinician_form,
                                                     'add_clinician_form':add_clinician_form,
                                                     'sample_type': report.sample_type,
-                                                    'add_variant_form': add_variant_form})
+                                                    'add_variant_form': add_variant_form,
+                                                    'gelir_form': gelir_form})
 
 
 @login_required
@@ -371,7 +373,6 @@ def validation_list(request, sample_type):
     :param sample_type: Either raredisease or cancer
     :return: View containing proband variants
     '''
-    config_dict = load_config.LoadConfig().load()
     proband_variants = ProbandVariant.objects.filter(requires_validation=True)
     return render(request, 'gel2mdt/validation_list.html', {'proband_variants':proband_variants,
                                                             'sample_type': sample_type})
@@ -436,11 +437,15 @@ def update_proband(request, report_id):
     report = GELInterpretationReport.objects.get(id=report_id)
     if request.method == "POST":
         proband_form = ProbandForm(request.POST, instance=report.ir_family.participant_family.proband)
-
-        if proband_form.is_valid():
+        gelir_form = GELIRForm(request.POST, instance=report)
+        if proband_form.is_valid() and gelir_form.is_valid():
             proband_form.save()
+            gelir_form.save()
             messages.add_message(request, 25, 'Proband Updated')
-            return HttpResponseRedirect(f'/proband/{report_id}')
+        else:
+            print(proband_form.errors)
+        return HttpResponseRedirect(f'/proband/{report_id}')
+
 
 
 @login_required
@@ -644,7 +649,7 @@ def mdt_proband_view(request, mdt_id, pk, important):
     variant_formset = VariantForm(queryset=proband_variant_reports)
 
     proband_form = ProbandMDTForm(instance=report.ir_family.participant_family.proband)
-
+    gelir_form = GELIRMDTForm(instance=report)
     panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.ir_family)
 
     if mdt_instance.status == "C":
@@ -659,10 +664,16 @@ def mdt_proband_view(request, mdt_id, pk, important):
     if request.method == 'POST':
         variant_formset = VariantForm(request.POST)
         proband_form = ProbandMDTForm(request.POST, instance=report.ir_family.participant_family.proband)
-        if variant_formset.is_valid() and proband_form.is_valid():
+        gelir_form = GELIRMDTForm(request.POST, instance=report)
+        if variant_formset.is_valid() and proband_form.is_valid() and gelir_form.is_valid():
             variant_formset.save()
             proband_form.save()
+            gelir_form.save()
             messages.add_message(request, 25, 'Proband Updated')
+        else:
+            print(gelir_form.errors)
+            print(proband_form.errors)
+            print(variant_formset.errors)
         return HttpResponseRedirect(f'/mdt_proband_view/{mdt_id}/{pk}/{important}')
     return render(request, 'gel2mdt/mdt_proband_view.html', {'proband_variants': proband_variants,
                                                              'report': report,
@@ -671,7 +682,8 @@ def mdt_proband_view(request, mdt_id, pk, important):
                                                              'proband_form': proband_form,
                                                              'variant_formset': variant_formset,
                                                              'panels': panels,
-                                                             'sample_type':report.sample_type})
+                                                             'sample_type':report.sample_type,
+                                                             'gelir_form':gelir_form})
 
 
 @login_required

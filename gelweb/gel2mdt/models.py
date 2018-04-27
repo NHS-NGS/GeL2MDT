@@ -255,6 +255,16 @@ class GELInterpretationReport(models.Model):
     sha_hash = models.CharField(max_length=200)
     polled_at_datetime = models.DateTimeField(default=timezone.now)
 
+    case_sent = models.BooleanField(default=False)
+    case_status = models.CharField(max_length=50, choices=(
+        ('N', 'Not Started'), ('U', 'Under Review'), ('M', 'Awaiting MDT'), ('V', 'Awaiting Validation'),
+        ('R', 'Awaiting Reporting'), ('P', 'Reported'), ('C', 'Completed'), ('E', 'External')), default='N')
+
+    mdt_status = models.CharField(max_length=50, choices=(
+        ('U', 'Unknown'),
+        ('R', 'Required'), ('N', 'Not Required'), ('I', 'In Progress'), ('D', 'Done'),), default='U')
+    pilot_case = models.BooleanField(default=False)
+
     def save(self, overwrite=False, *args, **kwargs):
         """
         Overwrite the model's save method to auto-increment versions for
@@ -272,6 +282,11 @@ class GELInterpretationReport(models.Model):
             latest_report.assembly = self.assembly
             latest_report.sha_hash = self.sha_hash
             latest_report.assigned_user = self.assigned_user
+            latest_report.mdt_status = self.mdt_status
+            latest_report.case_sent = self.case_sent
+            latest_report.case_status = self.case_status
+            latest_report.pilot_case = self.pilot_case
+            latest_report.tumour_content = self.tumour_content
             latest_report.polled_at_datetime = timezone.now()
             latest_report.user = self.user
             if overwrite:
@@ -322,7 +337,7 @@ class Proband(models.Model):
     nhs_number = models.CharField(max_length=200, null=True, blank=True)
     # must be unique, but can also be null if not known
     lab_number = models.CharField(
-        max_length=200, unique=True, blank=True, null=True)
+        max_length=200, blank=True, null=True)
     forename = models.CharField(max_length=200)
     surname = models.CharField(max_length=200)
     date_of_birth = models.DateTimeField('date_of_birth')
@@ -336,25 +351,16 @@ class Proband(models.Model):
     current_clinical_trial_info = models.CharField(max_length=250, null=True, blank=True)
     suitable_for_clinical_trial = models.BooleanField(default=False)
     previous_testing = models.TextField(blank=True, null=True)
-    
-    pilot_case = models.BooleanField(default=False)
     outcome = models.TextField(blank=True)
     comment = models.TextField(blank=True)
     discussion = models.TextField(blank=True)
     action = models.TextField(blank=True)
-    episode = models.CharField(max_length=255, blank=True)
     if config_dict['GMC'] != 'None':
         gmc = models.CharField(max_length=255, choices=gmc_choices, default='Unknown', null=True, blank=True)
     else:
         gmc = models.CharField(max_length=255, null=True, blank=True)
     local_id = models.CharField(max_length=255, null=True, blank=True)
-    case_sent = models.BooleanField(default=False)
-    status = models.CharField( max_length=50, choices=(
-        ('N', 'Not Started'), ('U', 'Under Review'), ('M', 'Awaiting MDT'), ('V', 'Awaiting Validation'),
-        ('R', 'Awaiting Reporting'), ('P', 'Reported'), ('C', 'Completed'), ('E', 'External')), default='N')
 
-    mdt_status = models.CharField( max_length=50, choices=(
-        ('R', 'Required'), ('N', 'Not Required'), ('I', 'In Progress'), ('D', 'Done'),), default='R')
     deceased = models.NullBooleanField()
 
     def __str__(self):
