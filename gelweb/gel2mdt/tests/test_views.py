@@ -154,11 +154,7 @@ class ViewTests(TestCase):
         response = self.client.post(reverse('update-proband', args=[self.gel_ir.id]),
                                     {'outcome': 'testoutcome',
                                     'comment': 'testcomment',
-                                     'status': 'C',
-                                     'episode': 'test_episode',
-                                     'mdt_status': 'R',
-                                     'pilot_case': True,
-                                     'case_sent': True},
+                                     'case_status': 'N'},
                                      follow=True)
         self.assertContains(response, 'Proband Updated')
         self.assertEquals(response.status_code, 200)
