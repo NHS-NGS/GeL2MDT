@@ -69,6 +69,15 @@ class GELIRForm(forms.ModelForm):
         model = GELInterpretationReport
         fields = ['case_status', 'mdt_status', 'pilot_case', 'case_sent']
 
+    def save(self):
+        gelir = self.instance
+        data = self.cleaned_data
+        gelir.case_status = data['case_status']
+        gelir.case_status = data['mdt_status']
+        gelir.case_status = data['pilot_case']
+        gelir.case_status = data['case_sent']
+        gelir.save(overwrite=True)
+
 
 class RelativeForm(forms.ModelForm):
     '''
@@ -131,6 +140,12 @@ class CaseAssignForm(forms.ModelForm):
         model = GELInterpretationReport
         fields = ["assigned_user"]
 
+    def save(self):
+        gelir = self.instance
+        data = self.cleaned_data
+        gelir.assigned_user = data['assigned_user']
+        gelir.save(overwrite=True)
+
 
 class MdtForm(forms.ModelForm):
     '''
@@ -165,6 +180,12 @@ class GELIRMDTForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(GELIRMDTForm, self).__init__(*args, **kwargs)
         self.fields['case_status'].required = False
+
+    def save(self):
+        gelir = self.instance
+        data = self.cleaned_data
+        gelir.case_status = data['case_status']
+        gelir.save(overwrite=True)
 
 
 class RareDiseaseMDTForm(forms.ModelForm):
