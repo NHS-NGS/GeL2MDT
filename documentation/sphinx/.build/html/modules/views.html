@@ -15,8 +15,8 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Models" href="models.html" />
-    <link rel="prev" title="Welcome to GeL2MDT’s documentation!" href="../index.html" /> 
+    <link rel="next" title="GeL2MDT" href="installation.html" />
+    <link rel="prev" title="Models" href="models.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -28,10 +28,10 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="models.html" title="Models"
+          <a href="installation.html" title="GeL2MDT"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="../index.html" title="Welcome to GeL2MDT’s documentation!"
+          <a href="models.html" title="Models"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">GeL2MDT 0.3.1 documentation</a> &#187;</li> 
       </ul>
@@ -42,8 +42,377 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="views">
-<h1>Views<a class="headerlink" href="#views" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-gel2mdt.views">
+<span id="views"></span><h1>Views<a class="headerlink" href="#module-gel2mdt.views" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="gel2mdt.views.add_attendee_to_mdt">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">add_attendee_to_mdt</code><span class="sig-paren">(</span><em>request</em>, <em>mdt_id</em>, <em>attendee_id</em>, <em>role</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.add_attendee_to_mdt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a attendee to a MDT
+:param request:
+:param mdt_id: MDT instance id
+:param attendee_id: Attendee ID
+:param role: Either Clinician, Clinical Scientist or Other Staff
+:return: To view where users can add attendees</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.add_ir_to_mdt">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">add_ir_to_mdt</code><span class="sig-paren">(</span><em>request</em>, <em>mdt_id</em>, <em>irreport_id</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.add_ir_to_mdt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a GELInterpretation report to a MDT
+:param request:
+:param mdt_id: MDT Instance ID
+:param irreport_id: GelIR ID
+:return: Add this report to the MDT</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.add_new_attendee">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">add_new_attendee</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.add_new_attendee" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new attendee to the 3 attendee models
+:param request:
+:return: Either to select attendees view if mdt_id in request.session or back to index if not</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.cancer_main">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">cancer_main</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.cancer_main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shows all the Cancer cases the user has access to and allows easy searching of cases</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request</strong> – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.delete_mdt">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">delete_mdt</code><span class="sig-paren">(</span><em>request</em>, <em>mdt_id</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.delete_mdt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deletes a selected MDT
+:param request:
+:param mdt_id: MDT ID
+:return: Back to recent MDTs</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.edit_mdt">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">edit_mdt</code><span class="sig-paren">(</span><em>request</em>, <em>sample_type</em>, <em>mdt_id</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.edit_mdt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allows users to select which cases they want to bring to MDT
+:param request:
+:param sample_type: Either raredisease or cancer and will filter which cases appear in list
+:param mdt_id: MDT instance id
+:return: List of GELIR cases</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.edit_mdt_proband">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">edit_mdt_proband</code><span class="sig-paren">(</span><em>request</em>, <em>report_id</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.edit_mdt_proband" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used for modal at MDT view to edit proband specific discussion and actions
+:param request:
+:param report_id: GEL IR id
+:return: Edits the proband discussion and actions in the MDT</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.edit_relatives">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">edit_relatives</code><span class="sig-paren">(</span><em>request</em>, <em>relative_id</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.edit_relatives" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allows users to edit relative demographic information</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>request</strong> – </li>
+<li><strong>relative_id</strong> – Relative ID</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.export_mdt">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">export_mdt</code><span class="sig-paren">(</span><em>request</em>, <em>mdt_id</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.export_mdt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns MDT information in CSV format
+:param request:
+:param mdt_id: MDT instance
+:return: CSV file</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.export_mdt_outcome_form">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">export_mdt_outcome_form</code><span class="sig-paren">(</span><em>request</em>, <em>report_id</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.export_mdt_outcome_form" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exports MDT outcome form which is proband specific after a case has been to MDT
+:param request:
+:param report_id:  GEL Interpretation report
+:return: DOCX format file</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.genomics_england_report">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">genomics_england_report</code><span class="sig-paren">(</span><em>request</em>, <em>report_id</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.genomics_england_report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Render a page to enter genomics england samples</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.index">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">index</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>A choice between the raredisease and cancer portal</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request</strong> – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.mdt_proband_view">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">mdt_proband_view</code><span class="sig-paren">(</span><em>request</em>, <em>mdt_id</em>, <em>pk</em>, <em>important</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.mdt_proband_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>MDT proband view where users can edit proband specific questions at MDT
+:param request:
+:param mdt_id: MDT instance id
+:param pk: GEL Interpretation report id
+:param important: Either 1 or 0; Whether to display T3 or non T3 variants
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.mdt_view">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">mdt_view</code><span class="sig-paren">(</span><em>request</em>, <em>mdt_id</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.mdt_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main MDT view where users see the cases added to MDT
+:param request:
+:param mdt_id: MDT ID
+:return: Main MDT page</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.negative_report">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">negative_report</code><span class="sig-paren">(</span><em>request</em>, <em>report_id</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.negative_report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Printer friendly negative report template
+:param request:
+:param report_id: GEL Report ID
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.panel_view">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">panel_view</code><span class="sig-paren">(</span><em>request</em>, <em>panelversion_id</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.panel_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replicates panelapp but specifc for panel Version
+:param request:
+:param panelversion_id: PanelVersion ID
+:return: Panel View details</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.proband_view">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">proband_view</code><span class="sig-paren">(</span><em>request</em>, <em>report_id</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.proband_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shows details about a particular proband, some fields are editable by clinical scientists</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>request</strong> – </li>
+<li><strong>report_id</strong> – GEL Report ID</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.profile">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">profile</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.profile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Profile page. Users can see their cases assigned to them and role info
+:param request:
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.pull_t3_variants">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">pull_t3_variants</code><span class="sig-paren">(</span><em>request</em>, <em>report_id</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.pull_t3_variants" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allows users to download T3 variants for a case
+:param request:
+:param report_id: GEL Interpretationreport id
+:return: Back to proband page</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.rare_disease_main">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">rare_disease_main</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.rare_disease_main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shows all the RD cases the user has access to and allows easy searching of cases</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request</strong> – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.recent_mdts">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">recent_mdts</code><span class="sig-paren">(</span><em>request</em>, <em>sample_type</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.recent_mdts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shows table of recent MDTs
+:param request:
+:param sample_type: Either cancer or raredisease
+:return: A list of cancer or raredisease MDTs</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.register">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">register</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.register" title="Permalink to this definition">¶</a></dt>
+<dd><p>Registers a new user and adds them to a role table
+:param request:
+:return: The user will then have to contact admin to authenticate them</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.remove_attendee_from_mdt">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">remove_attendee_from_mdt</code><span class="sig-paren">(</span><em>request</em>, <em>mdt_id</em>, <em>attendee_id</em>, <em>role</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.remove_attendee_from_mdt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes a attendee from an MDT
+:param request:
+:param mdt_id: MDT instance id
+:param attendee_id: Attendee ID
+:param role: Either Clinician, Clinical Scientist or Other Staff
+:return: To view where users can add attendees</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.remove_case">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">remove_case</code><span class="sig-paren">(</span><em>request</em>, <em>case_id</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.remove_case" title="Permalink to this definition">¶</a></dt>
+<dd><p>Users can remove a case from their assigned cases</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>request</strong> – </li>
+<li><strong>case_id</strong> – Report id of case that they want to remove</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Back to profile page</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.remove_ir_from_mdt">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">remove_ir_from_mdt</code><span class="sig-paren">(</span><em>request</em>, <em>mdt_id</em>, <em>irreport_id</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.remove_ir_from_mdt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes a proband from an MDT
+:param request:
+:param mdt_id: MDT ID
+:param irreport_id: GELIR ID
+:return: Removes this report from the MDT</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.select_attendees_for_mdt">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">select_attendees_for_mdt</code><span class="sig-paren">(</span><em>request</em>, <em>mdt_id</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.select_attendees_for_mdt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a CS/Clinician/Other to a MDT
+:param request:
+:param mdt_id: MDT ID
+:return: Table showing all users</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.select_transcript">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">select_transcript</code><span class="sig-paren">(</span><em>request</em>, <em>report_id</em>, <em>pv_id</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.select_transcript" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shows the transcript table and allows a user to select preferred transcript
+:param request:
+:param report_id: GEL Interpretationreport id
+:param pv_id: ProbandVariant id
+:return: View containing list of transcripts</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.start_mdt_view">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">start_mdt_view</code><span class="sig-paren">(</span><em>request</em>, <em>sample_type</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.start_mdt_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new MDT instance
+:param request:
+:param sample_type: Either raredisease or Cancer MDT will be created
+:return: View allowing users choose cases</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.update_demographics">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">update_demographics</code><span class="sig-paren">(</span><em>request</em>, <em>report_id</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.update_demographics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allows staff users to redo labkey lookup
+:param request:
+:param report_id: Report to redo lookup for
+:return: Back to proband page</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.update_proband">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">update_proband</code><span class="sig-paren">(</span><em>request</em>, <em>report_id</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.update_proband" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the Proband page for fields used by clinical scientists such as status and outcomes
+:param request:
+:param report_id: GEL Report ID
+:return: Proband view</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.update_transcript">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">update_transcript</code><span class="sig-paren">(</span><em>request</em>, <em>report_id</em>, <em>pv_id</em>, <em>transcript_id</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.update_transcript" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the selected transcript
+:param request:
+:param report_id: GEL Interpretationreport id
+:param pv_id: ProbandVariant id
+:param transcript_id: Transcript id of the selected transcript
+:return: Select Transcript view</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.validation_list">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">validation_list</code><span class="sig-paren">(</span><em>request</em>, <em>sample_type</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.validation_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the list of proband variants that require validation
+:param request:
+:param sample_type: Either raredisease or cancer
+:return: View containing proband variants</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.variant_for_validation">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">variant_for_validation</code><span class="sig-paren">(</span><em>request</em>, <em>pv_id</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.variant_for_validation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a proband variant to the list for validation
+:param request:
+:param pv_id: Proband Variant id
+:return: Back to proband page</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gel2mdt.views.variant_view">
+<code class="descclassname">gel2mdt.views.</code><code class="descname">variant_view</code><span class="sig-paren">(</span><em>request</em>, <em>variant_id</em><span class="sig-paren">)</span><a class="headerlink" href="#gel2mdt.views.variant_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shows details about a particular variant and also probands it is present in
+:param request:
+:param variant_id: Variant ID
+:return:</p>
+</dd></dl>
+
 </div>
 
 
@@ -53,11 +422,11 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="../index.html"
-                        title="previous chapter">Welcome to GeL2MDT’s documentation!</a></p>
-  <h4>Next topic</h4>
   <p class="topless"><a href="models.html"
-                        title="next chapter">Models</a></p>
+                        title="previous chapter">Models</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="installation.html"
+                        title="next chapter">GeL2MDT</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -91,10 +460,10 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="models.html" title="Models"
+          <a href="installation.html" title="GeL2MDT"
              >next</a> |</li>
         <li class="right" >
-          <a href="../index.html" title="Welcome to GeL2MDT’s documentation!"
+          <a href="models.html" title="Models"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">GeL2MDT 0.3.1 documentation</a> &#187;</li> 
       </ul>

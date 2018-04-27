@@ -16,10 +16,11 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../../gelweb'))
-
+os.environ['DJANGO_SETTINGS_MODULE'] = 'gelweb.settings.base'  
 import django
 from django.conf import settings
-settings.configure()
+
+#settings.configure()
 django.setup()
 
 
@@ -57,7 +58,11 @@ templates_path = ['.templates']
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_parsers = {
+    '.md': 'recommonmark.parser.CommonMarkParser',
+}
+source_suffix = ['.rst', '.md']
+#source_suffix = '.rst'
 
 # The master toctree document.
 master_doc = 'index'

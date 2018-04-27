@@ -103,7 +103,6 @@ There are multiple tutorials online about setting up a database for django and w
 Once you have a database setup, django will creates the tables and database structure for you. Users will have to run the following commands within your virtual environment:
     
     cd gelweb/
-    python manage.py migrate
     python manage.py makemigrations gel2mdt
     python manage.py migrate
     python manage.py createinitialrevisions

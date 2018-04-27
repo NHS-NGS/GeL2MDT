@@ -11,7 +11,8 @@ Welcome to GeL2MDT's documentation!
    :caption: Contents:
 
    modules/models
-
+   modules/views
+   modules/installation
 
 
 Indices and tables
