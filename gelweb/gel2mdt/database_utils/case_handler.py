@@ -1095,7 +1095,7 @@ class CaseAttributeManager(object):
             "assembly": genome_assembly,
             'sample_type': self.case.json['sample_type'],
             "sample_id": self.case.proband_sample,
-            'tumour_content': tumour_content
+            'tumour_content': tumour_content,
             "case_status": 'N',  # initialised to not started? (N)
         }, self.model_objects)
         return ir
