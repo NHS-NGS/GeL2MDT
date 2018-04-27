@@ -626,7 +626,6 @@ class CaseAttributeManager(object):
             "surname": demographics["surname"],
             "date_of_birth": datetime.strptime(demographics["date_of_birth"], "%Y/%m/%d").date(),
             "sex": self.case.proband["sex"],
-            "status": 'N', # initialised to not started? (N)
             "recruiting_disease": recruiting_disease,
             'disease_subtype': disease_subtype,
             "gmc": clinician.entry.hospital
@@ -1097,6 +1096,7 @@ class CaseAttributeManager(object):
             'sample_type': self.case.json['sample_type'],
             "sample_id": self.case.proband_sample,
             'tumour_content': tumour_content
+            "case_status": 'N',  # initialised to not started? (N)
         }, self.model_objects)
         return ir
 
