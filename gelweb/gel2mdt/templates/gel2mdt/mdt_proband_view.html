@@ -113,6 +113,8 @@
                     <th>HGVSc</th>
                     <th>HGVSp</th>
                     <th>Genotype</th>
+                    <th>Discussion</th>
+                    <th>Action</th>
                     <th>Classification</th>
                     <th>Contribution to Phenotype</th>
                     <th>Change Med</th>
@@ -133,6 +135,8 @@
                                                     <td  style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{form.instance.proband_variant.get_transcript_variant.hgvs_c}}</td>
                                                     <td style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{form.instance.proband_variant.get_transcript_variant.hgvs_p}}</td>
                                                     <td>{{form.instance.proband_variant.zygosity}}</td>
+                                                    <td>{{ form.discussion }}</td>
+                                                    <td> {{ form.action }}</td>
                                                     <td>{{ form.classification }}</td>
                                                     <td> {{ form.contribution_to_phenotype }}</td>
                                                     <td style="word-wrap: break-word; min-width: 10px;max-width: 10px;">{{ form.change_med }}
