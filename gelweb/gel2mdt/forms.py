@@ -195,7 +195,7 @@ class RareDiseaseMDTForm(forms.ModelForm):
     class Meta:
         model = RareDiseaseReport
         fields = ('contribution_to_phenotype', 'change_med',
-                  'clinical_trial',
+                  'clinical_trial', 'discussion', 'action',
                   'inform_reproductive_choice', 'surgical_option',
                   'add_surveillance_for_relatives',
                   'classification', 'id',)
@@ -206,6 +206,8 @@ class RareDiseaseMDTForm(forms.ModelForm):
                    'add_surveillance_for_relatives': CheckboxInput(),
                    'clinical_trial': CheckboxInput(),
                    'inform_reproductive_choice': CheckboxInput(),
+                   'discussion': Textarea(attrs={'rows': '2'}),
+                   'action': Textarea(attrs={'rows': '2'})
                    }
 
 
