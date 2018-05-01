@@ -319,6 +319,8 @@
                     <div class="panel panel-default">
                         <div class="panel-heading">Participant Information</div>
                         <div class="panel-body">
+                            <div class="container-fluid" >
+                        <div class="row">
 
                             <div class="col-md-2">
                                 {% bootstrap_label "GEL ID" %}
@@ -358,11 +360,28 @@
                                     <a href=# data-toggle="modal" data-target="#addvariantModal"><i class="fas fa-plus"></i></a>
                                 </div>
                             </div>
+                            </div>
+                            <div class="row">
+
+                             <div class="col-md-2">
+                                {% bootstrap_label "MDT Discussion" %}
+                                <div class="block">
+                                    {{report.ir_family.participant_family.proband.discussion}}
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                {% bootstrap_label "MDT Action" %}
+                                <div class="block">
+                                    {{report.ir_family.participant_family.proband.action}}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
 
+            </div>
+            </div>
             </div>
 
             <div class="panel-body">
@@ -415,11 +434,11 @@
                                             <hr>
                                                 <label>Action from MDT</label>
                                                 <br>
-                                                {{ report.ir_family.participant_family.proband.action }}
+                                                {{ pv.rarediseasereport.action }}
                                             <hr>
                                                 <label>MDT Discussion</label>
                                                 <br>
-                                                {{ report.ir_family.participant_family.proband.discussion }}
+                                                {{ pv.rarediseasereport.discussion }}
                                             <hr>
                                                 <label>Change Medication?</label>
                                                 <br>
