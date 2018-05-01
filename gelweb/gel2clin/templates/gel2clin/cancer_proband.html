@@ -11,8 +11,7 @@
 
         <div class="container-fluid" >
             {% if config_dict|get_item:'cip_as_id' == 'True' %}
-            <h1>{{report.ir_family.ir_family_id}}
-            <a href=# data-toggle="modal" data-target="#clinicalHistoryModal"><i>Clinical History</i></a></h1>
+            <h1>{{report.ir_family.ir_family_id}}</h1>
             {% else %}
             <h1>{{report.ir_family.participant_family.proband.gel_id}}</h1>
             {% endif %}
@@ -99,8 +98,10 @@
                                             <p style="color:gray">unknown</p>
                                         {% endif %}
                                     </div>
-
-
+                                    </br>
+                                    <div class="block">
+                                        <button class="btn btn-md btn-danger" href=#  data-toggle="modal" data-target="#clinicalHistoryModal"> Add Clinical History </button>
+                                    </div>
 
                                 </div>
                                 <div class="col-md-3">
