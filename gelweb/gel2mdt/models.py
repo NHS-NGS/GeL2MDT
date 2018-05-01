@@ -734,8 +734,6 @@ class VariantReport(models.Model):
 
 
 class OtherStaff(models.Model):
-    class Meta:
-        verbose_name_plural = "Other staff"
 
     name = models.CharField(max_length=200)
     hospital = models.CharField(max_length=200)
@@ -747,7 +745,8 @@ class OtherStaff(models.Model):
     class Meta:
         managed = True
         db_table = 'OtherStaff'
-        app_label= 'gel2mdt'
+        app_label = 'gel2mdt'
+        verbose_name_plural = "Other staff"
 
 
 class MDT(models.Model):
