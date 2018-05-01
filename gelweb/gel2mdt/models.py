@@ -724,9 +724,6 @@ class VariantReport(models.Model):
     # TODO: split this into multiple categorised fields
     comments = models.TextField()
 
-    def __str__(self):
-        pass
-
     class Meta:
         managed = True
         db_table = 'VariantReport'
@@ -739,8 +736,6 @@ class OtherStaff(models.Model):
     hospital = models.CharField(max_length=200)
     email = models.EmailField()
 
-    def __str__(self):
-        pass
 
     class Meta:
         managed = True
