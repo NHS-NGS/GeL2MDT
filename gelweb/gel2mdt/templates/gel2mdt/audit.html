@@ -1,0 +1,18 @@
+{% extends 'gel2mdt/base.html' %}
+{% block bokeh_head %}
+<meta charset="UTF-8">
+<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.15.min.js"></script>
+<link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.12.15.min.css">
+{% if script %}
+{{script|safe}}
+{% endif %}
+{% endblock %}
+{% block content %}
+
+{% if div %}
+{{div|safe}}
+{% else %}
+<h1>Plotting Failed for Audits</h1>
+{% endif %}
+
+{% endblock %}
