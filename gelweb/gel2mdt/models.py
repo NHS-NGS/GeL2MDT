@@ -614,10 +614,11 @@ class RareDiseaseReport(models.Model):
 
 
 class CancerReport(models.Model):
-    action_choices = (('Not Significant', 'Not Significant'),
-                      ('No Validation Required', 'No Validation Required'),
-                      ('Validation Required', 'Validation Required'),
-                      ('Unable to Validate', 'Unable to Validate'))
+    action_choices = (('Predicts Therapeutic Response', 'Predicts Therapeutic Response'),
+                      ('Prognostic', 'Prognostic'),
+                      ('Defines diagnosis group', 'Defines diagnosis group'),
+                      ('Eligibility for trial', 'Eligibility for trial'),
+                      ('Other', 'Other'),)
     discussion = models.TextField(db_column='Discussion', blank=True)
     action = models.TextField(db_column='Action', blank=True)
     classification = models.CharField(db_column='classification', max_length=2, choices=(
