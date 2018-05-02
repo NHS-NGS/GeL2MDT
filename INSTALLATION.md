@@ -77,6 +77,7 @@ Here are the options and what they pertain to:
     GMC=Either a list of GMC's if intending to give users set options for GMC or 'None' to leave it as CharField. 
     pull_T3=Boolean; This gives users the option to download T3 so only set to False if you are not pulling T3's routinely
     email_address: Contact email address for users to submib bug reports
+    plot_pilot_and_main_status_breakdown: Plots Main study and Pilot study case status breakdown in different figures
 
 Please do not use quotation marks in this file.
 

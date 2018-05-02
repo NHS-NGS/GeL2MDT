@@ -39,17 +39,15 @@ import os, json, csv
 from .exports import write_mdt_outcome_template, write_mdt_export
 from io import BytesIO, StringIO
 from .vep_utils.run_vep_batch import CaseVariant
-from .tasks import VariantAdder, update_for_t3, UpdateDemographics
+from .tasks import VariantAdder, update_for_t3, UpdateDemographics, create_bokeh_barplot
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import user_passes_test
 from .decorators import user_is_clinician
-from bokeh.models import ColumnDataSource, LabelSet
-from bokeh.palettes import Spectral8
-from bokeh.plotting import figure
-
 from bokeh.resources import CDN
 from bokeh.embed import components
 from django.db.models import Count
+from bokeh.layouts import gridplot, row
+
 # Create your views here.
 
 
@@ -220,7 +218,6 @@ def cancer_main(request):
     :param request:
     :return:
     '''
-    config_dict = load_config.LoadConfig().load()
     return render(request, 'gel2mdt/cancer_main.html', {'sample_type': 'cancer'})
 
 
@@ -246,7 +243,6 @@ def proband_view(request, report_id):
     :param report_id: GEL Report ID
     :return:
     '''
-    config_dict = load_config.LoadConfig().load()
     report = GELInterpretationReport.objects.get(id=report_id)
 
     # POST request from Demographic Update Form
@@ -1035,27 +1031,42 @@ def genomics_england_report(request, report_id):
 
 @login_required
 def audit(request, sample_type):
-
-    TOOLS = "pan,wheel_zoom,box_zoom,reset,save"
-    case_status_breakdown = GELInterpretationReport.objects.filter(sample_type=sample_type).values('case_status').annotate(Count('case_status'))
-
+    '''
+    Create figures giving breakdown of case status and NPF cases
+    :param request:
+    :param sample_type: Choice of raredisease and cancer
+    :return:
+    '''
+    config_dict = load_config.LoadConfig().load()
+    #Status choices and names
     status_choices = dict(GELInterpretationReport._meta.get_field('case_status').choices)
     status_names = list(status_choices.values())
-    status_counts = [status['case_status__count'] for status in case_status_breakdown if status['case_status'] in status_choices]
-    source = ColumnDataSource(data=dict(status=status_names,
-                                        counts=status_counts, color=Spectral8))
 
-    total_counts = figure(x_range=status_names, plot_height=350, plot_width=770,  title="Case Status Counts", tools=TOOLS)
+    #Total Case status plot
+    if config_dict['plot_pilot_and_main_status_breakdown'] == 'False':
+        case_status_breakdown = GELInterpretationReport.objects.filter(sample_type=sample_type).values(
+            'case_status').annotate(Count('case_status'))
+        status_counts = [status['case_status__count'] for status in case_status_breakdown
+                         if status['case_status'] in status_choices]
+        plots = create_bokeh_barplot(status_names, status_counts,
+                                                'Total Status Count', 'Case Status Counts')
+    else:
+        #Main study status plot
+        case_status_breakdown = GELInterpretationReport.objects.filter(sample_type=sample_type, pilot_case=False).values(
+            'case_status').annotate(Count('case_status'))
+        status_counts = [status['case_status__count'] for status in case_status_breakdown if
+                         status['case_status'] in status_choices]
+        main_study_count_plot = create_bokeh_barplot(status_names, status_counts,
+                                                     'Main Study Status Count', 'Case Status Counts')
 
-    labels = LabelSet(x='status', y='counts', text='counts', level='glyph',
-                      x_offset=-13.5, y_offset=0, source=source, render_mode='canvas')
-    total_counts.vbar(x='status', top='counts', width=0.9, color='color', legend='Total Count', source=source)
-    total_counts.add_layout(labels)
-    total_counts.xgrid.grid_line_color = None
-    total_counts.legend.orientation = "horizontal"
-    total_counts.legend.location = "top_center"
-
-
-    script, div = components(total_counts, CDN)
+        # Pilot study status plot
+        case_status_breakdown = GELInterpretationReport.objects.filter(sample_type=sample_type, pilot_case=True).values(
+            'case_status').annotate(Count('case_status'))
+        status_counts = [status['case_status__count'] for status in case_status_breakdown if
+                         status['case_status'] in status_choices]
+        pilot_study_count_plot = create_bokeh_barplot(status_names, status_counts, 'Pilot Study Status Count',
+                                                     'Case Status Counts')
+        plots = row([main_study_count_plot, pilot_study_count_plot])
+    script, div = components(plots, CDN)
     return render(request, 'gel2mdt/audit.html', {'script': script,
                   'div': div, 'sample_type': sample_type})

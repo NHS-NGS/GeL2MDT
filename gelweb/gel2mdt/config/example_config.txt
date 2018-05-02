@@ -20,3 +20,4 @@ remote_password=password
 remote_directory=/home/patrick/vep_output/
 show_clinical_report=False
 email_address=bioinformatics@xxx.nhs.uk
+plot_pilot_and_main_status_breakdown=False
