@@ -664,6 +664,13 @@ def mdt_proband_view(request, mdt_id, pk, important):
     else:
         proband_variants = ProbandVariant.objects.filter(interpretation_report=report,
                                                          max_tier=3)
+
+    for pv in proband_variants:
+        if mdt_instance.sample_type == 'raredisease':
+            pv.create_rare_disease_report()
+        elif mdt_instance.sample_type == 'cancer':
+            pv.create_cancer_report()
+            
     if mdt_instance.sample_type == 'raredisease':
         proband_variant_reports = RareDiseaseReport.objects.filter(proband_variant__in=proband_variants)
         VariantForm = modelformset_factory(RareDiseaseReport, form=RareDiseaseMDTForm, extra=0)
