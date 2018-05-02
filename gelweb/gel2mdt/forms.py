@@ -94,9 +94,9 @@ class GELIRForm(forms.ModelForm):
         gelir = self.instance
         data = self.cleaned_data
         gelir.case_status = data['case_status']
-        gelir.case_status = data['mdt_status']
-        gelir.case_status = data['pilot_case']
-        gelir.case_status = data['case_sent']
+        gelir.mdt_status = data['mdt_status']
+        gelir.pilot_case = data['pilot_case']
+        gelir.case_sent = data['case_sent']
         gelir.save(overwrite=True)
 
 
