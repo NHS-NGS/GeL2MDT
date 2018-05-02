@@ -33,6 +33,9 @@ import labkey as lk
 from datetime import datetime
 import json
 import time
+from bokeh.models import ColumnDataSource, LabelSet
+from bokeh.palettes import Spectral8
+from bokeh.plotting import figure
 
 def get_gel_content(ir, ir_version):
     '''
@@ -523,3 +526,22 @@ class UpdaterFromStorage(object):
         report.sample_id = self.proband_sample
         print(self.proband_sample)
         report.save(overwrite=True)
+
+
+def create_bokeh_barplot(names, values, legend, title):
+    TOOLS = "pan,wheel_zoom,box_zoom,reset,save"
+
+    source = ColumnDataSource(data=dict(names=names,
+                                        counts=values, color=Spectral8))
+
+    plot = figure(x_range=names, plot_height=350, plot_width=770, title=title,
+                          tools=TOOLS)
+
+    labels = LabelSet(x='names', y='counts', text='counts', level='glyph',
+                      x_offset=-13.5, y_offset=0, source=source, render_mode='canvas')
+    plot.vbar(x='names', top='counts', width=0.9, color='color', legend=legend, source=source)
+    plot.add_layout(labels)
+    plot.xgrid.grid_line_color = None
+    plot.legend.orientation = "horizontal"
+    plot.legend.location = "top_center"
+    return plot
