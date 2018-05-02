@@ -285,6 +285,7 @@ class GELInterpretationReport(models.Model):
         ('U', 'Unknown'),
         ('R', 'Required'), ('N', 'Not Required'), ('I', 'In Progress'), ('D', 'Done'),), default='U')
     pilot_case = models.BooleanField(default=False)
+    no_primary_findings = models.BooleanField(default=False)
 
     def save(self, overwrite=False, *args, **kwargs):
         """
@@ -310,6 +311,8 @@ class GELInterpretationReport(models.Model):
             latest_report.tumour_content = self.tumour_content
             latest_report.polled_at_datetime = timezone.now()
             latest_report.user = self.user
+            latest_report.no_primary_findings = self.no_primary_findings
+
             if overwrite:
                 latest_report.archived_version = self.archived_version
             else:
