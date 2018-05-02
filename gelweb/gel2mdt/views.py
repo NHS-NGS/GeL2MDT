@@ -288,9 +288,12 @@ def proband_view(request, report_id):
                                   add_variant_form.cleaned_data['reference'],
                                   add_variant_form.cleaned_data['alternate'],
                                   str(report.assembly))
-            variant_entry = add_variant_form.save(commit=False)
-            variant_entry.genome_assembly = report.assembly
-            variant_entry.save()
+            variant_entry, created = Variant.objects.get_or_create(chromosome=add_variant_form.cleaned_data['chromosome'],
+                                                                   position=add_variant_form.cleaned_data['position'],
+                                                                   genome_assembly=report.assembly,
+                                                                   reference=add_variant_form.cleaned_data['reference'],
+                                                                   alternate=add_variant_form.cleaned_data['alternate'],
+                                                                   defaults={'db_snp_id': add_variant_form['db_snp_id']})
             VariantAdder(variant_entry=variant_entry,
                          report=report,
                          variant=variant)
@@ -667,6 +670,13 @@ def mdt_proband_view(request, mdt_id, pk, important):
     else:
         proband_variants = ProbandVariant.objects.filter(interpretation_report=report,
                                                          max_tier=3)
+
+    for pv in proband_variants:
+        if mdt_instance.sample_type == 'raredisease':
+            pv.create_rare_disease_report()
+        elif mdt_instance.sample_type == 'cancer':
+            pv.create_cancer_report()
+
     if mdt_instance.sample_type == 'raredisease':
         proband_variant_reports = RareDiseaseReport.objects.filter(proband_variant__in=proband_variants)
         VariantForm = modelformset_factory(RareDiseaseReport, form=RareDiseaseMDTForm, extra=0)
