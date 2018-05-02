@@ -77,6 +77,7 @@ urlpatterns = [
     path('add_new_attendee/', views.add_new_attendee, name='add-new-attendee'),
 
     path(r'genomics_england_report/<int:report_id>', views.genomics_england_report, name='genomics-england-report'),
+    path('<str:sample_type>/audit/', views.audit, name='audit'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_DIR)
 
 urlpatterns += api_urlpatterns

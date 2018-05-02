@@ -43,6 +43,13 @@ from .tasks import VariantAdder, update_for_t3, UpdateDemographics
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import user_passes_test
 from .decorators import user_is_clinician
+from bokeh.models import ColumnDataSource
+from bokeh.palettes import Spectral8
+from bokeh.plotting import figure
+
+from bokeh.resources import CDN
+from bokeh.embed import components
+from django.db.models import Count
 # Create your views here.
 
 
@@ -1025,3 +1032,31 @@ def genomics_england_report(request, report_id):
     else:
         messages.add_message(request, 40, 'Failed to generate report, does one exist?')
         return HttpResponseRedirect(f'/proband/{report_id}')
+
+@login_required
+def audit(request, sample_type):
+
+    TOOLS = "pan,wheel_zoom,box_zoom,reset,save"
+    case_status_breakdown = GELInterpretationReport.objects.filter(sample_type=sample_type).values('case_status').annotate(Count('case_status'))
+
+    status_choices = dict(GELInterpretationReport._meta.get_field('case_status').choices)
+    status_names = list(status_choices.values())
+    status_counts = []
+    for status in case_status_breakdown:
+        if status['case_status'] in status_choices:
+            status_counts.append(status['case_status__count'])
+
+    source = ColumnDataSource(data=dict(status=status_names,
+                                        counts=status_counts, color=Spectral8))
+
+    p = figure(x_range=status_names, plot_height=350, plot_width=1000, title="Case Status Counts",
+               toolbar_location=None, tools=TOOLS)
+
+    p.vbar(x='status', top='counts', width=0.9, color='color', source=source)
+
+    p.xgrid.grid_line_color = None
+    p.legend.orientation = "horizontal"
+    p.legend.location = "top_center"
+    script, div = components(p, CDN)
+    return render(request, 'gel2mdt/audit.html', {'script': script,
+                  'div': div, 'sample_type': sample_type})
