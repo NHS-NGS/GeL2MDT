@@ -528,7 +528,7 @@ class UpdaterFromStorage(object):
         report.save(overwrite=True)
 
 
-def create_bokeh_barplot(names, values, legend, title):
+def create_bokeh_barplot(names, values, title):
     TOOLS = "pan,wheel_zoom,box_zoom,reset,save"
 
     source = ColumnDataSource(data=dict(names=names,
@@ -539,7 +539,7 @@ def create_bokeh_barplot(names, values, legend, title):
 
     labels = LabelSet(x='names', y='counts', text='counts', level='glyph',
                       x_offset=-13.5, y_offset=0, source=source, render_mode='canvas')
-    plot.vbar(x='names', top='counts', width=0.9, color='color', legend=legend, source=source)
+    plot.vbar(x='names', top='counts', width=0.9, color='color', source=source)
     plot.add_layout(labels)
     plot.xgrid.grid_line_color = None
     plot.legend.orientation = "horizontal"
