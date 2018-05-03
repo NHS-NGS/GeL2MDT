@@ -39,10 +39,15 @@ import os, json, csv
 from .exports import write_mdt_outcome_template, write_mdt_export
 from io import BytesIO, StringIO
 from .vep_utils.run_vep_batch import CaseVariant
-from .tasks import VariantAdder, update_for_t3, UpdateDemographics
+from .tasks import VariantAdder, update_for_t3, UpdateDemographics, create_bokeh_barplot
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import user_passes_test
 from .decorators import user_is_clinician
+from bokeh.resources import CDN
+from bokeh.embed import components
+from django.db.models import Count
+from bokeh.layouts import gridplot, row
+from .filters import *
 # Create your views here.
 
 
@@ -187,8 +192,6 @@ def index(request):
         return redirect('gel2clin:index')
 
 
-
-
 @login_required
 def remove_case(request, case_id):
     '''
@@ -213,7 +216,6 @@ def cancer_main(request):
     :param request:
     :return:
     '''
-    config_dict = load_config.LoadConfig().load()
     return render(request, 'gel2mdt/cancer_main.html', {'sample_type': 'cancer'})
 
 
@@ -239,7 +241,6 @@ def proband_view(request, report_id):
     :param report_id: GEL Report ID
     :return:
     '''
-    config_dict = load_config.LoadConfig().load()
     report = GELInterpretationReport.objects.get(id=report_id)
 
     # POST request from Demographic Update Form
@@ -474,7 +475,6 @@ def update_proband(request, report_id):
         return HttpResponseRedirect(f'/proband/{report_id}')
 
 
-
 @login_required
 @user_is_clinician(url='proband-view')
 def select_transcript(request, report_id, pv_id):
@@ -500,6 +500,7 @@ def select_transcript(request, report_id, pv_id):
     return render(request, 'gel2mdt/select_transcript.html',
                   {'proband_transcript_variants': proband_transcript_variants,
                    'report': report})
+
 
 @login_required
 @user_is_clinician(url='proband-view')
@@ -545,11 +546,14 @@ def edit_mdt(request, sample_type, mdt_id):
 
     gel_ir_list = GELInterpretationReport.objects.filter(sample_type=sample_type)
     mdt_instance = MDT.objects.get(id=mdt_id)
-    reports_in_mdt = MDTReport.objects.filter(MDT=mdt_instance).values_list('interpretation_report', flat=True)
-
+    mdt_reports = MDTReport.objects.filter(MDT=mdt_instance)
+    reports_in_mdt = mdt_reports.values_list('interpretation_report', flat=True)
+    report_filter = ReportFilter(request.GET, queryset=gel_ir_list)
     return render(request, 'gel2mdt/mdt_ir_select.html', {'gel_ir_list': gel_ir_list,
-                                                          'reports_in_mdt': reports_in_mdt,
+                                                          'report_filter': report_filter,
                                                           'mdt_id': mdt_id,
+                                                           'mdt_reports': mdt_reports,
+                                                          'reports_in_mdt': reports_in_mdt,
                                                           'sample_type': sample_type})
 
 
@@ -1035,3 +1039,44 @@ def genomics_england_report(request, report_id):
     else:
         messages.add_message(request, 40, 'Failed to generate report, does one exist?')
         return HttpResponseRedirect(f'/proband/{report_id}')
+
+@login_required
+def audit(request, sample_type):
+    '''
+    Create figures giving breakdown of case status and NPF cases
+    :param request:
+    :param sample_type: Choice of raredisease and cancer
+    :return:
+    '''
+    config_dict = load_config.LoadConfig().load()
+    #Status choices and names
+    status_choices = dict(GELInterpretationReport._meta.get_field('case_status').choices)
+    status_names = list(status_choices.values())
+
+    #Total Case status plot
+    if config_dict['plot_pilot_and_main_status_breakdown'] == 'False':
+        case_status_breakdown = GELInterpretationReport.objects.filter(sample_type=sample_type).values(
+            'case_status').annotate(Count('case_status'))
+        status_counts = [status['case_status__count'] for status in case_status_breakdown
+                         if status['case_status'] in status_choices]
+        plots = create_bokeh_barplot(status_names, status_counts,
+                                                'Total Status Count')
+    else:
+        #Main study status plot
+        case_status_breakdown = GELInterpretationReport.objects.filter(sample_type=sample_type, pilot_case=False).values(
+            'case_status').annotate(Count('case_status'))
+        status_counts = [status['case_status__count'] for status in case_status_breakdown if
+                         status['case_status'] in status_choices]
+        main_study_count_plot = create_bokeh_barplot(status_names, status_counts,
+                                                     'Main Study Status Count')
+
+        # Pilot study status plot
+        case_status_breakdown = GELInterpretationReport.objects.filter(sample_type=sample_type, pilot_case=True).values(
+            'case_status').annotate(Count('case_status'))
+        status_counts = [status['case_status__count'] for status in case_status_breakdown if
+                         status['case_status'] in status_choices]
+        pilot_study_count_plot = create_bokeh_barplot(status_names, status_counts, 'Pilot Study Status Count')
+        plots = row([main_study_count_plot, pilot_study_count_plot])
+    script, div = components(plots, CDN)
+    return render(request, 'gel2mdt/audit.html', {'script': script,
+                  'div': div, 'sample_type': sample_type})

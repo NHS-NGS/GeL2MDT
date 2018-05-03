@@ -183,7 +183,7 @@ SOFTWARE.
                                     <br>
 
                                 <a href=# data-toggle="modal" data-target="#caseAssignModal"><i class="fas fa-user-plus"></i></a>
-                                    </a> {{ report.assigned_user.first_name }} {{ report.assigned_user.last_name }}
+                                    {{ report.assigned_user.first_name }} {{ report.assigned_user.last_name }}
 
                                 </div>
                             </div>
@@ -206,6 +206,9 @@ SOFTWARE.
                                 </div>
                                 <div class="col-md-2">
                                     {% bootstrap_field gelir_form.pilot_case %}
+                                </div>
+                                <div class="col-md-3">
+                                    {% bootstrap_field gelir_form.no_primary_findings %}
                                 </div>
                                 {% if proband_mdt|length > 0 %}
                                 <div class="col-md-2">

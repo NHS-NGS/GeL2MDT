@@ -285,6 +285,7 @@ class GELInterpretationReport(models.Model):
         ('U', 'Unknown'),
         ('R', 'Required'), ('N', 'Not Required'), ('I', 'In Progress'), ('D', 'Done'),), default='U')
     pilot_case = models.BooleanField(default=False)
+    no_primary_findings = models.BooleanField(default=False)
 
     def save(self, overwrite=False, *args, **kwargs):
         """
@@ -310,6 +311,8 @@ class GELInterpretationReport(models.Model):
             latest_report.tumour_content = self.tumour_content
             latest_report.polled_at_datetime = timezone.now()
             latest_report.user = self.user
+            latest_report.no_primary_findings = self.no_primary_findings
+
             if overwrite:
                 latest_report.archived_version = self.archived_version
             else:
@@ -611,10 +614,11 @@ class RareDiseaseReport(models.Model):
 
 
 class CancerReport(models.Model):
-    action_choices = (('Not Significant', 'Not Significant'),
-                      ('No Validation Required', 'No Validation Required'),
-                      ('Validation Required', 'Validation Required'),
-                      ('Unable to Validate', 'Unable to Validate'))
+    action_choices = (('Predicts Therapeutic Response', 'Predicts Therapeutic Response'),
+                      ('Prognostic', 'Prognostic'),
+                      ('Defines diagnosis group', 'Defines diagnosis group'),
+                      ('Eligibility for trial', 'Eligibility for trial'),
+                      ('Other', 'Other'),)
     discussion = models.TextField(db_column='Discussion', blank=True)
     action = models.TextField(db_column='Action', blank=True)
     classification = models.CharField(db_column='classification', max_length=2, choices=(

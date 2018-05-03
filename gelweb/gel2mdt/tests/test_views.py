@@ -175,13 +175,18 @@ class ViewTests(TestCase):
         response = self.client.post(reverse('update-proband', args=[self.gel_ir.id]),
                                     {'outcome': 'testoutcome',
                                     'comment': 'testcomment',
-                                     'case_status': 'N'},
+                                     'case_status': 'N',
+                                     'pilot_case': True,
+                                     'mdt_status': 'R',
+                                     'case_sent': False,
+                                     'no_primary_findings': False},
                                      follow=True)
         self.assertContains(response, 'Proband Updated')
         self.assertEquals(response.status_code, 200)
         proband = Proband.objects.get(id=self.proband.id)
+        gelir = GELInterpretationReport.objects.get(id=self.gel_ir.id)
         self.assertEqual(proband.comment, 'testcomment')
-        self.assertEqual(proband.outcome, 'testoutcome')
+        self.assertEqual(gelir.pilot_case, True)
 
     def test_select_transcript(self):
         """
