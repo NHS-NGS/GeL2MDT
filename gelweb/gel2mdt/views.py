@@ -47,7 +47,7 @@ from bokeh.resources import CDN
 from bokeh.embed import components
 from django.db.models import Count
 from bokeh.layouts import gridplot, row
-
+from .filters import *
 # Create your views here.
 
 
@@ -190,8 +190,6 @@ def index(request):
         return render(request, 'gel2mdt/index.html', {'sample_type': None})
     else:
         return redirect('gel2clin:index')
-
-
 
 
 @login_required
@@ -477,7 +475,6 @@ def update_proband(request, report_id):
         return HttpResponseRedirect(f'/proband/{report_id}')
 
 
-
 @login_required
 @user_is_clinician(url='proband-view')
 def select_transcript(request, report_id, pv_id):
@@ -503,6 +500,7 @@ def select_transcript(request, report_id, pv_id):
     return render(request, 'gel2mdt/select_transcript.html',
                   {'proband_transcript_variants': proband_transcript_variants,
                    'report': report})
+
 
 @login_required
 @user_is_clinician(url='proband-view')
@@ -548,11 +546,14 @@ def edit_mdt(request, sample_type, mdt_id):
 
     gel_ir_list = GELInterpretationReport.objects.filter(sample_type=sample_type)
     mdt_instance = MDT.objects.get(id=mdt_id)
-    reports_in_mdt = MDTReport.objects.filter(MDT=mdt_instance).values_list('interpretation_report', flat=True)
-
+    mdt_reports = MDTReport.objects.filter(MDT=mdt_instance)
+    reports_in_mdt = mdt_reports.values_list('interpretation_report', flat=True)
+    report_filter = ReportFilter(request.GET, queryset=gel_ir_list)
     return render(request, 'gel2mdt/mdt_ir_select.html', {'gel_ir_list': gel_ir_list,
-                                                          'reports_in_mdt': reports_in_mdt,
+                                                          'report_filter': report_filter,
                                                           'mdt_id': mdt_id,
+                                                           'mdt_reports': mdt_reports,
+                                                          'reports_in_mdt': reports_in_mdt,
                                                           'sample_type': sample_type})
 
 
