@@ -11,7 +11,7 @@ This repository is established for the primary purpose of sharing GeL2MDT with c
 
 #### Version
 
-The current tagged version of GeL2MDT is v0.3.2.
+The current tagged version of GeL2MDT is v0.4.0 (found under the 'Releases' tab).
 
 
 ### How do I get set up? ###
@@ -19,16 +19,6 @@ The current tagged version of GeL2MDT is v0.3.2.
 #### Installation & Configuration
 
 Detailed installation and configuration instructions can be found [here](INSTALLATION.md).
-
-#### Dependencies
-
-
-
-#### Database 
-
-#### Testing
-
-#### Deployment
 
 ### Contribution guidelines ###
 
