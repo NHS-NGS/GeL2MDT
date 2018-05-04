@@ -36,10 +36,13 @@ import time
 from bokeh.models import ColumnDataSource, LabelSet
 from bokeh.palettes import Spectral8
 from bokeh.plotting import figure
+from django.core.mail import EmailMessage
 
-def get_gel_content(ir, ir_version):
+@task
+def get_gel_content(user_email, ir, ir_version):
     '''
     Downloads and formats the GEL Clinical Report. Removes warning signs and inserts the genes in the panel
+    :param user_email: Logged in user email address
     :param ir: Interpretation report ID or CIP id
     :param ir_version: Version of CIP id
     :return: Beatitful soup version of the report
@@ -91,7 +94,6 @@ def get_gel_content(ir, ir_version):
         gene_panels.update(details)
 
     gel_content = BeautifulSoup(gel_content)
-
     try:
         # remove any warning signs if they appear in the report
         disclaimer = gel_content.find("div", {"class": "content-div error-panel"}).extract()
@@ -150,7 +152,16 @@ def get_gel_content(ir, ir_version):
     div_tag.insert(1, h3_tag)
     div_tag.insert(2, table_tag)
 
-    return gel_content.prettify()
+    gel_content = gel_content.prettify('utf-8')
+    with open("output.html", "wb") as file:
+        file.write(gel_content)
+    subject, from_email, to = 'GEL Report', 'bioinformatics@gosh.nhs.uk', user_email
+    text_content = f'Please see attached GEL Report for case {ir}-{ir_version}'
+    msg = EmailMessage(subject, text_content, from_email, [to])
+    msg.attach_file("output.html")
+    msg.send()
+    os.remove('output.html')
+
 
 def panel_app(gene_panel, gp_version):
     '''
@@ -168,8 +179,6 @@ def panel_app(gene_panel, gp_version):
         gene_list.append(gene['GeneSymbol'])
     gene_panel_info = {'gene_list': gene_list, 'panel_length': len(gene_list)}
     return gene_panel_info
-
-
 
 @task
 def update_for_t3(report_id):
