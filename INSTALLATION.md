@@ -31,11 +31,11 @@ To activate it, use the following:
     
     source activate gel2mdt
     
-### 3) Clone the GEL2MDT repository:
+### 3) Download GEL2MDT:
     
-    
-    git clone XXX
-    cd gel2mdt
+Navigate to https://github.com/NHS-NGS/GeL2MDT/releases and download the latest version of GeL2MDT. Unzip the directory and do the following:
+
+    cd GeL2MDT
     pip install -r requirements
         
 ### 3) Setup Storage Locations
