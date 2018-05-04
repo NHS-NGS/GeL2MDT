@@ -1020,7 +1020,6 @@ def negative_report(request, report_id):
         else:
             panel_genes[panel] = ''
 
-
     return render(request, 'gel2mdt/technical_information.html', {
         'report': report,
         'panels': panel_genes})
@@ -1029,16 +1028,16 @@ def negative_report(request, report_id):
 @login_required
 def genomics_england_report(request, report_id):
     """
-    Render a page to enter genomics england samples
+    Sends the genomics england report to the users email address
+    :param report_id: GELInterpretation Report iD
+    :return Back to proband page
     """
     report = GELInterpretationReport.objects.get(id=report_id)
     cip_id = report.ir_family.ir_family_id.split('-')
-    gel_content = get_gel_content(cip_id[0], cip_id[1])
-    if gel_content:
-        return render(request, 'gel2mdt/gel_template.html', {'gel_content': gel_content})
-    else:
-        messages.add_message(request, 40, 'Failed to generate report, does one exist?')
-        return HttpResponseRedirect(f'/proband/{report_id}')
+    get_gel_content.delay(request.user.email, cip_id[0], cip_id[1])
+    messages.add_message(request, 25, 'Report will be emailed to you if it exists')
+    return HttpResponseRedirect(f'/proband/{report_id}')
+
 
 @login_required
 def audit(request, sample_type):
