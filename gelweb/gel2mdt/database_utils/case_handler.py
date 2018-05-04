@@ -1047,25 +1047,14 @@ class CaseAttributeManager(object):
         str_genes_failing_coverage = str_genes_failing_coverage[:-2]
         str_genes_failing_coverage += '.'
 
-        ir_family= self.case.attribute_managers[InterpretationReportFamily].case_model
-        try:
-            if panel:
-                average_coverage = self.case.json_request_data["genePanelsCoverage"][panel.entry.panel.panelapp_id]["SUMMARY"]["_".join((self.case.proband_sample, "avg"))]
-                proportion_above_15x = self.case.json_request_data["genePanelsCoverage"][panel.entry.panel.panelapp_id]["SUMMARY"]["_".join((self.case.proband_sample, "gte15x"))]
-            else:
-                average_coverage = None
-                proportion_above_15x = None
-        except KeyError:
-            average_coverage = None
-            proportion_above_15x = None
-
+        ir_family = self.case.attribute_managers[InterpretationReportFamily].case_model
 
         ir_family_panels = ManyCaseModel(InterpretationReportFamilyPanel, [{
             "ir_family": ir_family.entry,
             "panel": panel.entry,
             "custom": False,
-            "average_coverage": average_coverage,
-            "proportion_above_15x": proportion_above_15x,
+            "average_coverage": self.case.json_request_data["genePanelsCoverage"][panel.entry.panel.panelapp_id]["SUMMARY"].get("_".join((self.case.proband_sample, "avg")), None),
+            "proportion_above_15x": self.case.json_request_data["genePanelsCoverage"][panel.entry.panel.panelapp_id]["SUMMARY"].get("_".join((self.case.proband_sample, "gte15x")), None),
             "genes_failing_coverage": str_genes_failing_coverage
         } for panel in self.case.attribute_managers[PanelVersion].case_model.case_models if "entry" in vars(panel)],
             self.model_objects)
