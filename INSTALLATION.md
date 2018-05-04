@@ -11,7 +11,7 @@ Please go [here](https://github.com/Ensembl/ensembl-vep) to download and install
 
 When using the INSTALL.pl script, please download a homo_sapiens cache. The refseq versions of these caches are not supported. The merged cache is supported and recommended if users want to see refseq transcripts. 
 
-To see the list of repositories to download, you can navigate to [here](ftp://ftp.ensembl.org/pub/release-X/variation/VEP/) where X is the latest release number.
+To see the list of repositories to download, you can navigate to ftp://ftp.ensembl.org/pub/release-X/variation/VEP/ where release-X is the latest release number.
 
 We recommended running the convert_cache.pl script on the downloaded cache to speed up VEP queries. For more information see [here](http://www.ensembl.org/info/docs/tools/vep/script/vep_cache.html#cache)
 
