@@ -20,16 +20,6 @@ The current tagged version of GeL2MDT is v0.4.0 (found under the 'Releases' tab)
 
 Detailed installation and configuration instructions can be found [here](INSTALLATION.md).
 
-#### Dependencies
-
-
-
-#### Database 
-
-#### Testing
-
-#### Deployment
-
 ### Contribution guidelines ###
 
 When contributing to this repository, please first discuss the change you wish to make via issue, email, Slack, or any other method with the owners of this repository before making a change.
