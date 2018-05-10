@@ -108,11 +108,12 @@ def run_vep(infile, config_dict):
         # builds command from locations supplied in config file
         cmd = "{vep} -i {infile} -o {outfile} --species homo_sapiens --force_overwrite --cache --dir_cache {cache} " \
               "--fork 4 --vcf --flag_pick --exclude_predicted --assembly GRCh37 --everything " \
-              "--hgvsg --dont_skip --total_length --offline --fasta {fasta_loc} --cache_version 91".format(
+              "--hgvsg --dont_skip --total_length --offline --fasta {fasta_loc} --cache_version {cache_version}".format(
                 vep=config_dict['vep'],
                 infile=hg19_vcf,
                 outfile=hg19_outfile.name,
                 cache=config_dict['cache'],
+                cache_version=config_dict['cache_version'],
                 fasta_loc=config_dict['hg19_fasta_loc'],
         )
         if config_dict["mergedVEP"] == 'True':
@@ -123,11 +124,12 @@ def run_vep(infile, config_dict):
     if os.stat(hg38_vcf).st_size != 0:
         cmd = "{vep} -i {infile} -o {outfile} --species homo_sapiens --force_overwrite --cache --dir_cache {cache}" \
               " --fork 4 --vcf --flag_pick  --merged --exclude_predicted --assembly GRCh38 --everything " \
-              "--hgvsg --dont_skip --total_length --offline --fasta {fasta_loc} --cache_version 91".format(
+              "--hgvsg --dont_skip --total_length --offline --fasta {fasta_loc} --cache_version {cache_version}".format(
                 vep=config_dict['vep'],
                 infile=hg38_vcf,
                 outfile=hg38_outfile.name,
                 cache=config_dict['cache'],
+                cache_version=config_dict['cache_version'],
                 fasta_loc=config_dict['hg38_fasta_loc'],
         )
         if config_dict["mergedVEP"] == 'True':

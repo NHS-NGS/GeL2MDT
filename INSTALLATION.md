@@ -57,9 +57,9 @@ If contributing to the project, please do not commit your configuration files an
 Here are the options and what they pertain to:
 
     vep: Path to VEP executable
-    hg19_cache: Path to hg19 VEP cache
+    cache: Path to VEP cache
+    cache_version: VEP cache version
     hg19_fasta_loc: Path to hg19 fasta files
-    hg38_cache: Path to hg38 VEP cache
     hg38_fasta_loc: Path to hg38 fasta files
     labkey_server_request: Labkey server path, for example:  Genomics England Portal/West Midlands/MeRCURy/Rare Diseases/Core
     labkey_cancer_server_request: Labkey server path for cancer cases. Similar to the one above
