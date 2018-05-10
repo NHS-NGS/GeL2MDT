@@ -1048,32 +1048,31 @@ def audit(request, sample_type):
     :return:
     '''
     config_dict = load_config.LoadConfig().load()
-    #Status choices and names
+    # Status choices and names
     status_choices = dict(GELInterpretationReport._meta.get_field('case_status').choices)
     status_names = list(status_choices.values())
-
-    #Total Case status plot
+    # Total Case status plot
     if config_dict['plot_pilot_and_main_status_breakdown'] == 'False':
         case_status_breakdown = GELInterpretationReport.objects.filter(sample_type=sample_type).values(
             'case_status').annotate(Count('case_status'))
-        status_counts = [status['case_status__count'] for status in case_status_breakdown
-                         if status['case_status'] in status_choices]
+        case_status_breakdown = {item['case_status']: item['case_status__count'] for item in case_status_breakdown}
+        status_counts = [case_status_breakdown.get(f, 0) for f in status_choices]
         plots = create_bokeh_barplot(status_names, status_counts,
                                                 'Total Status Count')
     else:
-        #Main study status plot
+        # Main study status plot
         case_status_breakdown = GELInterpretationReport.objects.filter(sample_type=sample_type, pilot_case=False).values(
             'case_status').annotate(Count('case_status'))
-        status_counts = [status['case_status__count'] for status in case_status_breakdown if
-                         status['case_status'] in status_choices]
+        case_status_breakdown = {item['case_status']: item['case_status__count'] for item in case_status_breakdown}
+        status_counts = [case_status_breakdown.get(f, 0) for f in status_choices]
         main_study_count_plot = create_bokeh_barplot(status_names, status_counts,
                                                      'Main Study Status Count')
 
         # Pilot study status plot
         case_status_breakdown = GELInterpretationReport.objects.filter(sample_type=sample_type, pilot_case=True).values(
             'case_status').annotate(Count('case_status'))
-        status_counts = [status['case_status__count'] for status in case_status_breakdown if
-                         status['case_status'] in status_choices]
+        case_status_breakdown = {item['case_status']: item['case_status__count'] for item in case_status_breakdown}
+        status_counts = [case_status_breakdown.get(f, 0) for f in status_choices]
         pilot_study_count_plot = create_bokeh_barplot(status_names, status_counts, 'Pilot Study Status Count')
         plots = row([main_study_count_plot, pilot_study_count_plot])
     script, div = components(plots, CDN)
