@@ -19,36 +19,38 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+import os
+import json
+import csv
+from datetime import datetime
+from io import BytesIO, StringIO
+
+from django.db import IntegrityError
+from django.db.models import Q, Count
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
+from django.template.loader import render_to_string
+from django.contrib import messages
+from django.contrib.auth.models import User, Group
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.forms import modelformset_factory
+
+from .config import load_config
 from .forms import *
 from .models import *
-from django.http import HttpResponseRedirect, HttpResponse
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.db import IntegrityError
-from datetime import datetime
-from django.template.loader import render_to_string
-from django.http import JsonResponse
-from django.db.models import Q
-from .database_utils.multiple_case_adder import MultipleCaseAdder
-from .tasks import get_gel_content, panel_app
-from .api.api_views import *
-from django.forms import modelformset_factory
-from .config import load_config
-import os, json, csv
+from .filters import *
+from .tasks import panel_app, get_gel_content, VariantAdder, update_for_t3, UpdateDemographics, create_bokeh_barplot
 from .exports import write_mdt_outcome_template, write_mdt_export
-from io import BytesIO, StringIO
-from .vep_utils.run_vep_batch import CaseVariant
-from .tasks import VariantAdder, update_for_t3, UpdateDemographics, create_bokeh_barplot
-from django.contrib.auth.models import User, Group
-from django.contrib.auth.decorators import user_passes_test
 from .decorators import user_is_clinician
+
+from .api.api_views import *
+
+from .database_utils.multiple_case_adder import MultipleCaseAdder
+from .vep_utils.run_vep_batch import CaseVariant
+
 from bokeh.resources import CDN
 from bokeh.embed import components
-from django.db.models import Count
 from bokeh.layouts import gridplot, row
-from .filters import *
-# Create your views here.
 
 
 def register(request):
