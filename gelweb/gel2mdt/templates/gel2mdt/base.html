@@ -139,11 +139,14 @@ SOFTWARE.
         </div>
 
 {% block footer %}
+    <div class="wrapper">
+<div class="push"></div>
 <div class="footer">
     <p align="center" style="color:gray">
-    GeL2MDT v0.3.3, build d32ce70. &copy; Great Ormond Street Hospital for Children NHS Foundation Trust &amp; Birmingham Women's and Children's NHS Foundation Trust.
+    GeL2MDT {%version_number%}build {% build %}. &copy; Great Ormond Street Hospital for Children NHS Foundation Trust &amp; Birmingham Women's and Children's NHS Foundation Trust.
     </p>
 </div>
+    </div>
 {% endblock %}
 
 {% block head-javascript %}
