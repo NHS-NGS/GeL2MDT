@@ -1056,7 +1056,8 @@ class CaseAttributeManager(object):
             "average_coverage": self.case.json_request_data["genePanelsCoverage"][panel.entry.panel.panelapp_id]["SUMMARY"].get("_".join((self.case.proband_sample, "avg")), None),
             "proportion_above_15x": self.case.json_request_data["genePanelsCoverage"][panel.entry.panel.panelapp_id]["SUMMARY"].get("_".join((self.case.proband_sample, "gte15x")), None),
             "genes_failing_coverage": str_genes_failing_coverage
-        } for panel in self.case.attribute_managers[PanelVersion].case_model.case_models if "entry" in vars(panel)],
+        } for panel in self.case.attribute_managers[PanelVersion].case_model.case_models if "entry" in vars(panel) and
+            panel.entry.panel.panelapp_id in self.case.json_request_data["genePanelsCoverage"]],
             self.model_objects)
 
         return ir_family_panels
