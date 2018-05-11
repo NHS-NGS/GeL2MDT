@@ -1,3 +1,14 @@
+## [0.4.1] - 20-05-11
+### Added
+- Automated tracking of version and build stamps through {% version_number %} and {% build %} templatetags.
+
+### Changed
+- Bugfix for audit panel where numbers and labels would not match up correctly.
+
+## [0.4.0] - 2018-05-05
+### Added
+- First public release of GeL2MDT!
+
 ## [0.3.3] - 2018-04-27
 ### Added
 - gelclin: clinician app which is designed to give clinicians different views to clinical scientists
