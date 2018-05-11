@@ -1,5 +1,6 @@
 vep=vep
 cache=/home/patrick/.vep/
+cache_version=91
 hg19_fasta_loc=/home/patrick/.vep/Homo_sapiens.GRCh37.dna.primary_assembly.fa
 hg38_fasta_loc=/home/patrick/.vep/Homo_sapiens.GRCh38.dna.primary_assembly.fa
 labkey_server_request=Genomics England Portal/North Thames/MeRCURy/Rare Diseases/Core

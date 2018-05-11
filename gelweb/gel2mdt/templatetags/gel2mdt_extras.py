@@ -19,7 +19,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+import subprocess
+
 from django import template
+
 
 register = template.Library()
 
@@ -30,3 +33,33 @@ def get_item(dictionary, key):
 @register.filter
 def sort_by(queryset, order):
     return queryset.order_by(order)
+
+@register.simple_tag
+def version_number():
+    version_fetch_cmd = "git tag | sort -V | tail -1"
+    version_fetch_process = subprocess.Popen(
+            version_fetch_cmd,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+    )
+    version_fetch_out, version_fetch_err = version_fetch_process.communicate()
+    version = str(version_fetch_out, "utf-8")
+
+    return version
+
+@register.simple_tag
+def build():
+    build_fetch_cmd = "git log -1 --stat"
+    build_fetch_process = subprocess.Popen(
+            build_fetch_cmd,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+    )
+    build_fetch_out, build_fetch_err = build_fetch_process.communicate()
+    build_fetch = str(build_fetch_out, "utf-8").split(' ')
+
+    build_hash = build_fetch[1][:6]
+    build_date = ' '.join(build_fetch[6:11])
+    return build_hash + ', ' + build_date
