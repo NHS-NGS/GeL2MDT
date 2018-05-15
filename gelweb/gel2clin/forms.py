@@ -33,5 +33,5 @@ class ProbandCancerForm(forms.ModelForm):
                   'disease_stage', 'disease_grade', 'deceased',
                   'previous_treatment', 'currently_in_clinical_trial',
                   'current_clinical_trial_info', 'suitable_for_clinical_trial',
-                  'previous_testing']
+                  'previous_testing', 'deceased']
 
