@@ -293,7 +293,7 @@ def proband_view(request, report_id):
                                                                    genome_assembly=report.assembly,
                                                                    reference=add_variant_form.cleaned_data['reference'],
                                                                    alternate=add_variant_form.cleaned_data['alternate'],
-                                                                   defaults={'db_snp_id': add_variant_form['db_snp_id']})
+                                                                   defaults={'db_snp_id': add_variant_form.cleaned_data['db_snp_id']})
             VariantAdder(variant_entry=variant_entry,
                          report=report,
                          variant=variant)
