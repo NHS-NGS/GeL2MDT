@@ -11,9 +11,17 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
+import sys
 from django.contrib.messages import constants as messages
-
 from datetime import datetime
+
+# Check that the expected local_settings values are present
+try:
+    from .local_settings import SECRET_KEY, DEBUG, ALLOWED_HOSTS, DATABASES
+except ImportError:
+    print('Check the following settings are present in local_settings.py:\n'
+          'SECRET_KEY, DEBUG, ALLOWED_HOSTS, DATABASES')
+    sys.exit()
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -25,14 +33,6 @@ STATICFILES_DIRS = (
 )
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ''
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-
 
 # Application definition
 
@@ -82,9 +82,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'gelweb.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
 # Testing
 # https://django-testing-docs.readthedocs.io/en/latest/coverage.html
