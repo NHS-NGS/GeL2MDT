@@ -217,6 +217,10 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
         format='%Y/%m/%d',
         read_only=True
     )
+    priority = serializers.CharField(
+        source='ir_family.priority',
+        read_only=True
+    )
 
     assigned_user = serializers.StringRelatedField()
 
@@ -253,5 +257,6 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
             'max_tier',
             'assembly',
             'user',
-            'assigned_user'
+            'assigned_user',
+            'priority'
         )
