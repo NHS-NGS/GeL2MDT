@@ -400,7 +400,7 @@ def validation_list(request, sample_type):
     :param sample_type: Either raredisease or cancer
     :return: View containing proband variants
     '''
-    proband_variants = ProbandVariant.objects.filter(requires_validation=True)
+    proband_variants = ProbandVariant.objects.all()
     return render(request, 'gel2mdt/validation_list.html', {'proband_variants':proband_variants,
                                                             'sample_type': sample_type})
 
