@@ -277,6 +277,7 @@ class GELInterpretationReport(models.Model):
     polled_at_datetime = models.DateTimeField(default=timezone.now)
 
     case_sent = models.BooleanField(default=False)
+
     case_status = models.CharField(max_length=50, choices=(
         ('N', 'Not Started'), ('U', 'Under Review'), ('M', 'Awaiting MDT'), ('V', 'Awaiting Validation'),
         ('R', 'Awaiting Reporting'), ('P', 'Reported'), ('C', 'Completed'), ('E', 'External')), default='N')
@@ -508,6 +509,19 @@ class ProbandVariant(models.Model):
     interpretation_report = models.ForeignKey(
         GELInterpretationReport, on_delete=models.CASCADE)
     requires_validation = models.BooleanField(db_column='Requires_Validation', default=False)
+    validation_status = models.CharField(max_length=50, choices=(
+        ('U', 'Unknown'),
+        ('A', 'Awaiting Validation'),
+        ('P', 'Passed Validation'),
+        ('F', 'Failed Validation'),
+        ('N', 'Not Required'),), default='U')
+    validation_responsible_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        on_delete=models.SET_NULL,
+        default=None
+    )
+    validation_datetime_set = models.DateTimeField(null=True, default=None)
 
     zygosity = models.CharField(
         # zygosity may also be 'unk' or 'missing', but this will default to
