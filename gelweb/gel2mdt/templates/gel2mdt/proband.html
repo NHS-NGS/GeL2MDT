@@ -494,9 +494,9 @@ SOFTWARE.
 
                             <td>
                                 {% if gelir_form.case_status.value != "C" %}
-                                <a href="/select_transcript/{{report.id}}/{{pv.id }}"><i class="fas fa-pencil-alt"></i></a></span>{{pv.get_transcript.name }}
+                                <a href="/select_transcript/{{report.id}}/{{pv.id }}"><i class="fas fa-pencil-alt"></i></a></span> {{pv.get_transcript.name }}
                                 {% else%}
-                                {{pv.get_transcript.name }}
+                                 {{pv.get_transcript.name }}
                                 {% endif %}
                             </td>
 
@@ -504,7 +504,7 @@ SOFTWARE.
                             <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv.get_transcript_variant.hgvs_p}}</td>
                             <td>{{pv.zygosity}}</td>
                             <td>{{pv.inheritance}}</td>
-                            <td><a href="/variant_for_validation/{{pv.id}}"><i class="fas fa-pencil-alt"></i></a></span>{{pv.requires_validation }}</td>
+                            <td><a href="/variant_for_validation/{{pv.id}}"><i class="fas fa-pencil-alt"></i></a></span> {{pv.get_validation_status_display}}</td>
                        </tr>
                     {% endfor %}
 
