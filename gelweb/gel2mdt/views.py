@@ -253,6 +253,16 @@ def proband_view(request, report_id):
         clinician_form = ClinicianForm(request.POST)
         add_clinician_form = AddClinicianForm(request.POST)
         add_variant_form = AddVariantForm(request.POST)
+        variant_validation_form = VariantValidationForm(request.POST)
+
+        if variant_validation_form.is_valid():
+            validation_status = variant_validation_form.cleaned_data['validation_status']
+            validation_user = variant_validation_form.cleaned_data['validation_responsible_user']
+
+            pv.validation_status = validation_status
+            pv.validation_responsible_user = validation_user
+            pv.save()
+
         if demogs_form.is_valid():
             demogs_form.save()
             messages.add_message(request, 25, 'Proband Updated')
@@ -312,6 +322,10 @@ def proband_view(request, report_id):
     add_clinician_form = AddClinicianForm()
     add_variant_form = AddVariantForm()
 
+    pv_forms_dict = {}
+    for pv in proband_variants:
+        pv_forms_dict[pv] = VariantValidationForm(instance=pv)
+
     if not request.user.is_staff:
         if report.case_status == "C":
             for field in proband_form.__dict__["fields"]:
@@ -323,7 +337,7 @@ def proband_view(request, report_id):
                                                     'proband_form': proband_form,
                                                     'demogs_form': demogs_form,
                                                     'case_assign_form': case_assign_form,
-                                                    'proband_variants': proband_variants,
+                                                    'pv_forms_dict': pv_forms_dict,
                                                     'proband_mdt': proband_mdt,
                                                     'panels': panels,
                                                     'panel_form': panel_form,
@@ -390,6 +404,30 @@ def variant_for_validation(request, pv_id):
     proband_variant.save()
     messages.add_message(request, 25, 'Validation Status Updated')
     return HttpResponseRedirect(f'/proband/{proband_variant.interpretation_report.id}')
+
+def ajax_variant_validation(request):
+    """
+    Accepts a POST request to change the validation status of a particular
+    ProbandVariant, the ID of which should be supplied in the JSON.
+    """
+    proband_variant_id = request.POST.get('probandVariant')
+    selected_validation_status = request.POST.get('selectedStatus')
+    selected_validation_user = request.POST.get('selectedUser')
+    user_instance = User.objects.get(username=selected_validation_user)
+
+
+    proband_variant = ProbandVariant.objects.get(id=proband_variant_id)
+    proband_variant.validation_status = selected_validation_status
+    print(selected_validation_status)
+
+    proband_variant.validation_responsible_user = user_instance
+    proband_variant.validation_datetime_set = timezone.now()
+
+    proband_variant.save()
+
+    response = json.dumps({"success": True})
+
+    return HttpResponse(response, content_type="application/json")
 
 
 @login_required

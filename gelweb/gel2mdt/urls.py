@@ -43,6 +43,7 @@ urlpatterns = [
     path('update_proband/<int:report_id>', views.update_proband, name='update-proband'),
     path('update_demographics/<int:report_id>', views.update_demographics, name='update-demographics'),
     path('variant_for_validation/<int:pv_id>', views.variant_for_validation, name='variant-for-validation'),
+    path('ajax_validation', views.ajax_variant_validation, name='ajax_validation'),
     path('<str:sample_type>/validation_list', views.validation_list, name='validation-list'),
 
     path('variant/<int:variant_id>', views.variant_view, name='variant-view'),
