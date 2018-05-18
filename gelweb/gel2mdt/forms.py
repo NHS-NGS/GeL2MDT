@@ -82,6 +82,25 @@ class ProbandForm(forms.ModelForm):
         fields = ['outcome', 'comment']
 
 
+class VariantValidationForm(forms.ModelForm):
+    """
+    Form used to change values used for variant validation tracking.
+    """
+    class Meta:
+        model = ProbandVariant
+        fields = [
+            'validation_status',
+            'validation_responsible_user',
+        ]
+
+
+VariantValidationFormSet = forms.modelformset_factory(
+    ProbandVariant,
+    extra=0,
+    form=VariantValidationForm
+    )
+
+
 class GELIRForm(forms.ModelForm):
     '''
     Form used for allowing users edit proband information

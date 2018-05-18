@@ -1,23 +1,23 @@
 <!--Copyright (c) 2018 Great Ormond Street Hospital for Children NHS Foundation
-Trust & Birmingham Women's and Children's NHS Foundation Trust
+    Trust & Birmingham Women's and Children's NHS Foundation Trust
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
+    Permission is hereby granted, free of charge, to any person obtaining a copy of
+    this software and associated documentation files (the "Software"), to deal in
+    the Software without restriction, including without limitation the rights to
+    use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+    of the Software, and to permit persons to whom the Software is furnished to do
+    so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
 -->
 {% extends 'gel2mdt/base.html' %}
 {% load bootstrap3 %}
@@ -25,637 +25,694 @@ SOFTWARE.
 {% block content %}
     {% load gel2mdt_extras %}
 
-<ul class="nav nav-tabs">
-    <li class="active"><a data-toggle="tab" href="#proband">Proband</a></li>
-    <li><a data-toggle="tab" href="#variants">Variants</a></li>
-</ul>
-{% block javascript %}
-  <script src="{% static 'js/custom.js' %}"></script>
-{% endblock %}
+    <ul class="nav nav-tabs">
+        <li class="active"><a data-toggle="tab" href="#proband">Proband</a></li>
+        <li><a data-toggle="tab" href="#variants">Variants</a></li>
+    </ul>
+    {% block javascript %}
+        <script src="{% static 'js/custom.js' %}"></script>
+    {% endblock %}
 
 
-<div class="tab-content">
-    <div id="proband" class="tab-pane fade in active">
-        <div class="container-fluid" >
-            {% if config_dict|get_item:'cip_as_id' == 'True' %}
-            <h1>{{report.ir_family.ir_family_id}}</h1>
-            {% else %}
-            <h1>{{report.ir_family.participant_family.proband.gel_id}}</h1>
-            {% endif %}
-            <form role="form" method="post" enctype="multipart/form-data" action="/update_proband/{{ report.id }}">
-                {% csrf_token %}
+    <div class="tab-content">
+        <div id="proband" class="tab-pane fade in active">
+            <div class="container-fluid" >
+                {% if config_dict|get_item:'cip_as_id' == 'True' %}
+                    <h1>{{report.ir_family.ir_family_id}}</h1>
+                {% else %}
+                    <h1>{{report.ir_family.participant_family.proband.gel_id}}</h1>
+                {% endif %}
+                <form role="form" method="post" enctype="multipart/form-data" action="/update_proband/{{ report.id }}">
+                    {% csrf_token %}
+                    <div class="row">
+
+                        <div class="col-md-12">
+                            <div class="panel panel-default">
+                                {% if gelir_form.case_status.value != "C" %}
+                                    <div class="panel-heading">Participant Information <span style="float:right">
+                                            {% if request.user.is_staff %}
+                                                <a href="/update_demographics/{{report.id}}" class="btn btn-xs btn-info"> Update Demographics   </a>
+                                            {% endif %}
+                                            <a href=# data-toggle="modal" data-target="#demogModal"><i class="fas fa-pencil-alt"></i></a></span></div>
+                                {% else %}
+                                    <div class="panel-heading">Participant Information</div>
+                                {% endif %}
+                                <div class="panel-body">
+
+                                    {% bootstrap_form_errors demogs_form %}
+
+                                    <div class="col-md-3">
+                                        {% bootstrap_label "GEL ID" %}
+                                        <div class="block">
+                                            {{report.ir_family.participant_family.proband.gel_id}}
+                                        </div>
+                                        </br>
+                                        {% bootstrap_label "NHS Number" %}
+                                        <div class="block">
+                                            {{report.ir_family.participant_family.proband.nhs_number}}
+                                        </div>
+                                        </br>
+                                        {% bootstrap_label "Date of Birth" %}
+                                        <div class="block">
+                                            {{report.ir_family.participant_family.proband.date_of_birth|date}}
+                                        </div>
+                                        </br>
+                                        {% bootstrap_label "GEL Sample ID" %}
+                                        <div class="block">
+                                            {{report.sample_id}}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        {% bootstrap_label "Forename" %}
+                                        <div class="block">
+                                            {{report.ir_family.participant_family.proband.forename}}
+                                        </div>
+                                        </br>
+                                        {% bootstrap_label "Sex" %}
+                                        <div class="block">
+                                            {{report.ir_family.participant_family.proband.sex}}
+                                        </div>
+                                        </br>
+                                        {% bootstrap_label "Panels" %}
+                                        <div class="block">
+
+                                            {% for panel in panels %}
+                                                <p>
+                                                <a href="/panel/{{panel.panel.id}}">
+                                                    {{panel.panel}}
+                                                </a>
+                                                </p>
+                                            {% endfor %}
+                                            <a href=# data-toggle="modal" data-target="#panelModal"><i class="fas fa-plus"></i></a>
+
+                                        </div>
+                                        </br>
+
+                                    </div>
+
+
+                                    <div class="col-md-3">
+
+                                        {% bootstrap_label "Surname" %}
+                                        <div class="block">
+                                            {{report.ir_family.participant_family.proband.surname}}
+                                        </div>
+
+                                        </br>
+                                        {% bootstrap_label "Lab Number" %}
+                                        <div class="block">
+                                            {% if report.ir_family.participant_family.proband.lab_number %}
+                                                {{ report.ir_family.participant_family.proband.lab_number }}
+                                            {% else %}
+                                                <p style="color:gray">unknown</p>
+                                            {% endif %}
+                                        </div>
+                                        </br>
+                                        {% bootstrap_label "Clinician" %}
+                                        <div class="block">
+                                            {{report.ir_family.participant_family.clinician}}
+                                            <a href=# data-toggle="modal" data-target="#changeclinicianModal"><i class="fas fa-pencil-alt"></i></a>
+                                            <a href=# data-toggle="modal" data-target="#addclinicianModal"><i class="fas fa-plus"></i></a>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-md-3">
+                                        {% bootstrap_label "CIP ID" %}
+                                        <div class="block">
+                                            <a href="https://cipapi.genomicsengland.nhs.uk/interpretationportal/#/participant/{{report.ir_family.ir_family_id}}" target="_blank"><i class="fas fa-external-link-alt"></i> {{report.ir_family.ir_family_id}}</a>
+                                        </div>
+                                        </br>
+                                        {% bootstrap_label "CGU Number" %}
+                                        <div class="block">
+                                            {% if report.ir_family.participant_family.proband.local_id %}
+                                                {{ report.ir_family.participant_family.proband.local_id }}
+                                            {% else %}
+                                                <p style="color:gray">unknown</p>
+                                            {% endif %}
+                                        </div>
+                                        </br>
+                                        {% bootstrap_label "GMC" %}
+                                        <div class="block">
+                                            {{report.ir_family.participant_family.proband.gmc}}
+                                        </div>
+                                        </br>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+
+                    <div class=row>
+                        <div class="col-md-7">
+
+                            <div class="panel panel-default">
+                                <div class="panel-heading">Proband Tracking</div>
+                                <div class="panel-body">
+                                    <div class="col-md-6">
+
+                                        {% bootstrap_field proband_form.outcome %}
+
+                                    </div>
+                                    <div class="col-md-6">
+
+                                        {% bootstrap_field proband_form.comment %}
+                                        {% bootstrap_label "Assigned User" %}
+                                        <br>
+
+                                        <a href=# data-toggle="modal" data-target="#caseAssignModal"><i class="fas fa-user-plus"></i></a>
+                                        {{ report.assigned_user.first_name }} {{ report.assigned_user.last_name }}
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-5">
+
+                            <div class="panel panel-default">
+                                <div class="panel-heading">Status</div>
+                                <div class="panel-body">
+                                    <div class="col-md-12">
+                                        {% bootstrap_field gelir_form.case_status %}
+                                        {% bootstrap_field gelir_form.mdt_status %}
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        {% bootstrap_field gelir_form.case_sent %}
+                                    </div>
+                                    <div class="col-md-2">
+                                        {% bootstrap_field gelir_form.pilot_case %}
+                                    </div>
+                                    <div class="col-md-3">
+                                        {% bootstrap_field gelir_form.no_primary_findings %}
+                                    </div>
+                                    {% if proband_mdt|length > 0 %}
+                                        <div class="col-md-2">
+                                            <a href="/export_mdt_outcome_form/{{report.id}}"><i class="fas fa-external-link-alt"></i> MDM Outcome</a>
+                                        </div>
+                                    {% endif %}
+                                    <div class="col-md-12">
+                                        {% if gelir_form.case_status.value != "C" %}
+                                            </br>
+                                            <button type="submit" name="variant_update" class="btn btn-primary btn">Save</button>
+                                        {% elif request.user.is_staff %}
+                                            </br>
+                                            <button type="submit" name="variant_update" class="btn btn-primary btn">Save</button>
+                                        {% endif %}
+
+
+                                        {% if config_dict|get_item:'show_clinical_report' == 'True' %}
+                                            <span style="float: right">
+                                                <a href="/genomics_england_report/{{report.id}}" class="btn btn-warning" role="button">Clinical Report</a>
+                                            </span>
+                                        {% endif %} 
+
+                                        <span style="float: right">
+                                            <a href="/proband/{{report.id}}/negative_report" target="_blank" class="btn btn-info" role="button">Negative Report</a>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+
+                {% if proband_mdt %}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">MDT History</div>
+                                <div class="panel-body">
+                                    <div class="col-md-15">
+                                        <table width="100%" class="table table-striped table-bordered table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>MDT Name</th>
+                                                    <th>MDT Date</th>
+                                                    <th>Status</th>
+                                                    <th>Creator</th>
+
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for mdt in proband_mdt %}
+                                                    <tr>
+                                                        <td><a href="/mdt_view/{{ mdt.MDT.id }}">{{ mdt.MDT.id }}</a></td>
+                                                        <td>{{mdt.MDT.date_of_mdt|date}}</td>
+                                                        <td>{{mdt.MDT.get_status_display}}</td>
+                                                        <td>{{mdt.MDT.creator}}</td>
+
+                                                    </tr>
+                                                {% endfor %}
+
+
+                                            </tbody>
+                                        </table>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if relatives %}
+                    <div class=row>
+                        <div class="col-md-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">Relatives</div>
+                                <div class="panel-body">
+                                    <table width="100%" class="table table-striped table-bordered table-hover" id="relative-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Relationship</th>
+                                                <th>Forename</th>
+                                                <th>Surname</th>
+                                                <th>DOB</th>
+                                                <th>NHS number</th>
+                                                <th>ID</th>
+                                                <th>Affection_status</th>
+                                                <th>Edit Relative</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for relative in relatives %}
+                                                <tr>
+
+                                                    <td>{{relative.relation_to_proband}}</td>
+                                                    <td>{{relative.forename}}</td>
+                                                    <td>{{relative.surname}}</td>
+                                                    <td>{{relative.date_of_birth|date}}</td>
+                                                    <td>{{relative.nhs_number}}</td>
+                                                    <td>{{relative.gel_id}}</td>
+                                                    <td>{{relative.affected_status}}</td>
+                                                    <td><button type="button" class="btn btn-xs btn-danger js-edit-relative"
+                                                                              data-url="/edit_relative/{{ relative.id }}">
+                                                            Edit
+                                                        </button></td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+
+            </div>
+        </div>
+
+        <div id="variants" class="tab-pane fade">
+            <div class="container-fluid" >
+                {% if config_dict|get_item:'cip_as_id' == 'True' %}
+                    <h1>{{report.ir_family.ir_family_id}}</h1>
+                {% else %}
+                    <h1>{{report.ir_family.participant_family.proband.gel_id}}</h1>
+                {% endif %}
                 <div class="row">
 
                     <div class="col-md-12">
                         <div class="panel panel-default">
-                            {% if gelir_form.case_status.value != "C" %}
-                            <div class="panel-heading">Participant Information <span style="float:right">
-                                {% if request.user.is_staff %}
-                                <a href="/update_demographics/{{report.id}}" class="btn btn-xs btn-info"> Update Demographics   </a>
-                                       {% endif %}
-                                <a href=# data-toggle="modal" data-target="#demogModal"><i class="fas fa-pencil-alt"></i></a></span></div>
-                            {% else %}
                             <div class="panel-heading">Participant Information</div>
-                            {% endif %}
                             <div class="panel-body">
+                                <div class="container-fluid" >
+                                    <div class="row">
 
-                            {% bootstrap_form_errors demogs_form %}
-
-                                <div class="col-md-3">
-                                    {% bootstrap_label "GEL ID" %}
-                                    <div class="block">
-                                        {{report.ir_family.participant_family.proband.gel_id}}
-                                    </div>
-                                    </br>
-                                    {% bootstrap_label "NHS Number" %}
-                                    <div class="block">
-                                        {{report.ir_family.participant_family.proband.nhs_number}}
-                                    </div>
-                                    </br>
-                                    {% bootstrap_label "Date of Birth" %}
-                                    <div class="block">
-                                        {{report.ir_family.participant_family.proband.date_of_birth|date}}
-                                    </div>
-                                    </br>
-                                    {% bootstrap_label "GEL Sample ID" %}
-                                    <div class="block">
-                                        {{report.sample_id}}
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    {% bootstrap_label "Forename" %}
-                                    <div class="block">
-                                        {{report.ir_family.participant_family.proband.forename}}
-                                    </div>
-                                    </br>
-                                    {% bootstrap_label "Sex" %}
-                                    <div class="block">
-                                        {{report.ir_family.participant_family.proband.sex}}
-                                    </div>
-                                </br>
-                                {% bootstrap_label "Panels" %}
-                                <div class="block">
-
-                                    {% for panel in panels %}
-                                        <p>
-                                    <a href="/panel/{{panel.panel.id}}">
-                                    {{panel.panel}}
-                                    </a>
-                                    </p>
-                                    {% endfor %}
-                                    <a href=# data-toggle="modal" data-target="#panelModal"><i class="fas fa-plus"></i></a>
-
-                                </div>
-                                </br>
-
-                                </div>
-
-
-                                <div class="col-md-3">
-
-                                    {% bootstrap_label "Surname" %}
-                                    <div class="block">
-                                        {{report.ir_family.participant_family.proband.surname}}
-                                    </div>
-
-                                    </br>
-                                    {% bootstrap_label "Lab Number" %}
-                                    <div class="block">
-                                         {% if report.ir_family.participant_family.proband.lab_number %}
-                                            {{ report.ir_family.participant_family.proband.lab_number }}
-                                        {% else %}
-                                            <p style="color:gray">unknown</p>
+                                        <div class="col-md-2">
+                                            {% bootstrap_label "GEL ID" %}
+                                            <div class="block">
+                                                {{report.ir_family.participant_family.proband.gel_id}}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            {% bootstrap_label "Forename" %}
+                                            <div class="block">
+                                                {{report.ir_family.participant_family.proband.forename}}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            {% bootstrap_label "Surname" %}
+                                            <div class="block">
+                                                {{report.ir_family.participant_family.proband.surname}}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            {% bootstrap_label "CIP ID" %}
+                                            <div class="block">
+                                                <a href="https://cipapi.genomicsengland.nhs.uk/interpretationportal/#/participant/{{report.ir_family.ir_family_id}}" target="_blank">{{report.ir_family.ir_family_id}}</a>
+                                            </div>
+                                        </div>
+                                        {% if config_dict|get_item:'pull_T3' == 'False' %}
+                                            <div class="col-md-2">
+                                                {% bootstrap_label "Pull Tier3 Variants" %}
+                                                <div class="block">
+                                                    <a href="/pull_t3_variants/{{report.id}}">Link</a>
+                                                </div>
+                                            </div>
                                         {% endif %}
+                                        <div class="col-md-2">
+                                            {% bootstrap_label "Add a new variant" %}
+                                            <div class="block">
+                                                <a href=# data-toggle="modal" data-target="#addvariantModal"><i class="fas fa-plus"></i></a>
+                                            </div>
+                                        </div>
                                     </div>
-                                    </br>
-                                    {% bootstrap_label "Clinician" %}
-                                    <div class="block">
-                                        {{report.ir_family.participant_family.clinician}}
-                                        <a href=# data-toggle="modal" data-target="#changeclinicianModal"><i class="fas fa-pencil-alt"></i></a>
-                                        <a href=# data-toggle="modal" data-target="#addclinicianModal"><i class="fas fa-plus"></i></a>
-                                    </div>
+                                    <div class="row">
 
-                                </div>
-                                <div class="col-md-3">
-                                    {% bootstrap_label "CIP ID" %}
-                                    <div class="block">
-                                        <a href="https://cipapi.genomicsengland.nhs.uk/interpretationportal/#/participant/{{report.ir_family.ir_family_id}}" target="_blank"><i class="fas fa-external-link-alt"></i> {{report.ir_family.ir_family_id}}</a>
+                                        <div class="col-md-2">
+                                            {% bootstrap_label "MDT Discussion" %}
+                                            <div class="block">
+                                                {{report.ir_family.participant_family.proband.discussion}}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            {% bootstrap_label "MDT Action" %}
+                                            <div class="block">
+                                                {{report.ir_family.participant_family.proband.action}}
+                                            </div>
+                                        </div>
                                     </div>
-                                    </br>
-                                    {% bootstrap_label "CGU Number" %}
-                                    <div class="block">
-                                        {% if report.ir_family.participant_family.proband.local_id %}
-                                            {{ report.ir_family.participant_family.proband.local_id }}
-                                        {% else %}
-                                            <p style="color:gray">unknown</p>
-                                        {% endif %}
-                                    </div>
-                                    </br>
-                                    {% bootstrap_label "GMC" %}
-                                    <div class="block">
-                                        {{report.ir_family.participant_family.proband.gmc}}
-                                    </div>
-                                    </br>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                </div>
 
 
-
-                <div class=row>
-                    <div class="col-md-7">
-
-                        <div class="panel panel-default">
-                            <div class="panel-heading">Proband Tracking</div>
-                            <div class="panel-body">
-                                <div class="col-md-6">
-
-                                    {% bootstrap_field proband_form.outcome %}
-
-                                </div>
-                                <div class="col-md-6">
-
-                                    {% bootstrap_field proband_form.comment %}
-                                    {% bootstrap_label "Assigned User" %}
-                                    <br>
-
-                                <a href=# data-toggle="modal" data-target="#caseAssignModal"><i class="fas fa-user-plus"></i></a>
-                                    {{ report.assigned_user.first_name }} {{ report.assigned_user.last_name }}
-
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div class="col-md-5">
-
-                        <div class="panel panel-default">
-                            <div class="panel-heading">Status</div>
-                            <div class="panel-body">
-                                <div class="col-md-12">
-                                    {% bootstrap_field gelir_form.case_status %}
-                                    {% bootstrap_field gelir_form.mdt_status %}
-                                </div>
-
-                                <div class="col-md-2">
-                                    {% bootstrap_field gelir_form.case_sent %}
-                                </div>
-                                <div class="col-md-2">
-                                    {% bootstrap_field gelir_form.pilot_case %}
-                                </div>
-                                <div class="col-md-3">
-                                    {% bootstrap_field gelir_form.no_primary_findings %}
-                                </div>
-                                {% if proband_mdt|length > 0 %}
-                                <div class="col-md-2">
-                                    <a href="/export_mdt_outcome_form/{{report.id}}"><i class="fas fa-external-link-alt"></i> MDM Outcome</a>
-                                </div>
-                                {% endif %}
-                                <div class="col-md-12">
-                                    {% if gelir_form.case_status.value != "C" %}
-                                        </br>
-                                <button type="submit" name="variant_update" class="btn btn-primary btn">Save</button>
-                                     {% elif request.user.is_staff %}
-                                     </br>
-                                    <button type="submit" name="variant_update" class="btn btn-primary btn">Save</button>
-                                    {% endif %}
-
-
-                                {% if config_dict|get_item:'show_clinical_report' == 'True' %}
-                                <span style="float: right">
-                                    <a href="/genomics_england_report/{{report.id}}" class="btn btn-warning" role="button">Clinical Report</a>
-                                </span>
-                                {% endif %} 
-
-                                <span style="float: right">
-                                    <a href="/proband/{{report.id}}/negative_report" target="_blank" class="btn btn-info" role="button">Negative Report</a>
-                                </span>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
-            </form>
 
-
-            {% if proband_mdt %}
-                <div class="row">
-                <div class="col-md-12">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">MDT History</div>
-                        <div class="panel-body">
-                            <div class="col-md-15">
-                                <table width="100%" class="table table-striped table-bordered table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>MDT Name</th>
-                                            <th>MDT Date</th>
-                                            <th>Status</th>
-                                            <th>Creator</th>
-
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                    {% for mdt in proband_mdt %}
-                                        <tr>
-                                        <td><a href="/mdt_view/{{ mdt.MDT.id }}">{{ mdt.MDT.id }}</a></td>
-                                        <td>{{mdt.MDT.date_of_mdt|date}}</td>
-                                            <td>{{mdt.MDT.get_status_display}}</td>
-                                        <td>{{mdt.MDT.creator}}</td>
-
-                                    </tr>
-                                {% endfor %}
-
-
-                                    </tbody>
-                                </table>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% endif %}
-
-            {% if relatives %}
-                <div class=row>
-                <div class="col-md-12">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">Relatives</div>
-                        <div class="panel-body">
-                            <table width="100%" class="table table-striped table-bordered table-hover" id="relative-table">
-                                <thead>
-                                    <tr>
-                                        <th>Relationship</th>
-                                        <th>Forename</th>
-                                        <th>Surname</th>
-                                        <th>DOB</th>
-                                        <th>NHS number</th>
-                                        <th>ID</th>
-                                        <th>Affection_status</th>
-                                        <th>Edit Relative</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                {% for relative in relatives %}
-                                    <tr>
-
-                                    <td>{{relative.relation_to_proband}}</td>
-                                    <td>{{relative.forename}}</td>
-                                    <td>{{relative.surname}}</td>
-                                    <td>{{relative.date_of_birth|date}}</td>
-                                    <td>{{relative.nhs_number}}</td>
-                                    <td>{{relative.gel_id}}</td>
-                                        <td>{{relative.affected_status}}</td>
-                                        <td><button type="button" class="btn btn-xs btn-danger js-edit-relative"
-                                                data-url="/edit_relative/{{ relative.id }}">
-                                            Edit
-                                        </button></td>
+                <div class="panel-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered table-hover" id="dataTables-pv">
+                            <thead style='font-size: 75%'>
+                                <tr>
+                                    <th>Variant</th>
+                                    <th>Interpretation</th>
+                                    <th>Gene</th>
+                                    <th>Tier</th>
+                                    <th>Transcript</th>
+                                    <th>HGVSc</th>
+                                    <th>HGVSp</th>
+                                    <th>Genotype</th>
+                                    <th>Inheritance</th>
+                                    <th>Validation Status</th>
                                 </tr>
-                            {% endfor %}
-                                </tbody>
-                            </table>
+                            </thead>
+                            <tbody style='font-size: 75%'>
 
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% endif %}
+                                {% for pv, pv_form in pv_forms_dict.items %}
+                                    <tr >
+                                        <td>
+                                            <a href="/variant/{{pv.variant.id }}">
+                                                <i class="fas fa-external-link-alt fa-2x"></i>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <a href=# data-toggle="modal" data-target="#pvModal{{forloop.counter}}">
+                                                <i class="fas fa-info-circle fa-2x"></i>
+                                            </a>
+                                        </td>
 
-
-        </div>
-    </div>
-
-    <div id="variants" class="tab-pane fade">
-        <div class="container-fluid" >
-            {% if config_dict|get_item:'cip_as_id' == 'True' %}
-            <h1>{{report.ir_family.ir_family_id}}</h1>
-            {% else %}
-            <h1>{{report.ir_family.participant_family.proband.gel_id}}</h1>
-            {% endif %}
-            <div class="row">
-
-                <div class="col-md-12">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">Participant Information</div>
-                        <div class="panel-body">
-                            <div class="container-fluid" >
-                        <div class="row">
-
-                            <div class="col-md-2">
-                                {% bootstrap_label "GEL ID" %}
-                                <div class="block">
-                                    {{report.ir_family.participant_family.proband.gel_id}}
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                {% bootstrap_label "Forename" %}
-                                <div class="block">
-                                    {{report.ir_family.participant_family.proband.forename}}
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                {% bootstrap_label "Surname" %}
-                                <div class="block">
-                                    {{report.ir_family.participant_family.proband.surname}}
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                {% bootstrap_label "CIP ID" %}
-                                <div class="block">
-                                    <a href="https://cipapi.genomicsengland.nhs.uk/interpretationportal/#/participant/{{report.ir_family.ir_family_id}}" target="_blank">{{report.ir_family.ir_family_id}}</a>
-                                </div>
-                            </div>
-                             {% if config_dict|get_item:'pull_T3' == 'False' %}
-                            <div class="col-md-2">
-                                {% bootstrap_label "Pull Tier3 Variants" %}
-                                <div class="block">
-                                    <a href="/pull_t3_variants/{{report.id}}">Link</a>
-                                </div>
-                            </div>
-                            {% endif %}
-                             <div class="col-md-2">
-                                {% bootstrap_label "Add a new variant" %}
-                                <div class="block">
-                                    <a href=# data-toggle="modal" data-target="#addvariantModal"><i class="fas fa-plus"></i></a>
-                                </div>
-                            </div>
-                            </div>
-                            <div class="row">
-
-                             <div class="col-md-2">
-                                {% bootstrap_label "MDT Discussion" %}
-                                <div class="block">
-                                    {{report.ir_family.participant_family.proband.discussion}}
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                {% bootstrap_label "MDT Action" %}
-                                <div class="block">
-                                    {{report.ir_family.participant_family.proband.action}}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-            </div>
-            </div>
-            </div>
-
-            <div class="panel-body">
-                <div class="table-responsive">
-                    <table class="table table-striped table-bordered table-hover" id="dataTables-pv">
-                        <thead style='font-size: 75%'>
-                            <tr>
-                                <th>Variant</th>
-                                <th>Interpretation</th>
-                                <th>Gene</th>
-                                <th>Tier</th>
-                                <th>Transcript</th>
-                                <th>HGVSc</th>
-                                <th>HGVSp</th>
-                                <th>Genotype</th>
-                                <th>Inheritance</th>
-                                <th>Requires Validation</th>
-                            </tr>
-                        </thead>
-                        <tbody style='font-size: 75%'>
-
-                        {% for pv in proband_variants %}
-                            <tr >
-                            <td>
-                                <a href="/variant/{{pv.variant.id }}">
-                                    <i class="fas fa-external-link-alt fa-2x"></i>
-                                </a>
-                            </td>
-                            <td>
-                                <a href=# data-toggle="modal" data-target="#pvModal{{forloop.counter}}">
-                                    <i class="fas fa-info-circle fa-2x"></i>
-                                </a>
-                            </td>
-
-                            <div id="pvModal{{forloop.counter}}" class="modal fade" role="dialog">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
-                                            <h4 class="modal-title">MDT Results</h4>
+                                        <div id="pvModal{{forloop.counter}}" class="modal fade" role="dialog">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
+                                                        <h4 class="modal-title">MDT Results</h4>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <label>Variant Classification</label>
+                                                        <br>
+                                                        {{ pv.rarediseasereport.classification }}
+                                                        <hr>
+                                                        <label>Contribution to Phenotype</label>
+                                                        <br>
+                                                        {{ pv.rarediseasereport.contribution_of_phenotype }}
+                                                        <hr>
+                                                        <label>Action from MDT</label>
+                                                        <br>
+                                                        {{ pv.rarediseasereport.action }}
+                                                        <hr>
+                                                        <label>MDT Discussion</label>
+                                                        <br>
+                                                        {{ pv.rarediseasereport.discussion }}
+                                                        <hr>
+                                                        <label>Change Medication?</label>
+                                                        <br>
+                                                        {{ pv.rarediseasereport.change_med }}
+                                                        <hr>
+                                                        <label>Surgical Option?</label>
+                                                        <br>
+                                                        {{ pv.rarediseasereport.surgical_option }}
+                                                        <hr>
+                                                        <label>Add Relative Surveillance?</label>
+                                                        <br>
+                                                        {{ pv.rarediseasereport.add_surveillance_for_relatives }}
+                                                        <hr>
+                                                        <label>Add Clinical Trial?</label>
+                                                        <br>
+                                                        {{ pv.rarediseasereport.clinical_trial }}
+                                                        <hr>
+                                                        <label>Inform Reproductive Choice?</label>
+                                                        <br>
+                                                        {{ pv.rarediseasereport.inform_reproductive_choice }}
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="modal-body">
-                                                <label>Variant Classification</label>
-                                                <br>
-                                                {{ pv.rarediseasereport.classification }}
-                                            <hr>
-                                                <label>Contribution to Phenotype</label>
-                                                <br>
-                                                {{ pv.rarediseasereport.contribution_of_phenotype }}
-                                            <hr>
-                                                <label>Action from MDT</label>
-                                                <br>
-                                                {{ pv.rarediseasereport.action }}
-                                            <hr>
-                                                <label>MDT Discussion</label>
-                                                <br>
-                                                {{ pv.rarediseasereport.discussion }}
-                                            <hr>
-                                                <label>Change Medication?</label>
-                                                <br>
-                                                {{ pv.rarediseasereport.change_med }}
-                                            <hr>
-                                                <label>Surgical Option?</label>
-                                                <br>
-                                                {{ pv.rarediseasereport.surgical_option }}
-                                            <hr>
-                                                <label>Add Relative Surveillance?</label>
-                                                <br>
-                                                {{ pv.rarediseasereport.add_surveillance_for_relatives }}
-                                            <hr>
-                                                <label>Add Clinical Trial?</label>
-                                                <br>
-                                                {{ pv.rarediseasereport.clinical_trial }}
-                                            <hr>
-                                                <label>Inform Reproductive Choice?</label>
-                                                <br>
-                                                {{ pv.rarediseasereport.inform_reproductive_choice }}
+
+
+                                        <td>{{ pv.get_transcript.gene }}</td>
+                                        <td>{{ pv.max_tier }}</td>
+
+                                        <td>
+                                            {% if gelir_form.case_status.value != "C" %}
+                                                <a href="/select_transcript/{{report.id}}/{{pv.id }}"><i class="fas fa-pencil-alt"></i></a></span> {{pv.get_transcript.name }}
+                                        {% else%}
+                                            {{pv.get_transcript.name }}
+                                        {% endif %}
+                                        </td>
+
+                                        <td style="word-wrap: break-word; min-width: 100px;max-width: 100px;">{{pv.get_transcript_variant.hgvs_c}}</td>
+                                        <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv.get_transcript_variant.hgvs_p}}</td>
+                                        <td>{{pv.zygosity}}</td>
+                                        <td>{{pv.inheritance}}</td>
+                                        <td><a onclick="$('#validationModal{{forloop.counter}}').modal('show')"><i class="fas fa-pencil-alt"></i></a></span> {{pv.get_validation_status_display}}</td>
+                                    </tr>
+
+                                    <div id="validationModal{{forloop.counter}}" class="modal fade validationModal" role="dialog">
+                                        <p class="pv-id" hidden>{{pv.id}}</p>
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
+                                                    <h4 class="modal-title">{{pv.get_transcript_variant.hgvs_c}}</h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <h5>Validation for variant {{pv.get_transcript_variant.hgvs_c}}.</h5>
+                                                    <form id="validationForm{{forloop.counter}}" action="#" method="POST">
+                                                        {% csrf_token %}
+                                                        {% bootstrap_form pv_form %}
+                                                        {% buttons %}
+                                                        <input value="Update" type="button" onclick="updateValidation(validationModal{{forloop.counter}});" class="btn btn-primary">
+                                                        </input>
+                                                        {% endbuttons %}
+                                                    </form>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
+                                {% endfor %}
+                                <script>
+                                    function updateValidation(modalID) {
+                                        var modal = $(modalID);
+                                        var CSRFToken = modal.find('input[name=csrfmiddlewaretoken]').val();
 
+                                        var modalTitle = modal.find('.modal-title');
+                                        var pvID = modal.find('.pv-id').text();
+                                        console.log("Updating validation for " + modalTitle.text() + " (" + pvID + ").");
 
-                            <td>{{ pv.get_transcript.gene }}</td>
-                            <td>{{ pv.max_tier }}</td>
+                                        var select_status = modal.find('#id_validation_status');
+                                        var select_status_value = select_status.find(":selected").text();
 
-                            <td>
-                                {% if gelir_form.case_status.value != "C" %}
-                                <a href="/select_transcript/{{report.id}}/{{pv.id }}"><i class="fas fa-pencil-alt"></i></a></span> {{pv.get_transcript.name }}
-                                {% else%}
-                                 {{pv.get_transcript.name }}
-                                {% endif %}
-                            </td>
+                                        var select_user = modal.find('#id_validation_responsible_user');
+                                        var select_user_value = select_user.find(":selected").text();
 
-                            <td style="word-wrap: break-word; min-width: 100px;max-width: 100px;">{{pv.get_transcript_variant.hgvs_c}}</td>
-                            <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv.get_transcript_variant.hgvs_p}}</td>
-                            <td>{{pv.zygosity}}</td>
-                            <td>{{pv.inheritance}}</td>
-                            <td><a href="/variant_for_validation/{{pv.id}}"><i class="fas fa-pencil-alt"></i></a></span> {{pv.get_validation_status_display}}</td>
-                       </tr>
-                    {% endfor %}
+                                        console.log("Setting validation status as " + select_status_value);
+                                        console.log("Setting validation user as " + select_user_value);
 
+                                        $.ajax({
+                                            type: 'POST',
+                                            url: '/ajax_validation',
+                                            data: {
+                                                probandVariant: pvID,
+                                                selectedStatus: select_status_value,
+                                                selectedUser: select_user_value,
+                                                csrfmiddlewaretoken: CSRFToken
+                                            },
+                                            success: function(response) {
+                                                console.log("POSTed validation change.");
+                                            }
+                                        })
 
-                        </tbody>
-                    </table>
+                                    }
+                                </script>
+                            </tbody>
+                        </table>
+                    </div>
+
                 </div>
-
             </div>
         </div>
     </div>
-</div>
 
-<div id="caseAssignModal" class="modal fade" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
-                <h4 class="modal-title">Assign case to user</h4>
-            </div>
-            <div class="modal-body">
-                <form action="/proband/{{ report.id }}" method="POST">
-                    {% csrf_token %}
-                    {% bootstrap_form case_assign_form %}
-                    {% buttons %}
-                    <button type="submit" class="btn btn-primary">
-                        Update
-                    </button>
-                    {% endbuttons %}
-                </form>
+    <div id="caseAssignModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
+                    <h4 class="modal-title">Assign case to user</h4>
+                </div>
+                <div class="modal-body">
+
+                    <form action="/proband/{{ report.id }}" method="POST">
+                        {% csrf_token %}
+                        {% bootstrap_form case_assign_form %}
+                        {% buttons %}
+                        <button type="submit" class="btn btn-primary">
+                            Update
+                        </button>
+                        {% endbuttons %}
+                    </form>
+
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div id="demogModal" class="modal fade" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
-                <h4 class="modal-title">Edit proband information</h4>
-            </div>
-            <div class="modal-body">
-                <form action="/proband/{{ report.id }}" method="POST">
-                    {% csrf_token %}
-                    {% bootstrap_form demogs_form %}
-                    {% buttons %}
-                    <button type="submit" class="btn btn-primary">
-                        Update
-                    </button>
-                    {% endbuttons %}
-                </form>
+    <div id="demogModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
+                    <h4 class="modal-title">Edit proband information</h4>
+                </div>
+                <div class="modal-body">
+                    <form action="/proband/{{ report.id }}" method="POST">
+                        {% csrf_token %}
+                        {% bootstrap_form demogs_form %}
+                        {% buttons %}
+                        <button type="submit" class="btn btn-primary">
+                            Update
+                        </button>
+                        {% endbuttons %}
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div id="panelModal" class="modal fade" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
-                <h4 class="modal-title">Add Panel</h4>
-            </div>
-            <div class="modal-body">
-                <form action="/proband/{{ report.id }}" method="POST">
-                    {% csrf_token %}
-                    {% bootstrap_form panel_form %}
-                    {% buttons %}
-                    <button type="submit" class="btn btn-primary">
-                        Change
-                    </button>
-                    {% endbuttons %}
-                </form>
+    <div id="panelModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
+                    <h4 class="modal-title">Add Panel</h4>
+                </div>
+                <div class="modal-body">
+                    <form action="/proband/{{ report.id }}" method="POST">
+                        {% csrf_token %}
+                        {% bootstrap_form panel_form %}
+                        {% buttons %}
+                        <button type="submit" class="btn btn-primary">
+                            Change
+                        </button>
+                        {% endbuttons %}
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div id="changeclinicianModal" class="modal fade" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
-                <h4 class="modal-title">Change Clinician</h4>
-            </div>
-            <div class="modal-body">
-                <form action="/proband/{{ report.id }}" method="POST">
-                    {% csrf_token %}
-                    {% bootstrap_form clinician_form %}
-                    {% buttons %}
-                    <button type="submit" class="btn btn-primary">
-                        Change Clinician
-                    </button>
-                    {% endbuttons %}
-                </form>
+    <div id="changeclinicianModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
+                    <h4 class="modal-title">Change Clinician</h4>
+                </div>
+                <div class="modal-body">
+                    <form action="/proband/{{ report.id }}" method="POST">
+                        {% csrf_token %}
+                        {% bootstrap_form clinician_form %}
+                        {% buttons %}
+                        <button type="submit" class="btn btn-primary">
+                            Change Clinician
+                        </button>
+                        {% endbuttons %}
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div id="addclinicianModal" class="modal fade" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
-                <h4 class="modal-title">Add New Clinician</h4>
-            </div>
-            <div class="modal-body">
-                <form action="/proband/{{ report.id }}" method="POST">
-                    {% csrf_token %}
-                    {% bootstrap_form add_clinician_form %}
-                    {% buttons %}
-                    <button type="submit" class="btn btn-primary">
-                        Add New Clinician
-                    </button>
-                    {% endbuttons %}
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="addvariantModal" class="modal fade" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
-                <h4 class="modal-title">Add New Variant</h4>
-            </div>
-            <div class="modal-body">
-                <form action="/proband/{{ report.id }}" method="POST">
-                    {% csrf_token %}
-                    {% bootstrap_form add_variant_form %}
-                    {% buttons %}
-                    <button type="submit" class="btn btn-primary">
-                        Add New Variant
-                    </button>
-                    {% endbuttons %}
-                </form>
+    <div id="addclinicianModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
+                    <h4 class="modal-title">Add New Clinician</h4>
+                </div>
+                <div class="modal-body">
+                    <form action="/proband/{{ report.id }}" method="POST">
+                        {% csrf_token %}
+                        {% bootstrap_form add_clinician_form %}
+                        {% buttons %}
+                        <button type="submit" class="btn btn-primary">
+                            Add New Clinician
+                        </button>
+                        {% endbuttons %}
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-
-<div class="modal fade" id="modal-relative">
-    <div class="modal-dialog">
-      <div class="modal-content">
-      </div>
+    <div id="addvariantModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
+                    <h4 class="modal-title">Add New Variant</h4>
+                </div>
+                <div class="modal-body">
+                    <form action="/proband/{{ report.id }}" method="POST">
+                        {% csrf_token %}
+                        {% bootstrap_form add_variant_form %}
+                        {% buttons %}
+                        <button type="submit" class="btn btn-primary">
+                            Add New Variant
+                        </button>
+                        {% endbuttons %}
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
+
+
+    <div class="modal fade" id="modal-relative">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            </div>
+        </div>
+    </div>
 
 {% endblock %}
