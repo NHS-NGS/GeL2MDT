@@ -457,7 +457,10 @@ def validation_list(request, sample_type):
     :param sample_type: Either raredisease or cancer
     :return: View containing proband variants
     '''
-    proband_variants = ProbandVariant.objects.filter(validation_status="A")
+    proband_variants = ProbandVariant.objects.filter(
+        validation_status="A",
+        interpretation_report__sample_type=sample_type
+    )
     pv_forms_dict = {proband_variant: VariantValidationForm(instance=proband_variant)
                      for proband_variant in proband_variants}
     return render(request, 'gel2mdt/validation_list.html', {'pv_forms_dict':pv_forms_dict,
