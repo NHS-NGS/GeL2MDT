@@ -75,40 +75,97 @@ SOFTWARE.
                             <th>Date Assigned</th>
                             <th>Zygosity</th>
                             <th>CIP Link</th>
+                            <th>Outcome</th>
                         </tr>
                     </thead>
                     <tbody style='font-size: 75%'>
-                        {% for pv in proband_variants %}
+                        {% for pv, pv_form in pv_forms_dict.items %}
                             {% if pv.validation_status == "A" %}
-                        <tr>
-                            <td>
-                                <a href="/variant/{{pv.variant.id }}">
-                                    <i class="fas fa-external-link-alt fa-2x"></i>
-                                </a>
-                            </td>
-                            <td>{{ pv.get_transcript.gene }}</td>
-                            <td style="word-wrap: break-word; min-width: 100px;max-width: 100px;">{{pv.get_transcript_variant.hgvs_c}}</td>
-                            <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv.get_transcript_variant.hgvs_p}}</td>
-                            <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv.get_transcript_variant.hgvs_g}}</td>
-                            <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv.validation_responsible_user.first_name}} {{pv.validation_responsible_user.last_name}}</td>
-                            <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv.validation_datetime_set}}</td>
-                            <td>{{pv.zygosity}}</td>
-                            {% if config_dict|get_item:'cip_as_id' == 'True' %}
-                            <td>
-                                <a href="/proband/{{pv.interpretation_report.id }}">
-                                    {{pv.interpretation_report.ir_family.ir_family_id}}
-                                </a>
-                            </td>
-                            {% else %}
-                            <td>
-                                <a href="/proband/{{pv.interpretation_report.id }}">
-                                    {{pv.interpretation_report.ir_family.participant_family.proband.gel_id}}
-                                </a>
-                            </td>
+                                <tr>
+                                    <td>
+                                        <a href="/variant/{{pv.variant.id }}">
+                                            <i class="fas fa-external-link-alt fa-2x"></i>
+                                        </a>
+                                    </td>
+                                    <td>{{ pv.get_transcript.gene }}</td>
+                                    <td style="word-wrap: break-word; min-width: 100px;max-width: 100px;">{{pv.get_transcript_variant.hgvs_c}}</td>
+                                    <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv.get_transcript_variant.hgvs_p}}</td>
+                                    <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv.get_transcript_variant.hgvs_g}}</td>
+                                    <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv.validation_responsible_user.first_name}} {{pv.validation_responsible_user.last_name}}</td>
+                                    <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv.validation_datetime_set}}</td>
+                                    <td>{{pv.zygosity}}</td>
+                                    {% if config_dict|get_item:'cip_as_id' == 'True' %}
+                                        <td>
+                                            <a href="/proband/{{pv.interpretation_report.id }}">
+                                                {{pv.interpretation_report.ir_family.ir_family_id}}
+                                            </a>
+                                        </td>
+                                    {% else %}
+                                        <td>
+                                            <a href="/proband/{{pv.interpretation_report.id }}">
+                                                {{pv.interpretation_report.ir_family.participant_family.proband.gel_id}}
+                                            </a>
+                                        </td>
+                                    {% endif %}
+                                    <td><a onclick="$('#validationModal{{forloop.counter}}').modal('show')"><i class="fas fa-pencil-alt"></i></a></span> {{pv.get_validation_status_display}}</td>
+                                </tr>
+
+                                <div id="validationModal{{forloop.counter}}" class="modal fade validationModal" role="dialog">
+                                    <p class="pv-id" hidden>{{pv.id}}</p>
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
+                                                <h4 class="modal-title">{{pv.get_transcript_variant.hgvs_c}}</h4>
+                                            </div>
+                                            <div class="modal-body">
+                                                <h5>Validation for variant {{pv.get_transcript_variant.hgvs_c}}.</h5>
+                                                <form id="validationForm{{forloop.counter}}" action="#" method="POST">
+                                                    {% csrf_token %}
+                                                    {% bootstrap_form pv_form %}
+                                                    {% buttons %}
+                                                    <input value="Update" type="button" onclick="updateValidation(validationModal{{forloop.counter}});" class="btn btn-primary">
+                                                    </input>
+                                                    {% endbuttons %}
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             {% endif %}
-                        </tr>
-                    {% endif %}
                         {% endfor %}
+                                <script>
+                                    function updateValidation(modalID) {
+                                        var modal = $(modalID);
+                                        var CSRFToken = modal.find('input[name=csrfmiddlewaretoken]').val();
+                                        var modalTitle = modal.find('.modal-title');
+                                        var pvID = modal.find('.pv-id').text();
+                                        console.log("Updating validation for " + modalTitle.text() + " (" + pvID + ").");
+                                        var select_status = modal.find('#id_validation_status');
+                                        var select_status_value = select_status.find(":selected").text();
+                                        var select_user = modal.find('#id_validation_responsible_user');
+                                        var select_user_value = select_user.find(":selected").text();
+                                        console.log("Setting validation status as " + select_status_value);
+                                        console.log("Setting validation user as " + select_user_value);
+                                        $.ajax({
+                                            type: 'POST',
+                                            url: '/ajax_validation',
+                                            data: {
+                                                probandVariant: pvID,
+                                                selectedStatus: select_status_value,
+                                                selectedUser: select_user_value,
+                                                csrfmiddlewaretoken: CSRFToken
+                                            },
+                                            success: function(response) {
+                                                console.log("POSTed validation change:");
+                                                console.log(response);
+                                                select_status.find(":selected").text(response.validationStatus);
+                                                select_user.find(":selected").text(response.validationUser);
+                                                location.reload();
+                                            }
+                                        })
+                                    }
+                                </script>
                     </tbody>
                 </table>
             </div>
@@ -119,5 +176,5 @@ SOFTWARE.
     <!-- /.col-lg-12 -->
 </div>
  </div>
-</div>
+ </div>
 {% endblock %}

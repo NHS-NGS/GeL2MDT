@@ -415,17 +415,36 @@ def ajax_variant_validation(request):
     selected_validation_user = request.POST.get('selectedUser')
     user_instance = User.objects.get(username=selected_validation_user)
 
+    validation_status_key = {
+        'Unknown': 'U',
+        'Awaiting Validation':'A',
+        'Passed Validation':'P',
+        'Failed Validation': 'F',
+        'Not Required': 'N',
+    }
+    selected_validation_status = validation_status_key[selected_validation_status]
 
     proband_variant = ProbandVariant.objects.get(id=proband_variant_id)
-    proband_variant.validation_status = selected_validation_status
-    print(selected_validation_status)
 
+    proband_variant.validation_status = selected_validation_status
     proband_variant.validation_responsible_user = user_instance
-    proband_variant.validation_datetime_set = timezone.now()
+
+    if not proband_variant.validation_datetime_set:
+        proband_variant.validation_datetime_set = timezone.now()
 
     proband_variant.save()
+    proband_variant = ProbandVariant.objects.get(id=proband_variant_id)
 
-    response = json.dumps({"success": True})
+    new_validation_status = proband_variant.validation_status
+    new_validation_user = proband_variant.validation_responsible_user
+
+    print(vars(proband_variant))
+
+    response = json.dumps({
+        "success": True,
+        "validationStatus": new_validation_status,
+        "validationUser": new_validation_user.username
+    })
 
     return HttpResponse(response, content_type="application/json")
 
@@ -438,8 +457,10 @@ def validation_list(request, sample_type):
     :param sample_type: Either raredisease or cancer
     :return: View containing proband variants
     '''
-    proband_variants = ProbandVariant.objects.all()
-    return render(request, 'gel2mdt/validation_list.html', {'proband_variants':proband_variants,
+    proband_variants = ProbandVariant.objects.filter(validation_status="A")
+    pv_forms_dict = {proband_variant: VariantValidationForm(instance=proband_variant)
+                     for proband_variant in proband_variants}
+    return render(request, 'gel2mdt/validation_list.html', {'pv_forms_dict':pv_forms_dict,
                                                             'sample_type': sample_type})
 
 
@@ -708,9 +729,11 @@ def mdt_proband_view(request, mdt_id, pk, important):
     if important ==1:
         proband_variants = ProbandVariant.objects.filter(interpretation_report=report,
                                                          max_tier__lte=2).order_by('-max_tier')
+        validation_forms = [VariantValidationForm(instance=x) for x in proband_variants]
     else:
         proband_variants = ProbandVariant.objects.filter(interpretation_report=report,
                                                          max_tier=3)
+        validation_forms = [VariantValidationForm(instance=x) for x in proband_variants]
 
     for pv in proband_variants:
         if mdt_instance.sample_type == 'raredisease':
