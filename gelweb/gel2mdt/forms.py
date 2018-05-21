@@ -22,7 +22,7 @@ SOFTWARE.
 from django import forms
 from .models import *
 from django.contrib.auth.models import User
-from django.forms import HiddenInput, Textarea, CheckboxInput
+from django.forms import HiddenInput, Textarea, CheckboxInput, Select
 from django.forms import BaseFormSet
 
 
@@ -233,23 +233,42 @@ class RareDiseaseMDTForm(forms.ModelForm):
     '''
     Form used in Proband View at MDT which allows users to fill in exit questionaire questions
     '''
+    requires_validation = forms.ChoiceField(
+        choices=(
+            ('U', 'Unknown'),
+            ('A', 'Awaiting Validation'),
+            ('P', 'Passed Validation'),
+            ('F', 'Failed Validation'),
+            ('N', 'Not Required'),
+        )
+    )
+
     class Meta:
         model = RareDiseaseReport
-        fields = ('contribution_to_phenotype', 'change_med',
-                  'clinical_trial', 'discussion', 'action',
-                  'inform_reproductive_choice', 'surgical_option',
-                  'add_surveillance_for_relatives',
-                  'classification', 'id',)
+        fields = (
+            'contribution_to_phenotype', 'change_med',
+            'clinical_trial', 'requires_validation',
+            'discussion', 'action',
+            'inform_reproductive_choice', 'surgical_option',
+            'add_surveillance_for_relatives',
+            'classification', 'id',)
         widgets = {
-                   'id': HiddenInput(),
-                   'surgical_option': CheckboxInput(),
-                   'change_med': CheckboxInput(),
-                   'add_surveillance_for_relatives': CheckboxInput(),
-                   'clinical_trial': CheckboxInput(),
-                   'inform_reproductive_choice': CheckboxInput(),
-                   'discussion': Textarea(attrs={'rows': '2'}),
-                   'action': Textarea(attrs={'rows': '2'})
-                   }
+            'id': HiddenInput(),
+            'surgical_option': CheckboxInput(),
+            'requires_validation': Select(),
+            'change_med': CheckboxInput(),
+            'add_surveillance_for_relatives': CheckboxInput(),
+            'clinical_trial': CheckboxInput(),
+            'inform_reproductive_choice': CheckboxInput(),
+            'discussion': Textarea(attrs={'rows': '2'}),
+            'action': Textarea(attrs={'rows': '2'})
+        }
+
+    def save(self, commit=True):
+        selected_validation_status = self.cleaned_data['requires_validation']
+        print(selected_validation_status)
+
+        return super(RareDiseaseMDTForm, self).save(commit=commit)
 
 
 class CancerMDTForm(forms.ModelForm):
