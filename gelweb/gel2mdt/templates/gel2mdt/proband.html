@@ -25,7 +25,7 @@
 {% block content %}
     {% load gel2mdt_extras %}
 
-    <ul class="nav nav-tabs">
+    <ul class="nav nav-tabs" data-options="deep_linking: true">
         <li class="active"><a data-toggle="tab" href="#proband">Proband</a></li>
         <li><a data-toggle="tab" href="#variants">Variants</a></li>
     </ul>
@@ -529,25 +529,22 @@
                                             </div>
                                         </div>
                                     </div>
+
                                 {% endfor %}
+
                                 <script>
                                     function updateValidation(modalID) {
                                         var modal = $(modalID);
                                         var CSRFToken = modal.find('input[name=csrfmiddlewaretoken]').val();
-
                                         var modalTitle = modal.find('.modal-title');
                                         var pvID = modal.find('.pv-id').text();
                                         console.log("Updating validation for " + modalTitle.text() + " (" + pvID + ").");
-
                                         var select_status = modal.find('#id_validation_status');
                                         var select_status_value = select_status.find(":selected").text();
-
                                         var select_user = modal.find('#id_validation_responsible_user');
                                         var select_user_value = select_user.find(":selected").text();
-
                                         console.log("Setting validation status as " + select_status_value);
                                         console.log("Setting validation user as " + select_user_value);
-
                                         $.ajax({
                                             type: 'POST',
                                             url: '/ajax_validation',
@@ -558,12 +555,17 @@
                                                 csrfmiddlewaretoken: CSRFToken
                                             },
                                             success: function(response) {
-                                                console.log("POSTed validation change.");
+                                                console.log("POSTed validation change:");
+                                                console.log(response);
+                                                select_status.find(":selected").text(response.validationStatus);
+                                                select_user.find(":selected").text(response.validationUser);
+                                                location.reload();
                                             }
                                         })
 
                                     }
                                 </script>
+
                             </tbody>
                         </table>
                     </div>
