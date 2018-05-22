@@ -472,7 +472,13 @@ function getRadioValue(radioElementName) {
         });
     });
 </script>
-
+<script>
+    $(document).ready(function() {
+        $('#dataTables-validationlist').DataTable({
+            "order": [[ 6, "desc" ]]
+        });
+    });
+</script>
 <script>
     $(document).ready(function() {
         $('#myCases').DataTable({
