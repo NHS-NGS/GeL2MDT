@@ -19,12 +19,21 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+import os
 import subprocess
 
 from django import template
+from gel2mdt.config import load_config
 
 
 register = template.Library()
+config = load_config.LoadConfig().load()
+
+def is_git_repo():
+    if subprocess.call(["git", "branch"], stderr=subprocess.STDOUT, stdout=open(os.devnull, 'w')) != 0:
+        return False
+    else:
+        return True
 
 @register.filter
 def get_item(dictionary, key):
@@ -36,6 +45,8 @@ def sort_by(queryset, order):
 
 @register.simple_tag
 def version_number():
+    if not is_git_repo():
+        return config["VERSION_NUMBER"]
     version_fetch_cmd = "git tag | sort -V | tail -1"
     version_fetch_process = subprocess.Popen(
             version_fetch_cmd,
@@ -50,6 +61,8 @@ def version_number():
 
 @register.simple_tag
 def build():
+    if not is_git_repo():
+        return ''
     build_fetch_cmd = "git log -1 --stat"
     build_fetch_process = subprocess.Popen(
             build_fetch_cmd,
@@ -61,5 +74,4 @@ def build():
     build_fetch = str(build_fetch_out, "utf-8").split(' ')
 
     build_hash = build_fetch[1][:6]
-    build_date = ' '.join(build_fetch[6:11])
-    return build_hash + ', ' + build_date
+    return 'build ' + build_hash
