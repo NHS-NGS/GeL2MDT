@@ -257,6 +257,16 @@ def proband_view(request, report_id):
         clinician_form = ClinicianForm(request.POST)
         add_clinician_form = AddClinicianForm(request.POST)
         add_variant_form = AddVariantForm(request.POST)
+        variant_validation_form = VariantValidationForm(request.POST)
+
+        if variant_validation_form.is_valid():
+            validation_status = variant_validation_form.cleaned_data['validation_status']
+            validation_user = variant_validation_form.cleaned_data['validation_responsible_user']
+
+            pv.validation_status = validation_status
+            pv.validation_responsible_user = validation_user
+            pv.save()
+
         if demogs_form.is_valid():
             demogs_form.save()
             messages.add_message(request, 25, 'Proband Updated')
@@ -316,6 +326,10 @@ def proband_view(request, report_id):
     add_clinician_form = AddClinicianForm()
     add_variant_form = AddVariantForm()
 
+    pv_forms_dict = {}
+    for pv in proband_variants:
+        pv_forms_dict[pv] = VariantValidationForm(instance=pv)
+
     if not request.user.is_staff:
         if report.case_status == "C":
             for field in proband_form.__dict__["fields"]:
@@ -327,7 +341,7 @@ def proband_view(request, report_id):
                                                     'proband_form': proband_form,
                                                     'demogs_form': demogs_form,
                                                     'case_assign_form': case_assign_form,
-                                                    'proband_variants': proband_variants,
+                                                    'pv_forms_dict': pv_forms_dict,
                                                     'proband_mdt': proband_mdt,
                                                     'panels': panels,
                                                     'panel_form': panel_form,
@@ -395,6 +409,56 @@ def variant_for_validation(request, pv_id):
     messages.add_message(request, 25, 'Validation Status Updated')
     return HttpResponseRedirect(f'/proband/{proband_variant.interpretation_report.id}')
 
+def ajax_variant_validation(request):
+    """
+    Accepts a POST request to change the validation status of a particular
+    ProbandVariant, the ID of which should be supplied in the JSON.
+    """
+    proband_variant_id = request.POST.get('probandVariant')
+    selected_validation_status = request.POST.get('selectedStatus')
+    selected_validation_user = request.POST.get('selectedUser')
+    if selected_validation_user == "---------":
+        print("None")
+        user_instance = None
+    else:
+        user_instance = User.objects.get(username=selected_validation_user)
+
+    validation_status_key = {
+        'Unknown': 'U',
+        'Awaiting Validation':'A',
+        'Passed Validation':'P',
+        'Failed Validation': 'F',
+        'Not Required': 'N',
+    }
+    selected_validation_status = validation_status_key[selected_validation_status]
+
+    proband_variant = ProbandVariant.objects.get(id=proband_variant_id)
+
+    proband_variant.validation_status = selected_validation_status
+    proband_variant.validation_responsible_user = user_instance
+
+    if not proband_variant.validation_datetime_set:
+        proband_variant.validation_datetime_set = timezone.now()
+
+    proband_variant.save()
+    proband_variant = ProbandVariant.objects.get(id=proband_variant_id)
+
+    new_validation_status = proband_variant.validation_status
+    new_validation_user = proband_variant.validation_responsible_user
+    if new_validation_user:
+        new_validation_user = new_validation_user.username
+    else:
+        new_validation_user = None
+
+
+    response = json.dumps({
+        "success": True,
+        "validationStatus": new_validation_status,
+        "validationUser": new_validation_user
+    })
+
+    return HttpResponse(response, content_type="application/json")
+
 
 @login_required
 def validation_list(request, sample_type):
@@ -404,8 +468,13 @@ def validation_list(request, sample_type):
     :param sample_type: Either raredisease or cancer
     :return: View containing proband variants
     '''
-    proband_variants = ProbandVariant.objects.filter(requires_validation=True)
-    return render(request, 'gel2mdt/validation_list.html', {'proband_variants':proband_variants,
+    proband_variants = ProbandVariant.objects.filter(
+        validation_status="A",
+        interpretation_report__sample_type=sample_type
+    )
+    pv_forms_dict = {proband_variant: VariantValidationForm(instance=proband_variant)
+                     for proband_variant in proband_variants}
+    return render(request, 'gel2mdt/validation_list.html', {'pv_forms_dict':pv_forms_dict,
                                                             'sample_type': sample_type})
 
 
@@ -719,15 +788,22 @@ def mdt_proband_view(request, mdt_id, pk, important):
             print(proband_form.errors)
             print(variant_formset.errors)
         return HttpResponseRedirect(f'/mdt_proband_view/{mdt_id}/{pk}/{important}')
-    return render(request, 'gel2mdt/mdt_proband_view.html', {'proband_variants': proband_variants,
-                                                             'report': report,
-                                                             'mdt_id': mdt_id,
-                                                             'mdt_instance': mdt_instance,
-                                                             'proband_form': proband_form,
-                                                             'variant_formset': variant_formset,
-                                                             'panels': panels,
-                                                             'sample_type':report.sample_type,
-                                                             'gelir_form':gelir_form})
+
+    for form in variant_formset:
+        pv = form.instance.proband_variant
+        current_validation_status = pv.validation_status
+        form.initial["requires_validation"] = pv.validation_status
+        return render(request, 'gel2mdt/mdt_proband_view.html', {
+            'proband_variants': proband_variants,
+            'report': report,
+            'mdt_id': mdt_id,
+            'mdt_instance': mdt_instance,
+            'proband_form': proband_form,
+            'variant_formset': variant_formset,
+            'panels': panels,
+            'sample_type':report.sample_type,
+            'gelir_form':gelir_form
+        })
 
 
 @login_required
