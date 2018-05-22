@@ -413,7 +413,11 @@ def ajax_variant_validation(request):
     proband_variant_id = request.POST.get('probandVariant')
     selected_validation_status = request.POST.get('selectedStatus')
     selected_validation_user = request.POST.get('selectedUser')
-    user_instance = User.objects.get(username=selected_validation_user)
+    if selected_validation_user == "---------":
+        print("None")
+        user_instance = None
+    else:
+        user_instance = User.objects.get(username=selected_validation_user)
 
     validation_status_key = {
         'Unknown': 'U',
@@ -437,13 +441,16 @@ def ajax_variant_validation(request):
 
     new_validation_status = proband_variant.validation_status
     new_validation_user = proband_variant.validation_responsible_user
+    if new_validation_user:
+        new_validation_user = new_validation_user.username
+    else:
+        new_validation_user = None
 
-    print(vars(proband_variant))
 
     response = json.dumps({
         "success": True,
         "validationStatus": new_validation_status,
-        "validationUser": new_validation_user.username
+        "validationUser": new_validation_user
     })
 
     return HttpResponse(response, content_type="application/json")

@@ -89,19 +89,16 @@ class VariantValidationForm(forms.ModelForm):
     """
     Form used to change values used for variant validation tracking.
     """
+    def __init__(self, *args, **kwargs):
+        super(VariantValidationForm, self).__init__(*args, **kwargs)
+        self.fields['validation_responsible_user'].required=False
+
     class Meta:
         model = ProbandVariant
         fields = [
             'validation_status',
             'validation_responsible_user',
         ]
-
-
-VariantValidationFormSet = forms.modelformset_factory(
-    ProbandVariant,
-    extra=0,
-    form=VariantValidationForm
-    )
 
 
 class GELIRForm(forms.ModelForm):
