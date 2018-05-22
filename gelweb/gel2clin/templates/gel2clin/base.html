@@ -296,61 +296,127 @@ function initaliseTable() {
     redrawTrioStatus(table, trioStatus);
     redrawDeNovoStatus(table, deNovoStatus);
 }
+
+
 function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
     console.log("Loading table through initaliseTable()!")
-    var table = $('#rare-disease-main').DataTable( {
-        "ajax": {
-            "url": '{% url 'gelir-json' sample_type=sample_type %}',
-            "dataSrc": ''
-        },
-        "columns": [
-            {
-                "data": "id",
-                "render": function(data, type, row, meta){
-                    if(type === 'display'){
-                        data = '<a href="proband/' + data + '">' + '<i class="fas fa-external-link-alt"></i>' + '</a>';
-                    }
-                    return data;
+    if("{{sample_type}}" === 'cancer') {
+        var table = $('#rare-disease-main').DataTable({
+            "ajax": {
+                "url": '{% url 'gelir-json' sample_type=sample_type %}',
+                "dataSrc": ''
+            },
+            "columns": [
+                {
+                    "data": "id",
+                    "render": function (data, type, row, meta) {
+                        if (type === 'display') {
+                            data = '<a href="proband/' + data + '">' + '<i class="fas fa-external-link-alt"></i>' + '</a>';
+                        }
+                        return data;
+                    },
+                    "orderable": false,
                 },
-                "orderable": false,
+                {"data": "gel_id"},
+                {"data": "forename"},
+                {"data": "surname"},
+                {
+                    "data": "date_of_birth",
+                    "type": "date "
+                },
+                {
+                    "data": "max_tier",
+                    "type": "num"
+                },
+                {
+                    "data": "assembly",
+                    "visible": false
+                },
+                {"data": "case_status"},
+                {
+                    "data": "pilot_case",
+                    "visible": false,
+                    "type": "string"
+                },
+                {
+                    "data": "trio_sequenced",
+                    "visible": false,
+                },
+                {
+                    "data": "has_de_novo",
+                    "visible": false,
+                },
+                {
+                    "data": "updated",
+                    "type": "date "
+                },
+                {"data": "priority"},
+                {"data": "cip_id"},
+                {"data": "gmc"},
+                {"data": "clinician"}
+            ],
+            "order": [[11, "desc"]]
+        });
+    } else {
+        var table = $('#rare-disease-main').DataTable({
+            "ajax": {
+                "url": '{% url 'gelir-json' sample_type=sample_type %}',
+                "dataSrc": ''
             },
-            { "data": "gel_id" },
-            { "data": "forename" },
-            { "data": "surname" },
-            { "data": "date_of_birth",
-                "type": "date " },
-            {
-                "data": "max_tier",
-                "type": "num"
-            },
-            {
-                "data": "assembly",
-                "visible": false
-            },
-            { "data": "case_status" },
-            {
-                "data": "pilot_case",
-                "visible": false,
-                "type": "string"
-            },
-            {
-                "data": "trio_sequenced",
-                "visible": false,
-            },
-            {
-                "data": "has_de_novo",
-                "visible": false,
-            },
-            { "data": "updated",
-                "type": "date " },
-            { "data": "cip_id" },
-            { "data": "gmc" },
-            { "data": "clinician" }
-        ],
-        "order": [[ 11, "desc" ]]
-    } );
+            "columns": [
+                {
+                    "data": "id",
+                    "render": function (data, type, row, meta) {
+                        if (type === 'display') {
+                            data = '<a href="proband/' + data + '">' + '<i class="fas fa-external-link-alt"></i>' + '</a>';
+                        }
+                        return data;
+                    },
+                    "orderable": false,
+                },
+                {"data": "gel_id"},
+                {"data": "forename"},
+                {"data": "surname"},
+                {
+                    "data": "date_of_birth",
+                    "type": "date "
+                },
+                {
+                    "data": "max_tier",
+                    "type": "num"
+                },
+                {
+                    "data": "assembly",
+                    "visible": false
+                },
+                {"data": "case_status"},
+                {
+                    "data": "pilot_case",
+                    "visible": false,
+                    "type": "string"
+                },
+                {
+                    "data": "trio_sequenced",
+                    "visible": false,
+                },
+                {
+                    "data": "has_de_novo",
+                    "visible": false,
+                },
+                {
+                    "data": "updated",
+                    "type": "date "
+                },
+                {"data": "cip_id"},
+                {"data": "gmc"},
+                {"data": "clinician"}
+            ],
+            "order": [[11, "desc"]]
+        });
+    }
     return table
 }
+
 function getRadioValue(radioElementName) {
     var radios = document.getElementsByName(radioElementName);
     for (var i = 0, length=radios.length; i < length; i++) {
