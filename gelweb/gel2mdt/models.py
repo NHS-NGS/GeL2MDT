@@ -518,6 +518,7 @@ class ProbandVariant(models.Model):
     validation_responsible_user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,
+        blank=True,
         on_delete=models.SET_NULL,
         default=None
     )

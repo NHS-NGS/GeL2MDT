@@ -732,11 +732,9 @@ def mdt_proband_view(request, mdt_id, pk, important):
     if important ==1:
         proband_variants = ProbandVariant.objects.filter(interpretation_report=report,
                                                          max_tier__lte=2).order_by('-max_tier')
-        validation_forms = [VariantValidationForm(instance=x) for x in proband_variants]
     else:
         proband_variants = ProbandVariant.objects.filter(interpretation_report=report,
                                                          max_tier=3)
-        validation_forms = [VariantValidationForm(instance=x) for x in proband_variants]
 
     for pv in proband_variants:
         if mdt_instance.sample_type == 'raredisease':
@@ -779,15 +777,22 @@ def mdt_proband_view(request, mdt_id, pk, important):
             print(proband_form.errors)
             print(variant_formset.errors)
         return HttpResponseRedirect(f'/mdt_proband_view/{mdt_id}/{pk}/{important}')
-    return render(request, 'gel2mdt/mdt_proband_view.html', {'proband_variants': proband_variants,
-                                                             'report': report,
-                                                             'mdt_id': mdt_id,
-                                                             'mdt_instance': mdt_instance,
-                                                             'proband_form': proband_form,
-                                                             'variant_formset': variant_formset,
-                                                             'panels': panels,
-                                                             'sample_type':report.sample_type,
-                                                             'gelir_form':gelir_form})
+
+    for form in variant_formset:
+        pv = form.instance.proband_variant
+        current_validation_status = pv.validation_status
+        form.initial["requires_validation"] = pv.validation_status
+        return render(request, 'gel2mdt/mdt_proband_view.html', {
+            'proband_variants': proband_variants,
+            'report': report,
+            'mdt_id': mdt_id,
+            'mdt_instance': mdt_instance,
+            'proband_form': proband_form,
+            'variant_formset': variant_formset,
+            'panels': panels,
+            'sample_type':report.sample_type,
+            'gelir_form':gelir_form
+        })
 
 
 @login_required
