@@ -80,7 +80,6 @@ SOFTWARE.
                     </thead>
                     <tbody style='font-size: 75%'>
                         {% for pv, pv_form in pv_forms_dict.items %}
-                            {% if pv.validation_status == "A" %}
                                 <tr>
                                     <td>
                                         <a href="/variant/{{pv.variant.id }}">
@@ -132,7 +131,6 @@ SOFTWARE.
                                         </div>
                                     </div>
                                 </div>
-                            {% endif %}
                         {% endfor %}
                                 <script>
                                     function updateValidation(modalID) {
