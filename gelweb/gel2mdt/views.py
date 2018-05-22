@@ -391,24 +391,6 @@ def update_demographics(request, report_id):
     return HttpResponseRedirect(f'/proband/{report_id}')
 
 
-@login_required
-@user_is_clinician(url='index')
-def variant_for_validation(request, pv_id):
-    '''
-    Adds a proband variant to the list for validation
-    :param request:
-    :param pv_id: Proband Variant id
-    :return: Back to proband page
-    '''
-    proband_variant = ProbandVariant.objects.get(id=pv_id)
-    if proband_variant.requires_validation:
-        proband_variant.requires_validation = False
-    else:
-        proband_variant.requires_validation = True
-    proband_variant.save()
-    messages.add_message(request, 25, 'Validation Status Updated')
-    return HttpResponseRedirect(f'/proband/{proband_variant.interpretation_report.id}')
-
 def ajax_variant_validation(request):
     """
     Accepts a POST request to change the validation status of a particular
@@ -425,6 +407,7 @@ def ajax_variant_validation(request):
     validation_status_key = {
         'Unknown': 'U',
         'Awaiting Validation':'A',
+        'Urgent Validation': 'K',
         'Passed Validation':'P',
         'Failed Validation': 'F',
         'Not Required': 'N',
@@ -467,13 +450,13 @@ def validation_list(request, sample_type):
     :param sample_type: Either raredisease or cancer
     :return: View containing proband variants
     '''
+
     proband_variants = ProbandVariant.objects.filter(
-        validation_status="A",
-        interpretation_report__sample_type=sample_type
-    )
+        Q(validation_status="A") | Q(validation_status="K"),
+        interpretation_report__sample_type=sample_type)
     pv_forms_dict = {proband_variant: VariantValidationForm(instance=proband_variant)
                      for proband_variant in proband_variants}
-    return render(request, 'gel2mdt/validation_list.html', {'pv_forms_dict':pv_forms_dict,
+    return render(request, 'gel2mdt/validation_list.html', {'pv_forms_dict': pv_forms_dict,
                                                             'sample_type': sample_type})
 
 

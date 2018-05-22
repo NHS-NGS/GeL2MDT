@@ -512,6 +512,7 @@ class ProbandVariant(models.Model):
     validation_status = models.CharField(max_length=50, choices=(
         ('U', 'Unknown'),
         ('A', 'Awaiting Validation'),
+        ('K', 'Urgent Validation'),
         ('P', 'Passed Validation'),
         ('F', 'Failed Validation'),
         ('N', 'Not Required'),), default='U')
