@@ -60,7 +60,7 @@ class ProfileForm(forms.Form):
                     ('Clinical Scientist', 'Clinical Scientist'),
                     ('Other Staff', 'Other Staff'),
                     ('Unknown', 'Unknown'),)
-    role = forms.ChoiceField(choices=role_choices)
+    role = forms.ChoiceField(choices=role_choices, required=False)
     config_dict = load_config.LoadConfig().load()
     if config_dict['GMC'] != 'None':
         choices = config_dict['GMC'].split(',')

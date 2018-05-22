@@ -146,26 +146,30 @@ def profile(request):
     if request.method == 'POST':
         form = ProfileForm(request.POST)
         if form.is_valid():
-            if role:
-                role.delete() # Delete the old role
-            if form.cleaned_data['role'] == 'Clinical Scientist':
-                cs = ClinicalScientist(name=request.user.first_name + ' ' + request.user.last_name,
-                                       email=request.user.email,
-                                       hospital=form.cleaned_data['hospital'])
-                cs.save()
-            elif form.cleaned_data['role'] == 'Clinician':
-                clinician = Clinician(name=request.user.first_name + ' ' + request.user.last_name,
-                                      email=request.user.email,
-                                      hospital=form.cleaned_data['hospital'],
-                                      added_by_user=True)
-                clinician.save()
-            elif form.cleaned_data['role'] == 'Other Staff':
-                other = OtherStaff(name=request.user.first_name + ' ' + request.user.last_name,
-                                   email=request.user.email,
-                                   hospital=form.cleaned_data['hospital'])
-                other.save()
-            messages.add_message(request,25, 'Profile Updated')
+            if request.user.is_staff:
+                if role:
+                    role.delete() # Delete the old role
+                    rolename = form.cleaned_data['role']
+            if rolename == 'Clinical Scientist':
+                cs, created = ClinicalScientist.objects.update_or_create(
+                    name=request.user.first_name + ' ' + request.user.last_name,
+                    email=request.user.email,
+                    defaults={'hospital': form.cleaned_data['hospital']})
+            elif rolename == 'Clinician':
+                clinician, created = Clinician.objects.update_or_create(
+                    name=request.user.first_name + ' ' + request.user.last_name,
+                    email=request.user.email,
+                    defaults={'hospital': form.cleaned_data['hospital'],
+                              'added_by_user': True})
+            elif rolename == 'Other Staff':
+                other, created = OtherStaff.objects.update_or_create(
+                    name=request.user.first_name + ' ' + request.user.last_name,
+                    email=request.user.email,
+                    defaults={'hospital':form.cleaned_data['hospital']})
+            messages.add_message(request, 25, 'Profile Updated')
             return HttpResponseRedirect('/profile')
+        else:
+            print(form.errors)
     else:
         if role:
             form = ProfileForm(initial={'role': rolename, 'hospital': role.hospital})

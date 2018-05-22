@@ -91,7 +91,10 @@ SOFTWARE.
                     </br>
                     <form role="form" method="post" enctype="multipart/form-data">
                         {% csrf_token %}
-                        {% bootstrap_form form %}
+                        {% if request.user.is_staff %}
+                            {% bootstrap_field form.role %}
+                        {% endif %}
+                        {% bootstrap_field form.hospital %}
                         <button type="submit" name="Submit" style="float: right" class="btn btn-info">Update</button>
                     </form>
                 </div>
