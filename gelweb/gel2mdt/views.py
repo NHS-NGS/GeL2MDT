@@ -418,7 +418,6 @@ def ajax_variant_validation(request):
     selected_validation_status = request.POST.get('selectedStatus')
     selected_validation_user = request.POST.get('selectedUser')
     if selected_validation_user == "---------":
-        print("None")
         user_instance = None
     else:
         user_instance = User.objects.get(username=selected_validation_user)

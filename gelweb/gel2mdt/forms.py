@@ -260,8 +260,8 @@ class RareDiseaseMDTForm(forms.ModelForm):
             'add_surveillance_for_relatives': CheckboxInput(),
             'clinical_trial': CheckboxInput(),
             'inform_reproductive_choice': CheckboxInput(),
-            'discussion': Textarea(attrs={'rows': '2'}),
-            'action': Textarea(attrs={'rows': '2'})
+            'discussion': Textarea(attrs={'rows': '4'}),
+            'action': Textarea(attrs={'rows': '4'})
         }
 
     def save(self, commit=True):
