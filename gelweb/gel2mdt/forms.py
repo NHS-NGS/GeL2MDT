@@ -19,11 +19,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+from datetime import datetime
+
 from django import forms
-from .models import *
 from django.contrib.auth.models import User
 from django.forms import HiddenInput, Textarea, CheckboxInput, Select
 from django.forms import BaseFormSet
+
+from .models import *
 
 
 class UserForm(forms.ModelForm):
@@ -266,7 +269,13 @@ class RareDiseaseMDTForm(forms.ModelForm):
 
     def save(self, commit=True):
         selected_validation_status = self.cleaned_data['requires_validation']
-        print(selected_validation_status)
+        pv = self.instance.proband_variant
+
+        pv.validation_status = selected_validation_status
+        if not pv.validation_datetime_set:
+            pv.validation_datetime_set = datetime.now()
+
+        pv.save()
 
         return super(RareDiseaseMDTForm, self).save(commit=commit)
 
