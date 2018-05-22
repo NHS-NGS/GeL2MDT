@@ -162,6 +162,80 @@
                         </div>
 
                     </div>
+                </div>
+                {% if report.sample_type == 'cancer' %}
+                <div class=row>
+                    <div class="col-md-12">
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">Clinical Information</div>
+                            <div class="panel-body">
+                                <div class="col-md-3">
+                                    {% bootstrap_label "Recruiting Disease" %}
+                                    <div class="block">
+                                        {{report.ir_family.participant_family.proband.recruiting_disease}}
+                                    </div>
+                                    </br>
+                                    {% bootstrap_label "Disease Subtype" %}
+                                    <div class="block">
+                                            {{ report.ir_family.participant_family.proband.disease_subtype }}
+
+                                    </div>
+                                    </br>
+                                    {% bootstrap_label "Deceased" %}
+                                    <div class="block">
+                                        {{report.ir_family.participant_family.proband.deceased}}
+                                    </div>
+                                    </br>
+                                </div>
+                                <div class="col-md-3">
+                                    {% bootstrap_label "Disease Grade" %}
+                                    <div class="block">
+                                        {{report.ir_family.participant_family.proband.disease_grade}}
+                                    </div>
+                                    </br>
+                                    {% bootstrap_label "Disease Stage" %}
+                                    <div class="block">
+                                            {{ report.ir_family.participant_family.proband.disease_stage }}
+
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    {% bootstrap_label "Currently In Clinical Trial" %}
+                                    <div class="block">
+                                        {{report.ir_family.participant_family.proband.currently_in_clinical_trial}}
+                                    </div>
+                                    </br>
+                                    {% bootstrap_label "Current Clinical Trial Information" %}
+                                    <div class="block">
+                                            {{ report.ir_family.participant_family.proband.current_clinical_trial_info }}
+
+                                    </div>
+                                    </br>
+                                    {% bootstrap_label "Suitable For Clinical Trial" %}
+                                    <div class="block">
+                                            {{ report.ir_family.participant_family.proband.suitable_for_clinical_trial }}
+
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    {% bootstrap_label "Previous Treatment" %}
+                                    <div class="block">
+                                        {{report.ir_family.participant_family.proband.previous_treatment}}
+                                    </div>
+                                    </br>
+                                    {% bootstrap_label "Previous Testing" %}
+                                    <div class="block">
+                                            {{ report.ir_family.participant_family.proband.previous_testing }}
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                    {% endif %}
 
 
 

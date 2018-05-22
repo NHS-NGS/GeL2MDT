@@ -1,3 +1,4 @@
+VERSION_NUMBER=v0.4.2
 vep=vep
 cache=/home/patrick/.vep/
 cache_version=91
