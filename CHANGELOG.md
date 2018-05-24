@@ -1,3 +1,14 @@
+## [0.4.2]- 24-05-11
+### Added
+- Validation outcomes and assignment to users
+- Running run_batch_update from manage.py
+- Priority and recruiting disease status to cancer main page
+- Clinical info now present in clinical scientists view for cancer
+
+### Changed
+- Bugfix for audit panel where numbers and labels would not match up correctly.
+- Removed role assignment for users
+
 ## [0.4.1] - 20-05-11
 ### Added
 - Automated tracking of version and build stamps through {% version_number %} and {% build %} templatetags.
