@@ -221,6 +221,10 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
         source='ir_family.priority',
         read_only=True
     )
+    recruiting_disease = serializers.CharField(
+        source="ir_family.participant_family.proband.recruiting_disease",
+        read_only=True
+    )
 
     assigned_user = serializers.StringRelatedField()
 
@@ -258,5 +262,6 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
             'assembly',
             'user',
             'assigned_user',
-            'priority'
+            'priority',
+            'recruiting_disease',
         )
