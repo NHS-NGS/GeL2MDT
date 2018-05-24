@@ -123,7 +123,7 @@ def run_vep(infile, config_dict):
     # run VEP for hg38 variants
     if os.stat(hg38_vcf).st_size != 0:
         cmd = "{vep} -i {infile} -o {outfile} --species homo_sapiens --force_overwrite --cache --dir_cache {cache}" \
-              " --fork 4 --vcf --flag_pick  --merged --exclude_predicted --assembly GRCh38 --everything " \
+              " --fork 4 --vcf --flag_pick  --exclude_predicted --assembly GRCh38 --everything " \
               "--hgvsg --dont_skip --total_length --offline --fasta {fasta_loc} --cache_version {cache_version}".format(
                 vep=config_dict['vep'],
                 infile=hg38_vcf,

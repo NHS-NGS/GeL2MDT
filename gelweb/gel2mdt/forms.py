@@ -19,11 +19,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+from datetime import datetime
+
 from django import forms
-from .models import *
 from django.contrib.auth.models import User
-from django.forms import HiddenInput, Textarea, CheckboxInput
+from django.forms import HiddenInput, Textarea, CheckboxInput, Select
 from django.forms import BaseFormSet
+
+from .models import *
 
 
 class UserForm(forms.ModelForm):
@@ -60,7 +63,7 @@ class ProfileForm(forms.Form):
                     ('Clinical Scientist', 'Clinical Scientist'),
                     ('Other Staff', 'Other Staff'),
                     ('Unknown', 'Unknown'),)
-    role = forms.ChoiceField(choices=role_choices)
+    role = forms.ChoiceField(choices=role_choices, required=False)
     config_dict = load_config.LoadConfig().load()
     if config_dict['GMC'] != 'None':
         choices = config_dict['GMC'].split(',')
@@ -80,6 +83,22 @@ class ProbandForm(forms.ModelForm):
     class Meta:
         model = Proband
         fields = ['outcome', 'comment']
+
+
+class VariantValidationForm(forms.ModelForm):
+    """
+    Form used to change values used for variant validation tracking.
+    """
+    def __init__(self, *args, **kwargs):
+        super(VariantValidationForm, self).__init__(*args, **kwargs)
+        self.fields['validation_responsible_user'].required=False
+
+    class Meta:
+        model = ProbandVariant
+        fields = [
+            'validation_status',
+            'validation_responsible_user',
+        ]
 
 
 class GELIRForm(forms.ModelForm):
@@ -214,23 +233,49 @@ class RareDiseaseMDTForm(forms.ModelForm):
     '''
     Form used in Proband View at MDT which allows users to fill in exit questionaire questions
     '''
+    requires_validation = forms.ChoiceField(
+        choices=(
+            ('U', 'Unknown'),
+            ('A', 'Awaiting Validation'),
+            ('K', 'Urgent Validation'),
+            ('P', 'Passed Validation'),
+            ('F', 'Failed Validation'),
+            ('N', 'Not Required'),
+        )
+    )
+
     class Meta:
         model = RareDiseaseReport
-        fields = ('contribution_to_phenotype', 'change_med',
-                  'clinical_trial', 'discussion', 'action',
-                  'inform_reproductive_choice', 'surgical_option',
-                  'add_surveillance_for_relatives',
-                  'classification', 'id',)
+        fields = (
+            'contribution_to_phenotype', 'change_med',
+            'clinical_trial', 'requires_validation',
+            'discussion', 'action',
+            'inform_reproductive_choice', 'surgical_option',
+            'add_surveillance_for_relatives',
+            'classification', 'id',)
         widgets = {
-                   'id': HiddenInput(),
-                   'surgical_option': CheckboxInput(),
-                   'change_med': CheckboxInput(),
-                   'add_surveillance_for_relatives': CheckboxInput(),
-                   'clinical_trial': CheckboxInput(),
-                   'inform_reproductive_choice': CheckboxInput(),
-                   'discussion': Textarea(attrs={'rows': '2'}),
-                   'action': Textarea(attrs={'rows': '2'})
-                   }
+            'id': HiddenInput(),
+            'surgical_option': CheckboxInput(),
+            'requires_validation': Select(),
+            'change_med': CheckboxInput(),
+            'add_surveillance_for_relatives': CheckboxInput(),
+            'clinical_trial': CheckboxInput(),
+            'inform_reproductive_choice': CheckboxInput(),
+            'discussion': Textarea(attrs={'rows': '4'}),
+            'action': Textarea(attrs={'rows': '4'})
+        }
+
+    def save(self, commit=True):
+        selected_validation_status = self.cleaned_data['requires_validation']
+        pv = self.instance.proband_variant
+
+        pv.validation_status = selected_validation_status
+        if not pv.validation_datetime_set:
+            pv.validation_datetime_set = datetime.now()
+
+        pv.save()
+
+        return super(RareDiseaseMDTForm, self).save(commit=commit)
 
 
 class CancerMDTForm(forms.ModelForm):
