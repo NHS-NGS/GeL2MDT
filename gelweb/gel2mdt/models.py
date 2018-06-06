@@ -297,29 +297,45 @@ class GELInterpretationReport(models.Model):
             ir_family=self.ir_family)
         if archived_reports:
             latest_report = archived_reports.latest('polled_at_datetime')
-            self.status = latest_report.status
-            self.updated = latest_report.updated
-            self.sample_type = latest_report.sample_type
-            self.sample_id = latest_report.sample_id
-            self.max_tier = latest_report.max_tier
-            self.assembly = latest_report.assembly
-            self.sha_hash = latest_report.sha_hash
-            self.assigned_user = latest_report.assigned_user
-            self.mdt_status = latest_report.mdt_status
-            self.case_sent = latest_report.case_sent
-            self.case_status = latest_report.case_status
-            self.pilot_case = latest_report.pilot_case
-            self.tumour_content = latest_report.tumour_content
-            self.polled_at_datetime = timezone.now()
-            self.user = latest_report.user
-            self.no_primary_findings = latest_report.no_primary_findings
-
             if overwrite:
-                self.archived_version = latest_report.archived_version
+                latest_report.status = self.status
+                latest_report.updated = self.updated
+                latest_report.sample_type = self.sample_type
+                latest_report.sample_id = self.sample_id
+                latest_report.max_tier = self.max_tier
+                latest_report.assembly = self.assembly
+                latest_report.sha_hash = self.sha_hash
+                latest_report.assigned_user = self.assigned_user
+                latest_report.mdt_status = self.mdt_status
+                latest_report.case_sent = self.case_sent
+                latest_report.case_status = self.case_status
+                latest_report.pilot_case = self.pilot_case
+                latest_report.tumour_content = self.tumour_content
+                latest_report.polled_at_datetime = timezone.now()
+                latest_report.user = self.user
+                latest_report.no_primary_findings = self.no_primary_findings
+                latest_report.archived_version = self.archived_version
+                super(GELInterpretationReport, latest_report).save(*args, **kwargs)
             else:
+                self.status = latest_report.status
+                self.updated = latest_report.updated
+                self.sample_type = latest_report.sample_type
+                self.sample_id = latest_report.sample_id
+                self.max_tier = latest_report.max_tier
+                self.assembly = latest_report.assembly
+                self.sha_hash = latest_report.sha_hash
+                self.assigned_user = latest_report.assigned_user
+                self.mdt_status = latest_report.mdt_status
+                self.case_sent = latest_report.case_sent
+                self.case_status = latest_report.case_status
+                self.pilot_case = latest_report.pilot_case
+                self.tumour_content = latest_report.tumour_content
+                self.polled_at_datetime = timezone.now()
+                self.user = latest_report.user
+                self.no_primary_findings = latest_report.no_primary_findings
                 # update the latest saved version.
                 self.archived_version = latest_report.archived_version + 1
-            super(GELInterpretationReport, self).save(*args, **kwargs)
+                super(GELInterpretationReport, self).save(*args, **kwargs)
         else:
             self.archived_version = 1
             super(GELInterpretationReport, self).save(*args, **kwargs)
