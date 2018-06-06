@@ -60,8 +60,9 @@ class RareDiseaseCases(generics.ListAPIView):
                 serializer_class from GELInterpretationReportSerializer
         """
 
+        sample_type = self.kwargs['sample_type']
         qs = GELInterpretationReport.objects.filter(
-            sample_type="raredisease"
+            sample_type=sample_type
         ).prefetch_related(
             *[
                 'ir_family',
