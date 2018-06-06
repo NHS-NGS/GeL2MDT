@@ -25,6 +25,8 @@ from gel2mdt.api.serializers import *
 from django.http import Http404
 from django.db.models import Prefetch
 
+import pandas as pd
+
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
@@ -57,12 +59,32 @@ class RareDiseaseCases(generics.ListAPIView):
             queryset (django.query.QuerySet): queryset used to initialise the
                 serializer_class from GELInterpretationReportSerializer
         """
-        sample_type = self.kwargs['sample_type']
-        queryset = GELInterpretationReport.objects.filter(sample_type=sample_type).prefetch_related(
+
+        qs = GELInterpretationReport.objects.filter(
+            sample_type="raredisease"
+        ).prefetch_related(
             *[
                 'ir_family',
-                'ir_family__participant_family__proband',
+                'ir_family__participant_family__proband'
             ]
         )
+
+        qs_df = pd.DataFrame(list(qs.values())).sort_values(
+            by=[
+                'ir_family_id',
+                'archived_version'
+            ]
+        )
+        multi_archived = qs_df.drop_duplicates(
+            subset=['ir_family_id'],
+            keep='last'
+        )
+
+        ids_of_latest = multi_archived["id"].tolist()
+        queryset = GELInterpretationReport.objects.filter(
+            id__in=ids_of_latest
+        )
+
         return queryset
+
     serializer_class = GELInterpretationReportSerializer
