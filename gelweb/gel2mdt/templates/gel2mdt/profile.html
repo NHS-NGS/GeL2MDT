@@ -57,7 +57,7 @@ SOFTWARE.
                                 <td>{{ case.ir_family.participant_family.proband.surname }}</td>
                                 <td>{{ case.max_tier }}</td>
                                 <td>{{ case.assembly }}</td>
-                                <td>{{ case.ir_family.participant_family.proband.get_status_display }}</td>
+                                <td>{{ case.get_case_status_display }}</td>
                                 <td><a href='{% url 'remove-case' case_id=case.id%}'><i class="fas fa-minus-circle rediconcolor"></i></a></td>
                             </tr>
                         {% endfor %}

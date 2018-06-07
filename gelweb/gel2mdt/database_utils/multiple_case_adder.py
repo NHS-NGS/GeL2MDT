@@ -375,14 +375,18 @@ class MultipleCaseAdder(object):
         # finally, save jsons to disk storage
         cip_api_storage = self.config['cip_api_storage']
         for case in cases:
+            ir_family = case.attribute_managers[InterpretationReportFamily].case_model.entry
+            latest_case = GELInterpretationReport.objects.filter(
+                ir_family=ir_family
+            ).latest('polled_at_datetime')
+
             with open(
-                os.path.join(
-                    cip_api_storage,
-                    '{}.json'.format(
-                        case.request_id + "-" + str(case.attribute_managers[GELInterpretationReport].case_model.entry.archived_version))
-                ),
-                'w') as f:
-                    json.dump(case.raw_json, f)
+                    os.path.join(
+                        cip_api_storage,
+                        '{}.json'.format(
+                            case.request_id + "-" + str(latest_case.archived_version)
+                        )), 'w') as f:
+                json.dump(case.raw_json, f)
 
 
     def save_new(self, model_type, model_list):
