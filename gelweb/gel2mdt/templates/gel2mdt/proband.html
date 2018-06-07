@@ -300,16 +300,17 @@
 
 
                                         {% if config_dict|get_item:'show_clinical_report' == 'True' %}
-                                            <span style="margin: 5px;">
+                                            <span>
                                                 <a href="/genomics_england_report/{{report.id}}" class="btn btn-warning" role="button">Clinical Report</a>
                                             </span>
                                         {% endif %} 
 
-                                        <span style="float: right; margin: 5px;">
-                                            <a href="/proband/{{report.id}}/report/positive" target="_blank" class="btn btn-warning" role="button">Positive Report</a>
-                                        </span>
-                                        <span style="float: right; margin: 5px;">
+
+                                        <span style="float: right; margin: 0px 5px 0px 5px">
                                             <a href="/proband/{{report.id}}/report/negative" target="_blank" class="btn btn-info" role="button">Negative Report</a>
+                                        </span>
+                                        <span style="float: right; margin: 0px 5px 0px 5px">
+                                            <a href="#" data-toggle="modal" data-target="#reportingModal" class="btn btn-warning" role="button">Positive Report</a>
                                         </span>
 
                                     </div>
@@ -319,6 +320,68 @@
                     </div>
                 </form>
 
+                <div id="reportingModal" class="modal fade" role="dialog">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
+                                <h4 class="modal-title">Variants for Reporting</h4>
+                            </div>
+
+                            <div class="modal-body">
+                                <table class="table table-bordered table-condensed">
+                                    <thead>
+                                        <tr>
+                                            <th><i class="fas fa-plus-circle"></i></th>
+                                            <th>Gene</th>
+                                            <th>Zygosity</th>
+                                            <th>Inheritance</th>
+                                            <th>HGVS description</th>
+                                            <th>Classification</th>
+                                            </th>
+                                    </thead>
+                                    <tbody>
+                                        {% for variant in variants_for_reporting %}
+                                            <td><div class="checkbox">
+                                                    <label><input type="checkbox" name="reportVariantChoice" value="{{variant.id}}"></label>
+                                                </div></td>
+                                                <td>{{variant.proband_variant.get_transcript.gene}}</td>
+                                                <td>{{variant.proband_variant.zygosity}}</td>
+                                                <td>{{variant.proband_variant.inheritance}}</td>
+                                                <td>
+                                                    {{variant.proband_variant.get_transcript_variant.hgvs_c}}
+                                                    {% if variant.proband_variant.get_transcript_variant.hgvs_p %}
+                                                        <br>
+                                                        {{variant.proband_variant.get_transcript_variant.hgvs_p}}
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{variant.classification}}</td>
+                                            {% endfor %}
+                                    </tbody>
+                                </table>
+                                <a target="_blank" id="btnSendVariants" class="btn btn-active" role="button">Generate</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+    <script>
+        $(document).ready(function() {
+            $("#btnSendVariants").click(function() {
+                var url="/proband/{{report.id}}/report/positive?rdr=";
+                var flag=false;
+                $("input:checkbox[name=reportVariantChoice]:checked").each(function() {
+                    if (!flag) {
+                        url=url+$(this).val();
+                        flag=true;
+                    } else {
+                        url=url+"&rdr="+$(this).val();
+                    }
+                })
+                window.location=url;
+           })
+        })
+    </script>
 
                 {% if proband_mdt %}
                     <div class="row">
