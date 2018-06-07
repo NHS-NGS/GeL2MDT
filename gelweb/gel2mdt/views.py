@@ -1116,28 +1116,38 @@ def audit(request, sample_type):
     :return:
     '''
     config_dict = load_config.LoadConfig().load()
-    # Status choices and names
+    # Getting all GELIRs
+    qs = GELInterpretationReport.objects.filter(
+        sample_type=sample_type).prefetch_related(*['ir_family', 'ir_family__participant_family__proband'])
+
+    # Filtering out duplicates
+    qs_df = pd.DataFrame(list(qs.values())).sort_values(by=['ir_family_id', 'archived_version'])
+    multi_archived = qs_df.drop_duplicates(subset=['ir_family_id'], keep='last')
+    ids_of_latest = multi_archived["id"].tolist()
+    queryset = GELInterpretationReport.objects.filter(id__in=ids_of_latest)
+
+    # Getting case status options
     status_choices = dict(GELInterpretationReport._meta.get_field('case_status').choices)
     status_names = list(status_choices.values())
-    # Total Case status plot
+
+    # Total case breakdown
     if config_dict['plot_pilot_and_main_status_breakdown'] == 'False':
-        case_status_breakdown = GELInterpretationReport.objects.filter(sample_type=sample_type).values(
+        case_status_breakdown = queryset.values(
             'case_status').annotate(Count('case_status'))
         case_status_breakdown = {item['case_status']: item['case_status__count'] for item in case_status_breakdown}
         status_counts = [case_status_breakdown.get(f, 0) for f in status_choices]
-        plots = create_bokeh_barplot(status_names, status_counts,
-                                                'Total Status Count')
+        plots = create_bokeh_barplot(status_names, status_counts, 'Total Status Count')
+
     else:
         # Main study status plot
-        case_status_breakdown = GELInterpretationReport.objects.filter(sample_type=sample_type, pilot_case=False).values(
+        case_status_breakdown = queryset.filter(sample_type=sample_type, pilot_case=False).values(
             'case_status').annotate(Count('case_status'))
         case_status_breakdown = {item['case_status']: item['case_status__count'] for item in case_status_breakdown}
         status_counts = [case_status_breakdown.get(f, 0) for f in status_choices]
-        main_study_count_plot = create_bokeh_barplot(status_names, status_counts,
-                                                     'Main Study Status Count')
+        main_study_count_plot = create_bokeh_barplot(status_names, status_counts, 'Main Study Status Count')
 
         # Pilot study status plot
-        case_status_breakdown = GELInterpretationReport.objects.filter(sample_type=sample_type, pilot_case=True).values(
+        case_status_breakdown = queryset.filter(sample_type=sample_type, pilot_case=True).values(
             'case_status').annotate(Count('case_status'))
         case_status_breakdown = {item['case_status']: item['case_status__count'] for item in case_status_breakdown}
         status_counts = [case_status_breakdown.get(f, 0) for f in status_choices]
