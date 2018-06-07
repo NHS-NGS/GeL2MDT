@@ -328,6 +328,11 @@ def proband_view(request, report_id):
     add_clinician_form = AddClinicianForm()
     add_variant_form = AddVariantForm()
 
+    variants_for_reporting = RareDiseaseReport.objects.filter(
+        classification__in=('3','4','5'),
+        proband_variant__validation_status="P"
+    )
+
     pv_forms_dict = {}
     for pv in proband_variants:
         pv_forms_dict[pv] = VariantValidationForm(instance=pv)
@@ -351,6 +356,7 @@ def proband_view(request, report_id):
                                                     'add_clinician_form':add_clinician_form,
                                                     'sample_type': report.sample_type,
                                                     'add_variant_form': add_variant_form,
+                                                    'variants_for_reporting': variants_for_reporting,
                                                     'gelir_form': gelir_form})
 
 
@@ -1089,7 +1095,10 @@ def report(request, report_id, outcome):
             panel_genes[panel] = ''
 
     if outcome == "positive":
-        reported_variants = RareDiseaseReport.objects.get(id=1228)
+        reported_variant_ids = request.GET.getlist('rdr')
+        reported_variants = RareDiseaseReport.objects.filter(
+            id__in=reported_variant_ids
+        )
     else:
         reported_variants = None
 
