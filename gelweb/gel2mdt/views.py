@@ -328,6 +328,12 @@ def proband_view(request, report_id):
     add_clinician_form = AddClinicianForm()
     add_variant_form = AddVariantForm()
 
+    variants_for_reporting = RareDiseaseReport.objects.filter(
+        proband_variant__interpretation_report__id=report.id,
+        classification__in=('3','4','5'),
+        proband_variant__validation_status="P"
+    )
+
     pv_forms_dict = {}
     for pv in proband_variants:
         pv_forms_dict[pv] = VariantValidationForm(instance=pv)
@@ -351,6 +357,7 @@ def proband_view(request, report_id):
                                                     'add_clinician_form':add_clinician_form,
                                                     'sample_type': report.sample_type,
                                                     'add_variant_form': add_variant_form,
+                                                    'variants_for_reporting': variants_for_reporting,
                                                     'gelir_form': gelir_form})
 
 
@@ -1070,7 +1077,7 @@ def export_mdt_outcome_form(request, report_id):
 
 
 @login_required
-def negative_report(request, report_id):
+def report(request, report_id, outcome):
     '''
     Printer friendly negative report template
     :param request:
@@ -1080,6 +1087,7 @@ def negative_report(request, report_id):
     config_dict = load_config.LoadConfig().load()
 
     report = GELInterpretationReport.objects.get(id=report_id)
+    genome_build = report.assembly
     panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.ir_family)
 
     panel_genes = {}
@@ -1087,13 +1095,25 @@ def negative_report(request, report_id):
         panelapp_file = f'{config_dict["panelapp_storage"]}/{panel.panel.panel.panelapp_id}_{panel.panel.version_number}.json'
         if os.path.isfile(panelapp_file):
             panelapp_json = json.load(open(panelapp_file))
-            num_genes = len(panelapp_json['result']['Genes'])
-            panel_genes[panel] = num_genes
+            green_genes = [gene for gene in panelapp_json['result']['Genes']
+                         if gene['LevelOfConfidence'] == "HighEvidence"]
+            panel_genes[panel] = len(green_genes)
         else:
             panel_genes[panel] = ''
 
+    if outcome == "positive":
+        reported_variant_ids = request.GET.getlist('rdr')
+        reported_variants = RareDiseaseReport.objects.filter(
+            id__in=reported_variant_ids
+        )
+    else:
+        reported_variants = None
+
     return render(request, 'gel2mdt/technical_information.html', {
+        'outcome': outcome,
+        'build': genome_build,
         'report': report,
+        'reported_variants': reported_variants,
         'panels': panel_genes})
 
 
