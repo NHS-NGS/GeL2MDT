@@ -1091,8 +1091,9 @@ def report(request, report_id, outcome):
         panelapp_file = f'{config_dict["panelapp_storage"]}/{panel.panel.panel.panelapp_id}_{panel.panel.version_number}.json'
         if os.path.isfile(panelapp_file):
             panelapp_json = json.load(open(panelapp_file))
-            num_genes = len(panelapp_json['result']['Genes'])
-            panel_genes[panel] = num_genes
+            green_genes = [gene for gene in panelapp_json['result']['Genes']
+                         if gene['LevelOfConfidence'] == "HighEvidence"]
+            panel_genes[panel] = len(green_genes)
         else:
             panel_genes[panel] = ''
 
