@@ -238,6 +238,7 @@ class RareDiseaseMDTForm(forms.ModelForm):
             ('U', 'Unknown'),
             ('A', 'Awaiting Validation'),
             ('K', 'Urgent Validation'),
+            ('I', 'In Progress'),
             ('P', 'Passed Validation'),
             ('F', 'Failed Validation'),
             ('N', 'Not Required'),

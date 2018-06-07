@@ -132,7 +132,9 @@ def profile(request):
     other = OtherStaff.objects.filter(email=request.user.email).first()
     clinician = Clinician.objects.filter(email=request.user.email).first()
 
-    my_cases = GELInterpretationReport.objects.filter(assigned_user__username=request.user.username)
+    my_cases = GELInterpretationReport.objects.latest_cases_by_user(
+        username=request.user
+    )
 
     if cs:
         rolename = 'Clinical Scientist'
@@ -408,6 +410,7 @@ def ajax_variant_validation(request):
         'Unknown': 'U',
         'Awaiting Validation':'A',
         'Urgent Validation': 'K',
+        'In Progress': 'I',
         'Passed Validation':'P',
         'Failed Validation': 'F',
         'Not Required': 'N',
@@ -452,7 +455,7 @@ def validation_list(request, sample_type):
     '''
 
     proband_variants = ProbandVariant.objects.filter(
-        Q(validation_status="A") | Q(validation_status="K"),
+        Q(validation_status="A") | Q(validation_status="K") | Q(validation_status="I"),
         interpretation_report__sample_type=sample_type)
     pv_forms_dict = {proband_variant: VariantValidationForm(instance=proband_variant)
                      for proband_variant in proband_variants}
@@ -601,7 +604,9 @@ def edit_mdt(request, sample_type, mdt_id):
     :return: List of GELIR cases
     '''
 
-    gel_ir_list = GELInterpretationReport.objects.filter(sample_type=sample_type)
+    gel_ir_list = GELInterpretationReport.objects.latest_cases_by_sample_type(
+        sample_type=sample_type
+    )
     mdt_instance = MDT.objects.get(id=mdt_id)
     mdt_reports = MDTReport.objects.filter(MDT=mdt_instance)
     reports_in_mdt = mdt_reports.values_list('interpretation_report', flat=True)
@@ -762,6 +767,10 @@ def mdt_proband_view(request, mdt_id, pk, important):
         gelir_form = GELIRMDTForm(request.POST, instance=report)
         if variant_formset.is_valid() and proband_form.is_valid() and gelir_form.is_valid():
             variant_formset.save()
+            for form in variant_formset:
+                pv = form.instance.proband_variant
+                pv.validation_status = form.cleaned_data['requires_validation']
+                pv.save()
             proband_form.save()
             gelir_form.save()
             messages.add_message(request, 25, 'Proband Updated')
@@ -773,19 +782,18 @@ def mdt_proband_view(request, mdt_id, pk, important):
 
     for form in variant_formset:
         pv = form.instance.proband_variant
-        current_validation_status = pv.validation_status
         form.initial["requires_validation"] = pv.validation_status
-        return render(request, 'gel2mdt/mdt_proband_view.html', {
-            'proband_variants': proband_variants,
-            'report': report,
-            'mdt_id': mdt_id,
-            'mdt_instance': mdt_instance,
-            'proband_form': proband_form,
-            'variant_formset': variant_formset,
-            'panels': panels,
-            'sample_type':report.sample_type,
-            'gelir_form':gelir_form
-        })
+    return render(request, 'gel2mdt/mdt_proband_view.html', {
+        'proband_variants': proband_variants,
+        'report': report,
+        'mdt_id': mdt_id,
+        'mdt_instance': mdt_instance,
+        'proband_form': proband_form,
+        'variant_formset': variant_formset,
+        'panels': panels,
+        'sample_type':report.sample_type,
+        'gelir_form':gelir_form
+    })
 
 
 @login_required
