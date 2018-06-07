@@ -31,7 +31,7 @@ from .case_handler import Case, CaseAttributeManager
 from ..config import load_config
 import pprint
 import logging
-
+import time
 
 # set up logging
 logger = logging.getLogger(__name__)
@@ -256,7 +256,6 @@ class MultipleCaseAdder(object):
             # no such cases.
             pass
 
-        print(cases_to_update)
         return cases_to_update
 
     def add_cases(self, update=False):
@@ -330,7 +329,6 @@ class MultipleCaseAdder(object):
                 model_objects = model_type.objects.all().prefetch_related(*lookups)
             elif not lookups:
                 model_objects = model_type.objects.all()
-
             for case in cases:
                 # create a CaseAttributeManager for the case
                 case.attribute_managers[model_type] = CaseAttributeManager(
@@ -338,6 +336,7 @@ class MultipleCaseAdder(object):
                 # use thea attribute manager to set the case models
                 attribute_manager = case.attribute_managers[model_type]
                 attribute_manager.get_case_model()
+
             if not many:
                 # get a list of CaseModels
                 model_list = [
@@ -351,6 +350,7 @@ class MultipleCaseAdder(object):
                     many_case_model = attribute_manager.case_model
                     for case_model in many_case_model.case_models:
                         model_list.append(case_model)
+
             # now create the required new Model instances from CaseModel lists
             if model_type == GELInterpretationReport:
                 # GEL_IR is a special case, preprocessing version no. means
@@ -366,11 +366,9 @@ class MultipleCaseAdder(object):
                 model_objects = model_type.objects.all().prefetch_related(*lookups)
             elif not lookups:
                 model_objects = model_type.objects.all()
-
             for model in model_list:
                 if model.entry is False:
                     model.check_found_in_db(model_objects)
-
 
         # finally, save jsons to disk storage
         cip_api_storage = self.config['cip_api_storage']
