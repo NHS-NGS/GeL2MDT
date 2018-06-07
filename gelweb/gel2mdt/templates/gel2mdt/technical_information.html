@@ -113,7 +113,7 @@ SOFTWARE.
                         <th>Zygosity</th>
                         <th>Inheritance</th>
                         <th>HGVS description</th>
-                        <th>Location</th>
+                        <th>Position ({{build}})</th>
                         <th>Classification</th>
                         <th>VEP Consequence</th>
                         </th>
@@ -131,7 +131,7 @@ SOFTWARE.
                                     {{variant.proband_variant.get_transcript_variant.hgvs_p}}
                                 {% endif %}
                             </td>
-                            <td>{{variant.proband_variant.get_transcript.location}}</td>
+                            <td>{{variant.proband_variant.get_transcript_variant.variant.position}}</td>
                             <td>{{variant.classification}}</td>
                             <td>{{variant.proband_variant.get_ptv.effect}}</td>
                         </tr>

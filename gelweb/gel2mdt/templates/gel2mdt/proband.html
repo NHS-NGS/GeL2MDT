@@ -329,6 +329,7 @@
                             </div>
 
                             <div class="modal-body">
+                                        {% if variants_for_reporting %}
                                 <table class="table table-bordered table-condensed">
                                     <thead>
                                         <tr>
@@ -358,6 +359,9 @@
                                     </tbody>
                                 </table>
                                 <a target="_blank" id="btnSendVariants" class="btn btn-active" role="button">Generate</a>
+                                {%else%}
+                                    <p>No class 3, 4, or 5 variants which have passed validation found for this patient.</p>
+                                    {% endif %}
                             </div>
                         </div>
                     </div>
