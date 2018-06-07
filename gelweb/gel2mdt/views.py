@@ -132,7 +132,9 @@ def profile(request):
     other = OtherStaff.objects.filter(email=request.user.email).first()
     clinician = Clinician.objects.filter(email=request.user.email).first()
 
-    my_cases = GELInterpretationReport.objects.filter(assigned_user__username=request.user.username)
+    my_cases = GELInterpretationReport.objects.latest_cases_by_user(
+        username=request.user
+    )
 
     if cs:
         rolename = 'Clinical Scientist'
@@ -601,7 +603,9 @@ def edit_mdt(request, sample_type, mdt_id):
     :return: List of GELIR cases
     '''
 
-    gel_ir_list = GELInterpretationReport.objects.filter(sample_type=sample_type)
+    gel_ir_list = GELInterpretationReport.objects.latest_cases_by_sample_type(
+        sample_type=sample_type
+    )
     mdt_instance = MDT.objects.get(id=mdt_id)
     mdt_reports = MDTReport.objects.filter(MDT=mdt_instance)
     reports_in_mdt = mdt_reports.values_list('interpretation_report', flat=True)
