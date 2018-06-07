@@ -93,12 +93,36 @@ SOFTWARE.
     depth coverage and incomplete ascertainment of disease-gene associations. More
     detailed information regarding read depth coverage is available on request.
     Please contact the laboratory and quote the Laboratory No. for more information.
+    {% if outcome == "positive" %}
+        Variants are classified using the ACMG/AMP guidelines
+        (Richards et al 2015 Genet Med) and confirmed using in-house Sanger sequencing.
+    {% endif %}
     </p>
 
 
     <h3>Variant Details</h3>
 
-    <strong>No variants have been detected.</strong>
+    {% if outcome != "positive" %}
+        <strong>No variants have been detected.</strong>
+    {% elif outcome == "positive" %}
+    <table class="table table-condensed">
+        <thead>
+            <tr>
+                <th>Gene</th>
+                <th>Zygosity</th>
+                <th>Inheritance</th>
+                <th>HGVS description</th>
+                <th>Location</th>
+                <th>Classification</th>
+                <th>VEP Consequence</th>
+            </th>
+        </thead>
+        <tbody>
+        {% for variant in reported_variants %}
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
 
 
 
@@ -114,6 +138,7 @@ SOFTWARE.
             </th>
         </thead>
         <tbody>
+
         {% for panel, num_genes in panels.items %}
             <tr>
             <td>{{panel.panel}}</td>

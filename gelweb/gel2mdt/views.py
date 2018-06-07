@@ -1066,7 +1066,7 @@ def export_mdt_outcome_form(request, report_id):
 
 
 @login_required
-def report(request, report_id, positive=False):
+def report(request, report_id, outcome):
     '''
     Printer friendly negative report template
     :param request:
@@ -1088,16 +1088,10 @@ def report(request, report_id, positive=False):
         else:
             panel_genes[panel] = ''
 
-    if positive:
-        pass
-    else:
-        genes = None
-
     return render(request, 'gel2mdt/technical_information.html', {
-        'positive': positive,
+        'outcome': outcome,
         'report': report,
         'panels': panel_genes})
-
 
 
 @login_required

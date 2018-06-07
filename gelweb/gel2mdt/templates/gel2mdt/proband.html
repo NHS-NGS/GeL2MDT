@@ -300,14 +300,18 @@
 
 
                                         {% if config_dict|get_item:'show_clinical_report' == 'True' %}
-                                            <span style="float: right">
+                                            <span style="margin: 5px;">
                                                 <a href="/genomics_england_report/{{report.id}}" class="btn btn-warning" role="button">Clinical Report</a>
                                             </span>
                                         {% endif %} 
 
-                                        <span style="float: right">
-                                            <a href="/proband/{{report.id}}/report" target="_blank" class="btn btn-info" role="button">Negative Report</a>
+                                        <span style="float: right; margin: 5px;">
+                                            <a href="/proband/{{report.id}}/report/positive" target="_blank" class="btn btn-warning" role="button">Positive Report</a>
                                         </span>
+                                        <span style="float: right; margin: 5px;">
+                                            <a href="/proband/{{report.id}}/report/negative" target="_blank" class="btn btn-info" role="button">Negative Report</a>
+                                        </span>
+
                                     </div>
                                 </div>
                             </div>
