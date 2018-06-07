@@ -61,29 +61,8 @@ class RareDiseaseCases(generics.ListAPIView):
         """
 
         sample_type = self.kwargs['sample_type']
-        qs = GELInterpretationReport.objects.filter(
+        queryset = GELInterpretationReport.objects.latest_cases_by_sample_type(
             sample_type=sample_type
-        ).prefetch_related(
-            *[
-                'ir_family',
-                'ir_family__participant_family__proband'
-            ]
-        )
-
-        qs_df = pd.DataFrame(list(qs.values())).sort_values(
-            by=[
-                'ir_family_id',
-                'archived_version'
-            ]
-        )
-        multi_archived = qs_df.drop_duplicates(
-            subset=['ir_family_id'],
-            keep='last'
-        )
-
-        ids_of_latest = multi_archived["id"].tolist()
-        queryset = GELInterpretationReport.objects.filter(
-            id__in=ids_of_latest
         )
 
         return queryset

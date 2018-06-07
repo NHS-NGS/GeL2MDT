@@ -22,6 +22,9 @@ SOFTWARE.
 from django.db import models
 from django.utils import timezone
 from django.conf import settings
+
+import pandas as pd
+
 from .model_utils.choices import ChoiceEnum
 from .config import load_config
 
@@ -252,7 +255,37 @@ class InterpretationReportFamilyPanel(models.Model):
     genes_failing_coverage = models.TextField(null=True)
 
 
+class GELInterpretationReportQuerySet(models.QuerySet):
+    def latest_cases_by_sample_type(self, sample_type):
+        qs = self.filter(sample_type=sample_type)
+        qs_df = pd.DataFrame(list(qs.values())).sort_values(
+            by=["ir_family_id", "archived_version"]
+        )
+        rm_dup_old = qs_df.drop_duplicates(
+            subset=["ir_family_id"],
+            keep="last"
+        )
+        ids_of_latest_cases = rm_dup_old["id"].tolist()
+        return self.filter(id__in=ids_of_latest_cases)
+
+    def latest_cases_by_user(self, username):
+        qs = self.filter(assigned_user__username=username)
+        if qs:
+            qs_df = pd.DataFrame(list(qs.values())).sort_values(
+                by=["ir_family_id", "archived_version"]
+            )
+            rm_dup_old = qs_df.drop_duplicates(
+                subset=["ir_family_id"],
+                keep="last"
+            )
+            ids_of_latest_cases = rm_dup_old["id"].tolist()
+            return self.filter(id__in=ids_of_latest_cases)
+        else:
+            return qs
+
 class GELInterpretationReport(models.Model):
+    objects = GELInterpretationReportQuerySet.as_manager()
+
     ir_family = models.ForeignKey(
         InterpretationReportFamily, on_delete=models.CASCADE)
     archived_version = models.IntegerField(default=1)
