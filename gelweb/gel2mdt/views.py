@@ -329,6 +329,7 @@ def proband_view(request, report_id):
     add_variant_form = AddVariantForm()
 
     variants_for_reporting = RareDiseaseReport.objects.filter(
+        proband_variant__interpretation_report__id=report.id,
         classification__in=('3','4','5'),
         proband_variant__validation_status="P"
     )
