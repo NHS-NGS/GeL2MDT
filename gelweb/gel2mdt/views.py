@@ -1083,6 +1083,7 @@ def report(request, report_id, outcome):
     config_dict = load_config.LoadConfig().load()
 
     report = GELInterpretationReport.objects.get(id=report_id)
+    genome_build = report.assembly
     panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.ir_family)
 
     panel_genes = {}
@@ -1105,6 +1106,7 @@ def report(request, report_id, outcome):
 
     return render(request, 'gel2mdt/technical_information.html', {
         'outcome': outcome,
+        'build': genome_build,
         'report': report,
         'reported_variants': reported_variants,
         'panels': panel_genes})
