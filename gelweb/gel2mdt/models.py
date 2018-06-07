@@ -361,6 +361,12 @@ class GELInterpretationReport(models.Model):
                 # update the latest saved version.
                 self.archived_version = latest_report.archived_version + 1
                 super(GELInterpretationReport, self).save(*args, **kwargs)
+                mdt_report = MDTReport.objects.filter(interpretation_report=latest_report)
+                if mdt_report:
+                    for report in mdt_report:
+                        report.interpretation_report = self
+                        report.save()
+
         else:
             self.archived_version = 1
             super(GELInterpretationReport, self).save(*args, **kwargs)
@@ -554,6 +560,7 @@ class ProbandVariant(models.Model):
         ('U', 'Unknown'),
         ('A', 'Awaiting Validation'),
         ('K', 'Urgent Validation'),
+        ('I', 'In Progress'),
         ('P', 'Passed Validation'),
         ('F', 'Failed Validation'),
         ('N', 'Not Required'),), default='U')
