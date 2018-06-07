@@ -1088,9 +1088,15 @@ def report(request, report_id, outcome):
         else:
             panel_genes[panel] = ''
 
+    if outcome == "positive":
+        reported_variants = RareDiseaseReport.objects.get(id=1228)
+    else:
+        reported_variants = None
+
     return render(request, 'gel2mdt/technical_information.html', {
         'outcome': outcome,
         'report': report,
+        'reported_variants': reported_variants,
         'panels': panel_genes})
 
 
