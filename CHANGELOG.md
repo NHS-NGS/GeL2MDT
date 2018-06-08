@@ -1,3 +1,7 @@
+## [0.4.3]- 24-06-07
+### Changed
+- Bugfix for GELInterpretationReport models, solving issue where incrementing version number due to a change within GEL/CIP-API would result in erasure of important case tracking information.
+
 ## [0.4.2]- 24-05-11
 ### Added
 - Validation outcomes and assignment to users
