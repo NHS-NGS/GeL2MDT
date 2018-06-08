@@ -667,7 +667,7 @@ class RareDiseaseReport(models.Model):
     clinical_trial = models.NullBooleanField(db_column='Clinical_trial')
     inform_reproductive_choice = models.NullBooleanField(db_column='inform_reproductive_choice')
     classification = models.CharField(db_column='classification', max_length=2, choices=(
-        ('NA', 'NA'), ('1', '1'), ('2', '2'), ('3', '3'), ('4', '4'), ('5', '5'),
+        ('NA', 'NA'), ('1', '1'), ('2', '2'), ('3', '3'), ('4', '4'), ('5', '5'), ('A', 'Artefact')
     ), default='NA')
     proband_variant = models.OneToOneField(ProbandVariant, on_delete=models.CASCADE)
 
