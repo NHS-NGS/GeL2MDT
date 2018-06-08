@@ -6,7 +6,6 @@
 - Specification of 'artefact' for ACMG classification.
 - Specification of 'In Progress' for variant validation.
 
-
 ### Changed
 - Technical reports only count HighEvidence genes from PanelApp.
 
