@@ -1035,6 +1035,7 @@ class CaseAttributeManager(object):
         panel=None
         for panel in self.case.attribute_managers[PanelVersion].case_model.case_models:
             if "entry" in vars(panel):
+                print(panel.entry)
                 if 'genePanelsCoverage' in self.case.json_request_data:
                     if self.case.json_request_data['genePanelsCoverage']:
                         panel_coverage = self.case.json_request_data["genePanelsCoverage"].get(panel.entry.panel.panelapp_id, {})
@@ -1793,12 +1794,12 @@ class CaseModel(object):
                      if db_obj['panelapp_id'] == self.model_attributes["panelapp_id"]]
         elif self.model_type == PanelVersion:
             entry = [db_obj for db_obj in queryset
-                     if db_obj['panel'] == self.model_attributes["panel"]
+                     if db_obj['panel'] == self.model_attributes["panel"].id
                      and db_obj['version_number'] == self.model_attributes["version_number"]]
         elif self.model_type == InterpretationReportFamilyPanel:
             entry = [db_obj for db_obj in queryset
                      if db_obj['ir_family'] == self.model_attributes["ir_family"]
-                     and db_obj['panel'] == self.model_attributes["panel"]]
+                     and db_obj['panel'] == self.model_attributes["panel"].id]
         elif self.model_type == Gene:
             entry = [db_obj for db_obj in queryset
                      if db_obj['hgnc_id'] == self.model_attributes["hgnc_id"]]
