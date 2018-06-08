@@ -363,7 +363,7 @@ class MultipleCaseAdder(object):
             # refresh CaseAttributeManagers with new CaseModels
             lookups = self.get_prefetch_lookups(model_type)
             if lookups:
-                model_objects = model_type.objects.all().prefetch_related(*lookups)
+                model_objects = model_type.objects.all().values(*lookups)
             elif not lookups:
                 model_objects = model_type.objects.all()
             for model in model_list:
@@ -465,7 +465,7 @@ class MultipleCaseAdder(object):
             Proband: ['id',"gel_id"],
             Relative: ['id',"gel_id", "proband"],
             Variant: ['id','chromosome', 'position', 'reference', 'alternate', "genome_assembly"],
-            Transcript: ['id',"gene", 'genome_assembly'],
+            Transcript: ['id',"name", 'genome_assembly'],
             TranscriptVariant: ['id',"transcript", "variant"],
             ProbandVariant: ['id',"variant", "interpretation_report", 'max_tier'],
             ProbandTranscriptVariant: ['id',"transcript", "proband_variant"],
