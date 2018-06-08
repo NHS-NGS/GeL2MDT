@@ -1,3 +1,14 @@
+## [0.4.4]- 24-06-08
+### Added
+- Added feature to generate positive reports based on selected variants which are Classed 3-5 and have been fully validated.
+- Additional security to API/ajax interface to enforce authentication.
+- Custom QuerySet manager for GELInterpretationReport objects to select latest incremented version by user (objects.latest_cases_by_user) or by sample_ type (objects.latest__cases_by_sample_type).
+- Specification of 'artefact' for ACMG classification.
+- Specification of 'In Progress' for variant validation.
+
+### Changed
+- Technical reports only count HighEvidence genes from PanelApp.
+
 ## [0.4.3]- 24-06-07
 ### Changed
 - Bugfix for GELInterpretationReport models, solving issue where incrementing version number due to a change within GEL/CIP-API would result in erasure of important case tracking information.

@@ -93,12 +93,53 @@ SOFTWARE.
     depth coverage and incomplete ascertainment of disease-gene associations. More
     detailed information regarding read depth coverage is available on request.
     Please contact the laboratory and quote the Laboratory No. for more information.
+    {% if outcome == "positive" %}
+        Variants are classified using the ACMG/AMP guidelines
+        (Richards et al 2015 Genet Med) and confirmed using in-house Sanger sequencing.
+    {% endif %}
     </p>
 
 
     <h3>Variant Details</h3>
 
-    <strong>No variants have been detected.</strong>
+    {% if outcome != "positive" %}
+        <strong>No variants have been detected.</strong>
+    {% elif outcome == "positive" %}
+        <small>
+            <table class="table table-bordered table-condensed" style="font-size:10px;">
+                <thead>
+                    <tr>
+                        <th>Gene</th>
+                        <th>Zygosity</th>
+                        <th>Inheritance</th>
+                        <th>HGVS description</th>
+                        <th>Position ({{build}})</th>
+                        <th>Classification</th>
+                        <th>VEP Consequence</th>
+                        </th>
+                </thead>
+                <tbody>
+                    {% for variant in reported_variants %}
+                        <tr>
+                            <td>{{variant.proband_variant.get_transcript.gene}}</td>
+                            <td>{{variant.proband_variant.zygosity}}</td>
+                            <td>{{variant.proband_variant.inheritance}}</td>
+                            <td>
+                                {{variant.proband_variant.get_transcript_variant.hgvs_c}}
+                                {% if variant.proband_variant.get_transcript_variant.hgvs_p %}
+                                    <br>
+                                    {{variant.proband_variant.get_transcript_variant.hgvs_p}}
+                                {% endif %}
+                            </td>
+                            <td>{{variant.proband_variant.get_transcript_variant.variant.position}}</td>
+                            <td>{{variant.classification}}</td>
+                            <td>{{variant.proband_variant.get_ptv.effect}}</td>
+                        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+        </small>
+    {% endif %}
 
 
 
@@ -114,6 +155,7 @@ SOFTWARE.
             </th>
         </thead>
         <tbody>
+
         {% for panel, num_genes in panels.items %}
             <tr>
             <td>{{panel.panel}}</td>
