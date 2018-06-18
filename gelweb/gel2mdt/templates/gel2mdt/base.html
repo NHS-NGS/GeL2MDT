@@ -345,7 +345,7 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
     console.log("Loading table through initaliseTable()!")
     if("{{sample_type}}" === 'cancer') {
         var table = $('#rare-disease-main').DataTable({
-            dom: 'Bfrtip',
+            dom: 'lBfrtip',
             buttons: [ {
                 extend: 'excelHtml5',
                 title: 'Data export'
