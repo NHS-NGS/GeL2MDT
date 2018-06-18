@@ -281,9 +281,15 @@
                                     <div class="col-md-2">
                                         {% bootstrap_field gelir_form.pilot_case %}
                                     </div>
+                                    {% if report.sample_type == "cancer" %}
                                     <div class="col-md-3">
-                                        {% bootstrap_field gelir_form.no_primary_findings %}
+                                        {% bootstrap_field gelir_form.no_primary_findings label="No Actionable Findings" %}
                                     </div>
+                                    {% else %}
+                                    <div class="col-md-3">
+                                        {% bootstrap_field gelir_form.no_primary_findings label="No Primary Findings" %}
+                                    </div>
+                                    {% endif %}
                                     {% if proband_mdt|length > 0 %}
                                         <div class="col-md-2">
                                             <a href="/export_mdt_outcome_form/{{report.id}}"><i class="fas fa-external-link-alt"></i> MDM Outcome</a>
