@@ -358,6 +358,7 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
                 "url": '{% url 'gelir-json' sample_type=sample_type %}',
                 "dataSrc": ''
             },
+            "deferRender": true,
             "columns": [
                 {
                     "data": "id",
@@ -412,7 +413,7 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
         });
     } else {
         var table = $('#rare-disease-main').DataTable({
-             dom: 'Bfrtip',
+            dom: 'lBfrtip',
             buttons: [ {
                 extend: 'excelHtml5',
                 title: 'Data export'
@@ -425,6 +426,7 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
                 "url": '{% url 'gelir-json' sample_type=sample_type %}',
                 "dataSrc": ''
             },
+            "deferRender": true,
             "columns": [
                 {
                     "data": "id",
