@@ -281,9 +281,15 @@
                                     <div class="col-md-2">
                                         {% bootstrap_field gelir_form.pilot_case %}
                                     </div>
+                                    {% if report.sample_type == "cancer" %}
                                     <div class="col-md-3">
-                                        {% bootstrap_field gelir_form.no_primary_findings %}
+                                        {% bootstrap_field gelir_form.no_primary_findings label="No Actionable Findings" %}
                                     </div>
+                                    {% else %}
+                                    <div class="col-md-3">
+                                        {% bootstrap_field gelir_form.no_primary_findings label="No Primary Findings" %}
+                                    </div>
+                                    {% endif %}
                                     {% if proband_mdt|length > 0 %}
                                         <div class="col-md-2">
                                             <a href="/export_mdt_outcome_form/{{report.id}}"><i class="fas fa-external-link-alt"></i> MDM Outcome</a>
@@ -563,7 +569,11 @@
                                     <th>HGVSc</th>
                                     <th>HGVSp</th>
                                     <th>Genotype</th>
+                                    {% if report.sample_type == 'cancer' %}
+                                    <th>Somatic status</th>
+                                    {% else %}
                                     <th>Inheritance</th>
+                                    {% endif %}
                                     <th>Validation Status</th>
                                 </tr>
                             </thead>
@@ -645,7 +655,11 @@
                                         <td style="word-wrap: break-word; min-width: 100px;max-width: 100px;">{{pv.get_transcript_variant.hgvs_c}}</td>
                                         <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv.get_transcript_variant.hgvs_p}}</td>
                                         <td>{{pv.zygosity}}</td>
+                                        {% if report.sample_type == 'cancer' %}
+                                        <td>{{pv.somatic}}</td>
+                                        {% else %}
                                         <td>{{pv.inheritance}}</td>
+                                        {% endif %}
                                         <td><a onclick="$('#validationModal{{forloop.counter}}').modal('show')"><i class="fas fa-pencil-alt"></i></a></span> {{pv.get_validation_status_display}}</td>
                                     </tr>
 

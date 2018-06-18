@@ -326,7 +326,7 @@ class MultipleCaseAdder(object):
             # prefetch database entries for check_found_in_db()
             lookups = self.get_prefetch_lookups(model_type)
             if lookups:
-                model_objects = model_type.objects.all().prefetch_related(*lookups)
+                model_objects = model_type.objects.all().values(*lookups)
             elif not lookups:
                 model_objects = model_type.objects.all()
             for case in cases:
@@ -363,7 +363,7 @@ class MultipleCaseAdder(object):
             # refresh CaseAttributeManagers with new CaseModels
             lookups = self.get_prefetch_lookups(model_type)
             if lookups:
-                model_objects = model_type.objects.all().prefetch_related(*lookups)
+                model_objects = model_type.objects.all().values(*lookups)
             elif not lookups:
                 model_objects = model_type.objects.all()
             for model in model_list:
@@ -450,26 +450,26 @@ class MultipleCaseAdder(object):
         When adding new tables to the database, add their FKs here.
         """
         lookup_dict = {
-            Clinician: None,
-            Phenotype: None,
-            Family: ["clinician"],
-            FamilyPhenotype: ["family", "phenotype"],
-            Gene: None,
-            Panel: None,
-            PanelVersion: ["panel"],
-            PanelVersionGene: ["panel_version", "gene"],
-            ToolOrAssemblyVersion: None,
-            InterpretationReportFamily: ["participant_family"],
-            InterpretationReportFamilyPanel: ["ir_family", "panel"],
-            GELInterpretationReport: ["ir_family"],
-            Proband: ["family"],
-            Relative: ["proband"],
-            Variant: ["genome_assembly"],
-            Transcript: ["gene", 'genome_assembly'],
-            TranscriptVariant: ["transcript", "variant"],
-            ProbandVariant: ["variant", "interpretation_report"],
-            ProbandTranscriptVariant: ["transcript", "proband_variant"],
-            ReportEvent: ["proband_variant", "panel", "gene"],
+            Clinician: ['id','name', 'hospital', 'email'],
+            Phenotype: ['id','hpo_terms'],
+            Family: ['id',"gel_family_id"],
+            FamilyPhenotype: ['id',"family", "phenotype"],
+            Gene: ['id','hgnc_id'],
+            Panel: ['id','panelapp_id'],
+            PanelVersion: ['id',"panel", 'version_number'],
+            PanelVersionGene: ['id',"panel_version", "gene"],
+            ToolOrAssemblyVersion: ['id','tool_name','version_number'],
+            InterpretationReportFamily: ['id',"ir_family_id"],
+            InterpretationReportFamilyPanel: ['id',"ir_family", "panel"],
+            GELInterpretationReport: ['id',"sha_hash"],
+            Proband: ['id',"gel_id"],
+            Relative: ['id',"gel_id", "proband"],
+            Variant: ['id','chromosome', 'position', 'reference', 'alternate', "genome_assembly"],
+            Transcript: ['id',"name", 'genome_assembly'],
+            TranscriptVariant: ['id',"transcript", "variant"],
+            ProbandVariant: ['id',"variant", "interpretation_report", 'max_tier'],
+            ProbandTranscriptVariant: ['id',"transcript", "proband_variant"],
+            ReportEvent: ['id',"proband_variant", "re_id"],
         }
         return lookup_dict[model_type]
 
