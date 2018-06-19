@@ -147,6 +147,9 @@ class Case(object):
         self.panels = self.get_panels_json()
         self.variants = self.get_case_variants()
         self.transcripts = []  # set by MCM with a call to vep_utils
+        self.demographics = None
+        self.clinicians = None
+        self.diagnosis = None
 
         # initialise a dict to contain the AttributeManagers for this case,
         # which will be set by the MCA as they are required (otherwise there
@@ -443,35 +446,11 @@ class CaseAttributeManager(object):
             labkey_server_request = config_dict['labkey_cancer_server_request']
         # load in site specific details from config file
 
-
         if self.case.skip_demographics:
             # don't poll labkey
             clinician_details = {"name": "unknown", "hospital": "unknown"}
         elif not self.case.skip_demographics:
             # poll labkey
-            server_context = lk.utils.create_server_context(
-                'gmc.genomicsengland.nhs.uk',
-                labkey_server_request,
-                '/labkey', use_ssl=True)
-
-            if self.case.json['sample_type']=='raredisease':
-                search_results = lk.query.select_rows(
-                    server_context=server_context,
-                    schema_name='gel_rare_diseases',
-                    query_name='rare_diseases_registration',
-                    filter_array=[
-                        lk.query.QueryFilter('family_id', family_id, 'contains')
-                    ]
-                )
-            elif self.case.json['sample_type']=='cancer':
-                search_results = lk.query.select_rows(
-                    server_context=server_context,
-                    schema_name='gel_cancer',
-                    query_name='cancer_registration',
-                    filter_array=[
-                        lk.query.QueryFilter('participant_identifiers_id', family_id, 'contains')
-                    ]
-                )
             clinician_details = {"name": "unknown", "hospital": "unknown"}
             # The results contain multiple rows for each famliy member.
             # This code just takes the first entry. May need refining.
@@ -585,59 +564,42 @@ class CaseAttributeManager(object):
         demographics = self.get_paricipant_demographics(participant_id)
         family = self.case.attribute_managers[Family].case_model
         clinician = self.case.attribute_managers[Clinician].case_model
+        recruiting_disease = None
+        disease_subtype = None
+        try:
+            if self.case.json['sample_type'] == 'cancer':
+                if 'cancerParticipant' in self.case.json_request_data:
+                    if 'primaryDiagnosisDisease' in self.case.json_request_data['cancerParticipant']:
+                        recruiting_disease = self.case.json_request_data['cancerParticipant']['primaryDiagnosisDisease']
+                    if 'primaryDiagnosisSubDisease' in self.case.json_request_data['cancerParticipant']:
+                        disease_subtype = self.case.json_request_data['cancerParticipant']['primaryDiagnosisSubDisease']
+        except IndexError as e:
+            pass
 
-        if self.case.skip_demographics:
-            recruiting_disease = None
-            disease_subtype = None
-            try:
-                if self.case.json['sample_type'] == 'cancer':
-                    if 'cancerParticipant' in self.case.json_request_data:
-                        if 'primaryDiagnosisDisease' in self.case.json_request_data['cancerParticipant']:
-                            recruiting_disease = self.case.json_request_data['cancerParticipant']['primaryDiagnosisDisease']
-                        if 'primaryDiagnosisSubDisease' in self.case.json_request_data['cancerParticipant']:
-                            disease_subtype = self.case.json_request_data['cancerParticipant']['primaryDiagnosisSubDisease']
-            except IndexError as e:
-                pass
-        else:
+        if not self.case.skip_demographics:
             # set up LabKey to get recruited disease
             config_dict = load_config.LoadConfig().load()
             if self.case.json['sample_type'] == 'raredisease':
                 labkey_server_request = config_dict['labkey_server_request']
                 schema_name = 'gel_rare_diseases'
                 queryname = 'rare_diseases_diagnosis'
-            elif self.case.json['sample_type'] == 'cancer':
-                labkey_server_request = config_dict['labkey_cancer_server_request']
-                schema_name = 'gel_cancer'
-                queryname = 'cancer_diagnosis'
 
-            server_context = lk.utils.create_server_context(
-                'gmc.genomicsengland.nhs.uk',
-                labkey_server_request,
-                '/labkey', use_ssl=True)
+                server_context = lk.utils.create_server_context(
+                    'gmc.genomicsengland.nhs.uk',
+                    labkey_server_request,
+                    '/labkey', use_ssl=True)
 
-            # search in LabKey for recruited disease
-            search_results = lk.query.select_rows(
-                server_context=server_context,
-                schema_name=schema_name,
-                query_name=queryname,
-                filter_array=[
-                    lk.query.QueryFilter('participant_identifiers_id', participant_id, 'eq')
-                ]
-            )
-
-            recruiting_disease = None
-            disease_subtype = None
-            try:
+                # search in LabKey for recruited disease
+                search_results = lk.query.select_rows(
+                    server_context=server_context,
+                    schema_name=schema_name,
+                    query_name=queryname,
+                    filter_array=[
+                        lk.query.QueryFilter('participant_identifiers_id', participant_id, 'eq')
+                    ]
+                )
                 if self.case.json['sample_type'] == 'raredisease':
                     recruiting_disease = search_results['rows'][0].get('gel_disease_information_specific_disease', None)
-                elif self.case.json['sample_type'] == 'cancer':
-                    if 'cancerParticipant' in self.case.json_request_data:
-                        if 'primaryDiagnosisDisease' in self.case.json_request_data['cancerParticipant']:
-                            recruiting_disease = self.case.json_request_data['cancerParticipant']['primaryDiagnosisDisease']
-                        if 'primaryDiagnosisSubDisease' in self.case.json_request_data['cancerParticipant']:
-                            disease_subtype = self.case.json_request_data['cancerParticipant']['primaryDiagnosisSubDisease']
-            except IndexError as e:
-                pass
 
         proband = CaseModel(Proband, {
             "gel_id": participant_id,
