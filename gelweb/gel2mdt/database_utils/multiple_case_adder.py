@@ -331,8 +331,8 @@ class MultipleCaseAdder(object):
                         participant_ids.append(case.json["proband"])
                         for family_member in case.family_members:
                             participant_ids.append(family_member['gel_id'])
-                    demographics = demographic_handler.get_demographics(family_ids)
-                    clinicians = demographic_handler.get_clinicians(participant_ids)
+                    demographics = demographic_handler.get_demographics(participant_ids)
+                    clinicians = demographic_handler.get_clinicians(family_ids)
                     diagnosis = demographic_handler.get_diagnosis(participant_ids)
                 elif self.sample_type == 'cancer':
                     for case in cases:
@@ -344,7 +344,6 @@ class MultipleCaseAdder(object):
                     diagnosis = None
 
                 for case in cases:
-                    print(clinicians)
                     case.demographics = demographics
                     case.clinicians = clinicians
                     case.diagnosis = diagnosis
