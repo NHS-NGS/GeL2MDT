@@ -38,6 +38,9 @@ class DemographicsHandler:
             query_name = 'cancer_registration'
             filter_type = 'participant_identifiers_id'
         query = ';'.join(family_ids)
+        print(query_name)
+        print(query)
+        print(filter_type)
         results = lk.query.select_rows(
             server_context=self.server_context,
             schema_name=schema_name,
@@ -52,6 +55,7 @@ class DemographicsHandler:
         # search in LabKey for recruited disease
         if self.sample_type == 'raredisease':
             query = ';'.join(participant_ids)
+            print(query)
             results = lk.query.select_rows(
                 server_context=self.server_context,
                 schema_name='gel_rare_diseases',
