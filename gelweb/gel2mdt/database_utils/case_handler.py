@@ -438,25 +438,25 @@ class CaseAttributeManager(object):
         # family ID used to search for clinician details in labkey
         family_id = None
         clinician_details = {"name": "unknown", "hospital": "unknown"}
-        if self.case.json['sample_type']=='raredisease':
+        search_term = 'participant_identifiers_id'
+        if self.case.json['sample_type'] == 'raredisease':
             family_id = self.case.json["family_id"]
-        elif self.case.json['sample_type']=='cancer':
+            search_term = 'family_id'
+        elif self.case.json['sample_type'] == 'cancer':
             family_id = self.case.json["proband"]
         # load in site specific details from config file
 
-        clinician_details = {"name": "unknown", "hospital": "unknown"}
         if not self.case.skip_demographics:
             for row in self.case.clinicians:
                 try:
-                    if row['participant_identifiers_id'] == family_id:
+                    if row[search_term] == family_id:
                         clinician_details['name'] = row.get(
-                        'consultant_details_full_name_of_responsible_consultant')
+                            'consultant_details_full_name_of_responsible_consultant')
 
                         clinician_details['hospital'] = row.get(
                             'consultant_details_hospital_of_responsible_consultant')
                 except IndexError as e:
                     pass
-
         clinician = CaseModel(Clinician, {
             "name": clinician_details['name'],
             "email": "unknown",  # clinician email not on labkey
@@ -498,7 +498,6 @@ class CaseAttributeManager(object):
                                 'person_identifier')
                 except IndexError as e:
                     pass
-
         return participant_demographics
 
     def get_proband(self):

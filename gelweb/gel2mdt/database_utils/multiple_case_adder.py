@@ -176,7 +176,8 @@ class MultipleCaseAdder(object):
                         panel_manager=self.panel_manager,
                         variant_manager=self.variant_manager,
                         gene_manager=self.gene_manager,
-                        skip_demographics=self.skip_demographics))
+                        skip_demographics=self.skip_demographics,
+                        pullt3=self.pullt3))
         logger.info("Found " + str(len(list_of_cases)) +  " test cases.")
         return list_of_cases
 
