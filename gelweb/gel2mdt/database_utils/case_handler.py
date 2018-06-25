@@ -1706,7 +1706,7 @@ class CaseModel(object):
                      and db_obj['version_number'] == self.model_attributes["version_number"]]
         elif self.model_type == InterpretationReportFamilyPanel:
             entry = [db_obj for db_obj in queryset
-                     if db_obj['ir_family'] == self.model_attributes["ir_family"]
+                     if db_obj['ir_family'] == self.model_attributes["ir_family"].id
                      and db_obj['panel'] == self.model_attributes["panel"].id]
         elif self.model_type == Gene:
             entry = [db_obj for db_obj in queryset
