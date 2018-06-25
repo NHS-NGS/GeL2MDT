@@ -448,16 +448,16 @@ class CaseAttributeManager(object):
         elif self.case.json['sample_type'] == 'cancer':
             family_id = self.case.json["proband"]
         # load in site specific details from config file
-
         if not self.case.skip_demographics:
             for row in self.case.clinicians:
                 try:
                     if row[search_term] == family_id:
-                        clinician_details['name'] = row.get(
-                            'consultant_details_full_name_of_responsible_consultant')
-
-                        clinician_details['hospital'] = row.get(
-                            'consultant_details_hospital_of_responsible_consultant')
+                        if row.get('consultant_details_full_name_of_responsible_consultant'):
+                            clinician_details['name'] = row.get(
+                                'consultant_details_full_name_of_responsible_consultant')
+                        if row.get('consultant_details_hospital_of_responsible_consultant'):
+                            clinician_details['hospital'] = row.get(
+                                'consultant_details_hospital_of_responsible_consultant')
                 except IndexError as e:
                     pass
         clinician = CaseModel(Clinician, {
