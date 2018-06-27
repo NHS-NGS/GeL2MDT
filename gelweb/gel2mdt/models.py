@@ -555,7 +555,7 @@ class Inheritance(ChoiceEnum):
 
 class ProbandVariant(models.Model):
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
-    max_tier = models.IntegerField()
+    max_tier = models.IntegerField(null=True)
     somatic = models.BooleanField()
     vaf = models.DecimalField(max_digits=8, decimal_places=3, null=True)
 
@@ -653,6 +653,19 @@ class ProbandVariant(models.Model):
     class Meta:
         managed = True
         db_table = 'ProbandVariant'
+        app_label= 'gel2mdt'
+
+
+class PVFlag(models.Model):
+    proband_variant = models.ForeignKey(ProbandVariant, on_delete=models.CASCADE)
+    flag_name = models.CharField(db_column='flag_name', max_length=255, choices=(('CIP candidate', 'CIP candidate'),
+                                                                                 ('Clinical Report', 'Clinical Report'),
+                                                                                 ('Exomiser', 'Exomiser')))
+    exomiser_score = models.FloatField(null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'PVFlag'
         app_label= 'gel2mdt'
 
 
@@ -874,3 +887,6 @@ class MDTReport(models.Model):
         managed = True
         db_table = 'MDTReport'
         app_label= 'gel2mdt'
+
+
+class VariantFlag(models.Model):
