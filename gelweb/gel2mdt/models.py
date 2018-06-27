@@ -366,6 +366,11 @@ class GELInterpretationReport(models.Model):
                     for report in mdt_report:
                         report.interpretation_report = self
                         report.save()
+                proband_variants = ProbandVariant.objects.filter(interpretation_report=latest_report)
+                if proband_variants:
+                    for pv in proband_variants:
+                        pv.interpretation_report = self
+                        pv.save()
 
         else:
             self.archived_version = 1
