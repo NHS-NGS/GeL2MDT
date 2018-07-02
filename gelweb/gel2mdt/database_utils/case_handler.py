@@ -309,35 +309,32 @@ class Case(object):
 
         # check for CIP flagged variants
         for interpreted_genome in self.json["interpreted_genome"]:
-            try:
-                if interpreted_genome['interpreted_genome_data']['company_name'] != 'Exomiser':
-                    for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
-                        variant_object_count += 1
-                        if self.json['sample_type'] == 'raredisease':
-                            case_variant = CaseVariant(
-                                chromosome=variant["chromosome"],
-                                position=variant["position"],
-                                ref=variant["reference"],
-                                alt=variant["alternate"],
-                                case_id=self.request_id,
-                                variant_count=str(variant_object_count),
-                                genome_build=genome_build
-                            )
-                        elif self.json['sample_type'] == 'cancer':
-                            case_variant = CaseVariant(
-                                chromosome=variant['reportedVariantCancer']["chromosome"],
-                                position=variant['reportedVariantCancer']["position"],
-                                ref=variant['reportedVariantCancer']["reference"],
-                                alt=variant['reportedVariantCancer']["alternate"],
-                                case_id=self.request_id,
-                                variant_count=str(variant_object_count),
-                                genome_build=genome_build
-                            )
-                        case_variant_list.append(case_variant)
-                        # also add it to the dict within self.json_variants
-                        variant["case_variant"] = case_variant
-            except KeyError:
-                pass
+            for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
+                variant_object_count += 1
+                if self.json['sample_type'] == 'raredisease':
+                    case_variant = CaseVariant(
+                        chromosome=variant["chromosome"],
+                        position=variant["position"],
+                        ref=variant["reference"],
+                        alt=variant["alternate"],
+                        case_id=self.request_id,
+                        variant_count=str(variant_object_count),
+                        genome_build=genome_build
+                    )
+                elif self.json['sample_type'] == 'cancer':
+                    case_variant = CaseVariant(
+                        chromosome=variant['reportedVariantCancer']["chromosome"],
+                        position=variant['reportedVariantCancer']["position"],
+                        ref=variant['reportedVariantCancer']["reference"],
+                        alt=variant['reportedVariantCancer']["alternate"],
+                        case_id=self.request_id,
+                        variant_count=str(variant_object_count),
+                        genome_build=genome_build
+                    )
+                print(case_variant)
+                case_variant_list.append(case_variant)
+                # also add it to the dict within self.json_variants
+                variant["case_variant"] = case_variant
 
         for clinical_report in self.json['clinical_report']:
             for variant in clinical_report['clinical_report_data']['candidateVariants']:
@@ -633,20 +630,16 @@ class CaseAttributeManager(object):
 
             # cip-flagged variants
             for interpreted_genome in self.case.json["interpreted_genome"]:
-                try:
-                    if interpreted_genome['interpreted_genome_data']['company_name'] != 'Exomiser':
-                        for json_variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
-                            json_variant['maternal_zygosity'] = 'unknown'
-                            json_variant['paternal_zygosity'] = 'unknown'
-                            for genotype in json_variant["calledGenotypes"]:
-                                genotype_gelid = genotype.get('gelId', None)
-                                if genotype_gelid == self.case.mother["gel_id"]:
-                                    json_variant['maternal_zygosity'] = genotype["genotype"]
-                                elif genotype_gelid == self.case.father["gel_id"]:
-                                    json_variant['paternal_zygosity'] = genotype["genotype"]
-                            variants_to_check.append(json_variant)
-                except KeyError as e:
-                    pass
+                for json_variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
+                    json_variant['maternal_zygosity'] = 'unknown'
+                    json_variant['paternal_zygosity'] = 'unknown'
+                    for genotype in json_variant["calledGenotypes"]:
+                        genotype_gelid = genotype.get('gelId', None)
+                        if genotype_gelid == self.case.mother["gel_id"]:
+                            json_variant['maternal_zygosity'] = genotype["genotype"]
+                        elif genotype_gelid == self.case.father["gel_id"]:
+                            json_variant['paternal_zygosity'] = genotype["genotype"]
+                    variants_to_check.append(json_variant)
 
             for clinical_report in self.case.json["clinical_report"]:
                 for json_variant in clinical_report['clinical_report_data']['candidateVariants']:
@@ -992,8 +985,9 @@ class CaseAttributeManager(object):
         self.case.processed_variants = self.process_proband_variants()
         self.case.max_tier = 3
         for variant in self.case.processed_variants:
-            if variant["max_tier"] < self.case.max_tier:
-                self.case.max_tier = variant["max_tier"]
+            if variant['max_tier']:
+                if variant["max_tier"] < self.case.max_tier:
+                    self.case.max_tier = variant["max_tier"]
 
         tumour_content = None
         if self.case.json['sample_type'] == 'cancer':
@@ -1058,25 +1052,22 @@ class CaseAttributeManager(object):
 
         # loop through all variants
         for interpreted_genome in self.case.json["interpreted_genome"]:
-            try:
-                if interpreted_genome['interpreted_genome_data']['company_name'] != 'Exomiser':
-                    for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
-                        if self.case.json['sample_type'] == 'cancer':
-                            variant['dbSNPid'] = variant['reportedVariantCancer']['dbSnpId']
-                        if variant['dbSNPid']:
-                            if not re.match('rs\d+', str(variant['dbSNPid'])):
-                                variant['dbSNPid'] = None
-                        cip_variant = {
-                            "genome_assembly": genome_assembly,
-                            "alternate": variant["case_variant"].alt,
-                            "chromosome": variant["case_variant"].chromosome,
-                            "db_snp_id": variant["dbSNPid"],
-                            "reference": variant["case_variant"].ref,
-                            "position": variant["case_variant"].position,
-                        }
-                        variants_list.append(cip_variant)
-            except KeyError as e:
-                pass
+            for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
+                print(variant['case_variant'])
+                if self.case.json['sample_type'] == 'cancer':
+                    variant['dbSNPid'] = variant['reportedVariantCancer']['dbSnpId']
+                if variant['dbSNPid']:
+                    if not re.match('rs\d+', str(variant['dbSNPid'])):
+                        variant['dbSNPid'] = None
+                cip_variant = {
+                    "genome_assembly": genome_assembly,
+                    "alternate": variant["case_variant"].alt,
+                    "chromosome": variant["case_variant"].chromosome,
+                    "db_snp_id": variant["dbSNPid"],
+                    "reference": variant["case_variant"].ref,
+                    "position": variant["case_variant"].position,
+                }
+                variants_list.append(cip_variant)
 
         for clinical_report in self.case.json["clinical_report"]:
             for variant in clinical_report['clinical_report_data']['candidateVariants']:
@@ -1320,7 +1311,7 @@ class CaseAttributeManager(object):
         for variant in all_flagged_variants:
             if variant["variant_entry"]:
                 cip_proband_variant = {
-                    "max_tier": 0,  # CIP flagged variants assigned tier 0
+                    "max_tier": None,  # CIP flagged variants assigned tier 0
                     "variant": variant["variant_entry"],
                     "zygosity": variant["zygosity"],
                     "maternal_zygosity": variant["maternal_zygosity"],
@@ -1333,15 +1324,15 @@ class CaseAttributeManager(object):
         tiered_and_cip_proband_variants = []
         seen_variants = []
 
-        for cip_variant in cip_proband_variants:
-            if cip_variant['variant'] not in seen_variants:
-                tiered_and_cip_proband_variants.append(cip_variant)
-                seen_variants.append(cip_variant['variant'])
-
         for variant in tiered_proband_variants:
             if variant['variant'] not in seen_variants:
                 tiered_and_cip_proband_variants.append(variant)
                 seen_variants.append(variant['variant'])
+
+        for cip_variant in cip_proband_variants:
+            if cip_variant['variant'] not in seen_variants:
+                tiered_and_cip_proband_variants.append(cip_variant)
+                seen_variants.append(cip_variant['variant'])
 
         return tiered_and_cip_proband_variants
 
