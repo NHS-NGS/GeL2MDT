@@ -423,6 +423,8 @@ class CaseAttributeManager(object):
             case_model = self.get_variants()
         elif self.model_type == TranscriptVariant:
             case_model = self.get_transcript_variants()
+        elif self.model_type == PVFlag:
+            case_model = self.get_pv_flags()
         elif self.model_type == ProbandVariant:
             case_model = self.get_proband_variants()
         elif self.model_type == ProbandTranscriptVariant:
@@ -607,7 +609,6 @@ class CaseAttributeManager(object):
                 self.case.mother = family_member
 
         self.case.trio_sequenced = False
-
 
         if self.case.mother["sequenced"] and self.case.father["sequenced"]:
             # participant has a mother and father recorded
@@ -1391,6 +1392,35 @@ class CaseAttributeManager(object):
         # print("Proband I:", inheritance)
         return inheritance
 
+    def get_pv_flags(self):
+        proband_variants = [proband_variant.entry for proband_variant
+                            in self.case.attribute_managers[ProbandVariant].case_model.case_models]
+        pv_flags = []
+        for interpreted_genome in self.case.json["interpreted_genome"]:
+            for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
+                for proband_variant in proband_variants:
+                    if proband_variant.variant == variant["variant_entry"]:
+                        variant['proband_variant'] = proband_variant
+                        variant['company'] = interpreted_genome['interpreted_genome_data']['companyName']
+                        pv_flags.append(variant)
+                        break
+
+        for clinical_report in self.case.json["clinical_report"]:
+            for variant in clinical_report['clinical_report_data']['candidateVariants']:
+                for proband_variant in proband_variants:
+                    if proband_variant.variant == variant["variant_entry"]:
+                        variant['proband_variant'] = proband_variant
+                        variant['company'] = 'Clinical Report'
+                        pv_flags.append(variant)
+                        break
+
+        pv_flags = ManyCaseModel(PVFlag, [{
+            "proband_variant": variant['proband_variant'],
+            'flag_name': variant['company']
+        } for variant in pv_flags], self.model_objects)
+
+        return pv_flags
+
     def get_report_events(self):
 
         """
@@ -1415,18 +1445,14 @@ class CaseAttributeManager(object):
         for variant in self.case.json_variants:
             interesting_variant = False
             if not self.case.pullt3:
-                print(variant['max_tier'])
                 if variant["max_tier"] < 3:
                     interesting_variant = True
             else:
                 interesting_variant=True
-            print(variant['max_tier'], interesting_variant)
             if interesting_variant:
                 # go through each RE in the variant
                 for report_event in variant["reportEvents"]:
-
                     # set the Gene entry
-                    found = False
                     gene_found = False
                     re_genomic_info = report_event.get("genomicFeature", None)
                     if re_genomic_info:
@@ -1436,7 +1462,6 @@ class CaseAttributeManager(object):
                                 report_event["gene_entry"] = gene
                                 gene_found = True
                                 break
-
                         if not gene_found:
                             # re-attempt with HGNC
                             re_gene_hgnc = re_genomic_info.get("HGNC", None)
@@ -1508,7 +1533,7 @@ class CaseAttributeManager(object):
                             "penetrance": report_event.get("penetrance", None),
                             "proband_variant": report_event["proband_variant_entry"],
                             "re_id": report_event_id,
-                            "tier": report_event_tier
+                            "tier": report_event_tier,
                         })
 
         # repeat for CIP flagged variants:
@@ -1734,6 +1759,10 @@ class CaseModel(object):
                      if db_obj['variant'] == self.model_attributes["variant"].id
                      and db_obj['max_tier'] == self.model_attributes["max_tier"]
                      and db_obj['interpretation_report'] == self.model_attributes["interpretation_report"].id]
+        elif self.model_type == PVFlag:
+            entry = [db_obj for db_obj in queryset
+                     if db_obj['proband_variant'] == self.model_attributes["proband_variant"].id
+                     and db_obj['flag_name'] == self.model_attributes["flag_name"]]
         elif self.model_type == ProbandTranscriptVariant:
             entry = [db_obj for db_obj in queryset
                      if db_obj['transcript'] == self.model_attributes["transcript"].id
