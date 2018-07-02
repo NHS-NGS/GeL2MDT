@@ -1053,7 +1053,6 @@ class CaseAttributeManager(object):
         # loop through all variants
         for interpreted_genome in self.case.json["interpreted_genome"]:
             for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
-                print(variant['case_variant'])
                 if self.case.json['sample_type'] == 'cancer':
                     variant['dbSNPid'] = variant['reportedVariantCancer']['dbSnpId']
                 if variant['dbSNPid']:
