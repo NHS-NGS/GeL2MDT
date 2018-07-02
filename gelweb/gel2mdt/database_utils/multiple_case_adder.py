@@ -283,6 +283,7 @@ class MultipleCaseAdder(object):
             (InterpretationReportFamilyPanel, True),
             (GELInterpretationReport, False),
             (ProbandVariant, True),
+            (PVFlag, True),
             (TranscriptVariant, True),
             (ProbandTranscriptVariant, True),
             #(ReportEvent, True)
@@ -499,6 +500,7 @@ class MultipleCaseAdder(object):
             Transcript: ['id',"name", 'genome_assembly'],
             TranscriptVariant: ['id',"transcript", "variant"],
             ProbandVariant: ['id',"variant", "interpretation_report", 'max_tier'],
+            PVFlag: ['id', "proband_variant", "flag_name"],
             ProbandTranscriptVariant: ['id',"transcript", "proband_variant"],
             ReportEvent: ['id',"proband_variant", "re_id"],
         }

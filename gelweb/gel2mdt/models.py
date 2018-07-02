@@ -658,15 +658,15 @@ class ProbandVariant(models.Model):
 
 class PVFlag(models.Model):
     proband_variant = models.ForeignKey(ProbandVariant, on_delete=models.CASCADE)
-    flag_name = models.CharField(db_column='flag_name', max_length=255, choices=(('CIP candidate', 'CIP candidate'),
-                                                                                 ('Clinical Report', 'Clinical Report'),
-                                                                                 ('Exomiser', 'Exomiser')))
-    exomiser_score = models.FloatField(null=True)
+    flag_name = models.CharField(db_column='flag_name', max_length=255)
+
+    def __str__(self):
+        return str(self.flag_name)
 
     class Meta:
         managed = True
         db_table = 'PVFlag'
-        app_label= 'gel2mdt'
+        app_label = 'gel2mdt'
 
 
 class RareDiseaseReport(models.Model):
@@ -887,6 +887,3 @@ class MDTReport(models.Model):
         managed = True
         db_table = 'MDTReport'
         app_label= 'gel2mdt'
-
-
-class VariantFlag(models.Model):
