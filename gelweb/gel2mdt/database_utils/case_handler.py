@@ -1255,7 +1255,6 @@ class CaseAttributeManager(object):
 
         # cip flagged variants
 
-
         all_flagged_variants = []
         for interpreted_genome in self.case.json["interpreted_genome"]:
             for json_variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
@@ -1748,7 +1747,6 @@ class CaseModel(object):
         elif self.model_type == ProbandVariant:
             entry = [db_obj for db_obj in queryset
                      if db_obj['variant'] == self.model_attributes["variant"].id
-                     and db_obj['max_tier'] == self.model_attributes["max_tier"]
                      and db_obj['interpretation_report'] == self.model_attributes["interpretation_report"].id]
         elif self.model_type == PVFlag:
             entry = [db_obj for db_obj in queryset
