@@ -689,7 +689,7 @@ def mdt_view(request, mdt_id):
         t3_proband_variant_count[report.id] = 0
         pvs = ProbandVariant.objects.filter(interpretation_report=report)
         for pv in pvs:
-            if pv.pvflag_set.all():
+            if pv.pvflag_set.all() or pv.max_tier < 3:
                 proband_variant_count[report.id] += 1
             else:
                 t3_proband_variant_count[report.id] += 1
@@ -740,7 +740,7 @@ def mdt_proband_view(request, mdt_id, pk, important):
     proband_variants_all = ProbandVariant.objects.filter(interpretation_report=report)
     for pv in proband_variants_all:
         if important ==1:
-            if pv.pvflag_set.all():
+            if pv.pvflag_set.all() or pv.max_tier < 3:
                 proband_variants.append(pv)
         else:
             if not pv.pvflag_set.all():
@@ -832,7 +832,7 @@ def edit_mdt_proband(request, report_id):
                 t3_proband_variant_count[report.id] = 0
                 pvs = ProbandVariant.objects.filter(interpretation_report=report)
                 for pv in pvs:
-                    if pv.pvflag_set.all():
+                    if pv.pvflag_set.all() or pv.max_tier < 3:
                         proband_variant_count[report.id] += 1
                     else:
                         t3_proband_variant_count[report.id] += 1
