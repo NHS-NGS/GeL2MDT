@@ -1,0 +1,3508 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>gel2mdt_mirror Database</title>
+  <!-- Tell the browser to be responsive to screen width -->
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+  <!-- Bootstrap 3.3.5 -->
+  <link rel="stylesheet" href="bower/admin-lte/bootstrap/css/bootstrap.min.css">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="bower/font-awesome/css/font-awesome.min.css">
+  <!-- Ionicons -->
+  <link rel="stylesheet" href="bower/ionicons/css/ionicons.min.css">
+  <!-- DataTables -->
+  <link rel="stylesheet" href="bower/datatables.net-bs/css/dataTables.bootstrap.min.css">
+  <link rel="stylesheet" href="bower/datatables.net-buttons-bs/css/buttons.bootstrap.min.css">
+  <!-- Code Mirror -->
+  <link rel="stylesheet" href="bower/codemirror/codemirror.css">
+  <!-- Fonts -->
+  <link href='fonts/indieflower/indie-flower.css' rel='stylesheet' type='text/css'>
+  <link href='fonts/source-sans-pro/source-sans-pro.css' rel='stylesheet' type='text/css'>
+
+  <!-- Theme style -->
+  <link rel="stylesheet" href="bower/admin-lte/dist/css/AdminLTE.min.css">
+  <!-- Salvattore -->
+  <link rel="stylesheet" href="bower/salvattore/salvattore.css">
+  <!-- AdminLTE Skins. Choose a skin from the css/skins
+       folder instead of downloading all of them to reduce the load. -->
+  <link rel="stylesheet" href="bower/admin-lte/dist/css/skins/_all-skins.min.css">
+  <!-- SchemaSpy -->
+  <link rel="stylesheet" href="schemaSpy.css">
+  
+  <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+  <!--[if lt IE 9]>
+  <script src="bower/html5shiv/html5shiv.min.js"></script>
+  <script src="bower/respond/respond.min.js"></script>
+  <![endif]-->
+</head>
+<!-- ADD THE CLASS layout-top-nav TO REMOVE THE SIDEBAR. -->
+<body class="hold-transition skin-blue layout-top-nav">
+<div class="wrapper">
+  <header class="main-header">
+    <nav class="navbar navbar-static-top">
+      <div class="container">
+        <div class="navbar-header">
+          <a href="index.html" class="navbar-brand"><b>gel2mdt_mirror</b> Database</a>
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse">
+            <i class="fa fa-bars"></i>
+          </button>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse pull-left" id="navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="index.html">Tables <span class="sr-only">(current)</span></a></li>            
+			<!--<li><a href="components.html" title="List of system components">Components</a></li>-->
+			<li><a href="columns.html" title="All of the columns in the schema">Columns</a></li>
+			<li><a href="constraints.html" title="Useful for diagnosing error messages that just give constraint name or number">Constraints</a></li>
+			<li><a href="relationships.html" title="Diagram of table relationships">Relationships</a></li>
+			<li><a href="orphans.html" title="View of tables with neither parents nor children">Orphan&nbsp;Tables</a></li>				
+			<li><a href="anomalies.html" title="Things that might not be quite right">Anomalies</a></li>
+          </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+        <!-- Navbar Right Menu -->
+
+      </div>
+      <!-- /.container-fluid -->
+    </nav>
+  </header>
+  <!-- Main content -->
+  <!-- Full Width Column -->
+  <div class="content-wrapper">
+          <!-- Content Header (Page header) -->
+      <section class="content-header">
+        <h1>Columns</h1>
+      </section>
+      <!-- Main content -->
+      <section class="content">
+		<div class="box box-primary">
+			<div class="box-header with-border">
+			  <span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span>
+              <h3 class="box-title">Columns</h3>
+            </div>	
+            <div class="box-body">
+				<table id="column_table" class="table table-bordered table-striped dataTable" role="grid">
+				<thead align='left'>
+				<tr>
+				  <th>Table</th>
+				  <th>Type</th>
+				  <th>Column</th>				  
+				  <th>Type</th>
+				  <th>Size</th>
+				  <th title='Are nulls allowed?'>Nulls</th>
+				  <th title='Is column automatically updated?'>Auto</th>
+				  <th title='Default value'>Default</th>
+				  <th title='Comments' class="toggle"><span>Comments</span></th>
+				</tr>
+				</thead>
+				<tbody>
+				<tr>
+				 <td>MDT_clinicians</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;MDT_clinicians_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>gel2mdt_interpretationreportfamilypanel</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>ir_family_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>GELInterpretationReport</td>
+				 <td>Table</td>
+				 <td>user</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>FamilyPhenotype</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>family_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>easyaudit_crudevent</td>
+				 <td>Table</td>
+				 <td class='indexedColumn' title='Indexed'><i class='fa fa-sitemap fa-rotate-120' style='padding-right: 5px;'></i>object_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>MDT</td>
+				 <td>Table</td>
+				 <td>to_report</td>
+				 <td>bool</td>
+				 <td>1</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ToolOrAssemblyVersion</td>
+				 <td>Table</td>
+				 <td>version_number</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>reversion_version</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>revision_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ClinicalScientist</td>
+				 <td>Table</td>
+				 <td>name</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>auth_user_user_permissions</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;auth_user_user_permissions_id_seq&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>gel2mdt_listupdate</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;gel2mdt_listupdate_id_seq&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>MDT_clinical_scientists</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>mdt_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Primer</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>variant_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Phenotype</td>
+				 <td>Table</td>
+				 <td>description</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>auth_user</td>
+				 <td>Table</td>
+				 <td>is_active</td>
+				 <td>bool</td>
+				 <td>1</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Family</td>
+				 <td>Table</td>
+				 <td>trio_sequenced</td>
+				 <td>bool</td>
+				 <td>1</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>reversion_version</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;reversion_version_id_seq&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ProbandVariant</td>
+				 <td>Table</td>
+				 <td>inheritance</td>
+				 <td>varchar</td>
+				 <td>20</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>auth_user</td>
+				 <td>Table</td>
+				 <td>first_name</td>
+				 <td>varchar</td>
+				 <td>30</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ReportEvent</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>gene_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Clinician</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>relates_to_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>MDTReport</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>interpretation_report_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>TranscriptVariant</td>
+				 <td>Table</td>
+				 <td>sift</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>MDT</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;MDT_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>auth_user_groups</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>user_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>VariantReport</td>
+				 <td>Table</td>
+				 <td>alamut_screenshot_sanger</td>
+				 <td>varchar</td>
+				 <td>100</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>easyaudit_requestevent</td>
+				 <td>Table</td>
+				 <td class='indexedColumn' title='Indexed'><i class='fa fa-sitemap fa-rotate-120' style='padding-right: 5px;'></i>method</td>
+				 <td>varchar</td>
+				 <td>20</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>GELInterpretationReport</td>
+				 <td>Table</td>
+				 <td>archived_version</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>easyaudit_loginevent</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>user_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Relative</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>proband_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Proband</td>
+				 <td>Table</td>
+				 <td>sex</td>
+				 <td>varchar</td>
+				 <td>10</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>MDT_clinicians</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>clinician_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Proband</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>family_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>easyaudit_crudevent</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;easyaudit_crudevent_id_seq&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>django_migrations</td>
+				 <td>Table</td>
+				 <td>name</td>
+				 <td>varchar</td>
+				 <td>255</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>InterpretationReportFamily</td>
+				 <td>Table</td>
+				 <td>cip</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>GELInterpretationReport</td>
+				 <td>Table</td>
+				 <td>no_primary_findings</td>
+				 <td>bool</td>
+				 <td>1</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>django_session</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>session_key</td>
+				 <td>varchar</td>
+				 <td>40</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>CancerReport</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;CancerReport_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>TranscriptVariant</td>
+				 <td>Table</td>
+				 <td>hgvs_p</td>
+				 <td>text</td>
+				 <td>2147483647</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>GELInterpretationReport</td>
+				 <td>Table</td>
+				 <td>sha_hash</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>TranscriptVariant</td>
+				 <td>Table</td>
+				 <td>af_max</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Proband</td>
+				 <td>Table</td>
+				 <td>forename</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>CancerReport</td>
+				 <td>Table</td>
+				 <td>variant_use</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ClinicalScientist</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;ClinicalScientist_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>RareDiseaseReport</td>
+				 <td>Table</td>
+				 <td>classification</td>
+				 <td>varchar</td>
+				 <td>2</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>GELInterpretationReport</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>assembly_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ReportEvent</td>
+				 <td>Table</td>
+				 <td>re_id</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>MDT</td>
+				 <td>Table</td>
+				 <td>sample_type</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>TranscriptVariant</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>transcript_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>VariantReport</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>proband_variant_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Transcript</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>genome_assembly_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Gene</td>
+				 <td>Table</td>
+				 <td class='indexedColumn' title='Indexed'><i class='fa fa-sitemap fa-rotate-120' style='padding-right: 5px;'></i>hgnc_id</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>MDTReport</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>MDT_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>VariantReport</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>secondary_cs_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>RareDiseaseReport</td>
+				 <td>Table</td>
+				 <td>Action</td>
+				 <td>text</td>
+				 <td>2147483647</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Primer</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;Primer_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>auth_permission</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>content_type_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Proband</td>
+				 <td>Table</td>
+				 <td>nhs_number</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>PanelVersion</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>panel_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>django_migrations</td>
+				 <td>Table</td>
+				 <td>app</td>
+				 <td>varchar</td>
+				 <td>255</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>auth_user</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;auth_user_id_seq&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Panel</td>
+				 <td>Table</td>
+				 <td class='indexedColumn' title='Indexed'><i class='fa fa-sitemap fa-rotate-120' style='padding-right: 5px;'></i>panelapp_id</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Family</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;Family_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>PanelVersion</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;PanelVersion_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Panel</td>
+				 <td>Table</td>
+				 <td>disease_subgroup</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Proband</td>
+				 <td>Table</td>
+				 <td>gmc</td>
+				 <td>varchar</td>
+				 <td>255</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Primer</td>
+				 <td>Table</td>
+				 <td>date_created</td>
+				 <td>timestamptz</td>
+				 <td>35</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>GELInterpretationReport</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>ir_family_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>easyaudit_loginevent</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;easyaudit_loginevent_id_seq&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Proband</td>
+				 <td>Table</td>
+				 <td>disease_stage</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>gel2mdt_listupdate</td>
+				 <td>Table</td>
+				 <td>cases_added</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ProbandTranscriptVariant</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>proband_variant_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ProbandTranscriptVariant</td>
+				 <td>Table</td>
+				 <td>selected</td>
+				 <td>bool</td>
+				 <td>1</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>gel2mdt_interpretationreportfamilypanel</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>panel_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>GELInterpretationReport</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>assigned_user_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Transcript</td>
+				 <td>Table</td>
+				 <td>location</td>
+				 <td>varchar</td>
+				 <td>255</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Clinician</td>
+				 <td>Table</td>
+				 <td>hospital</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>MDT</td>
+				 <td>Table</td>
+				 <td>gatb</td>
+				 <td>bool</td>
+				 <td>1</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ProbandVariant</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>interpretation_report_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Proband</td>
+				 <td>Table</td>
+				 <td>comment</td>
+				 <td>text</td>
+				 <td>2147483647</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>django_content_type</td>
+				 <td>Table</td>
+				 <td class='indexedColumn' title='Indexed'><i class='fa fa-sitemap fa-rotate-120' style='padding-right: 5px;'></i>model</td>
+				 <td>varchar</td>
+				 <td>100</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>InterpretationReportFamily</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>participant_family_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>gel2mdt_interpretationreportfamilypanel</td>
+				 <td>Table</td>
+				 <td>genes_failing_coverage</td>
+				 <td>text</td>
+				 <td>2147483647</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Panel</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;Panel_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>GELInterpretationReport</td>
+				 <td>Table</td>
+				 <td>sample_id</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>GELInterpretationReport</td>
+				 <td>Table</td>
+				 <td>tumour_content</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>easyaudit_crudevent</td>
+				 <td>Table</td>
+				 <td>object_repr</td>
+				 <td>varchar</td>
+				 <td>255</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>InterpretationReportFamily</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;InterpretationReportFamily_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ClinicalScientist</td>
+				 <td>Table</td>
+				 <td>email</td>
+				 <td>varchar</td>
+				 <td>254</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>RareDiseaseReport</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;RareDiseaseReport_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>GELInterpretationReport</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;GELInterpretationReport_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>MDT</td>
+				 <td>Table</td>
+				 <td>Status</td>
+				 <td>varchar</td>
+				 <td>50</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Gene</td>
+				 <td>Table</td>
+				 <td>hgnc_name</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ProbandVariant</td>
+				 <td>Table</td>
+				 <td>max_tier</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Variant</td>
+				 <td>Table</td>
+				 <td>reference</td>
+				 <td>text</td>
+				 <td>2147483647</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Primer</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>tool_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>auth_group</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;auth_group_id_seq&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Proband</td>
+				 <td>Table</td>
+				 <td>action</td>
+				 <td>text</td>
+				 <td>2147483647</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>auth_group_permissions</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>group_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>easyaudit_crudevent</td>
+				 <td>Table</td>
+				 <td>event_type</td>
+				 <td>int2</td>
+				 <td>5</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>easyaudit_crudevent</td>
+				 <td>Table</td>
+				 <td>user_pk_as_string</td>
+				 <td>varchar</td>
+				 <td>255</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>MDT_clinical_scientists</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;MDT_clinical_scientists_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>django_migrations</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;django_migrations_id_seq&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>django_session</td>
+				 <td>Table</td>
+				 <td class='indexedColumn' title='Indexed'><i class='fa fa-sitemap fa-rotate-120' style='padding-right: 5px;'></i>expire_date</td>
+				 <td>timestamptz</td>
+				 <td>35</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Family</td>
+				 <td>Table</td>
+				 <td class='indexedColumn' title='Indexed'><i class='fa fa-sitemap fa-rotate-120' style='padding-right: 5px;'></i>gel_family_id</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>TranscriptVariant</td>
+				 <td>Table</td>
+				 <td>pathogenicity</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>django_admin_log</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;django_admin_log_id_seq&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ProbandVariant</td>
+				 <td>Table</td>
+				 <td>validation_status</td>
+				 <td>varchar</td>
+				 <td>50</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>auth_user</td>
+				 <td>Table</td>
+				 <td>last_name</td>
+				 <td>varchar</td>
+				 <td>150</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>django_admin_log</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>user_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>easyaudit_loginevent</td>
+				 <td>Table</td>
+				 <td class='indexedColumn' title='Indexed'><i class='fa fa-sitemap fa-rotate-120' style='padding-right: 5px;'></i>remote_ip</td>
+				 <td>varchar</td>
+				 <td>50</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Panel</td>
+				 <td>Table</td>
+				 <td>disease_group</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>GELInterpretationReport</td>
+				 <td>Table</td>
+				 <td>status</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Transcript</td>
+				 <td>Table</td>
+				 <td>protein</td>
+				 <td>varchar</td>
+				 <td>255</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Relative</td>
+				 <td>Table</td>
+				 <td>lab_number</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Proband</td>
+				 <td>Table</td>
+				 <td>lab_number</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>MDT_other_staff</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;MDT_other_staff_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Clinician</td>
+				 <td>Table</td>
+				 <td>name</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ProbandVariant</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;ProbandVariant_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Transcript</td>
+				 <td>Table</td>
+				 <td>strand</td>
+				 <td>varchar</td>
+				 <td>255</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ReportEvent</td>
+				 <td>Table</td>
+				 <td>penetrance</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Variant</td>
+				 <td>Table</td>
+				 <td>db_snp_id</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Proband</td>
+				 <td>Table</td>
+				 <td>local_id</td>
+				 <td>varchar</td>
+				 <td>255</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>django_admin_log</td>
+				 <td>Table</td>
+				 <td>change_message</td>
+				 <td>text</td>
+				 <td>2147483647</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Proband</td>
+				 <td>Table</td>
+				 <td>suitable_for_clinical_trial</td>
+				 <td>bool</td>
+				 <td>1</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>MDTReport</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;MDTReport_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ProbandTranscriptVariant</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;ProbandTranscriptVariant_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ToolOrAssemblyVersion</td>
+				 <td>Table</td>
+				 <td>tool_name</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>MDT_other_staff</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>mdt_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>CancerReport</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>proband_variant_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>auth_user</td>
+				 <td>Table</td>
+				 <td>email</td>
+				 <td>varchar</td>
+				 <td>254</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>auth_permission</td>
+				 <td>Table</td>
+				 <td class='indexedColumn' title='Indexed'><i class='fa fa-sitemap fa-rotate-120' style='padding-right: 5px;'></i>codename</td>
+				 <td>varchar</td>
+				 <td>100</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>reversion_version</td>
+				 <td>Table</td>
+				 <td>format</td>
+				 <td>varchar</td>
+				 <td>255</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>VariantReport</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;VariantReport_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Relative</td>
+				 <td>Table</td>
+				 <td>date_of_birth</td>
+				 <td>timestamptz</td>
+				 <td>35</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Clinician</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;Clinician_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>reversion_version</td>
+				 <td>Table</td>
+				 <td>object_repr</td>
+				 <td>text</td>
+				 <td>2147483647</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>django_admin_log</td>
+				 <td>Table</td>
+				 <td>action_time</td>
+				 <td>timestamptz</td>
+				 <td>35</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ReportEvent</td>
+				 <td>Table</td>
+				 <td>mode_of_inheritance</td>
+				 <td>varchar</td>
+				 <td>40</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>MDT_clinical_scientists</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>clinicalscientist_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>TranscriptVariant</td>
+				 <td>Table</td>
+				 <td>hgvs_c</td>
+				 <td>text</td>
+				 <td>2147483647</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Proband</td>
+				 <td>Table</td>
+				 <td>disease_grade</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Variant</td>
+				 <td>Table</td>
+				 <td>alternate</td>
+				 <td>text</td>
+				 <td>2147483647</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>OtherStaff</td>
+				 <td>Table</td>
+				 <td>email</td>
+				 <td>varchar</td>
+				 <td>254</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>MDT_other_staff</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>otherstaff_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ClinicalScientist</td>
+				 <td>Table</td>
+				 <td>hospital</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>django_content_type</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;django_content_type_id_seq&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Transcript</td>
+				 <td>Table</td>
+				 <td>canonical_transcript</td>
+				 <td>bool</td>
+				 <td>1</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>auth_group</td>
+				 <td>Table</td>
+				 <td class='indexedColumn' title='Indexed'><i class='fa fa-sitemap fa-rotate-120' style='padding-right: 5px;'></i>name</td>
+				 <td>varchar</td>
+				 <td>80</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>auth_user</td>
+				 <td>Table</td>
+				 <td>last_login</td>
+				 <td>timestamptz</td>
+				 <td>35</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>TranscriptVariant</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>variant_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>MDT</td>
+				 <td>Table</td>
+				 <td>description</td>
+				 <td>varchar</td>
+				 <td>255</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>django_admin_log</td>
+				 <td>Table</td>
+				 <td>action_flag</td>
+				 <td>int2</td>
+				 <td>5</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Relative</td>
+				 <td>Table</td>
+				 <td>forename</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>RareDiseaseReport</td>
+				 <td>Table</td>
+				 <td>Discussion</td>
+				 <td>text</td>
+				 <td>2147483647</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>TranscriptVariant</td>
+				 <td>Table</td>
+				 <td>hgvs_g</td>
+				 <td>text</td>
+				 <td>2147483647</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>VariantReport</td>
+				 <td>Table</td>
+				 <td>comments</td>
+				 <td>text</td>
+				 <td>2147483647</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>CancerReport</td>
+				 <td>Table</td>
+				 <td>classification</td>
+				 <td>varchar</td>
+				 <td>2</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>VariantReport</td>
+				 <td>Table</td>
+				 <td>classification</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>RareDiseaseReport</td>
+				 <td>Table</td>
+				 <td>Add_surveillance_for_relatives</td>
+				 <td>bool</td>
+				 <td>1</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>GELInterpretationReport</td>
+				 <td>Table</td>
+				 <td>max_tier</td>
+				 <td>varchar</td>
+				 <td>1</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>reversion_version</td>
+				 <td>Table</td>
+				 <td class='indexedColumn' title='Indexed'><i class='fa fa-sitemap fa-rotate-120' style='padding-right: 5px;'></i>object_id</td>
+				 <td>varchar</td>
+				 <td>191</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ProbandVariant</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>variant_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>django_migrations</td>
+				 <td>Table</td>
+				 <td>applied</td>
+				 <td>timestamptz</td>
+				 <td>35</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>PanelVersion</td>
+				 <td>Table</td>
+				 <td>version_number</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>MDT_clinicians</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>mdt_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Panel</td>
+				 <td>Table</td>
+				 <td>panel_name</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>RareDiseaseReport</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>proband_variant_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>gel2mdt_panelversiongene</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;gel2mdt_panelversiongene_id_seq&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>auth_user_user_permissions</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>permission_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>reversion_revision</td>
+				 <td>Table</td>
+				 <td>comment</td>
+				 <td>text</td>
+				 <td>2147483647</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>OtherStaff</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;OtherStaff_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Proband</td>
+				 <td>Table</td>
+				 <td>surname</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>gel2mdt_interpretationreportfamilypanel</td>
+				 <td>Table</td>
+				 <td>custom</td>
+				 <td>bool</td>
+				 <td>1</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>RareDiseaseReport</td>
+				 <td>Table</td>
+				 <td>Clinical_trial</td>
+				 <td>bool</td>
+				 <td>1</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Proband</td>
+				 <td>Table</td>
+				 <td>disease_subtype</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>gel2mdt_panelversiongene</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>gene_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>auth_user</td>
+				 <td>Table</td>
+				 <td>is_superuser</td>
+				 <td>bool</td>
+				 <td>1</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Transcript</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;Transcript_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>gel2mdt_listupdate</td>
+				 <td>Table</td>
+				 <td>update_time</td>
+				 <td>timestamptz</td>
+				 <td>35</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>CancerReport</td>
+				 <td>Table</td>
+				 <td>Action</td>
+				 <td>text</td>
+				 <td>2147483647</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>gel2mdt_listupdate</td>
+				 <td>Table</td>
+				 <td>success</td>
+				 <td>bool</td>
+				 <td>1</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Clinician</td>
+				 <td>Table</td>
+				 <td>added_by_user</td>
+				 <td>bool</td>
+				 <td>1</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Proband</td>
+				 <td>Table</td>
+				 <td>current_clinical_trial_info</td>
+				 <td>varchar</td>
+				 <td>250</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>easyaudit_requestevent</td>
+				 <td>Table</td>
+				 <td>query_string</td>
+				 <td>varchar</td>
+				 <td>255</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Proband</td>
+				 <td>Table</td>
+				 <td>previous_testing</td>
+				 <td>text</td>
+				 <td>2147483647</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>MDT</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>creator_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>easyaudit_loginevent</td>
+				 <td>Table</td>
+				 <td>datetime</td>
+				 <td>timestamptz</td>
+				 <td>35</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Relative</td>
+				 <td>Table</td>
+				 <td>nhs_number</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>VariantReport</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>primary_cs_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Relative</td>
+				 <td>Table</td>
+				 <td>affected_status</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>CancerReport</td>
+				 <td>Table</td>
+				 <td>Discussion</td>
+				 <td>text</td>
+				 <td>2147483647</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>easyaudit_loginevent</td>
+				 <td>Table</td>
+				 <td>username</td>
+				 <td>varchar</td>
+				 <td>255</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>CancerReport</td>
+				 <td>Table</td>
+				 <td>validated</td>
+				 <td>bool</td>
+				 <td>1</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>gel2mdt_interpretationreportfamilypanel</td>
+				 <td>Table</td>
+				 <td>average_coverage</td>
+				 <td>numeric</td>
+				 <td>6</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>GELInterpretationReport</td>
+				 <td>Table</td>
+				 <td>updated</td>
+				 <td>timestamptz</td>
+				 <td>35</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Proband</td>
+				 <td>Table</td>
+				 <td>deceased</td>
+				 <td>bool</td>
+				 <td>1</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>auth_user</td>
+				 <td>Table</td>
+				 <td>date_joined</td>
+				 <td>timestamptz</td>
+				 <td>35</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>django_content_type</td>
+				 <td>Table</td>
+				 <td class='indexedColumn' title='Indexed'><i class='fa fa-sitemap fa-rotate-120' style='padding-right: 5px;'></i>app_label</td>
+				 <td>varchar</td>
+				 <td>100</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>RareDiseaseReport</td>
+				 <td>Table</td>
+				 <td>Contribution_to_phenotype</td>
+				 <td>varchar</td>
+				 <td>20</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>gel2mdt_listupdate</td>
+				 <td>Table</td>
+				 <td>error</td>
+				 <td>text</td>
+				 <td>2147483647</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>VariantReport</td>
+				 <td>Table</td>
+				 <td>alamut_screenshot_splicesites</td>
+				 <td>varchar</td>
+				 <td>100</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>auth_user</td>
+				 <td>Table</td>
+				 <td>password</td>
+				 <td>varchar</td>
+				 <td>128</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>TranscriptVariant</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;TranscriptVariant_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>reversion_version</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>content_type_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>easyaudit_requestevent</td>
+				 <td>Table</td>
+				 <td class='indexedColumn' title='Indexed'><i class='fa fa-sitemap fa-rotate-120' style='padding-right: 5px;'></i>url</td>
+				 <td>varchar</td>
+				 <td>255</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Transcript</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>gene_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>gel2mdt_interpretationreportfamilypanel</td>
+				 <td>Table</td>
+				 <td>proportion_above_15x</td>
+				 <td>numeric</td>
+				 <td>6</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Variant</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>genome_assembly_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>GELInterpretationReport</td>
+				 <td>Table</td>
+				 <td>polled_at_datetime</td>
+				 <td>timestamptz</td>
+				 <td>35</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Relative</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;Relative_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>reversion_revision</td>
+				 <td>Table</td>
+				 <td class='indexedColumn' title='Indexed'><i class='fa fa-sitemap fa-rotate-120' style='padding-right: 5px;'></i>date_created</td>
+				 <td>timestamptz</td>
+				 <td>35</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>gel2mdt_interpretationreportfamilypanel</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;gel2mdt_interpretationreportfamilypanel_id_seq&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>auth_user</td>
+				 <td>Table</td>
+				 <td class='indexedColumn' title='Indexed'><i class='fa fa-sitemap fa-rotate-120' style='padding-right: 5px;'></i>username</td>
+				 <td>varchar</td>
+				 <td>150</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Proband</td>
+				 <td>Table</td>
+				 <td>discussion</td>
+				 <td>text</td>
+				 <td>2147483647</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>auth_user</td>
+				 <td>Table</td>
+				 <td>is_staff</td>
+				 <td>bool</td>
+				 <td>1</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ToolOrAssemblyVersion</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;ToolOrAssemblyVersion_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Relative</td>
+				 <td>Table</td>
+				 <td>sequenced</td>
+				 <td>bool</td>
+				 <td>1</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>easyaudit_crudevent</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>user_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>easyaudit_crudevent</td>
+				 <td>Table</td>
+				 <td>object_json_repr</td>
+				 <td>text</td>
+				 <td>2147483647</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ProbandTranscriptVariant</td>
+				 <td>Table</td>
+				 <td>effect</td>
+				 <td>varchar</td>
+				 <td>255</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ReportEvent</td>
+				 <td>Table</td>
+				 <td>tier</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ProbandVariant</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>validation_responsible_user_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Proband</td>
+				 <td>Table</td>
+				 <td>recruiting_disease</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>gel2mdt_panelversiongene</td>
+				 <td>Table</td>
+				 <td>level_of_confidence</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Proband</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;Proband_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Relative</td>
+				 <td>Table</td>
+				 <td>sex</td>
+				 <td>varchar</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ReportEvent</td>
+				 <td>Table</td>
+				 <td>coverage</td>
+				 <td>numeric</td>
+				 <td>8</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>CancerReport</td>
+				 <td>Table</td>
+				 <td>action_type</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>OtherStaff</td>
+				 <td>Table</td>
+				 <td>name</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>auth_permission</td>
+				 <td>Table</td>
+				 <td>name</td>
+				 <td>varchar</td>
+				 <td>255</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>RareDiseaseReport</td>
+				 <td>Table</td>
+				 <td>inform_reproductive_choice</td>
+				 <td>bool</td>
+				 <td>1</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ProbandVariant</td>
+				 <td>Table</td>
+				 <td>paternal_zygosity</td>
+				 <td>varchar</td>
+				 <td>20</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>FamilyPhenotype</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;FamilyPhenotype_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>auth_user_user_permissions</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>user_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>reversion_version</td>
+				 <td>Table</td>
+				 <td class='indexedColumn' title='Indexed'><i class='fa fa-sitemap fa-rotate-120' style='padding-right: 5px;'></i>db</td>
+				 <td>varchar</td>
+				 <td>191</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>auth_group_permissions</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;auth_group_permissions_id_seq&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ProbandVariant</td>
+				 <td>Table</td>
+				 <td>zygosity</td>
+				 <td>varchar</td>
+				 <td>20</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>gel2mdt_listupdate</td>
+				 <td>Table</td>
+				 <td>cases_updated</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>reversion_revision</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;reversion_revision_id_seq&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ProbandVariant</td>
+				 <td>Table</td>
+				 <td>validation_datetime_set</td>
+				 <td>timestamptz</td>
+				 <td>35</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>easyaudit_crudevent</td>
+				 <td>Table</td>
+				 <td>datetime</td>
+				 <td>timestamptz</td>
+				 <td>35</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ProbandVariant</td>
+				 <td>Table</td>
+				 <td>somatic</td>
+				 <td>bool</td>
+				 <td>1</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Gene</td>
+				 <td>Table</td>
+				 <td>description</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>auth_user_groups</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>group_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Phenotype</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;Phenotype_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Variant</td>
+				 <td>Table</td>
+				 <td>chromosome</td>
+				 <td>varchar</td>
+				 <td>2</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>easyaudit_crudevent</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>content_type_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Proband</td>
+				 <td>Table</td>
+				 <td>previous_treatment</td>
+				 <td>text</td>
+				 <td>2147483647</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ProbandVariant</td>
+				 <td>Table</td>
+				 <td>vaf</td>
+				 <td>numeric</td>
+				 <td>8</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Relative</td>
+				 <td>Table</td>
+				 <td>surname</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>django_admin_log</td>
+				 <td>Table</td>
+				 <td>object_id</td>
+				 <td>text</td>
+				 <td>2147483647</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>reversion_revision</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>user_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>easyaudit_requestevent</td>
+				 <td>Table</td>
+				 <td class='indexedColumn' title='Indexed'><i class='fa fa-sitemap fa-rotate-120' style='padding-right: 5px;'></i>remote_ip</td>
+				 <td>varchar</td>
+				 <td>50</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Proband</td>
+				 <td>Table</td>
+				 <td class='indexedColumn' title='Indexed'><i class='fa fa-sitemap fa-rotate-120' style='padding-right: 5px;'></i>gel_id</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>GELInterpretationReport</td>
+				 <td>Table</td>
+				 <td>case_sent</td>
+				 <td>bool</td>
+				 <td>1</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Variant</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;Variant_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Gene</td>
+				 <td>Table</td>
+				 <td>ensembl_id</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ReportEvent</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>panel_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>FamilyPhenotype</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>phenotype_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ReportEvent</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>proband_variant_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>easyaudit_requestevent</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;easyaudit_requestevent_id_seq&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Phenotype</td>
+				 <td>Table</td>
+				 <td>hpo_terms</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>OtherStaff</td>
+				 <td>Table</td>
+				 <td>hospital</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Primer</td>
+				 <td>Table</td>
+				 <td>right_primer_seq</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>RareDiseaseReport</td>
+				 <td>Table</td>
+				 <td>Change_med</td>
+				 <td>bool</td>
+				 <td>1</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>TranscriptVariant</td>
+				 <td>Table</td>
+				 <td>polyphen</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Primer</td>
+				 <td>Table</td>
+				 <td>left_primer_seq</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Relative</td>
+				 <td>Table</td>
+				 <td>gel_id</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>MDT</td>
+				 <td>Table</td>
+				 <td>date_of_mdt</td>
+				 <td>timestamptz</td>
+				 <td>35</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>easyaudit_loginevent</td>
+				 <td>Table</td>
+				 <td>login_type</td>
+				 <td>int2</td>
+				 <td>5</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Gene</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;Gene_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>easyaudit_requestevent</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>user_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ProbandVariant</td>
+				 <td>Table</td>
+				 <td>Requires_Validation</td>
+				 <td>bool</td>
+				 <td>1</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>reversion_version</td>
+				 <td>Table</td>
+				 <td>serialized_data</td>
+				 <td>text</td>
+				 <td>2147483647</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Transcript</td>
+				 <td>Table</td>
+				 <td class='indexedColumn' title='Indexed'><i class='fa fa-sitemap fa-rotate-120' style='padding-right: 5px;'></i>name</td>
+				 <td>varchar</td>
+				 <td>255</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>GELInterpretationReport</td>
+				 <td>Table</td>
+				 <td>pilot_case</td>
+				 <td>bool</td>
+				 <td>1</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>CancerReport</td>
+				 <td>Table</td>
+				 <td>validated_assay_type</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>django_session</td>
+				 <td>Table</td>
+				 <td>session_data</td>
+				 <td>text</td>
+				 <td>2147483647</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Relative</td>
+				 <td>Table</td>
+				 <td>relation_to_proband</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>django_admin_log</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>content_type_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Proband</td>
+				 <td>Table</td>
+				 <td>date_of_birth</td>
+				 <td>timestamptz</td>
+				 <td>35</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>RareDiseaseReport</td>
+				 <td>Table</td>
+				 <td>Surgical_Option</td>
+				 <td>bool</td>
+				 <td>1</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Clinician</td>
+				 <td>Table</td>
+				 <td>email</td>
+				 <td>varchar</td>
+				 <td>254</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>easyaudit_requestevent</td>
+				 <td>Table</td>
+				 <td>datetime</td>
+				 <td>timestamptz</td>
+				 <td>35</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ProbandVariant</td>
+				 <td>Table</td>
+				 <td>maternal_zygosity</td>
+				 <td>varchar</td>
+				 <td>20</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>django_admin_log</td>
+				 <td>Table</td>
+				 <td>object_repr</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Proband</td>
+				 <td>Table</td>
+				 <td>outcome</td>
+				 <td>text</td>
+				 <td>2147483647</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>auth_user_groups</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;auth_user_groups_id_seq&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Family</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>clinician_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ProbandTranscriptVariant</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>transcript_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Proband</td>
+				 <td>Table</td>
+				 <td>currently_in_clinical_trial</td>
+				 <td>bool</td>
+				 <td>1</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>GELInterpretationReport</td>
+				 <td>Table</td>
+				 <td>case_status</td>
+				 <td>varchar</td>
+				 <td>50</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>gel2mdt_panelversiongene</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>panel_version_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>auth_group_permissions</td>
+				 <td>Table</td>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>permission_id</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>ReportEvent</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;&quot;ReportEvent_id_seq&quot;&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>GELInterpretationReport</td>
+				 <td>Table</td>
+				 <td>mdt_status</td>
+				 <td>varchar</td>
+				 <td>50</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>auth_permission</td>
+				 <td>Table</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i>id</td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;auth_permission_id_seq&#39;::regclass)</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Variant</td>
+				 <td>Table</td>
+				 <td>position</td>
+				 <td>int4</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Primer</td>
+				 <td>Table</td>
+				 <td class='indexedColumn' title='Indexed'><i class='fa fa-sitemap fa-rotate-120' style='padding-right: 5px;'></i>primer_set</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>Family</td>
+				 <td>Table</td>
+				 <td>has_de_novo</td>
+				 <td>bool</td>
+				 <td>1</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>GELInterpretationReport</td>
+				 <td>Table</td>
+				 <td>sample_type</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>InterpretationReportFamily</td>
+				 <td>Table</td>
+				 <td class='indexedColumn' title='Indexed'><i class='fa fa-sitemap fa-rotate-120' style='padding-right: 5px;'></i>ir_family_id</td>
+				 <td>varchar</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td>InterpretationReportFamily</td>
+				 <td>Table</td>
+				 <td>priority</td>
+				 <td>varchar</td>
+				 <td>200</td>
+				 <td title=''></td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td></td>
+				</tr>
+								</tbody>
+				</table>				
+			</div>
+		</div>	
+      </section>    
+  </div>
+  <!-- /.content-wrapper -->
+  <footer class="main-footer">
+    <div>
+      <div class="pull-right hidden-xs">
+        <a href="https://github.com/schemaspy/schemaspy" title="GitHub for SchemaSpy"><i class="fa fa-github-square fa-2x"></i></a>
+        <a href="http://stackoverflow.com/questions/tagged/schemaspy" title="StackOverflow for SchemaSpy"><i class="fa fa-stack-overflow fa-2x"></i></a>
+      </div>
+      <strong>Generated by <a href="http://schemaspy.org/" class="logo-text"><i class="fa fa-database"></i> SchemaSpy 6.0.0-rc2</a></strong>
+    </div>
+    <!-- /.container -->
+  </footer>
+</div>
+<!-- ./wrapper -->
+
+<!-- jQuery 2.2.3 -->
+<script src="bower/admin-lte/plugins/jQuery/jquery-2.2.3.min.js"></script>
+<script src="bower/admin-lte/plugins/jQueryUI/jquery-ui.min.js"></script>
+<!-- Bootstrap 3.3.5 -->
+<script src="bower/admin-lte/bootstrap/js/bootstrap.min.js"></script>
+<!-- DataTables -->
+<script src="bower/datatables.net/jquery.dataTables.min.js"></script>
+<script src="bower/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<script src="bower/datatables.net-buttons/dataTables.buttons.min.js"></script>
+<script src="bower/datatables.net-buttons-bs/js/buttons.bootstrap.min.js"></script>
+<script src="bower/datatables.net-buttons/buttons.html5.min.js"></script>
+<script src="bower/datatables.net-buttons/buttons.print.min.js"></script>
+<script src="bower/datatables.net-buttons/buttons.colVis.min.js"></script>
+
+<!-- SlimScroll -->
+<script src="bower/admin-lte/plugins/slimScroll/jquery.slimscroll.min.js"></script>
+<!-- FastClick -->
+<script src="bower/admin-lte/plugins/fastclick/fastclick.js"></script>
+<!-- Salvattore -->
+<script src="bower/salvattore/salvattore.min.js"></script>
+<!-- AnchorJS -->
+<script src="bower/anchor-js/anchor.min.js"></script>
+<!-- CodeMirror -->
+<script src="bower/codemirror/codemirror.js"></script>
+<script src="bower/codemirror/sql.js"></script>
+<!-- AdminLTE App -->
+<script src="bower/admin-lte/dist/js/app.min.js"></script>
+<script src="column.js"></script>
+<script src="schemaSpy.js"></script>
+</body>
+</html>

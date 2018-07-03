@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>gel2mdt_mirror Database</title>
+  <!-- Tell the browser to be responsive to screen width -->
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+  <!-- Bootstrap 3.3.5 -->
+  <link rel="stylesheet" href="bower/admin-lte/bootstrap/css/bootstrap.min.css">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="bower/font-awesome/css/font-awesome.min.css">
+  <!-- Ionicons -->
+  <link rel="stylesheet" href="bower/ionicons/css/ionicons.min.css">
+  <!-- DataTables -->
+  <link rel="stylesheet" href="bower/datatables.net-bs/css/dataTables.bootstrap.min.css">
+  <link rel="stylesheet" href="bower/datatables.net-buttons-bs/css/buttons.bootstrap.min.css">
+  <!-- Code Mirror -->
+  <link rel="stylesheet" href="bower/codemirror/codemirror.css">
+  <!-- Fonts -->
+  <link href='fonts/indieflower/indie-flower.css' rel='stylesheet' type='text/css'>
+  <link href='fonts/source-sans-pro/source-sans-pro.css' rel='stylesheet' type='text/css'>
+
+  <!-- Theme style -->
+  <link rel="stylesheet" href="bower/admin-lte/dist/css/AdminLTE.min.css">
+  <!-- Salvattore -->
+  <link rel="stylesheet" href="bower/salvattore/salvattore.css">
+  <!-- AdminLTE Skins. Choose a skin from the css/skins
+       folder instead of downloading all of them to reduce the load. -->
+  <link rel="stylesheet" href="bower/admin-lte/dist/css/skins/_all-skins.min.css">
+  <!-- SchemaSpy -->
+  <link rel="stylesheet" href="schemaSpy.css">
+  
+  <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+  <!--[if lt IE 9]>
+  <script src="bower/html5shiv/html5shiv.min.js"></script>
+  <script src="bower/respond/respond.min.js"></script>
+  <![endif]-->
+</head>
+<!-- ADD THE CLASS layout-top-nav TO REMOVE THE SIDEBAR. -->
+<body class="hold-transition skin-blue layout-top-nav">
+<div class="wrapper">
+  <header class="main-header">
+    <nav class="navbar navbar-static-top">
+      <div class="container">
+        <div class="navbar-header">
+          <a href="index.html" class="navbar-brand"><b>gel2mdt_mirror</b> Database</a>
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse">
+            <i class="fa fa-bars"></i>
+          </button>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse pull-left" id="navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="index.html">Tables <span class="sr-only">(current)</span></a></li>            
+			<!--<li><a href="components.html" title="List of system components">Components</a></li>-->
+			<li><a href="columns.html" title="All of the columns in the schema">Columns</a></li>
+			<li><a href="constraints.html" title="Useful for diagnosing error messages that just give constraint name or number">Constraints</a></li>
+			<li><a href="relationships.html" title="Diagram of table relationships">Relationships</a></li>
+			<li><a href="orphans.html" title="View of tables with neither parents nor children">Orphan&nbsp;Tables</a></li>				
+			<li><a href="anomalies.html" title="Things that might not be quite right">Anomalies</a></li>
+          </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+        <!-- Navbar Right Menu -->
+
+      </div>
+      <!-- /.container-fluid -->
+    </nav>
+  </header>
+  <!-- Main content -->
+  <!-- Full Width Column -->
+  <div class="content-wrapper">
+          <!-- Content Header (Page header) -->
+      <section class="content-header">
+        <h1>Constraints</h1>
+      </section>
+      <!-- Main content -->
+      <section class="content">
+		<div class="box box-primary">
+			<div class="box-header with-border">
+			  <i class="ion ion-key"></i>
+              <h3 class="box-title">60 Foreign Key Constraints</h3>
+              <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                </button>
+                <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+              </div>
+            </div>	
+            <div class="box-body">
+				<table id="constraint_table" class="table table-bordered table-striped dataTable" role="grid">
+				<thead align='left'>
+				<tr>
+				  <th>Constraint Name</th>
+				  <th>Child Column</th>
+				  <th>Parent Column</th>				  
+				  <th>Delete Rule</th>
+				</tr>
+				</thead>
+				<tbody>
+				<tr>
+				 <td>MDTReport_interpretation_repor_7c4a5e44_fk_GELInterp</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/MDTReport.html'>MDTReport</a><span>.interpretation_report_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/GELInterpretationReport.html'>GELInterpretationReport</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>MDTReport_MDT_id_252c8ab1_fk_MDT_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/MDTReport.html'>MDTReport</a><span>.MDT_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/MDT.html'>MDT</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>ProbandTranscriptVar_transcript_id_00f13cbb_fk_Transcrip</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/ProbandTranscriptVariant.html'>ProbandTranscriptVariant</a><span>.transcript_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/Transcript.html'>Transcript</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>ProbandTranscriptVar_proband_variant_id_92ef6f1d_fk_ProbandVa</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/ProbandTranscriptVariant.html'>ProbandTranscriptVariant</a><span>.proband_variant_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/ProbandVariant.html'>ProbandVariant</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>FamilyPhenotype_phenotype_id_f817cc19_fk_Phenotype_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/FamilyPhenotype.html'>FamilyPhenotype</a><span>.phenotype_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/Phenotype.html'>Phenotype</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>FamilyPhenotype_family_id_dc9bb214_fk_Family_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/FamilyPhenotype.html'>FamilyPhenotype</a><span>.family_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/Family.html'>Family</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>django_admin_log_user_id_c564eba6_fk</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/django_admin_log.html'>django_admin_log</a><span>.user_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/auth_user.html'>auth_user</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>django_admin_log_content_type_id_c4bce8eb_fk_django_co</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/django_admin_log.html'>django_admin_log</a><span>.content_type_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/django_content_type.html'>django_content_type</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>MDT_other_staff_mdt_id_078a46f5_fk_MDT_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/MDT_other_staff.html'>MDT_other_staff</a><span>.mdt_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/MDT.html'>MDT</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>MDT_other_staff_otherstaff_id_a381ac21_fk_OtherStaff_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/MDT_other_staff.html'>MDT_other_staff</a><span>.otherstaff_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/OtherStaff.html'>OtherStaff</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>reversion_version_content_type_id_7d0ff25c_fk_django_co</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/reversion_version.html'>reversion_version</a><span>.content_type_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/django_content_type.html'>django_content_type</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>reversion_version_revision_id_af9f6a9d_fk_reversion_revision_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/reversion_version.html'>reversion_version</a><span>.revision_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/reversion_revision.html'>reversion_revision</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>Variant_genome_assembly_id_c3ef24f9_fk_ToolOrAssemblyVersion_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/Variant.html'>Variant</a><span>.genome_assembly_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/ToolOrAssemblyVersion.html'>ToolOrAssemblyVersion</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>Family_clinician_id_b0d3d7f2_fk_Clinician_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/Family.html'>Family</a><span>.clinician_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/Clinician.html'>Clinician</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>MDT_clinicians_mdt_id_5d767f89_fk_MDT_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/MDT_clinicians.html'>MDT_clinicians</a><span>.mdt_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/MDT.html'>MDT</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>MDT_clinicians_clinician_id_e4c620bf_fk_Clinician_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/MDT_clinicians.html'>MDT_clinicians</a><span>.clinician_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/Clinician.html'>Clinician</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>InterpretationReport_participant_family_i_aaea9eb2_fk_Family_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/InterpretationReportFamily.html'>InterpretationReportFamily</a><span>.participant_family_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/Family.html'>Family</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>Relative_proband_id_9cae4931_fk_Proband_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/Relative.html'>Relative</a><span>.proband_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/Proband.html'>Proband</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>PanelVersion_panel_id_75eddc4e_fk_Panel_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/PanelVersion.html'>PanelVersion</a><span>.panel_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/Panel.html'>Panel</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>RareDiseaseReport_proband_variant_id_c8c7d1c0_fk_ProbandVa</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/RareDiseaseReport.html'>RareDiseaseReport</a><span>.proband_variant_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/ProbandVariant.html'>ProbandVariant</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>Proband_family_id_5053a357_fk_Family_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/Proband.html'>Proband</a><span>.family_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/Family.html'>Family</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>CancerReport_proband_variant_id_b169a72e_fk_ProbandVariant_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/CancerReport.html'>CancerReport</a><span>.proband_variant_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/ProbandVariant.html'>ProbandVariant</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>MDT_creator_id_ed47bae8_fk_auth_user_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/MDT.html'>MDT</a><span>.creator_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/auth_user.html'>auth_user</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>gel2mdt_panelversion_panel_version_id_dc93b317_fk_PanelVers</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/gel2mdt_panelversiongene.html'>gel2mdt_panelversiongene</a><span>.panel_version_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/PanelVersion.html'>PanelVersion</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>gel2mdt_panelversiongene_gene_id_4b559e3d_fk_Gene_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/gel2mdt_panelversiongene.html'>gel2mdt_panelversiongene</a><span>.gene_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/Gene.html'>Gene</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>VariantReport_secondary_cs_id_3b1e0782_fk_ClinicalScientist_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/VariantReport.html'>VariantReport</a><span>.secondary_cs_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/ClinicalScientist.html'>ClinicalScientist</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>VariantReport_proband_variant_id_e35ca0f5_fk_ProbandVariant_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/VariantReport.html'>VariantReport</a><span>.proband_variant_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/ProbandVariant.html'>ProbandVariant</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>VariantReport_primary_cs_id_2721d794_fk_ClinicalScientist_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/VariantReport.html'>VariantReport</a><span>.primary_cs_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/ClinicalScientist.html'>ClinicalScientist</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>easyaudit_crudevent_content_type_id_618ed0c6_fk_django_co</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/easyaudit_crudevent.html'>easyaudit_crudevent</a><span>.content_type_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/django_content_type.html'>django_content_type</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>easyaudit_crudevent_user_id_09177b54_fk_auth_user_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/easyaudit_crudevent.html'>easyaudit_crudevent</a><span>.user_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/auth_user.html'>auth_user</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>ProbandVariant_validation_responsib_58398476_fk_auth_user</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/ProbandVariant.html'>ProbandVariant</a><span>.validation_responsible_user_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/auth_user.html'>auth_user</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>ProbandVariant_variant_id_85e7c0df_fk_Variant_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/ProbandVariant.html'>ProbandVariant</a><span>.variant_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/Variant.html'>Variant</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>ProbandVariant_interpretation_repor_e1e8b54b_fk_GELInterp</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/ProbandVariant.html'>ProbandVariant</a><span>.interpretation_report_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/GELInterpretationReport.html'>GELInterpretationReport</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>GELInterpretationRep_ir_family_id_68c9c15e_fk_Interpret</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/GELInterpretationReport.html'>GELInterpretationReport</a><span>.ir_family_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/InterpretationReportFamily.html'>InterpretationReportFamily</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>GELInterpretationRep_assigned_user_id_bf9b0260_fk_auth_user</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/GELInterpretationReport.html'>GELInterpretationReport</a><span>.assigned_user_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/auth_user.html'>auth_user</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>GELInterpretationRep_assembly_id_36e3f293_fk_ToolOrAss</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/GELInterpretationReport.html'>GELInterpretationReport</a><span>.assembly_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/ToolOrAssemblyVersion.html'>ToolOrAssemblyVersion</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>Clinician_relates_to_id_c57af829_fk_Clinician_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/Clinician.html'>Clinician</a><span>.relates_to_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/Clinician.html'>Clinician</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>auth_user_user_permi_permission_id_1fbb5f2c_fk_auth_perm</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/auth_user_user_permissions.html'>auth_user_user_permissions</a><span>.permission_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/auth_permission.html'>auth_permission</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>auth_user_user_permissions_user_id_a95ead1b_fk_auth_user_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/auth_user_user_permissions.html'>auth_user_user_permissions</a><span>.user_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/auth_user.html'>auth_user</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>MDT_clinical_scientists_mdt_id_bda77605_fk_MDT_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/MDT_clinical_scientists.html'>MDT_clinical_scientists</a><span>.mdt_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/MDT.html'>MDT</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>MDT_clinical_scienti_clinicalscientist_id_27fc09ae_fk_ClinicalS</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/MDT_clinical_scientists.html'>MDT_clinical_scientists</a><span>.clinicalscientist_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/ClinicalScientist.html'>ClinicalScientist</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>easyaudit_requestevent_user_id_da412f45_fk_auth_user_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/easyaudit_requestevent.html'>easyaudit_requestevent</a><span>.user_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/auth_user.html'>auth_user</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>ReportEvent_panel_id_a4a623cc_fk_PanelVersion_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/ReportEvent.html'>ReportEvent</a><span>.panel_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/PanelVersion.html'>PanelVersion</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>ReportEvent_gene_id_648bbf65_fk_Gene_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/ReportEvent.html'>ReportEvent</a><span>.gene_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/Gene.html'>Gene</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>ReportEvent_proband_variant_id_ff08c9c7_fk_ProbandVariant_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/ReportEvent.html'>ReportEvent</a><span>.proband_variant_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/ProbandVariant.html'>ProbandVariant</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>auth_user_groups_group_id_97559544_fk_auth_group_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/auth_user_groups.html'>auth_user_groups</a><span>.group_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/auth_group.html'>auth_group</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>auth_user_groups_user_id_6a12ed8b_fk_auth_user_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/auth_user_groups.html'>auth_user_groups</a><span>.user_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/auth_user.html'>auth_user</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>easyaudit_loginevent_user_id_f47fcbfb_fk_auth_user_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/easyaudit_loginevent.html'>easyaudit_loginevent</a><span>.user_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/auth_user.html'>auth_user</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>TranscriptVariant_transcript_id_3aac2fbe_fk_Transcript_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/TranscriptVariant.html'>TranscriptVariant</a><span>.transcript_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/Transcript.html'>Transcript</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>TranscriptVariant_variant_id_7a85d125_fk_Variant_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/TranscriptVariant.html'>TranscriptVariant</a><span>.variant_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/Variant.html'>Variant</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>gel2mdt_interpretati_panel_id_e2946fcf_fk_PanelVers</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/gel2mdt_interpretationreportfamilypanel.html'>gel2mdt_interpretationreportfamilypanel</a><span>.panel_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/PanelVersion.html'>PanelVersion</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>gel2mdt_interpretati_ir_family_id_c782ee7e_fk_Interpret</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/gel2mdt_interpretationreportfamilypanel.html'>gel2mdt_interpretationreportfamilypanel</a><span>.ir_family_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/InterpretationReportFamily.html'>InterpretationReportFamily</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>auth_group_permissions_group_id_b120cbf9_fk_auth_group_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/auth_group_permissions.html'>auth_group_permissions</a><span>.group_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/auth_group.html'>auth_group</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>auth_group_permissio_permission_id_84c5c92e_fk_auth_perm</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/auth_group_permissions.html'>auth_group_permissions</a><span>.permission_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/auth_permission.html'>auth_permission</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>Transcript_genome_assembly_id_b7dc7a74_fk_ToolOrAss</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/Transcript.html'>Transcript</a><span>.genome_assembly_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/ToolOrAssemblyVersion.html'>ToolOrAssemblyVersion</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>Transcript_gene_id_f83faf24_fk_Gene_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/Transcript.html'>Transcript</a><span>.gene_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/Gene.html'>Gene</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>Primer_variant_id_584a9c8a_fk_Variant_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/Primer.html'>Primer</a><span>.variant_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/Variant.html'>Variant</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>Primer_tool_id_4eee0d7d_fk_ToolOrAssemblyVersion_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/Primer.html'>Primer</a><span>.tool_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/ToolOrAssemblyVersion.html'>ToolOrAssemblyVersion</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>auth_permission_content_type_id_2f476e4b_fk_django_co</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/auth_permission.html'>auth_permission</a><span>.content_type_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/django_content_type.html'>django_content_type</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+				<tr>
+				 <td>reversion_revision_user_id_17095f45_fk_auth_user_id</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/reversion_revision.html'>reversion_revision</a><span>.user_id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>			 
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td>
+						<a href='tables/auth_user.html'>auth_user</a><span>.id</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>	
+				 <td><span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>Restrict delete</span></td>
+				</tr>
+								</tbody>
+				</table>				
+			</div>
+		</div>	
+		<div class="box box-primary">
+			<div class="box-header with-border">
+              <i class="fa fa-sitemap"></i>
+              <h3 class="box-title">Check Constraints</h3>
+              <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                </button>
+                <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+              </div>
+            </div>	
+            <div class="box-body">
+				<table id="constraint_table" class="table table-bordered table-striped dataTable" role="grid">
+				<thead align='left'>
+				<tr>
+				  <th>Table</th>
+				  <th>Constraint Name</th>				  
+				  <th>Constraint</th>				  
+				</tr>
+				</thead>
+				<tbody>
+								<tr><td colspan="3">None detected</td></tr>
+								</tbody>
+				</table>				
+			</div>
+		</div>			
+      </section>    
+  </div>
+  <!-- /.content-wrapper -->
+  <footer class="main-footer">
+    <div>
+      <div class="pull-right hidden-xs">
+        <a href="https://github.com/schemaspy/schemaspy" title="GitHub for SchemaSpy"><i class="fa fa-github-square fa-2x"></i></a>
+        <a href="http://stackoverflow.com/questions/tagged/schemaspy" title="StackOverflow for SchemaSpy"><i class="fa fa-stack-overflow fa-2x"></i></a>
+      </div>
+      <strong>Generated by <a href="http://schemaspy.org/" class="logo-text"><i class="fa fa-database"></i> SchemaSpy 6.0.0-rc2</a></strong>
+    </div>
+    <!-- /.container -->
+  </footer>
+</div>
+<!-- ./wrapper -->
+
+<!-- jQuery 2.2.3 -->
+<script src="bower/admin-lte/plugins/jQuery/jquery-2.2.3.min.js"></script>
+<script src="bower/admin-lte/plugins/jQueryUI/jquery-ui.min.js"></script>
+<!-- Bootstrap 3.3.5 -->
+<script src="bower/admin-lte/bootstrap/js/bootstrap.min.js"></script>
+<!-- DataTables -->
+<script src="bower/datatables.net/jquery.dataTables.min.js"></script>
+<script src="bower/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<script src="bower/datatables.net-buttons/dataTables.buttons.min.js"></script>
+<script src="bower/datatables.net-buttons-bs/js/buttons.bootstrap.min.js"></script>
+<script src="bower/datatables.net-buttons/buttons.html5.min.js"></script>
+<script src="bower/datatables.net-buttons/buttons.print.min.js"></script>
+<script src="bower/datatables.net-buttons/buttons.colVis.min.js"></script>
+
+<!-- SlimScroll -->
+<script src="bower/admin-lte/plugins/slimScroll/jquery.slimscroll.min.js"></script>
+<!-- FastClick -->
+<script src="bower/admin-lte/plugins/fastclick/fastclick.js"></script>
+<!-- Salvattore -->
+<script src="bower/salvattore/salvattore.min.js"></script>
+<!-- AnchorJS -->
+<script src="bower/anchor-js/anchor.min.js"></script>
+<!-- CodeMirror -->
+<script src="bower/codemirror/codemirror.js"></script>
+<script src="bower/codemirror/sql.js"></script>
+<!-- AdminLTE App -->
+<script src="bower/admin-lte/dist/js/app.min.js"></script>
+<script src="constraint.js"></script>
+<script src="schemaSpy.js"></script>
+</body>
+</html>

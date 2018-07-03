@@ -1,0 +1,1100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<database name="gel2mdt_mirror" schema="public" type="PostgreSQL - 9.5.13">
+   <tables>
+      <table name="auth_group" numRows="0" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('auth_group_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial">
+            <child column="group_id" foreignKey="auth_group_permissions_group_id_b120cbf9_fk_auth_group_id" implied="false" onDeleteCascade="false" schema="public" table="auth_group_permissions"/>
+            <child column="group_id" foreignKey="auth_user_groups_group_id_97559544_fk_auth_group_id" implied="false" onDeleteCascade="false" schema="public" table="auth_user_groups"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="false" remarks="" size="80" type="varchar"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="auth_group_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="auth_group_name_a6ea08ec_like" unique="false">
+            <column ascending="true" name="name"/>
+         </index>
+         <index name="auth_group_name_key" unique="true">
+            <column ascending="true" name="name"/>
+         </index>
+      </table>
+      <table name="auth_group_permissions" numRows="0" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('auth_group_permissions_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="group_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="auth_group_permissions_group_id_b120cbf9_fk_auth_group_id" implied="false" onDeleteCascade="false" schema="public" table="auth_group"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="permission_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="auth_group_permissio_permission_id_84c5c92e_fk_auth_perm" implied="false" onDeleteCascade="false" schema="public" table="auth_permission"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="auth_group_permissions_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="auth_group_permissions_group_id_b120cbf9" unique="false">
+            <column ascending="true" name="group_id"/>
+         </index>
+         <index name="auth_group_permissions_group_id_permission_id_0cd325b0_uniq" unique="true">
+            <column ascending="true" name="group_id"/>
+            <column ascending="true" name="permission_id"/>
+         </index>
+         <index name="auth_group_permissions_permission_id_84c5c92e" unique="false">
+            <column ascending="true" name="permission_id"/>
+         </index>
+      </table>
+      <table name="auth_permission" numRows="120" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('auth_permission_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial">
+            <child column="permission_id" foreignKey="auth_group_permissio_permission_id_84c5c92e_fk_auth_perm" implied="false" onDeleteCascade="false" schema="public" table="auth_group_permissions"/>
+            <child column="permission_id" foreignKey="auth_user_user_permi_permission_id_1fbb5f2c_fk_auth_perm" implied="false" onDeleteCascade="false" schema="public" table="auth_user_user_permissions"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="false" remarks="" size="255" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="content_type_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="auth_permission_content_type_id_2f476e4b_fk_django_co" implied="false" onDeleteCascade="false" schema="public" table="django_content_type"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="3" name="codename" nullable="false" remarks="" size="100" type="varchar"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="auth_permission_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="auth_permission_content_type_id_2f476e4b" unique="false">
+            <column ascending="true" name="content_type_id"/>
+         </index>
+         <index name="auth_permission_content_type_id_codename_01ab375a_uniq" unique="true">
+            <column ascending="true" name="content_type_id"/>
+            <column ascending="true" name="codename"/>
+         </index>
+      </table>
+      <table name="auth_user" numRows="17" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('auth_user_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial">
+            <child column="user_id" foreignKey="auth_user_groups_user_id_6a12ed8b_fk_auth_user_id" implied="false" onDeleteCascade="false" schema="public" table="auth_user_groups"/>
+            <child column="user_id" foreignKey="auth_user_user_permissions_user_id_a95ead1b_fk_auth_user_id" implied="false" onDeleteCascade="false" schema="public" table="auth_user_user_permissions"/>
+            <child column="user_id" foreignKey="django_admin_log_user_id_c564eba6_fk" implied="false" onDeleteCascade="false" schema="public" table="django_admin_log"/>
+            <child column="user_id" foreignKey="easyaudit_crudevent_user_id_09177b54_fk_auth_user_id" implied="false" onDeleteCascade="false" schema="public" table="easyaudit_crudevent"/>
+            <child column="user_id" foreignKey="easyaudit_loginevent_user_id_f47fcbfb_fk_auth_user_id" implied="false" onDeleteCascade="false" schema="public" table="easyaudit_loginevent"/>
+            <child column="user_id" foreignKey="easyaudit_requestevent_user_id_da412f45_fk_auth_user_id" implied="false" onDeleteCascade="false" schema="public" table="easyaudit_requestevent"/>
+            <child column="assigned_user_id" foreignKey="GELInterpretationRep_assigned_user_id_bf9b0260_fk_auth_user" implied="false" onDeleteCascade="false" schema="public" table="GELInterpretationReport"/>
+            <child column="creator_id" foreignKey="MDT_creator_id_ed47bae8_fk_auth_user_id" implied="false" onDeleteCascade="false" schema="public" table="MDT"/>
+            <child column="validation_responsible_user_id" foreignKey="ProbandVariant_validation_responsib_58398476_fk_auth_user" implied="false" onDeleteCascade="false" schema="public" table="ProbandVariant"/>
+            <child column="user_id" foreignKey="reversion_revision_user_id_17095f45_fk_auth_user_id" implied="false" onDeleteCascade="false" schema="public" table="reversion_revision"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="password" nullable="false" remarks="" size="128" type="varchar"/>
+         <column autoUpdated="false" digits="6" id="2" name="last_login" nullable="true" remarks="" size="35" type="timestamptz"/>
+         <column autoUpdated="false" digits="0" id="3" name="is_superuser" nullable="false" remarks="" size="1" type="bool"/>
+         <column autoUpdated="false" digits="0" id="4" name="username" nullable="false" remarks="" size="150" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="5" name="first_name" nullable="false" remarks="" size="30" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="6" name="last_name" nullable="false" remarks="" size="150" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="7" name="email" nullable="false" remarks="" size="254" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="8" name="is_staff" nullable="false" remarks="" size="1" type="bool"/>
+         <column autoUpdated="false" digits="0" id="9" name="is_active" nullable="false" remarks="" size="1" type="bool"/>
+         <column autoUpdated="false" digits="6" id="10" name="date_joined" nullable="false" remarks="" size="35" type="timestamptz"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="auth_user_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="auth_user_username_6821ab7c_like" unique="false">
+            <column ascending="true" name="username"/>
+         </index>
+         <index name="auth_user_username_key" unique="true">
+            <column ascending="true" name="username"/>
+         </index>
+      </table>
+      <table name="auth_user_groups" numRows="0" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('auth_user_groups_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="user_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="auth_user_groups_user_id_6a12ed8b_fk_auth_user_id" implied="false" onDeleteCascade="false" schema="public" table="auth_user"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="group_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="auth_user_groups_group_id_97559544_fk_auth_group_id" implied="false" onDeleteCascade="false" schema="public" table="auth_group"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="auth_user_groups_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="auth_user_groups_group_id_97559544" unique="false">
+            <column ascending="true" name="group_id"/>
+         </index>
+         <index name="auth_user_groups_user_id_6a12ed8b" unique="false">
+            <column ascending="true" name="user_id"/>
+         </index>
+         <index name="auth_user_groups_user_id_group_id_94350c0c_uniq" unique="true">
+            <column ascending="true" name="user_id"/>
+            <column ascending="true" name="group_id"/>
+         </index>
+      </table>
+      <table name="auth_user_user_permissions" numRows="0" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('auth_user_user_permissions_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="user_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="auth_user_user_permissions_user_id_a95ead1b_fk_auth_user_id" implied="false" onDeleteCascade="false" schema="public" table="auth_user"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="permission_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="auth_user_user_permi_permission_id_1fbb5f2c_fk_auth_perm" implied="false" onDeleteCascade="false" schema="public" table="auth_permission"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="auth_user_user_permissions_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="auth_user_user_permissions_permission_id_1fbb5f2c" unique="false">
+            <column ascending="true" name="permission_id"/>
+         </index>
+         <index name="auth_user_user_permissions_user_id_a95ead1b" unique="false">
+            <column ascending="true" name="user_id"/>
+         </index>
+         <index name="auth_user_user_permissions_user_id_permission_id_14a6b632_uniq" unique="true">
+            <column ascending="true" name="user_id"/>
+            <column ascending="true" name="permission_id"/>
+         </index>
+      </table>
+      <table name="CancerReport" numRows="900" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;CancerReport_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="Discussion" nullable="false" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="2" name="Action" nullable="false" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="3" name="classification" nullable="false" remarks="" size="2" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="proband_variant_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="CancerReport_proband_variant_id_b169a72e_fk_ProbandVariant_id" implied="false" onDeleteCascade="false" schema="public" table="ProbandVariant"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="5" name="action_type" nullable="true" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="6" name="validated" nullable="false" remarks="" size="1" type="bool"/>
+         <column autoUpdated="false" digits="0" id="7" name="validated_assay_type" nullable="true" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="8" name="variant_use" nullable="true" remarks="" size="200" type="varchar"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="CancerReport_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="CancerReport_proband_variant_id_key" unique="true">
+            <column ascending="true" name="proband_variant_id"/>
+         </index>
+      </table>
+      <table name="ClinicalScientist" numRows="16" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;ClinicalScientist_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial">
+            <child column="clinicalscientist_id" foreignKey="MDT_clinical_scienti_clinicalscientist_id_27fc09ae_fk_ClinicalS" implied="false" onDeleteCascade="false" schema="public" table="MDT_clinical_scientists"/>
+            <child column="primary_cs_id" foreignKey="VariantReport_primary_cs_id_2721d794_fk_ClinicalScientist_id" implied="false" onDeleteCascade="false" schema="public" table="VariantReport"/>
+            <child column="secondary_cs_id" foreignKey="VariantReport_secondary_cs_id_3b1e0782_fk_ClinicalScientist_id" implied="false" onDeleteCascade="false" schema="public" table="VariantReport"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="hospital" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="3" name="email" nullable="false" remarks="" size="254" type="varchar"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="ClinicalScientist_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+      </table>
+      <table name="Clinician" numRows="362" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;Clinician_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial">
+            <child column="relates_to_id" foreignKey="Clinician_relates_to_id_c57af829_fk_Clinician_id" implied="false" onDeleteCascade="false" schema="public" table="Clinician"/>
+            <child column="clinician_id" foreignKey="Family_clinician_id_b0d3d7f2_fk_Clinician_id" implied="false" onDeleteCascade="false" schema="public" table="Family"/>
+            <child column="clinician_id" foreignKey="MDT_clinicians_clinician_id_e4c620bf_fk_Clinician_id" implied="false" onDeleteCascade="false" schema="public" table="MDT_clinicians"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="hospital" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="3" name="email" nullable="false" remarks="" size="254" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="added_by_user" nullable="false" remarks="" size="1" type="bool"/>
+         <column autoUpdated="false" digits="0" id="5" name="relates_to_id" nullable="true" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="Clinician_relates_to_id_c57af829_fk_Clinician_id" implied="false" onDeleteCascade="false" schema="public" table="Clinician"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="Clinician_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="Clinician_relates_to_id_c57af829" unique="false">
+            <column ascending="true" name="relates_to_id"/>
+         </index>
+      </table>
+      <table name="django_admin_log" numRows="29" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('django_admin_log_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="6" id="1" name="action_time" nullable="false" remarks="" size="35" type="timestamptz"/>
+         <column autoUpdated="false" digits="0" id="2" name="object_id" nullable="true" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="3" name="object_repr" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="action_flag" nullable="false" remarks="" size="5" type="int2"/>
+         <column autoUpdated="false" digits="0" id="5" name="change_message" nullable="false" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="6" name="content_type_id" nullable="true" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="django_admin_log_content_type_id_c4bce8eb_fk_django_co" implied="false" onDeleteCascade="false" schema="public" table="django_content_type"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="7" name="user_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="django_admin_log_user_id_c564eba6_fk" implied="false" onDeleteCascade="false" schema="public" table="auth_user"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="django_admin_log_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="django_admin_log_content_type_id_c4bce8eb" unique="false">
+            <column ascending="true" name="content_type_id"/>
+         </index>
+         <index name="django_admin_log_user_id_c564eba6" unique="false">
+            <column ascending="true" name="user_id"/>
+         </index>
+      </table>
+      <table name="django_content_type" numRows="40" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('django_content_type_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial">
+            <child column="content_type_id" foreignKey="auth_permission_content_type_id_2f476e4b_fk_django_co" implied="false" onDeleteCascade="false" schema="public" table="auth_permission"/>
+            <child column="content_type_id" foreignKey="django_admin_log_content_type_id_c4bce8eb_fk_django_co" implied="false" onDeleteCascade="false" schema="public" table="django_admin_log"/>
+            <child column="content_type_id" foreignKey="easyaudit_crudevent_content_type_id_618ed0c6_fk_django_co" implied="false" onDeleteCascade="false" schema="public" table="easyaudit_crudevent"/>
+            <child column="content_type_id" foreignKey="reversion_version_content_type_id_7d0ff25c_fk_django_co" implied="false" onDeleteCascade="false" schema="public" table="reversion_version"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="app_label" nullable="false" remarks="" size="100" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="model" nullable="false" remarks="" size="100" type="varchar"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="django_content_type_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="django_content_type_app_label_model_76bd3d3b_uniq" unique="true">
+            <column ascending="true" name="app_label"/>
+            <column ascending="true" name="model"/>
+         </index>
+      </table>
+      <table name="django_migrations" numRows="41" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('django_migrations_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="app" nullable="false" remarks="" size="255" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="name" nullable="false" remarks="" size="255" type="varchar"/>
+         <column autoUpdated="false" digits="6" id="3" name="applied" nullable="false" remarks="" size="35" type="timestamptz"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="django_migrations_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+      </table>
+      <table name="django_session" numRows="96" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="session_key" nullable="false" remarks="" size="40" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="1" name="session_data" nullable="false" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="6" id="2" name="expire_date" nullable="false" remarks="" size="35" type="timestamptz"/>
+         <primaryKey column="session_key" sequenceNumberInPK="1"/>
+         <index name="django_session_pkey" unique="true">
+            <column ascending="true" name="session_key"/>
+         </index>
+         <index name="django_session_expire_date_a5c62663" unique="false">
+            <column ascending="true" name="expire_date"/>
+         </index>
+         <index name="django_session_session_key_c0390e0f_like" unique="false">
+            <column ascending="true" name="session_key"/>
+         </index>
+      </table>
+      <table name="easyaudit_crudevent" numRows="8463" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('easyaudit_crudevent_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="event_type" nullable="false" remarks="" size="5" type="int2"/>
+         <column autoUpdated="false" digits="0" id="2" name="object_id" nullable="false" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="3" name="object_repr" nullable="true" remarks="" size="255" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="object_json_repr" nullable="true" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="6" id="5" name="datetime" nullable="false" remarks="" size="35" type="timestamptz"/>
+         <column autoUpdated="false" digits="0" id="6" name="content_type_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="easyaudit_crudevent_content_type_id_618ed0c6_fk_django_co" implied="false" onDeleteCascade="false" schema="public" table="django_content_type"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="7" name="user_id" nullable="true" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="easyaudit_crudevent_user_id_09177b54_fk_auth_user_id" implied="false" onDeleteCascade="false" schema="public" table="auth_user"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="8" name="user_pk_as_string" nullable="true" remarks="" size="255" type="varchar"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="easyaudit_crudevent_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="easyaudit_crudevent_content_type_id_618ed0c6" unique="false">
+            <column ascending="true" name="content_type_id"/>
+         </index>
+         <index name="easyaudit_crudevent_object_id_content_type_id_48e7e97f_idx" unique="false">
+            <column ascending="true" name="object_id"/>
+            <column ascending="true" name="content_type_id"/>
+         </index>
+         <index name="easyaudit_crudevent_user_id_09177b54" unique="false">
+            <column ascending="true" name="user_id"/>
+         </index>
+      </table>
+      <table name="easyaudit_loginevent" numRows="134" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('easyaudit_loginevent_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="login_type" nullable="false" remarks="" size="5" type="int2"/>
+         <column autoUpdated="false" digits="0" id="2" name="username" nullable="true" remarks="" size="255" type="varchar"/>
+         <column autoUpdated="false" digits="6" id="3" name="datetime" nullable="false" remarks="" size="35" type="timestamptz"/>
+         <column autoUpdated="false" digits="0" id="4" name="user_id" nullable="true" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="easyaudit_loginevent_user_id_f47fcbfb_fk_auth_user_id" implied="false" onDeleteCascade="false" schema="public" table="auth_user"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="5" name="remote_ip" nullable="true" remarks="" size="50" type="varchar"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="easyaudit_loginevent_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="easyaudit_loginevent_remote_ip_52fb5c3c" unique="false">
+            <column ascending="true" name="remote_ip"/>
+         </index>
+         <index name="easyaudit_loginevent_remote_ip_52fb5c3c_like" unique="false">
+            <column ascending="true" name="remote_ip"/>
+         </index>
+         <index name="easyaudit_loginevent_user_id_f47fcbfb" unique="false">
+            <column ascending="true" name="user_id"/>
+         </index>
+      </table>
+      <table name="easyaudit_requestevent" numRows="8693" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('easyaudit_requestevent_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="url" nullable="false" remarks="" size="255" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="method" nullable="false" remarks="" size="20" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="3" name="query_string" nullable="true" remarks="" size="255" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="remote_ip" nullable="true" remarks="" size="50" type="varchar"/>
+         <column autoUpdated="false" digits="6" id="5" name="datetime" nullable="false" remarks="" size="35" type="timestamptz"/>
+         <column autoUpdated="false" digits="0" id="6" name="user_id" nullable="true" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="easyaudit_requestevent_user_id_da412f45_fk_auth_user_id" implied="false" onDeleteCascade="false" schema="public" table="auth_user"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="easyaudit_requestevent_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="easyaudit_requestevent_method_83a0c884" unique="false">
+            <column ascending="true" name="method"/>
+         </index>
+         <index name="easyaudit_requestevent_method_83a0c884_like" unique="false">
+            <column ascending="true" name="method"/>
+         </index>
+         <index name="easyaudit_requestevent_remote_ip_d43af9b2" unique="false">
+            <column ascending="true" name="remote_ip"/>
+         </index>
+         <index name="easyaudit_requestevent_remote_ip_d43af9b2_like" unique="false">
+            <column ascending="true" name="remote_ip"/>
+         </index>
+         <index name="easyaudit_requestevent_url_37d1b8c4" unique="false">
+            <column ascending="true" name="url"/>
+         </index>
+         <index name="easyaudit_requestevent_url_37d1b8c4_like" unique="false">
+            <column ascending="true" name="url"/>
+         </index>
+         <index name="easyaudit_requestevent_user_id_da412f45" unique="false">
+            <column ascending="true" name="user_id"/>
+         </index>
+      </table>
+      <table name="Family" numRows="1569" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;Family_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial">
+            <child column="family_id" foreignKey="FamilyPhenotype_family_id_dc9bb214_fk_Family_id" implied="false" onDeleteCascade="false" schema="public" table="FamilyPhenotype"/>
+            <child column="participant_family_id" foreignKey="InterpretationReport_participant_family_i_aaea9eb2_fk_Family_id" implied="false" onDeleteCascade="false" schema="public" table="InterpretationReportFamily"/>
+            <child column="family_id" foreignKey="Proband_family_id_5053a357_fk_Family_id" implied="false" onDeleteCascade="false" schema="public" table="Proband"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="gel_family_id" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="trio_sequenced" nullable="false" remarks="" size="1" type="bool"/>
+         <column autoUpdated="false" digits="0" id="3" name="has_de_novo" nullable="false" remarks="" size="1" type="bool"/>
+         <column autoUpdated="false" digits="0" id="4" name="clinician_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="Family_clinician_id_b0d3d7f2_fk_Clinician_id" implied="false" onDeleteCascade="false" schema="public" table="Clinician"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="Family_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="Family_clinician_id_b0d3d7f2" unique="false">
+            <column ascending="true" name="clinician_id"/>
+         </index>
+         <index name="Family_gel_family_id_5523bfe6_like" unique="false">
+            <column ascending="true" name="gel_family_id"/>
+         </index>
+         <index name="Family_gel_family_id_key" unique="true">
+            <column ascending="true" name="gel_family_id"/>
+         </index>
+      </table>
+      <table name="FamilyPhenotype" numRows="0" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;FamilyPhenotype_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="family_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="FamilyPhenotype_family_id_dc9bb214_fk_Family_id" implied="false" onDeleteCascade="false" schema="public" table="Family"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="phenotype_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="FamilyPhenotype_phenotype_id_f817cc19_fk_Phenotype_id" implied="false" onDeleteCascade="false" schema="public" table="Phenotype"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="FamilyPhenotype_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="FamilyPhenotype_family_id_dc9bb214" unique="false">
+            <column ascending="true" name="family_id"/>
+         </index>
+         <index name="FamilyPhenotype_phenotype_id_f817cc19" unique="false">
+            <column ascending="true" name="phenotype_id"/>
+         </index>
+      </table>
+      <table name="gel2mdt_interpretationreportfamilypanel" numRows="12939" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('gel2mdt_interpretationreportfamilypanel_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="2" id="1" name="average_coverage" nullable="true" remarks="" size="6" type="numeric"/>
+         <column autoUpdated="false" digits="5" id="2" name="proportion_above_15x" nullable="true" remarks="" size="6" type="numeric"/>
+         <column autoUpdated="false" digits="0" id="3" name="ir_family_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="gel2mdt_interpretati_ir_family_id_c782ee7e_fk_Interpret" implied="false" onDeleteCascade="false" schema="public" table="InterpretationReportFamily"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="4" name="panel_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="gel2mdt_interpretati_panel_id_e2946fcf_fk_PanelVers" implied="false" onDeleteCascade="false" schema="public" table="PanelVersion"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="5" name="genes_failing_coverage" nullable="true" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="6" name="custom" nullable="false" remarks="" size="1" type="bool"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="gel2mdt_interpretationreportfamilypanel_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="gel2mdt_interpretationreportfamilypanel_ir_family_id_c782ee7e" unique="false">
+            <column ascending="true" name="ir_family_id"/>
+         </index>
+         <index name="gel2mdt_interpretationreportfamilypanel_panel_id_e2946fcf" unique="false">
+            <column ascending="true" name="panel_id"/>
+         </index>
+      </table>
+      <table name="gel2mdt_listupdate" numRows="10" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('gel2mdt_listupdate_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="6" id="1" name="update_time" nullable="false" remarks="" size="35" type="timestamptz"/>
+         <column autoUpdated="false" digits="0" id="2" name="success" nullable="false" remarks="" size="1" type="bool"/>
+         <column autoUpdated="false" digits="0" id="3" name="cases_added" nullable="false" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="4" name="cases_updated" nullable="false" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="5" name="error" nullable="true" remarks="" size="2147483647" type="text"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="gel2mdt_listupdate_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+      </table>
+      <table name="gel2mdt_panelversiongene" numRows="0" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('gel2mdt_panelversiongene_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="level_of_confidence" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="gene_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="gel2mdt_panelversiongene_gene_id_4b559e3d_fk_Gene_id" implied="false" onDeleteCascade="false" schema="public" table="Gene"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="3" name="panel_version_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="gel2mdt_panelversion_panel_version_id_dc93b317_fk_PanelVers" implied="false" onDeleteCascade="false" schema="public" table="PanelVersion"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="gel2mdt_panelversiongene_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="gel2mdt_panelversiongene_gene_id_4b559e3d" unique="false">
+            <column ascending="true" name="gene_id"/>
+         </index>
+         <index name="gel2mdt_panelversiongene_panel_version_id_dc93b317" unique="false">
+            <column ascending="true" name="panel_version_id"/>
+         </index>
+      </table>
+      <table name="GELInterpretationReport" numRows="3755" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;GELInterpretationReport_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial">
+            <child column="interpretation_report_id" foreignKey="MDTReport_interpretation_repor_7c4a5e44_fk_GELInterp" implied="false" onDeleteCascade="false" schema="public" table="MDTReport"/>
+            <child column="interpretation_report_id" foreignKey="ProbandVariant_interpretation_repor_e1e8b54b_fk_GELInterp" implied="false" onDeleteCascade="false" schema="public" table="ProbandVariant"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="archived_version" nullable="false" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="2" name="status" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="6" id="3" name="updated" nullable="false" remarks="" size="35" type="timestamptz"/>
+         <column autoUpdated="false" digits="0" id="4" name="sample_type" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="5" name="max_tier" nullable="false" remarks="" size="1" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="6" name="user" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="7" name="sha_hash" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="6" id="8" name="polled_at_datetime" nullable="false" remarks="" size="35" type="timestamptz"/>
+         <column autoUpdated="false" digits="0" id="9" name="assembly_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="GELInterpretationRep_assembly_id_36e3f293_fk_ToolOrAss" implied="false" onDeleteCascade="false" schema="public" table="ToolOrAssemblyVersion"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="10" name="ir_family_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="GELInterpretationRep_ir_family_id_68c9c15e_fk_Interpret" implied="false" onDeleteCascade="false" schema="public" table="InterpretationReportFamily"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="11" name="assigned_user_id" nullable="true" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="GELInterpretationRep_assigned_user_id_bf9b0260_fk_auth_user" implied="false" onDeleteCascade="false" schema="public" table="auth_user"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="12" name="sample_id" nullable="true" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="13" name="tumour_content" nullable="true" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="14" name="case_sent" nullable="false" remarks="" size="1" type="bool"/>
+         <column autoUpdated="false" digits="0" id="15" name="case_status" nullable="false" remarks="" size="50" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="16" name="mdt_status" nullable="false" remarks="" size="50" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="17" name="no_primary_findings" nullable="false" remarks="" size="1" type="bool"/>
+         <column autoUpdated="false" digits="0" id="18" name="pilot_case" nullable="false" remarks="" size="1" type="bool"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="GELInterpretationReport_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="GELInterpretationReport_assembly_id_36e3f293" unique="false">
+            <column ascending="true" name="assembly_id"/>
+         </index>
+         <index name="GELInterpretationReport_assigned_user_id_bf9b0260" unique="false">
+            <column ascending="true" name="assigned_user_id"/>
+         </index>
+         <index name="GELInterpretationReport_ir_family_id_68c9c15e" unique="false">
+            <column ascending="true" name="ir_family_id"/>
+         </index>
+      </table>
+      <table name="Gene" numRows="10922" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;Gene_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial">
+            <child column="gene_id" foreignKey="gel2mdt_panelversiongene_gene_id_4b559e3d_fk_Gene_id" implied="false" onDeleteCascade="false" schema="public" table="gel2mdt_panelversiongene"/>
+            <child column="gene_id" foreignKey="ReportEvent_gene_id_648bbf65_fk_Gene_id" implied="false" onDeleteCascade="false" schema="public" table="ReportEvent"/>
+            <child column="gene_id" foreignKey="Transcript_gene_id_f83faf24_fk_Gene_id" implied="false" onDeleteCascade="false" schema="public" table="Transcript"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="ensembl_id" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="hgnc_name" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="3" name="hgnc_id" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="description" nullable="false" remarks="" size="200" type="varchar"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="Gene_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="Gene_hgnc_id_39835574_like" unique="false">
+            <column ascending="true" name="hgnc_id"/>
+         </index>
+         <index name="Gene_hgnc_id_key" unique="true">
+            <column ascending="true" name="hgnc_id"/>
+         </index>
+      </table>
+      <table name="InterpretationReportFamily" numRows="1572" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;InterpretationReportFamily_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial">
+            <child column="ir_family_id" foreignKey="gel2mdt_interpretati_ir_family_id_c782ee7e_fk_Interpret" implied="false" onDeleteCascade="false" schema="public" table="gel2mdt_interpretationreportfamilypanel"/>
+            <child column="ir_family_id" foreignKey="GELInterpretationRep_ir_family_id_68c9c15e_fk_Interpret" implied="false" onDeleteCascade="false" schema="public" table="GELInterpretationReport"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="ir_family_id" nullable="false" remarks="" size="10" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="priority" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="3" name="cip" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="participant_family_id" nullable="true" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="InterpretationReport_participant_family_i_aaea9eb2_fk_Family_id" implied="false" onDeleteCascade="false" schema="public" table="Family"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="InterpretationReportFamily_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="InterpretationReportFamily_ir_family_id_6649974b_like" unique="false">
+            <column ascending="true" name="ir_family_id"/>
+         </index>
+         <index name="InterpretationReportFamily_ir_family_id_key" unique="true">
+            <column ascending="true" name="ir_family_id"/>
+         </index>
+         <index name="InterpretationReportFamily_participant_family_id_aaea9eb2" unique="false">
+            <column ascending="true" name="participant_family_id"/>
+         </index>
+      </table>
+      <table name="MDT" numRows="65" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;MDT_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial">
+            <child column="mdt_id" foreignKey="MDT_clinical_scientists_mdt_id_bda77605_fk_MDT_id" implied="false" onDeleteCascade="false" schema="public" table="MDT_clinical_scientists"/>
+            <child column="mdt_id" foreignKey="MDT_clinicians_mdt_id_5d767f89_fk_MDT_id" implied="false" onDeleteCascade="false" schema="public" table="MDT_clinicians"/>
+            <child column="mdt_id" foreignKey="MDT_other_staff_mdt_id_078a46f5_fk_MDT_id" implied="false" onDeleteCascade="false" schema="public" table="MDT_other_staff"/>
+            <child column="MDT_id" foreignKey="MDTReport_MDT_id_252c8ab1_fk_MDT_id" implied="false" onDeleteCascade="false" schema="public" table="MDTReport"/>
+         </column>
+         <column autoUpdated="false" digits="6" id="1" name="date_of_mdt" nullable="false" remarks="" size="35" type="timestamptz"/>
+         <column autoUpdated="false" digits="0" id="2" name="to_report" nullable="true" remarks="" size="1" type="bool"/>
+         <column autoUpdated="false" digits="0" id="3" name="Status" nullable="false" remarks="" size="50" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="gatb" nullable="true" remarks="" size="1" type="bool"/>
+         <column autoUpdated="false" digits="0" id="5" name="creator_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="MDT_creator_id_ed47bae8_fk_auth_user_id" implied="false" onDeleteCascade="false" schema="public" table="auth_user"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="6" name="description" nullable="true" remarks="" size="255" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="7" name="sample_type" nullable="false" remarks="" size="200" type="varchar"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="MDT_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="MDT_creator_id_ed47bae8" unique="false">
+            <column ascending="true" name="creator_id"/>
+         </index>
+      </table>
+      <table name="MDT_clinical_scientists" numRows="37" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;MDT_clinical_scientists_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="mdt_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="MDT_clinical_scientists_mdt_id_bda77605_fk_MDT_id" implied="false" onDeleteCascade="false" schema="public" table="MDT"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="clinicalscientist_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="MDT_clinical_scienti_clinicalscientist_id_27fc09ae_fk_ClinicalS" implied="false" onDeleteCascade="false" schema="public" table="ClinicalScientist"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="MDT_clinical_scientists_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="MDT_clinical_scientists_clinicalscientist_id_27fc09ae" unique="false">
+            <column ascending="true" name="clinicalscientist_id"/>
+         </index>
+         <index name="MDT_clinical_scientists_mdt_id_bda77605" unique="false">
+            <column ascending="true" name="mdt_id"/>
+         </index>
+         <index name="mdt_clinical_scientists_mdt_id_clinicalscientist_2a73fbb2_uniq" unique="true">
+            <column ascending="true" name="mdt_id"/>
+            <column ascending="true" name="clinicalscientist_id"/>
+         </index>
+      </table>
+      <table name="MDT_clinicians" numRows="67" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;MDT_clinicians_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="mdt_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="MDT_clinicians_mdt_id_5d767f89_fk_MDT_id" implied="false" onDeleteCascade="false" schema="public" table="MDT"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="clinician_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="MDT_clinicians_clinician_id_e4c620bf_fk_Clinician_id" implied="false" onDeleteCascade="false" schema="public" table="Clinician"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="MDT_clinicians_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="MDT_clinicians_clinician_id_e4c620bf" unique="false">
+            <column ascending="true" name="clinician_id"/>
+         </index>
+         <index name="MDT_clinicians_mdt_id_5d767f89" unique="false">
+            <column ascending="true" name="mdt_id"/>
+         </index>
+         <index name="mdt_clinicians_mdt_id_clinician_id_ebfc7c74_uniq" unique="true">
+            <column ascending="true" name="mdt_id"/>
+            <column ascending="true" name="clinician_id"/>
+         </index>
+      </table>
+      <table name="MDT_other_staff" numRows="5" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;MDT_other_staff_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="mdt_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="MDT_other_staff_mdt_id_078a46f5_fk_MDT_id" implied="false" onDeleteCascade="false" schema="public" table="MDT"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="otherstaff_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="MDT_other_staff_otherstaff_id_a381ac21_fk_OtherStaff_id" implied="false" onDeleteCascade="false" schema="public" table="OtherStaff"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="MDT_other_staff_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="MDT_other_staff_mdt_id_078a46f5" unique="false">
+            <column ascending="true" name="mdt_id"/>
+         </index>
+         <index name="mdt_other_staff_mdt_id_otherstaff_id_bb25bbd8_uniq" unique="true">
+            <column ascending="true" name="mdt_id"/>
+            <column ascending="true" name="otherstaff_id"/>
+         </index>
+         <index name="MDT_other_staff_otherstaff_id_a381ac21" unique="false">
+            <column ascending="true" name="otherstaff_id"/>
+         </index>
+      </table>
+      <table name="MDTReport" numRows="329" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;MDTReport_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="MDT_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="MDTReport_MDT_id_252c8ab1_fk_MDT_id" implied="false" onDeleteCascade="false" schema="public" table="MDT"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="interpretation_report_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="MDTReport_interpretation_repor_7c4a5e44_fk_GELInterp" implied="false" onDeleteCascade="false" schema="public" table="GELInterpretationReport"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="MDTReport_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="MDTReport_interpretation_report_id_7c4a5e44" unique="false">
+            <column ascending="true" name="interpretation_report_id"/>
+         </index>
+         <index name="MDTReport_MDT_id_252c8ab1" unique="false">
+            <column ascending="true" name="MDT_id"/>
+         </index>
+      </table>
+      <table name="OtherStaff" numRows="2" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;OtherStaff_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial">
+            <child column="otherstaff_id" foreignKey="MDT_other_staff_otherstaff_id_a381ac21_fk_OtherStaff_id" implied="false" onDeleteCascade="false" schema="public" table="MDT_other_staff"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="hospital" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="3" name="email" nullable="false" remarks="" size="254" type="varchar"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="OtherStaff_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+      </table>
+      <table name="Panel" numRows="129" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;Panel_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial">
+            <child column="panel_id" foreignKey="PanelVersion_panel_id_75eddc4e_fk_Panel_id" implied="false" onDeleteCascade="false" schema="public" table="PanelVersion"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="panel_name" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="panelapp_id" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="3" name="disease_group" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="disease_subgroup" nullable="false" remarks="" size="200" type="varchar"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="Panel_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="Panel_panelapp_id_761414e2_like" unique="false">
+            <column ascending="true" name="panelapp_id"/>
+         </index>
+         <index name="Panel_panelapp_id_key" unique="true">
+            <column ascending="true" name="panelapp_id"/>
+         </index>
+      </table>
+      <table name="PanelVersion" numRows="297" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;PanelVersion_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial">
+            <child column="panel_id" foreignKey="gel2mdt_interpretati_panel_id_e2946fcf_fk_PanelVers" implied="false" onDeleteCascade="false" schema="public" table="gel2mdt_interpretationreportfamilypanel"/>
+            <child column="panel_version_id" foreignKey="gel2mdt_panelversion_panel_version_id_dc93b317_fk_PanelVers" implied="false" onDeleteCascade="false" schema="public" table="gel2mdt_panelversiongene"/>
+            <child column="panel_id" foreignKey="ReportEvent_panel_id_a4a623cc_fk_PanelVersion_id" implied="false" onDeleteCascade="false" schema="public" table="ReportEvent"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="version_number" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="panel_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="PanelVersion_panel_id_75eddc4e_fk_Panel_id" implied="false" onDeleteCascade="false" schema="public" table="Panel"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="PanelVersion_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="PanelVersion_panel_id_75eddc4e" unique="false">
+            <column ascending="true" name="panel_id"/>
+         </index>
+      </table>
+      <table name="Phenotype" numRows="1133" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;Phenotype_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial">
+            <child column="phenotype_id" foreignKey="FamilyPhenotype_phenotype_id_f817cc19_fk_Phenotype_id" implied="false" onDeleteCascade="false" schema="public" table="FamilyPhenotype"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="description" nullable="true" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="hpo_terms" nullable="false" remarks="" size="200" type="varchar"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="Phenotype_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+      </table>
+      <table name="Primer" numRows="60" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;Primer_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="primer_set" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="left_primer_seq" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="3" name="right_primer_seq" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="6" id="4" name="date_created" nullable="false" remarks="" size="35" type="timestamptz"/>
+         <column autoUpdated="false" digits="0" id="5" name="tool_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="Primer_tool_id_4eee0d7d_fk_ToolOrAssemblyVersion_id" implied="false" onDeleteCascade="false" schema="public" table="ToolOrAssemblyVersion"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="6" name="variant_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="Primer_variant_id_584a9c8a_fk_Variant_id" implied="false" onDeleteCascade="false" schema="public" table="Variant"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="Primer_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="Primer_primer_set_92d30c58_like" unique="false">
+            <column ascending="true" name="primer_set"/>
+         </index>
+         <index name="Primer_primer_set_key" unique="true">
+            <column ascending="true" name="primer_set"/>
+         </index>
+         <index name="Primer_tool_id_4eee0d7d" unique="false">
+            <column ascending="true" name="tool_id"/>
+         </index>
+         <index name="Primer_variant_id_584a9c8a" unique="false">
+            <column ascending="true" name="variant_id"/>
+         </index>
+      </table>
+      <table name="Proband" numRows="1567" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;Proband_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial">
+            <child column="proband_id" foreignKey="Relative_proband_id_9cae4931_fk_Proband_id" implied="false" onDeleteCascade="false" schema="public" table="Relative"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="gel_id" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="nhs_number" nullable="true" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="3" name="lab_number" nullable="true" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="forename" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="5" name="surname" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="6" id="6" name="date_of_birth" nullable="false" remarks="" size="35" type="timestamptz"/>
+         <column autoUpdated="false" digits="0" id="7" name="sex" nullable="true" remarks="" size="10" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="8" name="outcome" nullable="false" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="9" name="comment" nullable="false" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="10" name="discussion" nullable="false" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="11" name="action" nullable="false" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="12" name="gmc" nullable="true" remarks="" size="255" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="13" name="local_id" nullable="true" remarks="" size="255" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="14" name="deceased" nullable="true" remarks="" size="1" type="bool"/>
+         <column autoUpdated="false" digits="0" id="15" name="family_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="Proband_family_id_5053a357_fk_Family_id" implied="false" onDeleteCascade="false" schema="public" table="Family"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="16" name="recruiting_disease" nullable="true" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="17" name="disease_subtype" nullable="true" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="18" name="current_clinical_trial_info" nullable="true" remarks="" size="250" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="19" name="currently_in_clinical_trial" nullable="false" remarks="" size="1" type="bool"/>
+         <column autoUpdated="false" digits="0" id="20" name="disease_grade" nullable="true" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="21" name="disease_stage" nullable="true" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="22" name="previous_testing" nullable="true" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="23" name="previous_treatment" nullable="true" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="24" name="suitable_for_clinical_trial" nullable="false" remarks="" size="1" type="bool"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="Proband_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="Proband_family_id_key" unique="true">
+            <column ascending="true" name="family_id"/>
+         </index>
+         <index name="Proband_gel_id_073970db_like" unique="false">
+            <column ascending="true" name="gel_id"/>
+         </index>
+         <index name="Proband_gel_id_key" unique="true">
+            <column ascending="true" name="gel_id"/>
+         </index>
+      </table>
+      <table name="ProbandTranscriptVariant" numRows="312488" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;ProbandTranscriptVariant_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="selected" nullable="false" remarks="" size="1" type="bool"/>
+         <column autoUpdated="false" digits="0" id="2" name="effect" nullable="false" remarks="" size="255" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="3" name="proband_variant_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="ProbandTranscriptVar_proband_variant_id_92ef6f1d_fk_ProbandVa" implied="false" onDeleteCascade="false" schema="public" table="ProbandVariant"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="4" name="transcript_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="ProbandTranscriptVar_transcript_id_00f13cbb_fk_Transcrip" implied="false" onDeleteCascade="false" schema="public" table="Transcript"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="ProbandTranscriptVariant_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="ProbandTranscriptVariant_proband_variant_id_92ef6f1d" unique="false">
+            <column ascending="true" name="proband_variant_id"/>
+         </index>
+         <index name="ProbandTranscriptVariant_transcript_id_00f13cbb" unique="false">
+            <column ascending="true" name="transcript_id"/>
+         </index>
+      </table>
+      <table name="ProbandVariant" numRows="42555" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;ProbandVariant_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial">
+            <child column="proband_variant_id" foreignKey="CancerReport_proband_variant_id_b169a72e_fk_ProbandVariant_id" implied="false" onDeleteCascade="false" schema="public" table="CancerReport"/>
+            <child column="proband_variant_id" foreignKey="ProbandTranscriptVar_proband_variant_id_92ef6f1d_fk_ProbandVa" implied="false" onDeleteCascade="false" schema="public" table="ProbandTranscriptVariant"/>
+            <child column="proband_variant_id" foreignKey="RareDiseaseReport_proband_variant_id_c8c7d1c0_fk_ProbandVa" implied="false" onDeleteCascade="false" schema="public" table="RareDiseaseReport"/>
+            <child column="proband_variant_id" foreignKey="ReportEvent_proband_variant_id_ff08c9c7_fk_ProbandVariant_id" implied="false" onDeleteCascade="false" schema="public" table="ReportEvent"/>
+            <child column="proband_variant_id" foreignKey="VariantReport_proband_variant_id_e35ca0f5_fk_ProbandVariant_id" implied="false" onDeleteCascade="false" schema="public" table="VariantReport"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="max_tier" nullable="false" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="2" name="somatic" nullable="false" remarks="" size="1" type="bool"/>
+         <column autoUpdated="false" digits="3" id="3" name="vaf" nullable="true" remarks="" size="8" type="numeric"/>
+         <column autoUpdated="false" digits="0" id="4" name="zygosity" nullable="false" remarks="" size="20" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="5" name="maternal_zygosity" nullable="false" remarks="" size="20" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="6" name="paternal_zygosity" nullable="false" remarks="" size="20" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="7" name="inheritance" nullable="false" remarks="" size="20" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="8" name="interpretation_report_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="ProbandVariant_interpretation_repor_e1e8b54b_fk_GELInterp" implied="false" onDeleteCascade="false" schema="public" table="GELInterpretationReport"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="9" name="variant_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="ProbandVariant_variant_id_85e7c0df_fk_Variant_id" implied="false" onDeleteCascade="false" schema="public" table="Variant"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="10" name="Requires_Validation" nullable="false" remarks="" size="1" type="bool"/>
+         <column autoUpdated="false" digits="6" id="11" name="validation_datetime_set" nullable="true" remarks="" size="35" type="timestamptz"/>
+         <column autoUpdated="false" digits="0" id="12" name="validation_responsible_user_id" nullable="true" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="ProbandVariant_validation_responsib_58398476_fk_auth_user" implied="false" onDeleteCascade="false" schema="public" table="auth_user"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="13" name="validation_status" nullable="false" remarks="" size="50" type="varchar"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="ProbandVariant_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="ProbandVariant_interpretation_report_id_e1e8b54b" unique="false">
+            <column ascending="true" name="interpretation_report_id"/>
+         </index>
+         <index name="ProbandVariant_validation_responsible_user_id_58398476" unique="false">
+            <column ascending="true" name="validation_responsible_user_id"/>
+         </index>
+         <index name="ProbandVariant_variant_id_85e7c0df" unique="false">
+            <column ascending="true" name="variant_id"/>
+         </index>
+      </table>
+      <table name="RareDiseaseReport" numRows="2332" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;RareDiseaseReport_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="Discussion" nullable="true" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="2" name="Action" nullable="true" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="3" name="Contribution_to_phenotype" nullable="false" remarks="" size="20" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="Change_med" nullable="true" remarks="" size="1" type="bool"/>
+         <column autoUpdated="false" digits="0" id="5" name="Surgical_Option" nullable="true" remarks="" size="1" type="bool"/>
+         <column autoUpdated="false" digits="0" id="6" name="Add_surveillance_for_relatives" nullable="true" remarks="" size="1" type="bool"/>
+         <column autoUpdated="false" digits="0" id="7" name="Clinical_trial" nullable="true" remarks="" size="1" type="bool"/>
+         <column autoUpdated="false" digits="0" id="8" name="inform_reproductive_choice" nullable="true" remarks="" size="1" type="bool"/>
+         <column autoUpdated="false" digits="0" id="9" name="classification" nullable="false" remarks="" size="2" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="10" name="proband_variant_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="RareDiseaseReport_proband_variant_id_c8c7d1c0_fk_ProbandVa" implied="false" onDeleteCascade="false" schema="public" table="ProbandVariant"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="RareDiseaseReport_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="RareDiseaseReport_proband_variant_id_key" unique="true">
+            <column ascending="true" name="proband_variant_id"/>
+         </index>
+      </table>
+      <table name="Relative" numRows="2895" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;Relative_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="gel_id" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="relation_to_proband" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="3" name="affected_status" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="nhs_number" nullable="true" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="5" name="lab_number" nullable="true" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="6" name="forename" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="7" name="surname" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="6" id="8" name="date_of_birth" nullable="false" remarks="" size="35" type="timestamptz"/>
+         <column autoUpdated="false" digits="0" id="9" name="sex" nullable="false" remarks="" size="10" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="10" name="sequenced" nullable="false" remarks="" size="1" type="bool"/>
+         <column autoUpdated="false" digits="0" id="11" name="proband_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="Relative_proband_id_9cae4931_fk_Proband_id" implied="false" onDeleteCascade="false" schema="public" table="Proband"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="Relative_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="Relative_proband_id_9cae4931" unique="false">
+            <column ascending="true" name="proband_id"/>
+         </index>
+      </table>
+      <table name="ReportEvent" numRows="5016" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;ReportEvent_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="re_id" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="tier" nullable="true" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="3" name="mode_of_inheritance" nullable="false" remarks="" size="40" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="penetrance" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="3" id="5" name="coverage" nullable="true" remarks="" size="8" type="numeric"/>
+         <column autoUpdated="false" digits="0" id="6" name="gene_id" nullable="true" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="ReportEvent_gene_id_648bbf65_fk_Gene_id" implied="false" onDeleteCascade="false" schema="public" table="Gene"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="7" name="panel_id" nullable="true" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="ReportEvent_panel_id_a4a623cc_fk_PanelVersion_id" implied="false" onDeleteCascade="false" schema="public" table="PanelVersion"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="8" name="proband_variant_id" nullable="true" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="ReportEvent_proband_variant_id_ff08c9c7_fk_ProbandVariant_id" implied="false" onDeleteCascade="false" schema="public" table="ProbandVariant"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="ReportEvent_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="ReportEvent_gene_id_648bbf65" unique="false">
+            <column ascending="true" name="gene_id"/>
+         </index>
+         <index name="ReportEvent_panel_id_a4a623cc" unique="false">
+            <column ascending="true" name="panel_id"/>
+         </index>
+         <index name="ReportEvent_proband_variant_id_ff08c9c7" unique="false">
+            <column ascending="true" name="proband_variant_id"/>
+         </index>
+      </table>
+      <table name="reversion_revision" numRows="0" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('reversion_revision_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial">
+            <child column="revision_id" foreignKey="reversion_version_revision_id_af9f6a9d_fk_reversion_revision_id" implied="false" onDeleteCascade="false" schema="public" table="reversion_version"/>
+         </column>
+         <column autoUpdated="false" digits="6" id="1" name="date_created" nullable="false" remarks="" size="35" type="timestamptz"/>
+         <column autoUpdated="false" digits="0" id="2" name="comment" nullable="false" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="3" name="user_id" nullable="true" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="reversion_revision_user_id_17095f45_fk_auth_user_id" implied="false" onDeleteCascade="false" schema="public" table="auth_user"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="reversion_revision_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="reversion_revision_date_created_96f7c20c" unique="false">
+            <column ascending="true" name="date_created"/>
+         </index>
+         <index name="reversion_revision_user_id_17095f45" unique="false">
+            <column ascending="true" name="user_id"/>
+         </index>
+      </table>
+      <table name="reversion_version" numRows="0" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('reversion_version_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="object_id" nullable="false" remarks="" size="191" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="format" nullable="false" remarks="" size="255" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="3" name="serialized_data" nullable="false" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="4" name="object_repr" nullable="false" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="5" name="content_type_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="reversion_version_content_type_id_7d0ff25c_fk_django_co" implied="false" onDeleteCascade="false" schema="public" table="django_content_type"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="6" name="revision_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="reversion_version_revision_id_af9f6a9d_fk_reversion_revision_id" implied="false" onDeleteCascade="false" schema="public" table="reversion_revision"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="7" name="db" nullable="false" remarks="" size="191" type="varchar"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="reversion_version_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="reversion_version_content_type_id_7d0ff25c" unique="false">
+            <column ascending="true" name="content_type_id"/>
+         </index>
+         <index name="reversion_version_db_content_type_id_objec_b2c54f65_uniq" unique="true">
+            <column ascending="true" name="db"/>
+            <column ascending="true" name="content_type_id"/>
+            <column ascending="true" name="object_id"/>
+            <column ascending="true" name="revision_id"/>
+         </index>
+         <index name="reversion_version_revision_id_af9f6a9d" unique="false">
+            <column ascending="true" name="revision_id"/>
+         </index>
+      </table>
+      <table name="ToolOrAssemblyVersion" numRows="3" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;ToolOrAssemblyVersion_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial">
+            <child column="assembly_id" foreignKey="GELInterpretationRep_assembly_id_36e3f293_fk_ToolOrAss" implied="false" onDeleteCascade="false" schema="public" table="GELInterpretationReport"/>
+            <child column="tool_id" foreignKey="Primer_tool_id_4eee0d7d_fk_ToolOrAssemblyVersion_id" implied="false" onDeleteCascade="false" schema="public" table="Primer"/>
+            <child column="genome_assembly_id" foreignKey="Transcript_genome_assembly_id_b7dc7a74_fk_ToolOrAss" implied="false" onDeleteCascade="false" schema="public" table="Transcript"/>
+            <child column="genome_assembly_id" foreignKey="Variant_genome_assembly_id_c3ef24f9_fk_ToolOrAssemblyVersion_id" implied="false" onDeleteCascade="false" schema="public" table="Variant"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="tool_name" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="version_number" nullable="false" remarks="" size="200" type="varchar"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="ToolOrAssemblyVersion_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+      </table>
+      <table name="Transcript" numRows="66285" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;Transcript_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial">
+            <child column="transcript_id" foreignKey="ProbandTranscriptVar_transcript_id_00f13cbb_fk_Transcrip" implied="false" onDeleteCascade="false" schema="public" table="ProbandTranscriptVariant"/>
+            <child column="transcript_id" foreignKey="TranscriptVariant_transcript_id_3aac2fbe_fk_Transcript_id" implied="false" onDeleteCascade="false" schema="public" table="TranscriptVariant"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="false" remarks="" size="255" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="canonical_transcript" nullable="false" remarks="" size="1" type="bool"/>
+         <column autoUpdated="false" digits="0" id="3" name="strand" nullable="false" remarks="" size="255" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="protein" nullable="true" remarks="" size="255" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="5" name="location" nullable="true" remarks="" size="255" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="6" name="gene_id" nullable="true" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="Transcript_gene_id_f83faf24_fk_Gene_id" implied="false" onDeleteCascade="false" schema="public" table="Gene"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="7" name="genome_assembly_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="Transcript_genome_assembly_id_b7dc7a74_fk_ToolOrAss" implied="false" onDeleteCascade="false" schema="public" table="ToolOrAssemblyVersion"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="Transcript_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="Transcript_gene_id_f83faf24" unique="false">
+            <column ascending="true" name="gene_id"/>
+         </index>
+         <index name="Transcript_genome_assembly_id_b7dc7a74" unique="false">
+            <column ascending="true" name="genome_assembly_id"/>
+         </index>
+         <index name="transcript_name_genome_assembly_id_02b3d27e_uniq" unique="true">
+            <column ascending="true" name="name"/>
+            <column ascending="true" name="genome_assembly_id"/>
+         </index>
+      </table>
+      <table name="TranscriptVariant" numRows="168428" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;TranscriptVariant_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="af_max" nullable="false" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="hgvs_c" nullable="false" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="3" name="hgvs_p" nullable="false" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="4" name="hgvs_g" nullable="false" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="5" name="sift" nullable="true" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="6" name="polyphen" nullable="true" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="7" name="pathogenicity" nullable="true" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="8" name="transcript_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="TranscriptVariant_transcript_id_3aac2fbe_fk_Transcript_id" implied="false" onDeleteCascade="false" schema="public" table="Transcript"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="9" name="variant_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="TranscriptVariant_variant_id_7a85d125_fk_Variant_id" implied="false" onDeleteCascade="false" schema="public" table="Variant"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="TranscriptVariant_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="TranscriptVariant_transcript_id_3aac2fbe" unique="false">
+            <column ascending="true" name="transcript_id"/>
+         </index>
+         <index name="TranscriptVariant_variant_id_7a85d125" unique="false">
+            <column ascending="true" name="variant_id"/>
+         </index>
+      </table>
+      <table name="Variant" numRows="23291" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;Variant_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial">
+            <child column="variant_id" foreignKey="Primer_variant_id_584a9c8a_fk_Variant_id" implied="false" onDeleteCascade="false" schema="public" table="Primer"/>
+            <child column="variant_id" foreignKey="ProbandVariant_variant_id_85e7c0df_fk_Variant_id" implied="false" onDeleteCascade="false" schema="public" table="ProbandVariant"/>
+            <child column="variant_id" foreignKey="TranscriptVariant_variant_id_7a85d125_fk_Variant_id" implied="false" onDeleteCascade="false" schema="public" table="TranscriptVariant"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="chromosome" nullable="false" remarks="" size="2" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="position" nullable="false" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="3" name="reference" nullable="false" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="4" name="alternate" nullable="false" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="5" name="db_snp_id" nullable="true" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="6" name="genome_assembly_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="Variant_genome_assembly_id_c3ef24f9_fk_ToolOrAssemblyVersion_id" implied="false" onDeleteCascade="false" schema="public" table="ToolOrAssemblyVersion"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="Variant_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="Variant_genome_assembly_id_c3ef24f9" unique="false">
+            <column ascending="true" name="genome_assembly_id"/>
+         </index>
+      </table>
+      <table name="VariantReport" numRows="0" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('&quot;VariantReport_id_seq&quot;'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="classification" nullable="false" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="2" name="alamut_screenshot_splicesites" nullable="true" remarks="" size="100" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="3" name="alamut_screenshot_sanger" nullable="true" remarks="" size="100" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="comments" nullable="false" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="5" name="primary_cs_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="VariantReport_primary_cs_id_2721d794_fk_ClinicalScientist_id" implied="false" onDeleteCascade="false" schema="public" table="ClinicalScientist"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="6" name="proband_variant_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="VariantReport_proband_variant_id_e35ca0f5_fk_ProbandVariant_id" implied="false" onDeleteCascade="false" schema="public" table="ProbandVariant"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="7" name="secondary_cs_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="VariantReport_secondary_cs_id_3b1e0782_fk_ClinicalScientist_id" implied="false" onDeleteCascade="false" schema="public" table="ClinicalScientist"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="VariantReport_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="VariantReport_primary_cs_id_2721d794" unique="false">
+            <column ascending="true" name="primary_cs_id"/>
+         </index>
+         <index name="VariantReport_proband_variant_id_key" unique="true">
+            <column ascending="true" name="proband_variant_id"/>
+         </index>
+         <index name="VariantReport_secondary_cs_id_3b1e0782" unique="false">
+            <column ascending="true" name="secondary_cs_id"/>
+         </index>
+      </table>
+   </tables>
+</database>
