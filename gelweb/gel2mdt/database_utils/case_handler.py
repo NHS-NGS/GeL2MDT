@@ -1773,7 +1773,6 @@ class CaseModel(object):
         elif self.model_type == ProbandVariant:
             entry = [db_obj for db_obj in queryset
                      if db_obj['variant'] == self.model_attributes["variant"].id
-                     and db_obj['max_tier'] == self.model_attributes["max_tier"]
                      and db_obj['interpretation_report'] == self.model_attributes["interpretation_report"].id]
         elif self.model_type == PVFlag:
             entry = [db_obj for db_obj in queryset
