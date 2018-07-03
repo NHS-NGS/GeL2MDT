@@ -314,7 +314,7 @@ class Case(object):
                 if interpreted_genome['interpreted_genome_data']['companyName'] == 'Exomiser':
                     for report_event in variant['reportEvents']:
                         if report_event['score'] >= 0.95:
-                            interesting_variant = True
+                            interesting_variant = False
                 else:
                     interesting_variant = True
                 if interesting_variant:
@@ -1267,15 +1267,16 @@ class CaseAttributeManager(object):
         all_flagged_variants = []
         for interpreted_genome in self.case.json["interpreted_genome"]:
             for json_variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
+                interesting_variant = False
                 if interpreted_genome['interpreted_genome_data']['companyName'] == 'Exomiser':
-                    interesting_variant = False
                     for report_event in json_variant['reportEvents']:
                         if report_event['score'] >= 0.95:
-                            interesting_variant = True
-                    if interesting_variant:
-                        all_flagged_variants.append(json_variant)
+                            interesting_variant = False
                 else:
+                    interesting_variant = True
+                if interesting_variant:
                     all_flagged_variants.append(json_variant)
+
         for clinical_report in self.case.json["clinical_report"]:
             for variant in clinical_report['clinical_report_data']['candidateVariants']:
                 all_flagged_variants.append(variant)
@@ -1407,10 +1408,9 @@ class CaseAttributeManager(object):
             for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
                 interesting_variant = False
                 if interpreted_genome['interpreted_genome_data']['companyName'] == 'Exomiser':
-
                     for report_event in variant['reportEvents']:
                         if report_event['score'] >= 0.95:
-                            interesting_variant = True
+                            interesting_variant = False
                 else:
                     interesting_variant = True
                 if interesting_variant:
