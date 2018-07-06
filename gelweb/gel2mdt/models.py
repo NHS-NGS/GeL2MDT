@@ -299,7 +299,7 @@ class GELInterpretationReport(models.Model):
     sample_id = models.CharField(max_length=200, null=True, blank=True)
     tumour_content = models.CharField(max_length=200, blank=True, null=True)
 
-    max_tier = models.CharField(max_length=1)
+    max_tier = models.CharField(max_length=1, null=True)
     assembly = models.ForeignKey(ToolOrAssemblyVersion, on_delete=models.CASCADE)
 
     user = models.CharField(max_length=200)
