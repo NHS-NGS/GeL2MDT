@@ -173,6 +173,18 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
         source="ir_family.participant_family.proband.gel_id",
         read_only=True
     )
+    nhs_num = serializers.CharField(
+        source="ir_family.participant_family.proband.nhs_number",
+        read_only=True
+    )
+    disease_subtype = serializers.CharField(
+        source="ir_family.participant_family.proband.disease_subtype",
+        read_only=True
+    )
+    sex = serializers.CharField(
+        source="ir_family.participant_family.proband.sex",
+        read_only=True
+    )
     cip_id = serializers.CharField(
         source="ir_family.ir_family_id",
         read_only=True
@@ -264,4 +276,7 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
             'assigned_user',
             'priority',
             'recruiting_disease',
+            'sex',
+            'nhs_num',
+            'disease_subtype'
         )
