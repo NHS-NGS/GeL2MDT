@@ -130,6 +130,7 @@ SOFTWARE.
                 <tr>
                     <th>Variant ID</th>
                     <th>Tier</th>
+                    <th>Flag</th>
                     <th>Gene</th>
                     <th>HGVSc</th>
                     <th>HGVSp</th>
@@ -153,6 +154,10 @@ SOFTWARE.
                                                 <tr>
                                                     <td  ><a href="/variant/{{form.instance.proband_variant.variant.id}}">{{form.instance.proband_variant.variant.id}}</a></td>
                                                     <td>{{form.instance.proband_variant.max_tier}}</td>
+                                                    <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{% for flag in form.instance.proband_variant.pvflag_set.all %}
+                                                        {{flag}};
+                                                    {% endfor %}
+                                                    </td>
                                                     <td >{{form.instance.proband_variant.get_transcript.gene}}</td>
                                                     <td  style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{form.instance.proband_variant.get_transcript_variant.hgvs_c}}</td>
                                                     <td style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{form.instance.proband_variant.get_transcript_variant.hgvs_p}}</td>
