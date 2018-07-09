@@ -193,6 +193,10 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
         source="ir_family.participant_family.proband.surname",
         read_only=True
     )
+    nhs_number = serializers.CharField(
+        source="ir_family.participant_family.proband.nhs_number",
+        read_only=True
+    )
     date_of_birth = serializers.DateTimeField(
         source="ir_family.participant_family.proband.date_of_birth",
         read_only=True,
@@ -248,6 +252,7 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
             'clinician',
             'forename',
             'surname',
+            'nhs_number',
             'date_of_birth',
             'case_status',
             'trio_sequenced',
