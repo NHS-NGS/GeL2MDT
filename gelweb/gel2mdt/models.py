@@ -299,7 +299,7 @@ class GELInterpretationReport(models.Model):
     sample_id = models.CharField(max_length=200, null=True, blank=True)
     tumour_content = models.CharField(max_length=200, blank=True, null=True)
 
-    max_tier = models.CharField(max_length=1)
+    max_tier = models.CharField(max_length=1, null=True)
     assembly = models.ForeignKey(ToolOrAssemblyVersion, on_delete=models.CASCADE)
 
     user = models.CharField(max_length=200)
@@ -366,6 +366,11 @@ class GELInterpretationReport(models.Model):
                     for report in mdt_report:
                         report.interpretation_report = self
                         report.save()
+                proband_variants = ProbandVariant.objects.filter(interpretation_report=latest_report)
+                if proband_variants:
+                    for pv in proband_variants:
+                        pv.interpretation_report = self
+                        pv.save()
 
         else:
             self.archived_version = 1
@@ -414,6 +419,7 @@ class Proband(models.Model):
     surname = models.CharField(max_length=200)
     date_of_birth = models.DateTimeField('date_of_birth')
     sex = models.CharField(max_length=10, null=True, blank=True)
+    disease_group = models.CharField(max_length=200, null=True, blank=True)
     recruiting_disease = models.CharField(max_length=200, null=True, blank=True)
     disease_subtype = models.CharField(max_length=200, null=True, blank=True)
     disease_stage = models.CharField(max_length=200, null=True, blank=True)
@@ -549,7 +555,7 @@ class Inheritance(ChoiceEnum):
 
 class ProbandVariant(models.Model):
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
-    max_tier = models.IntegerField()
+    max_tier = models.IntegerField(null=True)
     somatic = models.BooleanField()
     vaf = models.DecimalField(max_digits=8, decimal_places=3, null=True)
 
@@ -648,6 +654,19 @@ class ProbandVariant(models.Model):
         managed = True
         db_table = 'ProbandVariant'
         app_label= 'gel2mdt'
+
+
+class PVFlag(models.Model):
+    proband_variant = models.ForeignKey(ProbandVariant, on_delete=models.CASCADE)
+    flag_name = models.CharField(db_column='flag_name', max_length=255)
+
+    def __str__(self):
+        return str(self.flag_name)
+
+    class Meta:
+        managed = True
+        db_table = 'PVFlag'
+        app_label = 'gel2mdt'
 
 
 class RareDiseaseReport(models.Model):

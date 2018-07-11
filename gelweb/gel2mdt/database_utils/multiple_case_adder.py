@@ -32,6 +32,7 @@ from ..config import load_config
 import pprint
 import logging
 import time
+from .demographics_handler import DemographicsHandler
 
 # set up logging
 logger = logging.getLogger(__name__)
@@ -78,6 +79,7 @@ class MultipleCaseAdder(object):
         self.transcript_manager = TranscriptManager()
         self.variant_manager = VariantManager()
         self.gene_manager = GeneManager()
+        self.sample_type = sample_type
 
         if self.test_data:
             logger.info("Fetching test data.")
@@ -174,7 +176,8 @@ class MultipleCaseAdder(object):
                         panel_manager=self.panel_manager,
                         variant_manager=self.variant_manager,
                         gene_manager=self.gene_manager,
-                        skip_demographics=self.skip_demographics))
+                        skip_demographics=self.skip_demographics,
+                        pullt3=self.pullt3))
         logger.info("Found " + str(len(list_of_cases)) +  " test cases.")
         return list_of_cases
 
@@ -280,6 +283,7 @@ class MultipleCaseAdder(object):
             (InterpretationReportFamilyPanel, True),
             (GELInterpretationReport, False),
             (ProbandVariant, True),
+            (PVFlag, True),
             (TranscriptVariant, True),
             (ProbandTranscriptVariant, True),
             #(ReportEvent, True)
@@ -317,6 +321,34 @@ class MultipleCaseAdder(object):
                 transcript.gene_model = fetched_transcript.gene_model
                 # Append to case transcripts
                 case.transcripts.append(transcript)
+
+            # Labkey lookup for all cases
+            if not self.skip_demographics:
+                family_ids = []
+                participant_ids = []
+                demographic_handler = DemographicsHandler(self.sample_type)
+                if self.sample_type == 'raredisease':
+                    for case in cases:
+                        family_ids.append(case.json["family_id"])
+                        participant_ids.append(case.json["proband"])
+                        for family_member in case.family_members:
+                            participant_ids.append(family_member['gel_id'])
+                    demographics = demographic_handler.get_demographics(participant_ids)
+                    clinicians = demographic_handler.get_clinicians(family_ids)
+                    diagnosis = demographic_handler.get_diagnosis(participant_ids)
+                elif self.sample_type == 'cancer':
+                    for case in cases:
+                        participant_ids.append(case.json["proband"])
+                        for family_member in case.family_members:  # Shouldn't be any but just for futureproofing!
+                            participant_ids.append(family_member['gel_id'])
+                    demographics = demographic_handler.get_demographics(participant_ids)
+                    clinicians = demographic_handler.get_clinicians(participant_ids)
+                    diagnosis = None
+
+                for case in cases:
+                    case.demographics = demographics
+                    case.clinicians = clinicians
+                    case.diagnosis = diagnosis
 
         # ------------------- #
         # BULK UPDATE PROCESS #
@@ -468,6 +500,7 @@ class MultipleCaseAdder(object):
             Transcript: ['id',"name", 'genome_assembly'],
             TranscriptVariant: ['id',"transcript", "variant"],
             ProbandVariant: ['id',"variant", "interpretation_report", 'max_tier'],
+            PVFlag: ['id', "proband_variant", "flag_name"],
             ProbandTranscriptVariant: ['id',"transcript", "proband_variant"],
             ReportEvent: ['id',"proband_variant", "re_id"],
         }
