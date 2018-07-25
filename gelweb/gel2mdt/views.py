@@ -35,6 +35,8 @@ from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.forms import modelformset_factory
 
+from easy_pdf.rendering import render_to_pdf_response
+
 from .config import load_config
 from .forms import *
 from .models import *
@@ -1113,12 +1115,17 @@ def report(request, report_id, outcome):
     else:
         reported_variants = None
 
-    return render(request, 'gel2mdt/technical_information.html', {
-        'outcome': outcome,
-        'build': genome_build,
-        'report': report,
-        'reported_variants': reported_variants,
-        'panels': panel_genes})
+    return render_to_pdf_response(
+        request=request,
+        template='gel2mdt/technical_information.html',
+        context={
+            'outcome': outcome,
+            'build': genome_build,
+            'report': report,
+            'reported_variants': reported_variants,
+            'panels': panel_genes
+        }
+    )
 
 
 @login_required
