@@ -53,7 +53,7 @@ SOFTWARE.
             </strong>
 </td>
 <td>
-<img style="float:right; margin: 5px 0" src="file:///home/theo/Documents/gel2mdt/gelweb/gelweb/static_files/figures/bwh-logo.png" />
+<img style="float:right; margin: 5px 0; max-width: 80%;" src="file:///home/theo/Documents/gel2mdt/gelweb/gelweb/static_files/figures/bwh-logo.png" />
 </td>
 </tr>
 </table>
@@ -157,7 +157,15 @@ SOFTWARE.
                                 {% endif %}
                             </td>
                             <td>{{variant.proband_variant.get_transcript_variant.variant.position}}</td>
-                            <td>{{variant.classification}}</td>
+                            <td>
+								{% if variant.classification == "5" %}
+									Pathogenic
+								{% elif variant.classification == "4" %}
+									Likely Pathogenic
+								{% elif variant.classification == "3" %}
+									Variant of Unkown Significance
+							{% endif %}
+							</td>
                             <td>{{variant.proband_variant.get_ptv.effect}}</td>
                         </tr>
         {% endfor %}
@@ -173,7 +181,7 @@ SOFTWARE.
     <table class="table table-condensed">
         <thead>
             <tr>
-                <td>Panel</td>
+                <td>Panel <em>(https://panelapp.genomicsengland.co.uk/panels/)</em></td>
                 <td style="text-align:right">No. Genes</td>
                 <td style="text-align:right">Avg. Panel Coverage</td>
                 <td style="text-align:right">% >15x</td>
