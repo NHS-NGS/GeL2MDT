@@ -19,8 +19,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 -->
-{% load static %}
-{% load bootstrap3 %}
 
 <html>
 <head>
@@ -28,79 +26,106 @@ SOFTWARE.
 <!--This is the meta information which is good for SEO-->
 <!-- Bootstrap -->
 <!--Add keywords that describe your project between the quotation marks. This helps search engines find and index your content-->
-<link rel="shortcut icon" type="image/png" href="{% static 'gel2mdt/favicon/favicon-96x96.png' %}"/>
-{% block head-css %}
-    <script src="{% static 'gel2mdt/js/jquery-3.1.1.js' %}"></script>
-<script src="{% static 'gel2mdt/js/bootstrap.js' %}"></script>
-<link href="{% static 'gel2mdt/css/bootstrap.css' %}" rel="stylesheet">
-<link href="{% static 'gel2mdt/css/heroic-features.css' %}" rel="stylesheet">
-<link href="{% static 'gel2mdt/DataTables/datatables.min.css' %}" rel="stylesheet">
-<link href="{% static 'gel2mdt/css/jumbotron.css' %}" rel="stylesheet">
-<link href="{% static 'gel2mdt/css/bootstrap-responsive.css' %}" rel="stylesheet">
-<script type="text/javascript" src="{% static 'gel2mdt/DataTables/datatables.min.js' %}"></script>
-<script type="text/javascript" src="{% static 'gel2mdt/js/all.js' %}"></script>
 
-<link rel="stylesheet" type="text/css" href="{% static 'gel2mdt/css/report.css' %}">
 
-    {% endblock %}
-{% block javascript %}
-{% endblock %}
-
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
 </head>
 
 
-<body>
+<body style="font-size: 10pt;">
 
-<page size="A4">
+	<style type="text/css">
+@page {
+	size: {{ pagesize|default:"A4" }};
+	margin: 1.5cm;
+	</style>
 
-
-    <h2>Rare Disease Whole Genome Sequencing - Technical Report</h2>
-
-
-    <h3>Patient name: <strong>{{ report.ir_family.participant_family.proband.forename}} {{report.ir_family.participant_family.proband.surname}}</strong></h3>
-
-    <h3><strong>Sample Details</strong></h3>
-    <table class="table" style="table-layout:fixed">
-        <col style="width:25%", span="4" />
-        <tr>
-            <th>Laboratory No.:</th>
-            <th> {{ report.ir_family.participant_family.proband.lab_number }}</th>
-             <th>GeL ID:</th>
-            <th> {{ report.ir_family.participant_family.proband.gel_id }}</th>
-       <tr>
-             <th>Date of Birth:</th>
-            <th> {{ report.ir_family.participant_family.proband.date_of_birth|date:"d/m/Y" }}</th>
-             <th>NHS No.:</th>
-            <th> {{ report.ir_family.participant_family.proband.nhs_number }}</th>
-      </tr>
-    </table>
-
+<table style="width: 100%">
+<tr>
+<td>
+            <strong>
+            <p style="font-size: 9pt; margin-bottom: 0">West Midlands Regional Genetics Laboratory</p>
+            <p style="font-size: 9pt; margin-bottom: 0">Birmingham Women's and Children's Hospital</p>
+            <p style="font-size: 9pt; margin-bottom: 0">NHS Foundation Trust</p>
+            <p style="font-size: 9pt; margin-bottom: 0">Mindelsohn Way</p>
+            <p style="font-size: 9pt; margin-bottom: 10">B15 2TG</p>
+            </strong>
+</td>
+<td>
+<img style="float:right; margin: 5px 0; max-width: 80%;" src="file:///home/theo/Documents/gel2mdt/gelweb/gelweb/static_files/figures/bwh-logo.png" />
+</td>
+</tr>
+</table>
 
 
-    <h3>Recruiting Disease</h3>
-    <p>
-    {{ report.ir_family.participant_family.proband.recruiting_disease }}
-    </p>
+<hr style="margin: 0px; height: 0px; border: 1px solid black; color: black; background: black;">
+<p style="margin: auto; font-size: 12pt; text-align: center;"><strong>TECHNICAL REPORT</strong></p>
+<hr style="margin: 0px; height: 0px; border: 1px solid black; color: black; background: black;">
 
-    <hr>
-
-    <h3>Test Methodology</h3>
-    <p style="text-align:justify">
-    Whole genome sequencing by the 100,000 Genomes Project with analysis of
-    selected gene panels (see below). Please note that the sensitivity of this test
-    is limited by the types of detectable pathogenic variants, regions of low read
-    depth coverage and incomplete ascertainment of disease-gene associations. More
-    detailed information regarding read depth coverage is available on request.
-    Please contact the laboratory and quote the Laboratory No. for more information.
-    {% if outcome == "positive" %}
-        Variants are classified using the ACMG/AMP guidelines
-        (Richards et al 2015 Genet Med) and confirmed using in-house Sanger sequencing.
-    {% endif %}
-    </p>
+<p style="font-size: 8pt">Our reference: {{report.ir_family.participant_family.proband.lab_number}}</p>
 
 
-    <h3>Variant Details</h3>
+<table style="margin: auto; width: 100%">
+	<tr>
+		<td style="vertical-align: top; width: 50%;">
+			<p style="font-size: 8pt; margin-bottom: 0">Referring Clinician:</p>
+			<p style="font-size: 10pt">{{report.ir_family.participant_family.clinician.name}}</p>
+		</td>
+		<td>
+			<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg .tg-0ord{text-align:right}
+.tg .tg-lqy6{text-align:right;vertical-align:top}
+.tg .tg-yw4l{vertical-align:top}
+.tgd{padding-left:5px}
+			</style>
+			<table class="tg">
+				<tr>
+					<td class="tgd tg-0ord"><strong>Patient Name:</strong></td>
+<td></td>
+					<td class="tgd tg-031e">{{report.ir_family.participant_family.proband.forename}} {{report.ir_family.participant_family.proband.surname}}</td>
+				</tr>
+				<tr>
+					<td class="tgd tg-0ord">Date of Birth:</td>
+<td>&nbsp;&nbsp;&nbsp;</td>
+					<td class="tgd tg-031e">{{report.ir_family.participant_family.proband.date_of_birth|date:"d/m/Y"}}</td>
+				</tr>
+				<tr>
+					<td class="tgd tg-lqy6">Sex:</td>
+<td></td>
+					<td class="tg-yw4l">{{report.ir_family.participant_family.proband.gender}}</td>
+				</tr>
+				<tr>
+					<td class="tg-lqy6">NHS No.:</td>
+<td></td>
+					<td class="tg-yw4l">{{report.ir_family.participant_family.proband.nhs_number}}</td>
+				</tr>
+				<tr>
+					<td class="tg-lqy6">Hospital No.:</td>
+<td></td>
+					<td class="tg-yw4l">{{report.ir_family.participant_family.proband.cgu_number}}</td>
+				</tr>
+				<tr>
+					<td class="tg-lqy6">100,000 Genomes ID:</td>
+<td></td>
+					<td class="tg-yw4l">{{report.ir_family.participant_family.proband.gel_id}}</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+<tr><td></td><td><br></td></tr>
+<tr>
+<td></td>
+<td>
+<p style="margin: 0; padding:0"><strong>Recruiting Disease:</strong><br>
+{{report.ir_family.participant_family.proband.recruiting_disease}}<p>
+</td>
+</tr>
+</table>
+
+<hr style="margin: 0px; height: 0px; border: 1px solid black; color: black; background: black;">
+    <p style="margin: 5px 0; font-size: 12pt;"><strong>Variant Details</strong></p>
 
     {% if outcome != "positive" %}
         <strong>No variants have been detected.</strong>
@@ -132,7 +157,15 @@ SOFTWARE.
                                 {% endif %}
                             </td>
                             <td>{{variant.proband_variant.get_transcript_variant.variant.position}}</td>
-                            <td>{{variant.classification}}</td>
+                            <td>
+								{% if variant.classification == "5" %}
+									Pathogenic
+								{% elif variant.classification == "4" %}
+									Likely Pathogenic
+								{% elif variant.classification == "3" %}
+									Variant of Unkown Significance
+							{% endif %}
+							</td>
                             <td>{{variant.proband_variant.get_ptv.effect}}</td>
                         </tr>
         {% endfor %}
@@ -143,16 +176,16 @@ SOFTWARE.
 
 
 
-    <h3>Gene Panels and Read Depth Coverage</h3>
+    <p style="margin: 5px 0; font-size: 12pt;"><strong>Gene Panels and Read Depth Coverage</strong></p>
 
     <table class="table table-condensed">
         <thead>
             <tr>
-                <th>Panel</th>
-                <th style="text-align:right">No. Genes</th>
-                <th style="text-align:right">Avg. Panel Coverage</th>
-                <th style="text-align:right">% >15x</th>
-            </th>
+                <td>Panel <em>(https://panelapp.genomicsengland.co.uk/panels/)</em></td>
+                <td style="text-align:right">No. Genes</td>
+                <td style="text-align:right">Avg. Panel Coverage</td>
+                <td style="text-align:right">% >15x</td>
+            </tr>
         </thead>
         <tbody>
 
@@ -168,7 +201,7 @@ SOFTWARE.
     </table>
 
 
-    <h4>Genes with low coverage*: </h4>
+    <p style="margin: 5px 0; font-size: 12pt;"><strong>Genes with low coverage*:</strong></p>
         {% for panel, num_genes in panels.items %}
         {% if forloop.first %}
 
@@ -181,6 +214,22 @@ SOFTWARE.
         {% endif %}
         {% endfor %}
     <h6>* Low coverage = less than 95% of the gene has a minimum read depth coverage of 15x.</h6>
+
+<div style="width: 100%; position: fixed; bottom: 0;" id="page-footer">
+<hr style="margin: 0px; height: 0px; border: 1px solid black; color: black; background: black;">
+<p style="font-size: 8pt; margin: 0; text-align: center"><strong>Consultant Clinical Scientists: M Griffiths (Director), J Bell (Deputy Director), S Allen, T Antoniadi, J Mason, D McMullan, Y Wallis</strong></p>
+<p style="font-size: 8pt; margin: 0; text-align: center">West Midlands Regional Genetics Laboratory, BWC NHS Foundation Trust, Mindelsohn Way, Birmingham B15 2TG</p>
+<div style="width: 100%">
+<table style="margin: auto; width: 86%">
+<tr>
+<td style="width:25%"><p style="font-size: 8pt; margin: 0; text-align: center">genetics.lab@bwnft.nhs.uk</p></td>
+<td style="width:25%"><p style="font-size: 8pt; margin: 0; text-align: center">http://www.bwnft.nhs.uk</p></td>
+<td style="width:25%"><p style="font-size: 8pt; margin: 0; text-align: center">Tel: 0121 627 2710</p></td>
+<td style="width:25%"><p style="font-size: 8pt; margin: 0; text-align: center">Fax: 0121 627 2711</p></td>
+</tr>
+</table>
+</div>
+    </div>
 
 </page>
 
