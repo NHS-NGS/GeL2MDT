@@ -20,6 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.*/
 body {
     background: rgb(204,204,204);
+    font-family: Arial;
 }
 
 page[size="A4"] {
@@ -31,6 +32,13 @@ page[size="A4"] {
     padding: 1cm;
     margin-bottom: 0.5cm;
     box-shadow: 0 0 0.5cm rgba(0,0,0,0.5);
+}
+
+.bold-hr {
+    margin: 0px;
+    height: 4px;
+    color: black;
+    background: black;
 }
 
 
@@ -48,4 +56,10 @@ h3 {
         padding: 0;
         box-shadow: 0;
     }
+	hr {
+		margin: 0px !important;
+		height: 4px !important;
+		color: black !important;
+		background: black !important;
+	}
 }

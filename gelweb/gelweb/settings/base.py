@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'reversion',
     'django_extensions',
     'rest_framework',
+    'easy_pdf'
 ]
 
 MIDDLEWARE = [
