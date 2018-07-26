@@ -1,5 +1,5 @@
 <!--Copyright (c) 2018 Great Ormond Street Hospital for Children NHS Foundation
-Trust & Birmingham Women's and Children's NHS Foundation Trust
+ 1.1cmTrust & Birmingham Women's and Children's NHS Foundation Trust
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -38,7 +38,7 @@ SOFTWARE.
 	<style type="text/css">
 @page {
 	size: {{ pagesize|default:"A4" }};
-	margin: 1.5cm;
+	margin: 1.1cm 1.5cm;
 	</style>
 
 <table style="width: 100%">
@@ -53,7 +53,7 @@ SOFTWARE.
             </strong>
 </td>
 <td>
-<img style="float:right; margin: 5px 0; max-width: 80%;" src="file:///home/theo/Documents/gel2mdt/gelweb/gelweb/static_files/figures/bwh-logo.png" />
+<img style="float:right; margin: 5px 0; width: 90%;" src="file:///home/theo/Documents/gel2mdt/gelweb/gelweb/static_files/figures/bwh-logo.png" />
 </td>
 </tr>
 </table>
@@ -63,16 +63,12 @@ SOFTWARE.
 <p style="margin: auto; font-size: 12pt; text-align: center;"><strong>TECHNICAL REPORT</strong></p>
 <hr style="margin: 0px; height: 0px; border: 1px solid black; color: black; background: black;">
 
-<p style="font-size: 8pt">Our reference: {{report.ir_family.participant_family.proband.lab_number}}</p>
 
 
 <table style="margin: auto; width: 100%">
 	<tr>
+
 		<td style="vertical-align: top; width: 50%;">
-			<p style="font-size: 8pt; margin-bottom: 0">Referring Clinician:</p>
-			<p style="font-size: 10pt">{{report.ir_family.participant_family.clinician.name}}</p>
-		</td>
-		<td>
 			<style type="text/css">
 .tg  {border-collapse:collapse;border-spacing:0;}
 .tg .tg-0ord{text-align:right}
@@ -113,13 +109,21 @@ SOFTWARE.
 				</tr>
 			</table>
 		</td>
+		<td style="vertical-align: top; width: 50%;">
+
+
+<p style="font-size: 8pt">Our reference: {{report.ir_family.participant_family.proband.lab_number}}</p>
+<br><br><br><br>
+<p style="margin: 0; padding:0"><strong>Recruiting Disease:</strong>
+{{report.ir_family.participant_family.proband.recruiting_disease}}<p>
+		</td>
+
 	</tr>
-<tr><td></td><td><br></td></tr>
 <tr>
 <td></td>
 <td>
-<p style="margin: 0; padding:0"><strong>Recruiting Disease:</strong><br>
-{{report.ir_family.participant_family.proband.recruiting_disease}}<p>
+
+
 </td>
 </tr>
 </table>
@@ -131,7 +135,7 @@ SOFTWARE.
         <strong>No variants have been detected.</strong>
     {% elif outcome == "positive" %}
         <small>
-            <table class="table table-bordered table-condensed" style="font-size:10px;">
+            <table style="margin: 5px;" class="table table-bordered table-condensed" style="font-size:10px;">
                 <thead>
                     <tr>
                         <th>Gene</th>
@@ -140,8 +144,7 @@ SOFTWARE.
                         <th>HGVS description</th>
                         <th>Position ({{build}})</th>
                         <th>Classification</th>
-                        <th>VEP Consequence</th>
-                        </th>
+</tr>
                 </thead>
                 <tbody>
                     {% for variant in reported_variants %}
@@ -156,7 +159,7 @@ SOFTWARE.
                                     {{variant.proband_variant.get_transcript_variant.hgvs_p}}
                                 {% endif %}
                             </td>
-                            <td>{{variant.proband_variant.get_transcript_variant.variant.position}}</td>
+                            <td>{{variant.proband_variant.get_transcript_variant.variant.chromosome}}:{{variant.proband_variant.get_transcript_variant.variant.position}}</td>
                             <td>
 								{% if variant.classification == "5" %}
 									Pathogenic
@@ -166,7 +169,6 @@ SOFTWARE.
 									Variant of Unkown Significance
 							{% endif %}
 							</td>
-                            <td>{{variant.proband_variant.get_ptv.effect}}</td>
                         </tr>
         {% endfor %}
         </tbody>
@@ -175,10 +177,23 @@ SOFTWARE.
     {% endif %}
 
 
+    <p style="margin: 5px 0; font-size: 12pt;"><strong>Test Methodology</strong></p>
+<h6 style="text-align:justify">
+    Whole genome sequencing by the 100,000 Genomes Project with analysis of
+    selected gene panels (see below). Please note that the sensitivity of this test
+    is limited by the types of detectable pathogenic variants, regions of low read
+    depth coverage and incomplete ascertainment of disease-gene associations. The analysis
+	does not currently reliably detect larger copy number variants or structural abnormalities.
+    {% if outcome == "positive" %}
+        Variants are classified using the ACMG/AMP guidelines
+        (Richards et al 2015 Genet Med) and confirmed using in-house Sanger sequencing.
+    {% endif %}
+    </h6>
 
-    <p style="margin: 5px 0; font-size: 12pt;"><strong>Gene Panels and Read Depth Coverage</strong></p>
+    <p style="margin: 0px 0; font-size: 12pt;"><strong>Gene Panels and Read Depth Coverage</strong></p>
 
-    <table class="table table-condensed">
+    <table style="margin: 0px; font-size: 9pt" class="table table-condensed">
+<small>
         <thead>
             <tr>
                 <td>Panel <em>(https://panelapp.genomicsengland.co.uk/panels/)</em></td>
@@ -198,6 +213,7 @@ SOFTWARE.
         </tr>
     {% endfor %}
         </tbody>
+</small>
     </table>
 
 
@@ -213,7 +229,8 @@ SOFTWARE.
 
         {% endif %}
         {% endfor %}
-    <h6>* Low coverage = less than 95% of the gene has a minimum read depth coverage of 15x.</h6>
+    <h6>* Low coverage = less than 95% of the gene has a minimum read depth coverage of 15x. More
+    detailed information regarding read depth coverage is available on request.</h6>
 
 <div style="width: 100%; position: fixed; bottom: 0;" id="page-footer">
 <hr style="margin: 0px; height: 0px; border: 1px solid black; color: black; background: black;">
