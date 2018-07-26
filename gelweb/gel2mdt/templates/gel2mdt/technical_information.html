@@ -19,8 +19,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 -->
-{% load static %}
-{% load bootstrap3 %}
 
 <html>
 <head>
@@ -28,76 +26,94 @@ SOFTWARE.
 <!--This is the meta information which is good for SEO-->
 <!-- Bootstrap -->
 <!--Add keywords that describe your project between the quotation marks. This helps search engines find and index your content-->
-<link rel="shortcut icon" type="image/png" href="{% static 'gel2mdt/favicon/favicon-96x96.png' %}"/>
-{% block head-css %}
-    <script src="{% static 'gel2mdt/js/jquery-3.1.1.js' %}"></script>
-<script src="{% static 'gel2mdt/js/bootstrap.js' %}"></script>
-<link href="{% static 'gel2mdt/css/bootstrap.css' %}" rel="stylesheet">
-<link href="{% static 'gel2mdt/css/heroic-features.css' %}" rel="stylesheet">
-<link href="{% static 'gel2mdt/DataTables/datatables.min.css' %}" rel="stylesheet">
-<link href="{% static 'gel2mdt/css/jumbotron.css' %}" rel="stylesheet">
-<link href="{% static 'gel2mdt/css/bootstrap-responsive.css' %}" rel="stylesheet">
-<script type="text/javascript" src="{% static 'gel2mdt/DataTables/datatables.min.js' %}"></script>
-<script type="text/javascript" src="{% static 'gel2mdt/js/all.js' %}"></script>
 
-<link rel="stylesheet" type="text/css" href="{% static 'gel2mdt/css/report.css' %}">
 
-    {% endblock %}
-{% block javascript %}
-{% endblock %}
-
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
 </head>
 
 
 <body>
 
-<page size="A4">
+<page style="margin: 0 auto; width:21cm;"size="A4">
 
+<div class="container">
+    <div class="row">
+        <div class="col-sm-6" style="padding: 0">
+            <strong>
+            <p style="margin-bottom: 0">West Midlands Regional Genetics Laboratory</p>
+            <p style="margin-bottom: 0">Birmingham Women's and Children's Hospital</p>
+            <p style="margin-bottom: 0">NHS Foundation Trust</p>
+            <p style="margin-bottom: 0">Mindelsohn Way</p>
+            <p style="margin-bottom: 10">B15 2QQ</p>
+            </strong>
+        </div>
+        <div class="col-sm-6">
+        </div>
+    </div>
+</div>
 
-    <h2>Rare Disease Whole Genome Sequencing - Technical Report</h2>
+<hr style="margin: 0px; height: 0px; border: 2px solid black; color: black; background: black;">
+<p style="margin: auto; text-align: center;"><strong>TECHNICAL REPORT</strong></p>
+<hr style="margin: 0px; height: 0px; border: 2px solid black; color: black; background: black;">
 
+<p style="font-size: 9pt">Our reference: {{report.ir_family.participant_family.proband.lab_number}}</p>
 
-    <h3>Patient name: <strong>{{ report.ir_family.participant_family.proband.forename}} {{report.ir_family.participant_family.proband.surname}}</strong></h3>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-6">
+            <p style="font-size: 9pt; margin-bottom: 0">Referring Clinician:</p>
+            <p style="font-size: 12pt">{{report.ir_family.participant_family.clinician.name}}</p>
+        </div>
+        <div class="col-sm-6">
 
-    <h3><strong>Sample Details</strong></h3>
-    <table class="table" style="table-layout:fixed">
-        <col style="width:25%", span="4" />
-        <tr>
-            <th>Laboratory No.:</th>
-            <th> {{ report.ir_family.participant_family.proband.lab_number }}</th>
-             <th>GeL ID:</th>
-            <th> {{ report.ir_family.participant_family.proband.gel_id }}</th>
-       <tr>
-             <th>Date of Birth:</th>
-            <th> {{ report.ir_family.participant_family.proband.date_of_birth|date:"d/m/Y" }}</th>
-             <th>NHS No.:</th>
-            <th> {{ report.ir_family.participant_family.proband.nhs_number }}</th>
-      </tr>
-    </table>
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg .tg-0ord{text-align:right}
+.tg .tg-lqy6{text-align:right;vertical-align:top}
+.tg .tg-yw4l{vertical-align:top}
+.tgd{padding-left:5px}
+</style>
+<table class="tg">
+  <tr>
+    <td class="tgd tg-0ord">Patient Name:</td>
+    <td class="tgd tg-031e">{{report.ir_family.participant_family.proband.forename}} {{report.ir_family.participant_family.proband.surname}}</td>
+  </tr>
+  <tr>
+    <td class="tgd tg-0ord">Date of Birth:</td>
+    <td class="tgd tg-031e">{{report.ir_family.participant_family.proband.date_of_birth|date:"d/m/Y"}}</td>
+  </tr>
+  <tr>
+    <td class="tgd tg-lqy6">Sex:</td>
+    <td class="tg-yw4l">{{report.ir_family.participant_family.proband.gender}}</td>
+  </tr>
+  <tr>
+    <td class="tg-lqy6">NHS No.:</td>
+    <td class="tg-yw4l">{{report.ir_family.participant_family.proband.nhs_number}}</td>
+  </tr>
+  <tr>
+    <td class="tg-lqy6">Hospital No.:</td>
+    <td class="tg-yw4l">{{report.ir_family.participant_family.proband.cgu_number}}</td>
+  </tr>
+  <tr>
+    <td class="tg-lqy6">100,000 Genomes ID:</td>
+    <td class="tg-yw4l">{{report.ir_family.participant_family.proband.gel_id}}</td>
+  </tr>
+</table>
 
+        </div>
+    </div>
+</div>
 
+<hr style="margin: 0px; height: 0px; border: 2px solid black; color: black; background: black;">
 
     <h3>Recruiting Disease</h3>
     <p>
     {{ report.ir_family.participant_family.proband.recruiting_disease }}
     </p>
 
-    <hr>
 
-    <h3>Test Methodology</h3>
-    <p style="text-align:justify">
-    Whole genome sequencing by the 100,000 Genomes Project with analysis of
-    selected gene panels (see below). Please note that the sensitivity of this test
-    is limited by the types of detectable pathogenic variants, regions of low read
-    depth coverage and incomplete ascertainment of disease-gene associations. More
-    detailed information regarding read depth coverage is available on request.
-    Please contact the laboratory and quote the Laboratory No. for more information.
-    {% if outcome == "positive" %}
-        Variants are classified using the ACMG/AMP guidelines
-        (Richards et al 2015 Genet Med) and confirmed using in-house Sanger sequencing.
-    {% endif %}
-    </p>
+
 
 
     <h3>Variant Details</h3>
