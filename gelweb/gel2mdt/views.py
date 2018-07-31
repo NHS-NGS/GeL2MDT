@@ -35,6 +35,8 @@ from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.forms import modelformset_factory
 
+from easy_pdf.rendering import render_to_pdf_response
+
 from .config import load_config
 from .forms import *
 from .models import *
@@ -685,12 +687,14 @@ def mdt_view(request, mdt_id):
     proband_variant_count = {}
     t3_proband_variant_count = {}
     for report in reports:
-        count = ProbandVariant.objects.filter(interpretation_report=report,
-                                              max_tier__lte=2).count()
-        proband_variant_count[report.id] = count
-        count = ProbandVariant.objects.filter(interpretation_report=report,
-                                              max_tier=3).count()
-        t3_proband_variant_count[report.id] = count
+        proband_variant_count[report.id] = 0
+        t3_proband_variant_count[report.id] = 0
+        pvs = ProbandVariant.objects.filter(interpretation_report=report)
+        for pv in pvs:
+            if pv.pvflag_set.all() or pv.max_tier < 3:
+                proband_variant_count[report.id] += 1
+            else:
+                t3_proband_variant_count[report.id] += 1
 
     mdt_form = MdtForm(instance=mdt_instance)
     clinicians = Clinician.objects.filter(mdt=mdt_id).values_list('name', flat=True)
@@ -734,12 +738,15 @@ def mdt_proband_view(request, mdt_id, pk, important):
     '''
     mdt_instance = MDT.objects.get(id=mdt_id)
     report = GELInterpretationReport.objects.get(id=pk)
-    if important ==1:
-        proband_variants = ProbandVariant.objects.filter(interpretation_report=report,
-                                                         max_tier__lte=2).order_by('-max_tier')
-    else:
-        proband_variants = ProbandVariant.objects.filter(interpretation_report=report,
-                                                         max_tier=3)
+    proband_variants = []
+    proband_variants_all = ProbandVariant.objects.filter(interpretation_report=report)
+    for pv in proband_variants_all:
+        if important ==1:
+            if pv.pvflag_set.all() or pv.max_tier < 3:
+                proband_variants.append(pv)
+        else:
+            if not pv.pvflag_set.all():
+                proband_variants.append(pv)
 
     for pv in proband_variants:
         if mdt_instance.sample_type == 'raredisease':
@@ -781,10 +788,7 @@ def mdt_proband_view(request, mdt_id, pk, important):
             proband_form.save()
             gelir_form.save()
             messages.add_message(request, 25, 'Proband Updated')
-        else:
-            print(gelir_form.errors)
-            print(proband_form.errors)
-            print(variant_formset.errors)
+
         return HttpResponseRedirect(f'/mdt_proband_view/{mdt_id}/{pk}/{important}')
 
     for form in variant_formset:
@@ -826,12 +830,14 @@ def edit_mdt_proband(request, report_id):
             proband_variant_count = {}
             t3_proband_variant_count = {}
             for report in reports:
-                count = ProbandVariant.objects.filter(interpretation_report=report,
-                                                      max_tier__lte=2).count()
-                proband_variant_count[report.id] = count
-                count = ProbandVariant.objects.filter(interpretation_report=report,
-                                                      max_tier=3).count()
-                t3_proband_variant_count[report.id] = count
+                proband_variant_count[report.id] = 0
+                t3_proband_variant_count[report.id] = 0
+                pvs = ProbandVariant.objects.filter(interpretation_report=report)
+                for pv in pvs:
+                    if pv.pvflag_set.all() or pv.max_tier < 3:
+                        proband_variant_count[report.id] += 1
+                    else:
+                        t3_proband_variant_count[report.id] += 1
 
             data['html_mdt_list'] = render_to_string('gel2mdt/includes/mdt_proband_table.html', {
                 'reports': reports,
@@ -1109,12 +1115,17 @@ def report(request, report_id, outcome):
     else:
         reported_variants = None
 
-    return render(request, 'gel2mdt/technical_information.html', {
-        'outcome': outcome,
-        'build': genome_build,
-        'report': report,
-        'reported_variants': reported_variants,
-        'panels': panel_genes})
+    return render_to_pdf_response(
+        request=request,
+        template='gel2mdt/technical_information.html',
+        context={
+            'outcome': outcome,
+            'build': genome_build,
+            'report': report,
+            'reported_variants': reported_variants,
+            'panels': panel_genes
+        }
+    )
 
 
 @login_required

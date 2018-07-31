@@ -175,7 +175,7 @@ $(document).ready(initaliseTable());
 function redrawCaseType(table,caseType) {
     // select the DataTable API object
     table
-        .column(8)
+        .column(9)
         .search(caseType);
     table.draw();
 
@@ -194,7 +194,7 @@ function redrawGenomeBuild(table, genomeBuild) {
     // select the DataTable API object
     table
         // filter based on the value specified in HTML
-        .column(6)
+        .column(7)
         .search(genomeBuild);
     table.draw();
 
@@ -224,7 +224,7 @@ function redrawMaxTier(table, maxTier) {
 
     // search and redraw the datatable API
     table
-        .column(5)
+        .column(6)
         .search(searchRegex, regex=true);
     table.draw();
 
@@ -241,7 +241,7 @@ function redrawCaseStatus(table, caseStatus) {
     // select the DataTable API object
     table
         // filter based on the value specified in HTML
-        .column(7)
+        .column(8)
         .search(caseStatus);
     table.draw();
 
@@ -257,7 +257,7 @@ function redrawCaseStatus(table, caseStatus) {
 function redrawTrioStatus(table, trioStatus) {
     console.log(trioStatus)
     table
-        .column(9)
+        .column(10)
         .search(trioStatus);
     table.draw()
 }
@@ -268,7 +268,7 @@ function redrawTier3Only(table, tier3Only) {
         // disable maxTier input
         $('label[name=maxTierLabel]').attr('disabled', true);
         table
-            .column(5)
+            .column(6)
             .search('[3]', regex=true);
         table.draw()
         $('#maxTierSpec').text("Tier 3 only");
@@ -283,7 +283,7 @@ function redrawTier3Only(table, tier3Only) {
 function redrawDeNovoStatus(table, deNovoStatus) {
     console.log(deNovoStatus)
     table
-        .column(10)
+        .column(11)
         .search(deNovoStatus);
     table.draw()
 }
@@ -373,6 +373,7 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
                 {"data": "gel_id"},
                 {"data": "forename"},
                 {"data": "surname"},
+                {"data": "nhs_number"},
                 {
                     "data": "date_of_birth",
                     "type": "date "
@@ -407,9 +408,21 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
                 {"data": "recruiting_disease"},
                 {"data": "cip_id"},
                 {"data": "gmc"},
-                {"data": "clinician"}
+                {"data": "clinician"},
+                {
+                    "data": "sex",
+                    "visible": false
+                },
+                {
+                    "data": "disease_subtype",
+                    "visible": false
+                },
+                {
+                    "data": "nhs_num",
+                    "visible": false
+                }
             ],
-            "order": [[11, "desc"]]
+            "order": [[12, "desc"]]
         });
     } else {
         var table = $('#rare-disease-main').DataTable({
@@ -441,6 +454,7 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
                 {"data": "gel_id"},
                 {"data": "forename"},
                 {"data": "surname"},
+                {"data": "nhs_number"},
                 {
                     "data": "date_of_birth",
                     "type": "date "
@@ -473,7 +487,19 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
                 },
                 {"data": "cip_id"},
                 {"data": "gmc"},
-                {"data": "clinician"}
+                {"data": "clinician"},
+                {
+                    "data": "sex",
+                    "visible": false
+                },
+                {
+                    "data": "disease_subtype",
+                    "visible": false
+                },
+                {
+                    "data": "nhs_num",
+                    "visible": false
+                }
             ],
             "order": [[11, "desc"]]
         });
