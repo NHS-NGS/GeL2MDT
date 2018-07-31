@@ -38,7 +38,6 @@ from bokeh.palettes import Spectral8
 from bokeh.plotting import figure
 from django.core.mail import EmailMessage
 
-@task
 def get_gel_content(user_email, ir, ir_version):
     '''
     Downloads and formats the GEL Clinical Report. Removes warning signs and inserts the genes in the panel
@@ -52,7 +51,6 @@ def get_gel_content(user_email, ir, ir_version):
     interpretation_reponse = PollAPI(
         "cip_api_for_report", f'interpretationRequests/{ir}/{ir_version}/')
     interp_json = interpretation_reponse.get_json_response()
-
     analysis_versions = []
     latest = None
     if 'interpreted_genome' in interp_json:
@@ -72,7 +70,7 @@ def get_gel_content(user_email, ir, ir_version):
         if gel_json_content['detail'].startswith('Not found'):
             return None
     except JSONDecodeError as e:
-        pass
+        print('JSONDecodeError')
 
     analysis_panels = {}
 
@@ -152,16 +150,8 @@ def get_gel_content(user_email, ir, ir_version):
     div_tag.insert(1, h3_tag)
     div_tag.insert(2, table_tag)
 
-    gel_content = gel_content.prettify('utf-8')
-    with open("output.html", "wb") as file:
-        file.write(gel_content)
-    subject, from_email, to = 'GEL Report', 'bioinformatics@gosh.nhs.uk', user_email
-    text_content = f'Please see attached GEL Report for case {ir}-{ir_version}'
-    msg = EmailMessage(subject, text_content, from_email, [to])
-    msg.attach_file("output.html")
-    msg.send()
-    os.remove('output.html')
-
+    gel_content = gel_content.prettify()
+    return gel_content
 
 def panel_app(gene_panel, gp_version):
     '''
