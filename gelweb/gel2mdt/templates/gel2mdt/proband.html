@@ -763,13 +763,13 @@
                                 {% for history in report_history %}
                                      <tr>
                                     <td>{{ history.revision.user}}</td>
-                                    <td>{{ history.revision.date_created|date }}</td>
-                                    <td>{{ history.id }}</td>
-                                    <td>{{ history.serialized_data.0.fields.case_sent }}</td>
-                                    <td>{{ history.serialized_data.0.fields.case_status }}</td>
-                                    <td>{{ history.serialized_data.fields.mdt_status }}</td>
-                                    <td>{{ history.serialized_data.fields.pilot_case }}</td>
-                                    <td>{{ history.serialized_data.fields.no_primary_findings }}</td>
+                                    <td>{{ history.revision.date_created }}</td>
+                                    <td>{{ history.serialized_data.0.fields|get_item:'assigned_user' }}</td>
+                                    <td>{{ history.serialized_data.0.fields|get_item:'case_sent' }}</td>
+                                    <td>{{ history.serialized_data.0.fields|get_item:'case_status' }}</td>
+                                    <td>{{ history.serialized_data.0.fields|get_item:'mdt_status' }}</td>
+                                    <td>{{ history.serialized_data.0.fields|get_item:'pilot_case' }}</td>
+                                    <td>{{ history.serialized_data.0.fields|get_item:'no_primary_findings' }}</td>
                                      </tr>
 
     {% endfor %}
