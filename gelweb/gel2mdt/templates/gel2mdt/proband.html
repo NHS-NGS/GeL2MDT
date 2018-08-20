@@ -28,6 +28,7 @@
     <ul class="nav nav-tabs" data-options="deep_linking: true">
         <li class="active"><a data-toggle="tab" href="#proband">Proband</a></li>
         <li><a data-toggle="tab" href="#variants">Variants</a></li>
+        <li><a data-toggle="tab" href="#history">History</a></li>
     </ul>
     {% block javascript %}
         <script src="{% static 'js/custom.js' %}"></script>
@@ -735,7 +736,54 @@
                 </div>
             </div>
         </div>
+
+
+    <div id="history" class="tab-pane fade">
+            <div class="container-fluid" >
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">Case History</div>
+                            <div class="panel-body">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-bordered table-hover">
+                            <thead style='font-size: 75%'>
+                                <tr>
+                                    <th>User </th>
+                                    <th>Date Changed</th>
+                                    <th>assigned_user</th>
+                                    <th>case_sent</th>
+                                    <th>case_status</th>
+                                    <th>mdt_status</th>
+                                    <th>pilot_case</th>
+                                    <th>no_primary_findings</th>
+                                </tr>
+                            </thead>
+                            <tbody style='font-size: 75%'>
+                                {% for history in report_history %}
+                                     <tr>
+                                    <td>{{ history.revision.user}}</td>
+                                    <td>{{ history.revision.date_created|date }}</td>
+                                    <td>{{ history.id }}</td>
+                                    <td>{{ history.serialized_data.0.fields.case_sent }}</td>
+                                    <td>{{ history.serialized_data.0.fields.case_status }}</td>
+                                    <td>{{ history.serialized_data.fields.mdt_status }}</td>
+                                    <td>{{ history.serialized_data.fields.pilot_case }}</td>
+                                    <td>{{ history.serialized_data.fields.no_primary_findings }}</td>
+                                     </tr>
+
+    {% endfor %}
+                            </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
     </div>
+    </div>
+
 
     <div id="caseAssignModal" class="modal fade" role="dialog">
         <div class="modal-dialog">

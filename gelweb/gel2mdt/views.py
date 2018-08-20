@@ -252,6 +252,10 @@ def proband_view(request, report_id):
     :return:
     '''
     report = GELInterpretationReport.objects.get(id=report_id)
+    from reversion.models import Version, Revision
+    report_history = Version.objects.get_for_object(report)
+
+    important_fields = ['assigned_user', 'case_sent', 'case_status', 'mdt_status', 'pilot_case', 'no_primary_findings']
 
     # POST request from Demographic Update Form
     if request.method == "POST":
@@ -360,7 +364,8 @@ def proband_view(request, report_id):
                                                     'sample_type': report.sample_type,
                                                     'add_variant_form': add_variant_form,
                                                     'variants_for_reporting': variants_for_reporting,
-                                                    'gelir_form': gelir_form})
+                                                    'gelir_form': gelir_form,
+                                                    'report_history': report_history})
 
 
 @login_required
