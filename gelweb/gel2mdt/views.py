@@ -253,6 +253,9 @@ def proband_view(request, report_id):
     :return:
     '''
     report = GELInterpretationReport.objects.get(id=report_id)
+    proband = report.ir_family.participant_family.proband
+    print(Version.objects.get_for_object(proband).values())
+    proband_history = Version.objects.get_for_object(proband)
     report_history = Version.objects.get_for_object(report)
     for history in report_history:
         history.serialized_data = json.loads(history.serialized_data)
@@ -262,6 +265,8 @@ def proband_view(request, report_id):
             history.serialized_data[0]['fields']['case_status']]
         history.serialized_data[0]['fields']['mdt_status'] = mdt_status_choices[
             history.serialized_data[0]['fields']['mdt_status']]
+    for history in proband_history:
+        history.serialized_data = json.loads(history.serialized_data)
 
     if request.method == "POST":
         demogs_form = DemogsForm(request.POST, instance=report.ir_family.participant_family.proband)
@@ -370,7 +375,8 @@ def proband_view(request, report_id):
                                                     'add_variant_form': add_variant_form,
                                                     'variants_for_reporting': variants_for_reporting,
                                                     'gelir_form': gelir_form,
-                                                    'report_history': report_history})
+                                                    'report_history': report_history,
+                                                    'proband_history': proband_history})
 
 
 @login_required
