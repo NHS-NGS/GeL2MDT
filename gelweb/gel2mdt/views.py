@@ -49,6 +49,7 @@ from .api.api_views import *
 
 from .database_utils.multiple_case_adder import MultipleCaseAdder
 from .vep_utils.run_vep_batch import CaseVariant
+from reversion.models import Version, Revision
 
 from bokeh.resources import CDN
 from bokeh.embed import components
@@ -252,12 +253,16 @@ def proband_view(request, report_id):
     :return:
     '''
     report = GELInterpretationReport.objects.get(id=report_id)
-    from reversion.models import Version, Revision
     report_history = Version.objects.get_for_object(report)
+    for history in report_history:
+        history.serialized_data = json.loads(history.serialized_data)
+        case_status_choices = dict(GELInterpretationReport._meta.get_field('case_status').choices)
+        mdt_status_choices = dict(GELInterpretationReport._meta.get_field('mdt_status').choices)
+        history.serialized_data[0]['fields']['case_status'] = case_status_choices[
+            history.serialized_data[0]['fields']['case_status']]
+        history.serialized_data[0]['fields']['mdt_status'] = mdt_status_choices[
+            history.serialized_data[0]['fields']['mdt_status']]
 
-    important_fields = ['assigned_user', 'case_sent', 'case_status', 'mdt_status', 'pilot_case', 'no_primary_findings']
-
-    # POST request from Demographic Update Form
     if request.method == "POST":
         demogs_form = DemogsForm(request.POST, instance=report.ir_family.participant_family.proband)
         case_assign_form = CaseAssignForm(request.POST, instance=report)
