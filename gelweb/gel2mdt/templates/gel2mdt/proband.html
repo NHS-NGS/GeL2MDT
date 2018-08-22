@@ -761,9 +761,8 @@
                             </thead>
                             <tbody style='font-size: 75%'>
                                 {% for history in report_history %}
-                                    {% if history.diff.0 %}
-
-
+                                     {%  if forloop.counter0  == 0 %}
+                                     {% if history.diff.0 %}
                                      <tr>
                                     <td>{{ history.revision.user}}</td>
                                     <td>{{ history.revision.date_created }}</td>
@@ -773,9 +772,22 @@
                                      {% else %}
                                          <td></td>
                                      {% endif %}
-                                    {% endfor %}
-                                        </tr>
-                                {% endif %}
+                                         {% endfor %}
+                                    {% endif %}
+                                    {% else %}
+                                    {% if history.diff.0 %}
+                                     <tr>
+                                    <td>{{ history.revision.user}}</td>
+                                    <td>{{ history.revision.date_created }}</td>
+                                     {% for field in report_fields %}
+                                     {% if field in history.diff.1 %}
+                                         <td bgcolor="#90ee90">{{ history.serialized_data.0.fields|get_item:field }}</td>
+                                     {% else %}
+                                         <td></td>
+                                     {% endif %}
+                                         {% endfor %}
+                                    {% endif %}
+                                    {% endif %}
 
     {% endfor %}
                             </tbody>
@@ -819,6 +831,7 @@
                             </thead>
                             <tbody style='font-size: 75%'>
                                 {% for history in proband_history %}
+                                     {%  if forloop.counter0  == 0 %}
                                      {% if history.diff.0 %}
                                      <tr>
                                     <td>{{ history.revision.user}}</td>
@@ -830,6 +843,20 @@
                                          <td></td>
                                      {% endif %}
                                          {% endfor %}
+                                    {% endif %}
+                                    {% else %}
+                                    {% if history.diff.0 %}
+                                     <tr>
+                                    <td>{{ history.revision.user}}</td>
+                                    <td>{{ history.revision.date_created }}</td>
+                                     {% for field in proband_fields %}
+                                     {% if field in history.diff.1 %}
+                                         <td bgcolor="#90ee90">{{ history.serialized_data.0.fields|get_item:field }}</td>
+                                     {% else %}
+                                         <td></td>
+                                     {% endif %}
+                                         {% endfor %}
+                                    {% endif %}
                                     {% endif %}
 
     {% endfor %}
