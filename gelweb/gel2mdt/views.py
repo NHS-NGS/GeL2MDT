@@ -41,7 +41,7 @@ from .config import load_config
 from .forms import *
 from .models import *
 from .filters import *
-from .tasks import panel_app, get_gel_content, VariantAdder, update_for_t3, UpdateDemographics, create_bokeh_barplot
+from .tasks import *
 from .exports import write_mdt_outcome_template, write_mdt_export
 from .decorators import user_is_clinician
 
@@ -49,7 +49,6 @@ from .api.api_views import *
 
 from .database_utils.multiple_case_adder import MultipleCaseAdder
 from .vep_utils.run_vep_batch import CaseVariant
-from reversion.models import Version, Revision
 
 from bokeh.resources import CDN
 from bokeh.embed import components
@@ -253,20 +252,9 @@ def proband_view(request, report_id):
     :return:
     '''
     report = GELInterpretationReport.objects.get(id=report_id)
-    proband = report.ir_family.participant_family.proband
-    print(Version.objects.get_for_object(proband).values())
-    proband_history = Version.objects.get_for_object(proband)
-    report_history = Version.objects.get_for_object(report)
-    for history in report_history:
-        history.serialized_data = json.loads(history.serialized_data)
-        case_status_choices = dict(GELInterpretationReport._meta.get_field('case_status').choices)
-        mdt_status_choices = dict(GELInterpretationReport._meta.get_field('mdt_status').choices)
-        history.serialized_data[0]['fields']['case_status'] = case_status_choices[
-            history.serialized_data[0]['fields']['case_status']]
-        history.serialized_data[0]['fields']['mdt_status'] = mdt_status_choices[
-            history.serialized_data[0]['fields']['mdt_status']]
-    for history in proband_history:
-        history.serialized_data = json.loads(history.serialized_data)
+    report_history_formatter = ReportHistoryFormatter(report=report)
+    report_history = report_history_formatter.get_report_history()
+    proband_history = report_history_formatter.get_proband_history()
 
     if request.method == "POST":
         demogs_form = DemogsForm(request.POST, instance=report.ir_family.participant_family.proband)
@@ -376,7 +364,9 @@ def proband_view(request, report_id):
                                                     'variants_for_reporting': variants_for_reporting,
                                                     'gelir_form': gelir_form,
                                                     'report_history': report_history,
-                                                    'proband_history': proband_history})
+                                                    'proband_history': proband_history,
+                                                    'report_fields': report_history_formatter.report_interesting_fields,
+                                                    'proband_fields': report_history_formatter.proband_interesting_fields})
 
 
 @login_required
