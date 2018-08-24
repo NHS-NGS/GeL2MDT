@@ -605,7 +605,6 @@ class ReportHistoryFormatter:
             else:
                 diff_fields = self.json_diff(previous_history, history.serialized_data, self.report_interesting_fields)
                 history.diff = diff_fields
-                #previous_history.diff = diff_fields
             previous_history = history.serialized_data
         return self.report_history
 
@@ -617,7 +616,6 @@ class ReportHistoryFormatter:
             else:
                 diff_fields = self.json_diff(previous_history, history.serialized_data, self.proband_interesting_fields)
                 history.diff = diff_fields
-                #previous_history.diff = diff_fields
             previous_history = history.serialized_data
 
         return self.proband_history
