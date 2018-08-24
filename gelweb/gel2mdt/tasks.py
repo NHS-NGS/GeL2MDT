@@ -154,14 +154,14 @@ def get_gel_content(user_email, ir, ir_version):
     div_tag.insert(2, table_tag)
 
     gel_content = gel_content.prettify('utf-8')
-    with open("output.html", "wb") as file:
+    with open(f"{ir}_{ir_version}_clinical_report.html", "wb") as file:
         file.write(gel_content)
     subject, from_email, to = 'GEL Report', 'bioinformatics@gosh.nhs.uk', user_email
     text_content = f'Please see attached GEL Report for case {ir}-{ir_version}'
     msg = EmailMessage(subject, text_content, from_email, [to])
-    msg.attach_file("output.html")
+    msg.attach_file(f"{ir}_{ir_version}_clinical_report.html")
     msg.send()
-    os.remove('output.html')
+    os.remove(f"{ir}_{ir_version}_clinical_report.html")
 
 
 def panel_app(gene_panel, gp_version):
@@ -191,6 +191,26 @@ def update_for_t3(report_id):
     report = GELInterpretationReport.objects.get(id=report_id)
     mca = MultipleCaseAdder(sample_type=report.sample_type, pullt3=True, sample=report.ir_family.participant_family.proband.gel_id)
     mca.update_database()
+
+@task
+def listupdate_email():
+    '''
+    Utility function which sends emails to admin about last nights update
+    :return:
+    '''
+    most_recent_listupdates = ListUpdate.objects.order_by('-update_time')[0:2]
+    text_content = ''
+    for update in most_recent_listupdates:
+        if update.update_time.day == timezone.now().day:
+                text_content = text_content + f'{update.id}\t{update.update_time}' \
+                                              f'\t{update.cases_added}\t{update.cases_updated}\t{update.error}\n'
+    if text_content:
+        subject, from_email, to = 'GeL2MDT ListUpdate', 'bioinformatics@gosh.nhs.uk', 'bioinformatics@gosh.nhs.uk'
+        msg = EmailMessage(subject, text_content, from_email, [to])
+        try:
+            msg.send()
+        except Exception as e:
+            pass
 
 @task
 def update_cases():
