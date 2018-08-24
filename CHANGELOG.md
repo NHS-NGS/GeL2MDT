@@ -6,6 +6,7 @@
 - Fixed bug in the cancer proband MDT view which prevented saving working
 - Added email alert for ListUpdate's
 - Fixed ordering in main table for raredisease cases
+- Added more info to the MDT export file
 
 ## [0.4.4]- 24-06-08
 ### Added
