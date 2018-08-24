@@ -37,6 +37,7 @@ from bokeh.models import ColumnDataSource, LabelSet
 from bokeh.palettes import Spectral8
 from bokeh.plotting import figure
 from django.core.mail import EmailMessage
+from reversion.models import Version, Revision
 
 @task
 def get_gel_content(user_email, ir, ir_version):
@@ -554,3 +555,69 @@ def create_bokeh_barplot(names, values, title):
     plot.legend.orientation = "horizontal"
     plot.legend.location = "top_center"
     return plot
+
+
+class ReportHistoryFormatter:
+    def __init__(self, report):
+        self.report = report
+        self.proband = report.ir_family.participant_family.proband
+        self.proband_history = Version.objects.get_for_object(self.proband).reverse()
+        self.report_history = Version.objects.get_for_object(report).reverse()
+        self.report_interesting_fields = ['assigned_user', 'case_sent', 'case_status', 'mdt_status', 'pilot_case',
+                                          'no_primary_findings']
+        self.proband_interesting_fields = ['forename', 'surname','date_of_birth','nhs_number','sex','outcome','comment',
+                                           'discussion','action','gmc','lab_number','local_id','deceased','disease_group',
+                                           'recruiting_disease','disease_subtype','disease_stage','disease_grade',
+                                           'currently_in_clinical_trial','current_clinical_trial_info',
+                                           'suitable_for_clinical_trial','previous_testing','previous_treatment']
+
+    def get_report_history(self):
+        for count, history in enumerate(self.report_history):
+            history.serialized_data = json.loads(history.serialized_data)
+            case_status_choices = dict(GELInterpretationReport._meta.get_field('case_status').choices)
+            mdt_status_choices = dict(GELInterpretationReport._meta.get_field('mdt_status').choices)
+            history.serialized_data[0]['fields']['case_status'] = case_status_choices[
+                history.serialized_data[0]['fields']['case_status']]
+            history.serialized_data[0]['fields']['mdt_status'] = mdt_status_choices[
+                history.serialized_data[0]['fields']['mdt_status']]
+            if count == 0:
+                history.diff = (True, self.report_interesting_fields)
+            else:
+                diff_fields = self.json_diff(previous_history, history.serialized_data, self.report_interesting_fields)
+                history.diff = diff_fields
+                #previous_history.diff = diff_fields
+            previous_history = history.serialized_data
+        return self.report_history
+
+    def get_proband_history(self):
+        for count, history in enumerate(self.proband_history):
+            history.serialized_data = json.loads(history.serialized_data)
+            if count == 0:
+                history.diff = (True, self.proband_interesting_fields)
+            else:
+                diff_fields = self.json_diff(previous_history, history.serialized_data, self.proband_interesting_fields)
+                history.diff = diff_fields
+                #previous_history.diff = diff_fields
+            previous_history = history.serialized_data
+
+        return self.proband_history
+
+    @staticmethod
+    def json_diff(most_recent_history, older_history, fields_of_interest):
+        '''
+        # Goes in decending order through json history and decides which fields to keep
+        # Don't delete the first version
+        :param version_list: list of json history
+        :param fields_of_interest: all fields which will be displayed to the user
+        :return: Tuple of (Boolean, [Fields to keep]
+        '''
+        new_subset = {k: most_recent_history[0]['fields'][k] for k in fields_of_interest}
+        old_subset = {k: older_history[0]['fields'][k] for k in fields_of_interest}
+        if new_subset == old_subset:
+            return False, []
+        else:
+            field_diff = []
+            for field in new_subset:
+                if new_subset[field] != old_subset[field]:
+                    field_diff.append(field)
+            return True, field_diff
