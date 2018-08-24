@@ -631,8 +631,11 @@ class ReportHistoryFormatter:
         :param fields_of_interest: all fields which will be displayed to the user
         :return: Tuple of (Boolean, [Fields to keep]
         '''
-        new_subset = {k: most_recent_history[0]['fields'][k] for k in fields_of_interest}
-        old_subset = {k: older_history[0]['fields'][k] for k in fields_of_interest}
+        try:
+            new_subset = {k: most_recent_history[0]['fields'][k] for k in fields_of_interest}
+            old_subset = {k: older_history[0]['fields'][k] for k in fields_of_interest}
+        except KeyError as e:
+            return False, []
         if new_subset == old_subset:
             return False, []
         else:
