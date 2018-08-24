@@ -28,6 +28,7 @@
     <ul class="nav nav-tabs" data-options="deep_linking: true">
         <li class="active"><a data-toggle="tab" href="#proband">Proband</a></li>
         <li><a data-toggle="tab" href="#variants">Variants</a></li>
+        <li><a data-toggle="tab" href="#history">History</a></li>
     </ul>
     {% block javascript %}
         <script src="{% static 'js/custom.js' %}"></script>
@@ -735,7 +736,141 @@
                 </div>
             </div>
         </div>
+
+
+    <div id="history" class="tab-pane fade">
+            <div class="container-fluid" >
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">Report History</div>
+                            <div class="panel-body">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-bordered table-hover" >
+                            <thead style='font-size: 75%'>
+                                <tr>
+                                    <th>User </th>
+                                    <th>Date Changed</th>
+                                    <th>assigned_user</th>
+                                    <th>case_sent</th>
+                                    <th>case_status</th>
+                                    <th>mdt_status</th>
+                                    <th>pilot_case</th>
+                                    <th>no_primary_findings</th>
+                                </tr>
+                            </thead>
+                            <tbody style='font-size: 75%'>
+                                {% for history in report_history %}
+                                     {%  if forloop.counter0  == 0 %}
+                                     {% if history.diff.0 %}
+                                     <tr>
+                                    <td>{{ history.revision.user}}</td>
+                                    <td>{{ history.revision.date_created }}</td>
+                                     {% for field in report_fields %}
+                                     {% if field in history.diff.1 %}
+                                         <td>{{ history.serialized_data.0.fields|get_item:field }}</td>
+                                     {% else %}
+                                         <td></td>
+                                     {% endif %}
+                                         {% endfor %}
+                                    {% endif %}
+                                    {% else %}
+                                    {% if history.diff.0 %}
+                                     <tr>
+                                    <td>{{ history.revision.user}}</td>
+                                    <td>{{ history.revision.date_created }}</td>
+                                     {% for field in report_fields %}
+                                     {% if field in history.diff.1 %}
+                                         <td bgcolor="#90ee90">{{ history.serialized_data.0.fields|get_item:field }}</td>
+                                     {% else %}
+                                         <td></td>
+                                     {% endif %}
+                                         {% endfor %}
+                                    {% endif %}
+                                    {% endif %}
+
+    {% endfor %}
+                            </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    <div class="panel panel-default">
+                            <div class="panel-heading">Proband History</div>
+                            <div class="panel-body">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-bordered table-hover" >
+                            <thead style='font-size: 75%'>
+                                <tr>
+                                    <th>User </th>
+                                    <th>Date Changed</th>
+                                    <th>forename</th>
+                                    <th>surname</th>
+                                    <th>date_of_birth</th>
+                                    <th>nhs_number</th>
+                                    <th>sex</th>
+                                    <th>outcome</th>
+                                    <th>comment</th>
+                                    <th>discussion</th>
+                                    <th>action</th>
+                                    <th>gmc</th>
+                                    <th>lab_number</th>
+                                    <th>local_id</th>
+                                    <th>deceased</th>
+                                    <th>disease_group</th>
+                                    <th>recruiting_disease</th>
+                                    <th>disease_subtype</th>
+                                    <th>disease_stage</th>
+                                    <th>disease_grade</th>
+                                    <th>currently_in_clinical_trial</th>
+                                    <th>current_clinical_trial_info</th>
+                                    <th>suitable_for_clinical_trial</th>
+                                    <th>previous_testing</th>
+                                    <th>previous_treatment</th>
+                                </tr>
+                            </thead>
+                            <tbody style='font-size: 75%'>
+                                {% for history in proband_history %}
+                                     {%  if forloop.counter0  == 0 %}
+                                     {% if history.diff.0 %}
+                                     <tr>
+                                    <td>{{ history.revision.user}}</td>
+                                    <td>{{ history.revision.date_created }}</td>
+                                     {% for field in proband_fields %}
+                                     {% if field in history.diff.1 %}
+                                         <td>{{ history.serialized_data.0.fields|get_item:field }}</td>
+                                     {% else %}
+                                         <td></td>
+                                     {% endif %}
+                                         {% endfor %}
+                                    {% endif %}
+                                    {% else %}
+                                    {% if history.diff.0 %}
+                                     <tr>
+                                    <td>{{ history.revision.user}}</td>
+                                    <td>{{ history.revision.date_created }}</td>
+                                     {% for field in proband_fields %}
+                                     {% if field in history.diff.1 %}
+                                         <td bgcolor="#90ee90">{{ history.serialized_data.0.fields|get_item:field }}</td>
+                                     {% else %}
+                                         <td></td>
+                                     {% endif %}
+                                         {% endfor %}
+                                    {% endif %}
+                                    {% endif %}
+
+    {% endfor %}
+                            </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
     </div>
+    </div>
+
 
     <div id="caseAssignModal" class="modal fade" role="dialog">
         <div class="modal-dialog">
