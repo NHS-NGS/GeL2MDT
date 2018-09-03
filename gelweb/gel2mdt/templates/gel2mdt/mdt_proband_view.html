@@ -194,6 +194,7 @@ SOFTWARE.
                     <th>Action Type</th>
                     <th>Validated?</th>
                     <th>Validated Assay Type</th>
+                    <th>Requires Validation?</th>
                 </tr>
             </thead>
                                         <tbody style='font-size: 75%' >
@@ -214,6 +215,7 @@ SOFTWARE.
                                                     <td>{{form.validated }}
                                                     </td>
                                                     <td>{{  form.validated_assay_type  }}
+                                                    <td>{{ form.requires_validation }}</td>
                                                     </td>
                                                 </tr>
                                             {% endfor %}
