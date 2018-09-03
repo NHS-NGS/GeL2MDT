@@ -37,6 +37,7 @@ from bokeh.models import ColumnDataSource, LabelSet
 from bokeh.palettes import Spectral8
 from bokeh.plotting import figure
 from django.core.mail import EmailMessage
+from reversion.models import Version, Revision
 
 @task
 def get_gel_content(user_email, ir, ir_version):
@@ -153,14 +154,14 @@ def get_gel_content(user_email, ir, ir_version):
     div_tag.insert(2, table_tag)
 
     gel_content = gel_content.prettify('utf-8')
-    with open("output.html", "wb") as file:
+    with open(f"{ir}_{ir_version}_clinical_report.html", "wb") as file:
         file.write(gel_content)
     subject, from_email, to = 'GEL Report', 'bioinformatics@gosh.nhs.uk', user_email
     text_content = f'Please see attached GEL Report for case {ir}-{ir_version}'
     msg = EmailMessage(subject, text_content, from_email, [to])
-    msg.attach_file("output.html")
+    msg.attach_file(f"{ir}_{ir_version}_clinical_report.html")
     msg.send()
-    os.remove('output.html')
+    os.remove(f"{ir}_{ir_version}_clinical_report.html")
 
 
 def panel_app(gene_panel, gp_version):
@@ -190,6 +191,26 @@ def update_for_t3(report_id):
     report = GELInterpretationReport.objects.get(id=report_id)
     mca = MultipleCaseAdder(sample_type=report.sample_type, pullt3=True, sample=report.ir_family.participant_family.proband.gel_id)
     mca.update_database()
+
+@task
+def listupdate_email():
+    '''
+    Utility function which sends emails to admin about last nights update
+    :return:
+    '''
+    most_recent_listupdates = ListUpdate.objects.order_by('-update_time')[0:2]
+    text_content = ''
+    for update in most_recent_listupdates:
+        if update.update_time.day == timezone.now().day:
+                text_content = text_content + f'{update.id}\t{update.update_time}' \
+                                              f'\t{update.cases_added}\t{update.cases_updated}\t{update.error}\n'
+    if text_content:
+        subject, from_email, to = 'GeL2MDT ListUpdate', 'bioinformatics@gosh.nhs.uk', 'bioinformatics@gosh.nhs.uk'
+        msg = EmailMessage(subject, text_content, from_email, [to])
+        try:
+            msg.send()
+        except Exception as e:
+            pass
 
 @task
 def update_cases():
@@ -554,3 +575,67 @@ def create_bokeh_barplot(names, values, title):
     plot.legend.orientation = "horizontal"
     plot.legend.location = "top_center"
     return plot
+
+
+class ReportHistoryFormatter:
+    def __init__(self, report):
+        self.report = report
+        self.proband = report.ir_family.participant_family.proband
+        self.proband_history = Version.objects.get_for_object(self.proband).reverse()
+        self.report_history = Version.objects.get_for_object(report).reverse()
+        self.report_interesting_fields = ['assigned_user', 'case_sent', 'case_status', 'mdt_status', 'pilot_case',
+                                          'no_primary_findings']
+        self.proband_interesting_fields = ['forename', 'surname','date_of_birth','nhs_number','sex','outcome','comment',
+                                           'discussion','action','gmc','lab_number','local_id','deceased','disease_group',
+                                           'recruiting_disease','disease_subtype','disease_stage','disease_grade',
+                                           'currently_in_clinical_trial','current_clinical_trial_info',
+                                           'suitable_for_clinical_trial','previous_testing','previous_treatment']
+
+    def get_report_history(self):
+        for count, history in enumerate(self.report_history):
+            history.serialized_data = json.loads(history.serialized_data)
+            case_status_choices = dict(GELInterpretationReport._meta.get_field('case_status').choices)
+            mdt_status_choices = dict(GELInterpretationReport._meta.get_field('mdt_status').choices)
+            history.serialized_data[0]['fields']['case_status'] = case_status_choices[
+                history.serialized_data[0]['fields']['case_status']]
+            history.serialized_data[0]['fields']['mdt_status'] = mdt_status_choices[
+                history.serialized_data[0]['fields']['mdt_status']]
+            if count == 0:
+                history.diff = (True, self.report_interesting_fields)
+            else:
+                diff_fields = self.json_diff(previous_history, history.serialized_data, self.report_interesting_fields)
+                history.diff = diff_fields
+            previous_history = history.serialized_data
+        return self.report_history
+
+    def get_proband_history(self):
+        for count, history in enumerate(self.proband_history):
+            history.serialized_data = json.loads(history.serialized_data)
+            if count == 0:
+                history.diff = (True, self.proband_interesting_fields)
+            else:
+                diff_fields = self.json_diff(previous_history, history.serialized_data, self.proband_interesting_fields)
+                history.diff = diff_fields
+            previous_history = history.serialized_data
+
+        return self.proband_history
+
+    @staticmethod
+    def json_diff(most_recent_history, older_history, fields_of_interest):
+        '''
+        # Goes in decending order through json history and decides which fields to keep
+        # Don't delete the first version
+        :param version_list: list of json history
+        :param fields_of_interest: all fields which will be displayed to the user
+        :return: Tuple of (Boolean, [Fields to keep]
+        '''
+        new_subset = {k: most_recent_history[0]['fields'].get(k, None) for k in fields_of_interest}
+        old_subset = {k: older_history[0]['fields'].get(k, None) for k in fields_of_interest}
+        if new_subset == old_subset:
+            return False, []
+        else:
+            field_diff = []
+            for field in new_subset:
+                if new_subset[field] != old_subset[field]:
+                    field_diff.append(field)
+            return True, field_diff
