@@ -1,3 +1,13 @@
+## [0.4.5]- 2018-08-2X
+### Added
+- History tab to cases which shows history of changes to cases, ordered by oldest to newest
+
+### Changed
+- Fixed bug in the cancer proband MDT view which prevented saving working
+- Added email alert for ListUpdate's
+- Fixed ordering in main table for raredisease cases
+- Added more info to the MDT export file
+
 ## [0.4.4]- 24-06-08
 ### Added
 - Added feature to generate positive reports based on selected variants which are Classed 3-5 and have been fully validated.
