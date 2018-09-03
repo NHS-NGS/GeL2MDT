@@ -51,6 +51,14 @@ SOFTWARE.
         <script type="text/javascript" src="{% static 'gel2mdt/DataTables/datatables.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'gel2mdt/js/all.js' %}"></script>
         <link rel="stylesheet" type="text/css" href="{% static 'gel2mdt/css/custom.css' %}">
+        <script type="text/javascript" src="{% static 'DataTables/jquery.dataTables.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'DataTables/dataTables.buttons.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'DataTables/buttons.flash.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'DataTables/jszip.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'DataTables/buttons.html5.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'DataTables/buttons.print.min.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'DataTables/jquery.dataTables.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'DataTables/buttons.dataTables.min.css' %}">
 
     {% endblock %}
       {% block javascript %}
@@ -70,7 +78,7 @@ SOFTWARE.
           </button>
 
           <a class="navbar-brand" href="{% url 'gel2clin:index' %}"><i class="fas fa-paper-plane fa-1x"></i>
-              <em><strong>GeL2MDT v0.1</strong></em>
+              <em><strong>GeL2MDT</strong></em>
           </a>
         </div>
             {% if user.is_authenticated %}
@@ -302,6 +310,15 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
     console.log("Loading table through initaliseTable()!")
     if("{{sample_type}}" === 'cancer') {
         var table = $('#rare-disease-main').DataTable({
+            dom: 'lBfrtip',
+            buttons: [ {
+                extend: 'excelHtml5',
+                title: 'Data export'
+            },
+            {
+                extend: 'csvHtml5',
+                title: 'Data export'
+            }],
             "ajax": {
                 "url": '{% url 'gelir-json' sample_type=sample_type %}',
                 "dataSrc": ''
@@ -320,6 +337,7 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
                 {"data": "gel_id"},
                 {"data": "forename"},
                 {"data": "surname"},
+                {"data": "nhs_number"},
                 {
                     "data": "date_of_birth",
                     "type": "date "
@@ -356,10 +374,19 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
                 {"data": "gmc"},
                 {"data": "clinician"}
             ],
-            "order": [[11, "desc"]]
+            "order": [[12, "desc"]]
         });
     } else {
         var table = $('#rare-disease-main').DataTable({
+            dom: 'lBfrtip',
+            buttons: [ {
+                extend: 'excelHtml5',
+                title: 'Data export'
+            },
+            {
+                extend: 'csvHtml5',
+                title: 'Data export'
+            }],
             "ajax": {
                 "url": '{% url 'gelir-json' sample_type=sample_type %}',
                 "dataSrc": ''
@@ -378,6 +405,7 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
                 {"data": "gel_id"},
                 {"data": "forename"},
                 {"data": "surname"},
+                {"data": "nhs_number"},
                 {
                     "data": "date_of_birth",
                     "type": "date "
@@ -412,7 +440,7 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
                 {"data": "gmc"},
                 {"data": "clinician"}
             ],
-            "order": [[11, "desc"]]
+            "order": [[12, "desc"]]
         });
     }
     return table
@@ -504,6 +532,15 @@ function getRadioValue(radioElementName) {
 {% endblock %}
 
 {% block footer %}
+    <div class="wrapper">
+<div class="push"></div>
+<div class="footer">
+    <p align="center" style="color:gray">
+    GeL2MDT {%version_number%}{% build %}. &copy; Great Ormond Street Hospital for Children NHS Foundation Trust &amp; Birmingham Women's and Children's NHS Foundation Trust.
+    </p>
+</div>
+    </div>
 {% endblock %}
+
 </body>
 </html>

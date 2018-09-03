@@ -283,6 +283,18 @@ class CancerMDTForm(forms.ModelForm):
     '''
     Form used in Proband View at MDT which allows users to fill in exit questionaire questions
     '''
+    requires_validation = forms.ChoiceField(
+        choices=(
+            ('U', 'Unknown'),
+            ('A', 'Awaiting Validation'),
+            ('K', 'Urgent Validation'),
+            ('I', 'In Progress'),
+            ('P', 'Passed Validation'),
+            ('F', 'Failed Validation'),
+            ('N', 'Not Required'),
+        )
+    )
+
     class Meta:
         model = CancerReport
         fields = ('variant_use', 'action_type', 'validated',
@@ -291,6 +303,18 @@ class CancerMDTForm(forms.ModelForm):
         widgets = {'id': HiddenInput(),
                    'validated': CheckboxInput(),
                    }
+
+    def save(self, commit=True):
+        selected_validation_status = self.cleaned_data['requires_validation']
+        pv = self.instance.proband_variant
+
+        pv.validation_status = selected_validation_status
+        if not pv.validation_datetime_set:
+            pv.validation_datetime_set = datetime.now()
+
+        pv.save()
+
+        return super(CancerMDTForm, self).save(commit=commit)
 
 
 class AddNewAttendee(forms.Form):

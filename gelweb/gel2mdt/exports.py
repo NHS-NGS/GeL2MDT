@@ -35,8 +35,8 @@ def write_mdt_export(writer, mdt_instance, mdt_reports):
     :param mdt_reports: List of reports which are present in MDT
     :return: CSV file Writer
     '''
-    writer.writerow(['CIP_ID', 'Forename', 'Surname', 'DOB', 'Hospital_ID',
-                     'Variant/Zygosity', 'Panel'])
+    writer.writerow(['Forename', 'Surname', 'DOB', 'NHS no.', 'GELID', 'CIPID',
+                     'Clinician', 'Panel', 'Variant&Zygosity'])
 
     for report in mdt_reports:
         proband_variants = ProbandVariant.objects.filter(interpretation_report=report.interpretation_report)
@@ -62,13 +62,15 @@ def write_mdt_export(writer, mdt_instance, mdt_reports):
         for panel in panels:
             panel_names.append(f'{panel.panel.panel.panel_name}_'
                                f'{panel.panel.version_number}')
-        writer.writerow([report.interpretation_report.ir_family.ir_family_id,
-                         report.interpretation_report.ir_family.participant_family.proband.forename,
+        writer.writerow([report.interpretation_report.ir_family.participant_family.proband.forename,
                          report.interpretation_report.ir_family.participant_family.proband.surname,
                          report.interpretation_report.ir_family.participant_family.proband.date_of_birth.date(),
-                         report.interpretation_report.ir_family.participant_family.proband.local_id,
-                         '\n'.join(pv_output),
-                         '\n'.join(panel_names)])
+                         report.interpretation_report.ir_family.participant_family.proband.nhs_number,
+                         report.interpretation_report.ir_family.participant_family.proband.gel_id,
+                         report.interpretation_report.ir_family.ir_family_id,
+                         report.interpretation_report.ir_family.participant_family.clinician.name,
+                         '\n'.join(panel_names),
+                         '\n'.join(pv_output)])
     return writer
 
 

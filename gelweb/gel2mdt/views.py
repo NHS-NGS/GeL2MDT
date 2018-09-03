@@ -41,7 +41,7 @@ from .config import load_config
 from .forms import *
 from .models import *
 from .filters import *
-from .tasks import panel_app, get_gel_content, VariantAdder, update_for_t3, UpdateDemographics, create_bokeh_barplot
+from .tasks import *
 from .exports import write_mdt_outcome_template, write_mdt_export
 from .decorators import user_is_clinician
 
@@ -252,8 +252,10 @@ def proband_view(request, report_id):
     :return:
     '''
     report = GELInterpretationReport.objects.get(id=report_id)
+    report_history_formatter = ReportHistoryFormatter(report=report)
+    report_history = report_history_formatter.get_report_history()
+    proband_history = report_history_formatter.get_proband_history()
 
-    # POST request from Demographic Update Form
     if request.method == "POST":
         demogs_form = DemogsForm(request.POST, instance=report.ir_family.participant_family.proband)
         case_assign_form = CaseAssignForm(request.POST, instance=report)
@@ -360,7 +362,11 @@ def proband_view(request, report_id):
                                                     'sample_type': report.sample_type,
                                                     'add_variant_form': add_variant_form,
                                                     'variants_for_reporting': variants_for_reporting,
-                                                    'gelir_form': gelir_form})
+                                                    'gelir_form': gelir_form,
+                                                    'report_history': report_history,
+                                                    'proband_history': proband_history,
+                                                    'report_fields': report_history_formatter.report_interesting_fields,
+                                                    'proband_fields': report_history_formatter.proband_interesting_fields})
 
 
 @login_required
