@@ -55,7 +55,7 @@ class MultipleCaseAdder(object):
         :param sample: If you want to add a single sample, set this the GELID
         :param pullt3: Boolean to pull t3 variants
         """
-        logger.info("Initialising a MultipleCaseAdder.")
+        print("Initialising a MultipleCaseAdder.")
 
         if sample_type == "cancer" or sample_type == "raredisease":
             pass
@@ -82,11 +82,11 @@ class MultipleCaseAdder(object):
         self.sample_type = sample_type
 
         if self.test_data:
-            logger.info("Fetching test data.")
+            print("Fetching test data.")
             # set list_of_cases to test zoo
             self.list_of_cases = self.fetch_test_data()
             self.cases_to_poll = None
-            logger.info("Fetched test data.")
+            print("Fetched test data.")
             self.cases_to_add = self.check_cases_to_add()
             self.cases_to_update = self.check_cases_to_update()  #
             self.cases_to_skip = set(self.list_of_cases) - \
@@ -101,31 +101,61 @@ class MultipleCaseAdder(object):
             self.cases_to_skip = []
         else:
             # set list_of_cases to cases of interest from API
-            logger.info("Fetching live API data.")
-            logger.info("Polling for list of available cases...")
+            print("Fetching live API data.")
+            print("Polling for list of available cases...")
             interpretation_list_poll = InterpretationList(sample_type=sample_type)
-            logger.info("Fetched available cases")
+            cases_fetched = len(interpretation_list_poll.cases_to_poll)
+            print("Fetched", cases_fetched, "available cases")
 
-            logger.info("Determining which cases to poll...")
-            self.cases_to_poll = interpretation_list_poll.cases_to_poll
+            print("Determining which cases to poll...")
+            # reverse update, do the newest first!
+            self.total_cases_to_poll = interpretation_list_poll.cases_to_poll[::-1]
             if head:
-                self.cases_to_poll = self.cases_to_poll[:head]
+                self.total_cases_to_poll = self.total_cases_to_poll[:head]
+            self.num_cases_to_poll = len(self.total_cases_to_poll)
 
-            logger.info("Fetching API JSON data for cases to poll...")
-            self.list_of_cases = self.fetch_api_data()
-            if head:
-                # take a certain number of cases off the top
-                self.list_of_cases = self.list_of_cases[:head]
+            # work out how many hundreds in fetched cases
+            num_full_bins = self.num_cases_to_poll // 100
+            num_bins = num_full_bins + 1
+            final_bin_size = self.num_cases_to_poll - (num_full_bins * 100)
+            print(num_bins, final_bin_size)
 
-            logger.info("Fetched all required CIP API data.")
+            bins = []
+            for i in range(num_full_bins):
+                bins.append(
+                    [
+                        (100*i) + 1,
+                        (100*i) + 100
+                    ]
+                )   # [0, 100], [101, 200] etc
+            bins.append([num_full_bins + 1, None])
 
-            logger.info("Checking which cases to add.")
-            self.cases_to_add = self.check_cases_to_add()
-            logger.info("Checking which cases require updating.")
-            self.cases_to_update = self.check_cases_to_update()#
-            self.cases_to_skip = set(self.list_of_cases) - \
-                set(self.cases_to_add) - \
-                set(self.cases_to_update)
+            bin_count = 1
+            for b in bins:
+                print("Fetching cases for bin", bin_count, "of", len(bins))
+                self.cases_to_poll = self.total_cases_to_poll[b[0]: b[1]]
+
+                print("Fetching API JSON data for cases to poll...")
+                self.list_of_cases = self.fetch_api_data()
+                if head:
+                    # take a certain number of cases off the top
+                    self.list_of_cases = self.list_of_cases[:head]
+                print("Fetched all required CIP API data.")
+                print("Checking which cases to add.")
+                self.cases_to_add = self.check_cases_to_add()
+                print("Checking which cases require updating.")
+                self.cases_to_update = self.check_cases_to_update()#
+                self.cases_to_skip = set(self.list_of_cases) - \
+                    set(self.cases_to_add) - \
+                    set(self.cases_to_update)
+                print("Finished processing bin", bin_count, "of", len(bins))
+
+                for case in self.cases_to_add:
+                    del case
+                for case in self.cases_to_update:
+                    del case
+
+                bin_count += 1
 
     def update_database(self):
         # begin update process
