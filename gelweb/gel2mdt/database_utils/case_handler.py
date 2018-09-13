@@ -33,6 +33,7 @@ from ..config import load_config
 import re
 import copy
 import pprint
+from tqdm import tqdm
 
 
 class Case(object):
@@ -829,9 +830,10 @@ class CaseAttributeManager(object):
                 })
                 self.case.gene_manager.add_searched(transcript.gene_ensembl_id, str(transcript.gene_hgnc_id))
 
-        for gene in gene_list:
+        for gene in tqdm(gene_list, desc=self.case.request_id):
             gene['HGNC_ID'] = None
             if gene['EnsembleGeneIds']:
+                tqdm.write(gene["EnsembleGeneIds"])
                 polled = self.case.gene_manager.fetch_searched(gene['EnsembleGeneIds'])
                 if polled == 'Not_found':
                     gene['HGNC_ID'] = None
