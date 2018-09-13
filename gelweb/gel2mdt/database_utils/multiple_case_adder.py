@@ -33,6 +33,7 @@ import pprint
 import logging
 import time
 from .demographics_handler import DemographicsHandler
+from tqdm import tqdm
 
 # set up logging
 logger = logging.getLogger(__name__)
@@ -164,9 +165,9 @@ class MultipleCaseAdder(object):
         error = None
         try:
             logger.info("Adding cases from cases_to_add.")
-            print("Adding cases")
+            print("Adding", len(self.cases_to_add), "cases")
             self.add_cases()
-            print("Updating cases")
+            print("Updating", len(self.cases_to_update), "cases")
             self.add_cases(update=True)
             success = True
         except Exception as e:
@@ -213,9 +214,12 @@ class MultipleCaseAdder(object):
         return list_of_cases
 
     def fetch_api_data(self):
-        list_of_cases = [
-            # list comprehension, calling self.get_case_json each time for poll
-            Case(
+        list_of_cases = []
+        # list comprehension, calling self.get_case_json each time for poll
+        for case in tqdm(self.cases_to_poll):
+            tqdm.write("Polling for: {case}".format(case=case["interpretation_request_id"]))
+
+            c = Case(
                 # instatiate a new case with the polled json
                 case_json=self.get_case_json(case["interpretation_request_id"]),
                 panel_manager=self.panel_manager,
@@ -223,8 +227,9 @@ class MultipleCaseAdder(object):
                 gene_manager=self.gene_manager,
                 skip_demographics=self.skip_demographics,
                 pullt3=self.pullt3
-            ) for case in self.cases_to_poll
-        ]
+            )
+            list_of_cases.append(c)
+
         print("Successfully fetched", len(list_of_cases), "cases from CIP API.")
         return list_of_cases
 
@@ -235,8 +240,6 @@ class MultipleCaseAdder(object):
         :param interpretation_request_id: an IR ID of the format XXXX-X
         :returns: A case json associated with the given IR ID from CIP-API
         """
-        logger.info("Polling API for case", interpretation_request_id)
-        print("Polling API for case", interpretation_request_id)
         request_poll = PollAPI(
             # instantiate a poll of CIP API for a given case json
             "cip_api", "interpretation-request/{id}/{version}".format(
@@ -392,8 +395,9 @@ class MultipleCaseAdder(object):
                 model_objects = model_type.objects.all().values(*lookups)
             elif not lookups:
                 model_objects = model_type.objects.all()
-            for case in cases:
+            for case in tqdm(cases, desc="Parsing {model_type} into DB".format(model_type=model_type.__name__)):
                 # create a CaseAttributeManager for the case
+                tqdm.write(case.request_id)
                 case.attribute_managers[model_type] = CaseAttributeManager(
                     case, model_type, model_objects)
                 # use thea attribute manager to set the case models
@@ -408,11 +412,12 @@ class MultipleCaseAdder(object):
                 ]
             elif many:
                 model_list = []
-                for case in cases:
+                for case in tqdm(cases, desc="Parsing {model_type} into DB".format(model_type=model_type.__name__)):
                     attribute_manager = case.attribute_managers[model_type]
                     many_case_model = attribute_manager.case_model
-                    for case_model in many_case_model.case_models:
+                    for case_model in tqdm(many_case_model.case_models, desc=case.request_id):
                         model_list.append(case_model)
+                        tqdm.write(str(case_model.entry))
 
             # now create the required new Model instances from CaseModel lists
             if model_type == GELInterpretationReport:
