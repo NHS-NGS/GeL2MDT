@@ -376,3 +376,7 @@ class GenomicsEnglandform(forms.Form):
     # Version number of the interpretation
     ir_version = forms.IntegerField(label='Version')
     report_version = forms.IntegerField(label='Clinical Report Version')
+
+
+class GeneSearchForm(forms.Form):
+    gene = forms.CharField(max_length=25, widget = forms.TextInput(attrs={'style': 'width:200px'}))
