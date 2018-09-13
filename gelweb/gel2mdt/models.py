@@ -39,7 +39,9 @@ class ListUpdate(models.Model):
 
     cases_added = models.IntegerField()
     cases_updated = models.IntegerField()
-
+    reports_added = models.ManyToManyField('GELInterpretationReport', related_name='reports_added')
+    reports_updated = models.ManyToManyField('GELInterpretationReport', related_name='reports_updated')
+    sample_type = models.CharField(max_length=25, blank=True, null=True)
     error = models.TextField(null=True)
 
     class Meta:

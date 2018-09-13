@@ -163,12 +163,14 @@ class MultipleCaseAdder(object):
         # begin update process
         # --------------------
         error = None
+        added_cases = []
+        updated_cases = []
         try:
             logger.info("Adding cases from cases_to_add.")
             print("Adding", len(self.cases_to_add), "cases")
-            self.add_cases()
+            added_cases = self.add_cases()
             print("Updating", len(self.cases_to_update), "cases")
-            self.add_cases(update=True)
+            updated_cases = self.add_cases(update=True)
             success = True
         except Exception as e:
             print("Encountered error:", e)
@@ -178,13 +180,16 @@ class MultipleCaseAdder(object):
         finally:
             print("Recording update")
             # record the update in ListUpdate
-            ListUpdate.objects.create(
+            listupdate = ListUpdate.objects.create(
                 update_time=timezone.now(),
                 success=success,
                 cases_added=len(self.cases_to_add),
                 cases_updated=len(self.cases_to_update),
+                sample_type=self.sample_type,
                 error=error
             )
+            listupdate.reports_added.add(*added_cases)
+            listupdate.reports_updated.add(*updated_cases)
 
     def fetch_test_data(self):
         """
@@ -440,11 +445,13 @@ class MultipleCaseAdder(object):
 
         # finally, save jsons to disk storage
         cip_api_storage = self.config['cip_api_storage']
+        case_reports = []
         for case in cases:
             ir_family = case.attribute_managers[InterpretationReportFamily].case_model.entry
             latest_case = GELInterpretationReport.objects.filter(
                 ir_family=ir_family
             ).latest('polled_at_datetime')
+            case_reports.append(latest_case)
 
             with open(
                     os.path.join(
@@ -453,6 +460,7 @@ class MultipleCaseAdder(object):
                             case.request_id + "-" + str(latest_case.archived_version)
                         )), 'w') as f:
                 json.dump(case.raw_json, f)
+        return case_reports
 
 
     def save_new(self, model_type, model_list):
