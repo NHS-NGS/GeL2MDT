@@ -226,7 +226,9 @@ def cancer_main(request):
     :param request:
     :return:
     '''
-    return render(request, 'gel2mdt/cancer_main.html', {'sample_type': 'cancer'})
+    gene_search_form = GeneSearchForm()
+    return render(request, 'gel2mdt/cancer_main.html', {'sample_type': 'cancer',
+                                                        'gene_search_form': gene_search_form})
 
 
 @login_required
@@ -238,7 +240,31 @@ def rare_disease_main(request):
     :param request:
     :return:
     '''
-    return render(request, 'gel2mdt/rare_disease_main.html', {'sample_type': 'raredisease'})
+    gene_search_form = GeneSearchForm()
+    return render(request, 'gel2mdt/rare_disease_main.html', {'sample_type': 'raredisease',
+                                                              'gene_search_form': gene_search_form})
+
+
+@login_required
+def search_by_gene(request, sample_type):
+    latest_reports = GELInterpretationReport.objects.latest_cases_by_sample_type(
+        sample_type=sample_type
+    )
+    gene_search_form = GeneSearchForm()
+    proband_variants = []
+    gene = None
+    if request.method == 'POST':
+        gene_search_form = GeneSearchForm(request.POST)
+        if gene_search_form.is_valid():
+            gene = gene_search_form.cleaned_data['gene']
+            genes = Gene.objects.filter(hgnc_name__icontains=gene_search_form.cleaned_data['gene'])
+            proband_variants = ProbandVariant.objects.filter(probandtranscriptvariant__transcript__gene__in=genes,
+                                                             interpretation_report__in=latest_reports).distinct()
+    return render(request, 'gel2mdt/gene_search.html', {'gene_search_form': gene_search_form,
+                                                        'proband_variants': proband_variants,
+                                                        'gene': gene,
+                                                        'sample_type': sample_type})
+
 
 
 @login_required
