@@ -413,11 +413,11 @@ class MultipleCaseAdder(object):
             elif many:
                 model_list = []
                 for case in tqdm(cases, desc="Parsing {model_type} into DB".format(model_type=model_type.__name__)):
+                    tqdm.write(case.request_id)
                     attribute_manager = case.attribute_managers[model_type]
                     many_case_model = attribute_manager.case_model
                     for case_model in tqdm(many_case_model.case_models, desc=case.request_id):
                         model_list.append(case_model)
-                        tqdm.write(str(case_model.entry))
 
             # now create the required new Model instances from CaseModel lists
             if model_type == GELInterpretationReport:
