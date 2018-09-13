@@ -118,21 +118,20 @@ class MultipleCaseAdder(object):
             num_full_bins = self.num_cases_to_poll // 100
             num_bins = num_full_bins + 1
             final_bin_size = self.num_cases_to_poll - (num_full_bins * 100)
-            print(num_bins, final_bin_size)
 
             bins = []
             for i in range(num_full_bins):
                 bins.append(
                     [
-                        (100*i) + 1,
+                        (100*i),
                         (100*i) + 100
                     ]
                 )   # [0, 100], [101, 200] etc
-            bins.append([num_full_bins + 1, None])
+            bins.append([num_full_bins * 100, None])
 
             bin_count = 1
             for b in bins:
-                print("Fetching cases for bin", bin_count, "of", len(bins))
+                print("Fetching cases", b[0], "to", b[1], "(bin", bin_count, "of", str(len(bins)) + ")")
                 self.cases_to_poll = self.total_cases_to_poll[b[0]: b[1]]
 
                 print("Fetching API JSON data for cases to poll...")
@@ -148,6 +147,8 @@ class MultipleCaseAdder(object):
                 self.cases_to_skip = set(self.list_of_cases) - \
                     set(self.cases_to_add) - \
                     set(self.cases_to_update)
+                self.update_database()
+
                 print("Finished processing bin", bin_count, "of", len(bins))
 
                 for case in self.cases_to_add:

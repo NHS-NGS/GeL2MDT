@@ -54,4 +54,3 @@ class Command(BaseCommand):
                                 test_data=options['test_data'],
                                 skip_demographics=options['skip_demographics'],
                                 pullt3=options['pullt3'])
-        mca.update_database()
