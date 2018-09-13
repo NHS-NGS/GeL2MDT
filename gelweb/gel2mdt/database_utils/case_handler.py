@@ -736,7 +736,6 @@ class CaseAttributeManager(object):
                 if not polled:
                     panel_file = os.path.join(panelapp_storage, '{}_{}.json'.format(panel['panelName'],
                                                                                         panel['panelVersion']))
-                    print(panel["panelName"], panel["panelVersion"])
                     if os.path.isfile(panel_file):
 
                         try:
