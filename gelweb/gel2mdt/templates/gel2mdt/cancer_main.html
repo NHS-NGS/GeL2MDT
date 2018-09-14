@@ -181,7 +181,7 @@ SOFTWARE.
                                             </td>
                                         </tr>
 
-                                        <tr>
+                                        <tr hidden>
                                             <td>Trio status:</td>
                                             <td>
                                                 <div class="btn-group" data-toggle="buttons">
@@ -201,7 +201,7 @@ SOFTWARE.
                                             </td>
                                         </tr>
 
-                                        <tr>
+                                        <tr hidden>
                                             <td><em>De novo</em> status:</td>
                                             <td>
                                                 <div class="btn-group" data-toggle="buttons">
@@ -219,6 +219,19 @@ SOFTWARE.
                                         </tr>
                                     </tbody>
                                 </table>
+                                </form>
+                                <form action="{% url 'gene_search' sample_type=sample_type %}" method="post">
+                                    {% csrf_token %}
+                                 <table class="table">
+                                    <tbody>
+                                        <tr>
+                                            <td width="12.2%">Gene Search:</td>
+                                            <td width="13%">{{ gene_search_form.gene }}</td> <td>
+                        <button type="submit" ><i class="fas fa-search " style="font-size:20px;"></i></button>
+                                        </td>
+                                        </tr>
+                                    </tbody>
+                                 </table>
                                 </form>
                             </div>
                         </div>
