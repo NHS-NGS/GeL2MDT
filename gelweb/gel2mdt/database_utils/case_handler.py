@@ -1005,7 +1005,7 @@ class CaseAttributeManager(object):
         has_germline_variant = False
         if self.case.json['sample_type'] == 'cancer':
             alleleOrigins = [variant["alleleOrigins"][0]
-                             for variant in self.json_variants]
+                             for variant in self.case.json_variants]
             if "germline_variant" in alleleOrigins:
                 has_germline_variant = True
 
