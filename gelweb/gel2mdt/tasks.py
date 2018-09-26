@@ -50,7 +50,7 @@ def get_gel_content(user_email, ir, ir_version):
     # otherwise get uname and password from a file
 
     interpretation_reponse = PollAPI(
-        "cip_api_for_report", f'interpretationRequests/{ir}/{ir_version}/')
+        "cip_api", f'interpretation-request/{ir}/{ir_version}/')
     interp_json = interpretation_reponse.get_json_response()
     analysis_versions = []
     latest = None
@@ -63,13 +63,28 @@ def get_gel_content(user_email, ir, ir_version):
             latest = 1
 
     html_report = PollAPI(
-        "cip_api_for_report", f"ClinicalReport/{ir}/{ir_version}/{latest}/"
+        "cip_api", f"clinical-report/{ir}/{ir_version}/{latest}"
     )
     gel_content = html_report.get_json_response(content=True)
+    print(latest)
     try:
         gel_json_content = json.loads(gel_content)
-        if gel_json_content['detail'].startswith('Not found'):
-            return None
+        print(gel_json_content)
+        if gel_json_content['detail'].startswith('Not found') or gel_json_content['detail'].startswith(
+                'Method \"GET\" not allowed'):
+            if latest > 1:
+                latest -= 1
+                html_report = PollAPI(
+                    "cip_api", f"clinical-report/{ir}/{ir_version}/{latest}"
+                )
+                gel_content = html_report.get_json_response(content=True)
+                gel_json_content = json.loads(gel_content)
+                print(gel_json_content)
+                if gel_json_content['detail'].startswith('Not found') or gel_json_content['detail'].startswith(
+                        'Method \"GET\" not allowed'):
+                    raise Exception('Error')
+            else:
+                raise Exception('Error')
     except JSONDecodeError as e:
         print('JSONDecodeError')
 
