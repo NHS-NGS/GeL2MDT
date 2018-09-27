@@ -62,8 +62,8 @@ SOFTWARE.
                             <div class="panel-heading">Proband</div>
                             <div class="panel-body">
 
-                                <div class="table-responsive" >
-                                    <table width="100%" class="table table-striped table-bordered table-hover"  id="mdt-proband-table">
+                                <div class="table-responsive"  >
+                                    <table width="100%" class="table table-striped table-bordered table-hover" id="mdt-proband-table">
                                         <thead>
                                             <tr>
                                                 <th>GEL ID</th>
@@ -140,4 +140,12 @@ SOFTWARE.
         </div>
     </form>
 </div>
+
+     <script>
+    $(document).ready(function() {
+        $('#mdt-proband-table').DataTable({
+        });
+    });
+    </script>
+
 {% endblock %}
