@@ -37,7 +37,10 @@ SOFTWARE.
     <form action="/{{sample_type}}/edit_mdt/{{ mdt_id }}" role="form">
         {% csrf_token %} {% bootstrap_button "Edit Samples in MDT" button_type="submit" button_class=" btn-warning" %}
     </form>
-    <form action="/select_attendees_for_mdt/{{ mdt_id }}" role="form">
+     <form action="/delete_mdt/{{ mdt_id }}" role="form" method="post" onclick="return confirm('Are you sure?')">
+        {% csrf_token %} {% bootstrap_button "Delete MDT" button_type="submit" button_class="btn-danger" %}
+     </form>   
+     <form action="/select_attendees_for_mdt/{{ mdt_id }}" role="form">
         {% csrf_token %} {% bootstrap_button "Add Attendees" button_type="submit" button_class="btn-primary" %}
     </form>
     {% endif %}
@@ -143,7 +146,7 @@ SOFTWARE.
                     "extend": "excelHtml5",
                     "title": "MDT_{{mdt_id}}"
                 },
-            ]
+            ],
         });
     });
     </script>
