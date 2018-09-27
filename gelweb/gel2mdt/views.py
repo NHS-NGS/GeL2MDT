@@ -711,6 +711,11 @@ def mdt_view(request, mdt_id):
     :param mdt_id: MDT ID
     :return: Main MDT page
     """
+    clinician = False
+    clinicians_emails = Clinician.objects.all().values_list('email', flat=True)
+    if request.user.email in clinicians_emails:
+        clinician = True
+
     mdt_instance = MDT.objects.get(id=mdt_id)
     report_list = MDTReport.objects.filter(MDT=mdt_instance).values_list('interpretation_report', flat=True)
     reports = GELInterpretationReport.objects.filter(id__in=report_list)
@@ -755,7 +760,8 @@ def mdt_view(request, mdt_id):
                                                       'mdt_form': mdt_form,
                                                       'mdt_id': mdt_id,
                                                       'attendees': attendees,
-                                                     'sample_type': mdt_instance.sample_type})
+                                                     'sample_type': mdt_instance.sample_type,
+                                                     'clinician': clinician})
 
 
 @login_required
@@ -768,6 +774,10 @@ def mdt_proband_view(request, mdt_id, pk, important):
     :param important: Either 1 or 0; Whether to display T3 or non T3 variants
     :return:
     '''
+    clinician = False
+    clinicians_emails = Clinician.objects.all().values_list('email', flat=True)
+    if request.user.email in clinicians_emails:
+        clinician = True
     mdt_instance = MDT.objects.get(id=mdt_id)
     report = GELInterpretationReport.objects.get(id=pk)
     proband_variants = []
@@ -835,7 +845,8 @@ def mdt_proband_view(request, mdt_id, pk, important):
         'variant_formset': variant_formset,
         'panels': panels,
         'sample_type':report.sample_type,
-        'gelir_form':gelir_form
+        'gelir_form':gelir_form,
+        'clinician': clinician
     })
 
 
@@ -902,6 +913,10 @@ def recent_mdts(request, sample_type):
     :param sample_type: Either cancer or raredisease
     :return: A list of cancer or raredisease MDTs
     '''
+    clinician = False
+    clinicians_emails = Clinician.objects.all().values_list('email', flat=True)
+    if request.user.email in clinicians_emails:
+        clinician = True
     recent_mdt = list(MDT.objects.filter(sample_type=sample_type).order_by('-date_of_mdt'))
     config_dict = load_config.LoadConfig().load()
     # Need to get which probands were in MDT
@@ -919,7 +934,8 @@ def recent_mdts(request, sample_type):
 
     return render(request, 'gel2mdt/recent_mdts.html', {'recent_mdt': recent_mdt,
                                                         'probands_in_mdt': probands_in_mdt,
-                                                        'sample_type': sample_type})
+                                                        'sample_type': sample_type,
+                                                        'clinician': clinician})
 
 
 @login_required
@@ -1169,9 +1185,10 @@ def genomics_england_report(request, report_id):
     """
     report = GELInterpretationReport.objects.get(id=report_id)
     cip_id = report.ir_family.ir_family_id.split('-')
-    get_gel_content.delay(request.user.email, cip_id[0], cip_id[1])
-    messages.add_message(request, 25, 'Report will be emailed to you if it exists')
-    return HttpResponseRedirect(f'/proband/{report_id}')
+    gel_content = get_gel_content(request.user.email, cip_id[0], cip_id[1])
+    context = {}
+    context['gel_content'] = gel_content
+    return render(request, 'gel2mdt/gel_template.html', context)
 
 
 @login_required
