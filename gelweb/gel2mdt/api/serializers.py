@@ -269,6 +269,7 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
             'case_status',
             'trio_sequenced',
             'has_de_novo',
+            'has_germline_variant',
             'pilot_case',
             'ir_family',
             'archived_version',

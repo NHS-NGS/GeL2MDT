@@ -298,6 +298,7 @@ class GELInterpretationReport(models.Model):
                                                             ('raredisease', 'raredisease')))
     sample_id = models.CharField(max_length=200, null=True, blank=True)
     tumour_content = models.CharField(max_length=200, blank=True, null=True)
+    has_germline_variant = models.BooleanField(default=False)
 
     max_tier = models.CharField(max_length=1, null=True)
     assembly = models.ForeignKey(ToolOrAssemblyVersion, on_delete=models.CASCADE)
