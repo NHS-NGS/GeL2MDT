@@ -110,7 +110,7 @@ SOFTWARE.
 
 
 
-  <table class="table table-bordered">
+  <table id="mdt-select" class="table table-bordered">
     <thead>
       <tr>
          <th>Add/Remove Samples</th>
@@ -160,4 +160,13 @@ SOFTWARE.
     </tbody>
   </table>
      </div>
+
+     <script>
+    $(document).ready(function() {
+        $('#mdt-select').DataTable({
+            responsive: true
+        });
+    });
+    </script>
+
 {% endblock %}
