@@ -74,7 +74,7 @@ SOFTWARE.
                             <th>Assigned User</th>
                             <th>Date Assigned</th>
                             <th>Zygosity</th>
-                            <th>CIP Link</th>
+                            <th>Case</th>
                             <th>Outcome</th>
                         </tr>
                     </thead>
@@ -90,7 +90,7 @@ SOFTWARE.
                                     <td style="word-wrap: break-word; min-width: 100px;max-width: 100px;">{{pv.get_transcript_variant.hgvs_c}}</td>
                                     <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv.get_transcript_variant.hgvs_p}}</td>
                                     <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv.get_transcript_variant.hgvs_g}}</td>
-                                    <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv.validation_responsible_user.first_name}} {{pv.validation_responsible_user.last_name}}</td>
+                                    <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;"><a onclick="$('#validationModal{{forloop.counter}}').modal('show')"><i class="fas fa-pencil-alt"></i></a></span> {{pv.validation_responsible_user.first_name}} {{pv.validation_responsible_user.last_name}}</td>
                                     <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv.validation_datetime_set|date:"Y-m-d H:i:s"}}</td>
                                     <td>{{pv.zygosity}}</td>
                                     {% if config_dict|get_item:'cip_as_id' == 'True' %}
