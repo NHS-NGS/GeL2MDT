@@ -30,39 +30,22 @@ SOFTWARE.
     <td>{{report.ir_family.participant_family.proband.surname}}</td>
     <td>{{report.ir_family.participant_family.proband.gmc}}</td>
     <td>{{report.ir_family.participant_family.clinician.name}}</td>
-    <td style="word-wrap: break-word; min-width: 200px;max-width: 200px;">{{report.ir_family.participant_family.proband.discussion}}</td>
-    <td style="word-wrap: break-word; min-width: 200px;max-width: 200px;">{{report.ir_family.participant_family.proband.action}}</td>
-    <td>
+    <td style="word-wrap: break-word; min-width: 200px;max-width: 200px;">{{report.ir_family.participant_family.proband.discussion}}
         {% if mdt_form.status.value != "C" %}
-        <p>
-        <button type="button" class="btn btn-xs btn-info js-edit-mdt-proband "
-                data-url="/edit_mdt_proband/{{report.id}}">
-            Edit
-        </button>
+    <a href=# data-toggle="modal" data-url="/edit_mdt_proband/{{report.id}}" class="js-edit-mdt-proband"><i class="fas fa-pencil-alt"></i></a>
+    {% endif %}</td>
+    <td style="word-wrap: break-word; min-width: 200px;max-width: 200px;">{{report.ir_family.participant_family.proband.action}}
+        {% if mdt_form.status.value != "C" %}
+    <a href=# data-toggle="modal" data-url="/edit_mdt_proband/{{report.id}}" class="js-edit-mdt-proband"><i class="fas fa-pencil-alt"></i></a>
+    {% endif %}</td>
+    <td>
+        <a href="/mdt_proband_view/{{mdt_id}}/{{report.id }}/1" class="btn btn-primary">{{proband_variant_count|get_item:report.id }} Variants</a>
 
-
-        </p>
-        {% else %}
-        <p></p>
-        {% endif %}
     </td>
     <td>
-        {% ifnotequal  proband_variant_count|get_item:report.id 0 %}
+        <a href="/mdt_proband_view/{{mdt_id}}/{{report.id }}/0" class="btn btn-danger">{{t3_proband_variant_count|get_item:report.id }} Variants</a>
 
-        <a href="/mdt_proband_view/{{mdt_id}}/{{report.id }}/1"><i class="fas fa-pencil-alt"></i></a> {{proband_variant_count|get_item:report.id  }}
 
-        {% else %}
-        No Variants
-        {% endifnotequal %}
-    </td>
-    <td>
-        {% ifnotequal  t3_proband_variant_count|get_item:report.id 0 %}
-
-        <a href="/mdt_proband_view/{{mdt_id}}/{{report.id }}/0"><i class="fas fa-pencil-alt"></i></a> {{t3_proband_variant_count|get_item:report.id  }}
-
-        {% else %}
-        No Variants
-        {% endifnotequal %}
     </td>
     <td><a href="/export_mdt_outcome_form/{{report.id}}"><i class="fas fa-external-link-alt"></i></a></td>
 </tr>

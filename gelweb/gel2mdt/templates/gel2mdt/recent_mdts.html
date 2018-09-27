@@ -24,9 +24,23 @@ SOFTWARE.
 {% load static %}
 
 
-{% block tabs %}
-
+    {% block tabs %}
+{% if clinician %}
             <ul class="nav navbar-nav">
+                        {% if sample_type == 'cancer' %}
+                            <li><a href="{% url 'cancer-main' %}"><i class="fas fa-home"></i></span> Cases</a></li>
+                            </ul>
+                        {% elif sample_type == 'raredisease' %}
+                            <li><a href="{% url 'rare-disease-main' %}"><i class="fas fa-home"></i></span> Cases</a></li>
+                            </ul>
+                        {% endif %}
+
+
+                    <ul class="nav navbar-nav">
+                        <li class="active"><a href="{% url 'recent-mdt' sample_type=sample_type %}" ><i class="fas fa-history"></i> Recent MDTs</a></li>
+                        </ul>
+        {% else %}
+        <ul class="nav navbar-nav">
                         {% if sample_type == 'cancer' %}
                             <li><a href="{% url 'cancer-main' %}"><i class="fas fa-home"></i></span> Cases</a></li>
                             </ul>
@@ -47,7 +61,9 @@ SOFTWARE.
                     <ul class="nav navbar-nav">
                         <li><a href="{% url 'validation-list' sample_type=sample_type %}" ><i class="fas fa-check-circle"></i> Validation</a></li>
                         </ul>
+        {% endif %}
 {% endblock %}
+
 
 
 
