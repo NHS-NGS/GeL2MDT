@@ -1185,9 +1185,8 @@ def genomics_england_report(request, report_id):
     """
     report = GELInterpretationReport.objects.get(id=report_id)
     cip_id = report.ir_family.ir_family_id.split('-')
-    gel_content = get_gel_content(request.user.email, cip_id[0], cip_id[1])
-    context = {}
-    context['gel_content'] = gel_content
+    gel_content = get_gel_content.delay(request.user.email, cip_id[0], cip_id[1])
+    context = {'gel_content': gel_content}
     return render(request, 'gel2mdt/gel_template.html', context)
 
 
