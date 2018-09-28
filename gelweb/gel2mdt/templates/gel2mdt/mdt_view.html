@@ -89,11 +89,11 @@ SOFTWARE.
                                                 <th>NHS No.</th>
                                                 <th>GMC</th>
                                                 <th>Clinician</th>
-                                                <th>Disease Type</th>
                                                 <th>Discussion</th>
                                                 <th>Action</th>
                                                 <th>Edit Important Variants</th>
                                                 <th>Edit T3 Variants</th>
+                                                <th>Disease Type</th>
                                                 <th>MDT Outcome Form</tH>
                                             </tr>
                                         </thead>
@@ -159,13 +159,15 @@ SOFTWARE.
      <script>
     $(document).ready(function() {
         $('#mdt-proband-table').DataTable({
-            "dom": "Bfrtip",
-            "buttons": [
-                {
-                    "extend": "excelHtml5",
-                    "title": "MDT_{{mdt_id}}"
-                },
-            ],
+            dom: 'lBfrtip',
+            buttons: [ {
+                extend: 'excelHtml5',
+                title: "MDT_{{mdt_id}}"
+            },
+            {
+                extend: 'csvHtml5',
+                title: "MDT_{{mdt_id}}"
+            }],
         });
     });
     </script>

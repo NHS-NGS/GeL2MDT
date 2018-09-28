@@ -31,6 +31,7 @@ SOFTWARE.
     <td>{{report.ir_family.participant_family.proband.nhs_number}}
     <td>{{report.ir_family.participant_family.proband.gmc}}</td>
     <td>{{report.ir_family.participant_family.clinician.name}}</td>
+
     <td style="word-wrap: break-word; min-width: 200px;max-width: 200px;">{{report.ir_family.participant_family.proband.discussion}}
         {% if mdt_form.status.value != "C" %}
     <a href=# data-toggle="modal" data-url="/edit_mdt_proband/{{report.id}}" class="js-edit-mdt-proband"><i class="fas fa-pencil-alt"></i></a>
@@ -48,6 +49,7 @@ SOFTWARE.
 
 
     </td>
+    <td>{{report.ir_family.participant_family.proband.recruiting_disease}}
     <td><a href="/export_mdt_outcome_form/{{report.id}}"><i class="fas fa-external-link-alt"></i></a></td>
 </tr>
 {% endfor %}
