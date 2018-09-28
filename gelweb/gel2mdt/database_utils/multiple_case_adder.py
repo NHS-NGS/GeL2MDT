@@ -46,7 +46,9 @@ class MultipleCaseAdder(object):
     required related instances to the database and reporting status and
     errors during the process.
     """
-    def __init__(self, sample_type, head=None, test_data=False, skip_demographics=False, sample=None, pullt3=True):
+    def __init__(self, sample_type, head=None, test_data=False,
+                 skip_demographics=False, sample=None, pullt3=True,
+                 bins=None):
         """
         Initiliase an instance of a MultipleCaseAdder to start managing
         a database update. This will get the list of cases available to
@@ -115,24 +117,28 @@ class MultipleCaseAdder(object):
                 self.total_cases_to_poll = self.total_cases_to_poll[:head]
             self.num_cases_to_poll = len(self.total_cases_to_poll)
 
+        if bins:
+            bin_size = int(bins)
+            print("bin size", bin_size)
             # work out how many hundreds in fetched cases
-            num_full_bins = self.num_cases_to_poll // 100
+            num_full_bins = self.num_cases_to_poll // bin_size
             num_bins = num_full_bins + 1
-            final_bin_size = self.num_cases_to_poll - (num_full_bins * 100)
+            final_bin_size = self.num_cases_to_poll - (num_full_bins * bin_size)
 
-            bins = []
+            bin_ranges = []
             for i in range(num_full_bins):
-                bins.append(
+                bin_ranges.append(
                     [
-                        (100*i),
-                        (100*i) + 100
+                        (bin_size * i),            # e.g 0, 100
+                        (bin_size * i) + bin_size  # e.g 100, 200 - SLICE so not inclusive
                     ]
-                )   # [0, 100], [101, 200] etc
-            bins.append([num_full_bins * 100, None])
+                )   # [0, 100], [100, 200] etc
+            bin_ranges.append([num_full_bins * bin_size, None])
+            print("bin ranges", bin_ranges)
 
             bin_count = 1
-            for b in bins:
-                print("Fetching cases", b[0], "to", b[1], "(bin", bin_count, "of", str(len(bins)) + ")")
+            for b in bin_ranges:
+                print("Fetching cases", b[0], "to", b[1], "(bin", bin_count, "of", str(len(bin_ranges)) + ")")
                 self.cases_to_poll = self.total_cases_to_poll[b[0]: b[1]]
 
                 print("Fetching API JSON data for cases to poll...")
@@ -158,6 +164,25 @@ class MultipleCaseAdder(object):
                     del case
 
                 bin_count += 1
+
+        else:
+            # no bins, update as normal
+            print("Fetching all cases.")
+            self.cases_to_poll = self.total_cases_to_poll
+            print("Fetching API JSON data for cases to poll...")
+            self.list_of_cases = self.fetch_api_data()
+            if head:
+                # take a certain number of cases off the top
+                self.list_of_cases = self.list_of_cases[:head]
+                print("Fetched all required CIP API data.")
+                print("Checking which cases to add.")
+                self.cases_to_add = self.check_cases_to_add()
+                print("Checking which cases require updating.")
+                self.cases_to_update = self.check_cases_to_update()#
+                self.cases_to_skip = set(self.list_of_cases) - \
+                    set(self.cases_to_add) - \
+                    set(self.cases_to_update)
+                self.update_database()
 
     def update_database(self):
         # begin update process
