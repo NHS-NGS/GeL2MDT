@@ -63,28 +63,26 @@ def get_gel_content(user_email, ir, ir_version):
         except ValueError as e:
             latest = 1
 
-    html_report = PollAPI(
-        "cip_api", f"clinical-report/{ir}/{ir_version}/{latest}"
-    )
-    gel_content = html_report.get_json_response(content=True)
     try:
-        gel_json_content = json.loads(gel_content)
-        print(gel_json_content)
-        if gel_json_content['detail'].startswith('Not found') or gel_json_content['detail'].startswith(
-                'Method \"GET\" not allowed'):
-            if latest > 1:
-                latest -= 1
+        if latest == 1:
+            print('latest',  1)
+            html_report = PollAPI(
+                "cip_api_for_report", f"ClinicalReport/{ir}/{ir_version}/{latest}"
+            )
+            gel_content = html_report.get_json_response(content=True)
+        else:
+            while latest > 0:
+                print('latest', latest)
                 html_report = PollAPI(
-                    "cip_api", f"clinical-report/{ir}/{ir_version}/{latest}"
+                    "cip_api_for_report", f"ClinicalReport/{ir}/{ir_version}/{latest}"
                 )
                 gel_content = html_report.get_json_response(content=True)
                 gel_json_content = json.loads(gel_content)
-                print(gel_json_content)
                 if gel_json_content['detail'].startswith('Not found') or gel_json_content['detail'].startswith(
-                    'Method \"GET\" not allowed'):
-                    return None
-            else:
-                return None
+                        'Method \"GET\" not allowed'):
+                    latest -= 1
+                else:
+                    break
     except JSONDecodeError as e:
         print('JSONDecodeError')
 

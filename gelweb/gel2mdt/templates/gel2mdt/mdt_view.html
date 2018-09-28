@@ -24,6 +24,26 @@ SOFTWARE.
 {% load static %}
 
 
+{% if clinician %}
+    {% block tabs %}
+
+            <ul class="nav navbar-nav">
+                        {% if sample_type == 'cancer' %}
+                            <li><a href="{% url 'cancer-main' %}"><i class="fas fa-home"></i></span> Cases</a></li>
+                            </ul>
+                        {% elif sample_type == 'raredisease' %}
+                            <li><a href="{% url 'rare-disease-main' %}"><i class="fas fa-home"></i></span> Cases</a></li>
+                            </ul>
+                        {% endif %}
+
+
+                    <ul class="nav navbar-nav">
+                        <li><a href="{% url 'recent-mdt' sample_type=sample_type %}" ><i class="fas fa-history"></i> Recent MDTs</a></li>
+                        </ul>
+{% endblock %}
+    {% endif %}
+
+
 {% block content %}
 {% load gel2mdt_extras %}
 
@@ -72,7 +92,6 @@ SOFTWARE.
                                                 <th>Disease Type</th>
                                                 <th>Discussion</th>
                                                 <th>Action</th>
-                                                <th>Edit Discussion/Action</th>
                                                 <th>Edit Important Variants</th>
                                                 <th>Edit T3 Variants</th>
                                                 <th>MDT Outcome Form</tH>
