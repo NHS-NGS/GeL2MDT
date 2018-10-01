@@ -99,7 +99,7 @@ SOFTWARE.
                             {% else %}
                             <td></td>
                             {% endif %}
-                            <td>{{mdt.date_of_mdt|date}}</td>
+                            <td>{{mdt.date_of_mdt|date:"Y-m-d"}}</td>
                             <td>{% for report_list in probands_in_mdt|get_item:mdt.id %}
                                     <a href="/proband/{{report_list.0}}"> {{ report_list.1}}</a>
                                 {% endfor %}
