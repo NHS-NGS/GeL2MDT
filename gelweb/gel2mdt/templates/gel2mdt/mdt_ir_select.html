@@ -110,18 +110,19 @@ SOFTWARE.
 
 
 
-  <table class="table table-bordered">
+  <table id="mdt-select" class="table table-bordered">
     <thead>
       <tr>
-         <th>Add/Remove Samples</th>
+         <th></th>
          <th>GEL ID</th>
         <th>CIP ID</th>
         <th>Forename</th>
         <th>Surname</th>
-        <th>DOB</th>
+        <th>NHS No.</th>
+        <th>Status</th>
+        <th>MDT Status</th>
         <th>Clinician</th>
         <th>GMC</th>
-        <th>Family ID</th>
       </tr>
     </thead>
     <tbody>
@@ -145,10 +146,11 @@ SOFTWARE.
           <td>{{gel_ir.ir_family.ir_family_id }}</td>
           <td>{{gel_ir.ir_family.participant_family.proband.forename}}</td>
           <td>{{gel_ir.ir_family.participant_family.proband.surname}}</td>
-          <td>{{gel_ir.ir_family.participant_family.proband.date_of_birth|date}}</td>
+          <td>{{gel_ir.ir_family.participant_family.proband.nhs_number}}</td>
+          <td>{{gel_ir.get_case_status_display}}</td>
+          <td>{{gel_ir.get_mdt_status_display}}</td>
           <td>{{gel_ir.ir_family.participant_family.clinician.name}}</td>
           <td>{{gel_ir.ir_family.participant_family.proband.gmc}}</td>
-          <td>{{gel_ir.ir_family.participant_family.gel_family_id}}</td>
         </tr>
       {% empty %}
         <tr>
@@ -158,4 +160,33 @@ SOFTWARE.
     </tbody>
   </table>
      </div>
+
+     <script>
+    $(document).ready(function() {
+        $('#mdt-select').DataTable({
+            responsive: true,
+            initComplete: function () {
+            this.api().columns([6,7]).every( function () {
+                var column = this;
+                var select = $('<select><option value=""></option></select>')
+                    .appendTo( $(column.header()).empty() )
+                    .on( 'change', function () {
+                        var val = $.fn.dataTable.util.escapeRegex(
+                            $(this).val()
+                        );
+
+                        column
+                            .search( val ? '^'+val+'$' : '', true, false )
+                            .draw();
+                    } );
+
+                column.data().unique().sort().each( function ( d, j ) {
+                    select.append( '<option value="'+d+'">'+d+'</option>' )
+                } );
+            } );
+        },
+        });
+    });
+    </script>
+
 {% endblock %}
