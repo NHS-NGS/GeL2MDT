@@ -51,9 +51,8 @@ def get_gel_content(user_email, ir, ir_version):
     # otherwise get uname and password from a file
 
     interpretation_reponse = PollAPI(
-        "cip_api_for_report", f'interpretationRequests/{ir}/{ir_version}/')
+        "cip_api", f'interpretation-request/{ir}/{ir_version}')
     interp_json = interpretation_reponse.get_json_response()
-
     analysis_versions = []
     latest = None
     if 'interpreted_genome' in interp_json:
@@ -64,16 +63,28 @@ def get_gel_content(user_email, ir, ir_version):
         except ValueError as e:
             latest = 1
 
-    html_report = PollAPI(
-        "cip_api_for_report", f"ClinicalReport/{ir}/{ir_version}/{latest}/"
-    )
-    gel_content = html_report.get_json_response(content=True)
     try:
-        gel_json_content = json.loads(gel_content)
-        if gel_json_content['detail'].startswith('Not found'):
-            return None
+        if latest == 1:
+            print('latest',  1)
+            html_report = PollAPI(
+                "cip_api_for_report", f"ClinicalReport/{ir}/{ir_version}/{latest}"
+            )
+            gel_content = html_report.get_json_response(content=True)
+        else:
+            while latest > 0:
+                print('latest', latest)
+                html_report = PollAPI(
+                    "cip_api_for_report", f"ClinicalReport/{ir}/{ir_version}/{latest}"
+                )
+                gel_content = html_report.get_json_response(content=True)
+                gel_json_content = json.loads(gel_content)
+                if gel_json_content['detail'].startswith('Not found') or gel_json_content['detail'].startswith(
+                        'Method \"GET\" not allowed'):
+                    latest -= 1
+                else:
+                    break
     except JSONDecodeError as e:
-        pass
+        print('JSONDecodeError')
 
     analysis_panels = {}
 
@@ -152,7 +163,6 @@ def get_gel_content(user_email, ir, ir_version):
 
     div_tag.insert(1, h3_tag)
     div_tag.insert(2, table_tag)
-
     gel_content = gel_content.prettify('utf-8')
     with open(f"{ir}_{ir_version}_clinical_report.html", "wb") as file:
         file.write(gel_content)
@@ -162,7 +172,6 @@ def get_gel_content(user_email, ir, ir_version):
     msg.attach_file(f"{ir}_{ir_version}_clinical_report.html")
     msg.send()
     os.remove(f"{ir}_{ir_version}_clinical_report.html")
-
 
 def panel_app(gene_panel, gp_version):
     '''
@@ -575,7 +584,6 @@ def create_bokeh_barplot(names, values, title):
     plot.legend.orientation = "horizontal"
     plot.legend.location = "top_center"
     return plot
-
 
 class ReportHistoryFormatter:
     def __init__(self, report):

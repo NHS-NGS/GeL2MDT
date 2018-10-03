@@ -46,7 +46,9 @@ class MultipleCaseAdder(object):
     required related instances to the database and reporting status and
     errors during the process.
     """
-    def __init__(self, sample_type, head=None, test_data=False, skip_demographics=False, sample=None, pullt3=True):
+    def __init__(self, sample_type, head=None, test_data=False,
+                 skip_demographics=False, sample=None, pullt3=True,
+                 bins=None):
         """
         Initiliase an instance of a MultipleCaseAdder to start managing
         a database update. This will get the list of cases available to
@@ -93,13 +95,16 @@ class MultipleCaseAdder(object):
             self.cases_to_skip = set(self.list_of_cases) - \
                                  set(self.cases_to_add) - \
                                  set(self.cases_to_update)
+            self.update_database()
         elif sample:
             interpretation_list_poll = InterpretationList(sample_type=sample_type, sample=sample)
             self.cases_to_poll = interpretation_list_poll.cases_to_poll
             self.list_of_cases = self.fetch_api_data()
             self.cases_to_update = self.list_of_cases
+            print(self.cases_to_update)
             self.cases_to_add = []
             self.cases_to_skip = []
+            self.update_database()
         else:
             # set list_of_cases to cases of interest from API
             print("Fetching live API data.")
@@ -115,26 +120,56 @@ class MultipleCaseAdder(object):
                 self.total_cases_to_poll = self.total_cases_to_poll[:head]
             self.num_cases_to_poll = len(self.total_cases_to_poll)
 
-            # work out how many hundreds in fetched cases
-            num_full_bins = self.num_cases_to_poll // 100
-            num_bins = num_full_bins + 1
-            final_bin_size = self.num_cases_to_poll - (num_full_bins * 100)
+            if bins:
+                bin_size = int(bins)
+                print("bin size", bin_size)
+                # work out how many hundreds in fetched cases
+                num_full_bins = self.num_cases_to_poll // bin_size
 
-            bins = []
-            for i in range(num_full_bins):
-                bins.append(
-                    [
-                        (100*i),
-                        (100*i) + 100
-                    ]
-                )   # [0, 100], [101, 200] etc
-            bins.append([num_full_bins * 100, None])
+                bin_ranges = []
+                for i in range(num_full_bins):
+                    bin_ranges.append(
+                        [
+                            (bin_size * i),            # e.g 0, 100
+                            (bin_size * i) + bin_size  # e.g 100, 200 - SLICE so not inclusive
+                        ]
+                    )   # [0, 100], [100, 200] etc
+                bin_ranges.append([num_full_bins * bin_size, None])
+                print("bin ranges", bin_ranges)
 
-            bin_count = 1
-            for b in bins:
-                print("Fetching cases", b[0], "to", b[1], "(bin", bin_count, "of", str(len(bins)) + ")")
-                self.cases_to_poll = self.total_cases_to_poll[b[0]: b[1]]
+                bin_count = 1
+                for b in bin_ranges:
+                    print("Fetching cases", b[0], "to", b[1], "(bin", bin_count, "of", str(len(bin_ranges)) + ")")
+                    self.cases_to_poll = self.total_cases_to_poll[b[0]: b[1]]
 
+                    print("Fetching API JSON data for cases to poll...")
+                    self.list_of_cases = self.fetch_api_data()
+                    if head:
+                        # take a certain number of cases off the top
+                        self.list_of_cases = self.list_of_cases[:head]
+                    print("Fetched all required CIP API data.")
+                    print("Checking which cases to add.")
+                    self.cases_to_add = self.check_cases_to_add()
+                    print("Checking which cases require updating.")
+                    self.cases_to_update = self.check_cases_to_update()
+                    self.cases_to_skip = set(self.list_of_cases) - \
+                        set(self.cases_to_add) - \
+                        set(self.cases_to_update)
+                    self.update_database()
+
+                    print("Finished processing bin", bin_count, "of", len(bins))
+
+                    for case in self.cases_to_add:
+                        del case
+                    for case in self.cases_to_update:
+                        del case
+
+                    bin_count += 1
+
+            else:
+                # no bins, update as normal
+                print("Fetching all cases.")
+                self.cases_to_poll = self.total_cases_to_poll
                 print("Fetching API JSON data for cases to poll...")
                 self.list_of_cases = self.fetch_api_data()
                 if head:
@@ -144,31 +179,24 @@ class MultipleCaseAdder(object):
                 print("Checking which cases to add.")
                 self.cases_to_add = self.check_cases_to_add()
                 print("Checking which cases require updating.")
-                self.cases_to_update = self.check_cases_to_update()#
+                self.cases_to_update = self.check_cases_to_update()
                 self.cases_to_skip = set(self.list_of_cases) - \
                     set(self.cases_to_add) - \
                     set(self.cases_to_update)
                 self.update_database()
 
-                print("Finished processing bin", bin_count, "of", len(bins))
-
-                for case in self.cases_to_add:
-                    del case
-                for case in self.cases_to_update:
-                    del case
-
-                bin_count += 1
-
     def update_database(self):
         # begin update process
         # --------------------
         error = None
+        added_cases = []
+        updated_cases = []
         try:
             logger.info("Adding cases from cases_to_add.")
             print("Adding", len(self.cases_to_add), "cases")
-            self.add_cases()
+            added_cases = self.add_cases()
             print("Updating", len(self.cases_to_update), "cases")
-            self.add_cases(update=True)
+            updated_cases = self.add_cases(update=True)
             success = True
         except Exception as e:
             print("Encountered error:", e)
@@ -178,13 +206,16 @@ class MultipleCaseAdder(object):
         finally:
             print("Recording update")
             # record the update in ListUpdate
-            ListUpdate.objects.create(
+            listupdate = ListUpdate.objects.create(
                 update_time=timezone.now(),
                 success=success,
                 cases_added=len(self.cases_to_add),
                 cases_updated=len(self.cases_to_update),
+                sample_type=self.sample_type,
                 error=error
             )
+            listupdate.reports_added.add(*added_cases)
+            listupdate.reports_updated.add(*updated_cases)
 
     def fetch_test_data(self):
         """
@@ -440,11 +471,13 @@ class MultipleCaseAdder(object):
 
         # finally, save jsons to disk storage
         cip_api_storage = self.config['cip_api_storage']
+        case_reports = []
         for case in cases:
             ir_family = case.attribute_managers[InterpretationReportFamily].case_model.entry
             latest_case = GELInterpretationReport.objects.filter(
                 ir_family=ir_family
             ).latest('polled_at_datetime')
+            case_reports.append(latest_case)
 
             with open(
                     os.path.join(
@@ -453,6 +486,7 @@ class MultipleCaseAdder(object):
                             case.request_id + "-" + str(latest_case.archived_version)
                         )), 'w') as f:
                 json.dump(case.raw_json, f)
+        return case_reports
 
 
     def save_new(self, model_type, model_list):
