@@ -199,12 +199,10 @@ class Case(object):
                         continue
                     family_member = {'gel_id': participant["gelId"],
                                      'relation_to_proband': participant["additionalInformation"]["relation_to_proband"],
-                                     'affection_status': False,
+                                     'affection_status': True if len(participant['disorderList'] > 0) else False,
                                      'sequenced': False,
                                      'sex': participant['sex'],
                                      }
-                    if len(participant['disorderList'] > 0):
-                        family_member['affection_status'] = True
 
                     # determine if participant has undergone sequencing for trio
                     # calc
