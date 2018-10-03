@@ -423,6 +423,14 @@ function redrawDeNovoStatus(table, deNovoStatus) {
     table.draw()
 }
 
+function redrawGermlineStatus(table, germlineStatus) {
+    console.log(germlineStatus);
+    table
+        .column(21)
+        .search(germlineStatus);
+    table.draw();
+}
+
 // filter value change listeners
 $("input[name='caseType']").change(function() {
     var table = $('#rare-disease-main').DataTable()
@@ -452,6 +460,10 @@ $("input[name='deNovoStatus']").change(function() {
     var table = $('#rare-disease-main').DataTable()
     redrawDeNovoStatus(table, $(this).val());
 });
+$("input[name='germlineStatus']").change(function() {
+    var table = $('#rare-disease-main').DataTable()
+    redrawGermlineStatus(table, $(this).val());
+});
 
 
 
@@ -463,6 +475,7 @@ function initaliseTable() {
     var caseStatus = getRadioValue("caseStatus");
     var trioStatus = getRadioValue("trioStatus");
     var deNovoStatus = getRadioValue("deNovoStatus");
+    var germlineStatus = getRadioValue("germlineStatus");
     
     // create the datatable
     var table = fetchDataTable(caseType, genomeBuild, maxTier, caseStatus)
@@ -474,6 +487,7 @@ function initaliseTable() {
     redrawCaseStatus(table, caseStatus);
     redrawTrioStatus(table, trioStatus);
     redrawDeNovoStatus(table, deNovoStatus);
+    redrawGermlineStatus(table, germlineStatus);
 }
 
 function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
@@ -554,6 +568,10 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
                 },
                 {
                     "data": "nhs_num",
+                    "visible": false
+                },
+                {
+                    "data": "has_germline_variant",
                     "visible": false
                 }
             ],
