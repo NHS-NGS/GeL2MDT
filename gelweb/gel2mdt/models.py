@@ -39,7 +39,9 @@ class ListUpdate(models.Model):
 
     cases_added = models.IntegerField()
     cases_updated = models.IntegerField()
-
+    reports_added = models.ManyToManyField('GELInterpretationReport', related_name='reports_added')
+    reports_updated = models.ManyToManyField('GELInterpretationReport', related_name='reports_updated')
+    sample_type = models.CharField(max_length=25, blank=True, null=True)
     error = models.TextField(null=True)
 
     class Meta:
@@ -298,6 +300,7 @@ class GELInterpretationReport(models.Model):
                                                             ('raredisease', 'raredisease')))
     sample_id = models.CharField(max_length=200, null=True, blank=True)
     tumour_content = models.CharField(max_length=200, blank=True, null=True)
+    has_germline_variant = models.BooleanField(default=False)
 
     max_tier = models.CharField(max_length=1, null=True)
     assembly = models.ForeignKey(ToolOrAssemblyVersion, on_delete=models.CASCADE)

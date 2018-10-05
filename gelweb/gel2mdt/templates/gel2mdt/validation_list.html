@@ -27,6 +27,8 @@ SOFTWARE.
 {% block tabs %}
 
     <ul class="nav navbar-nav">
+
+
                    {% if sample_type == 'cancer' %}
                             <li><a href="{% url 'cancer-main' %}"><i class="fas fa-home"></i></span> Cases</a></li>
                             </ul>
@@ -71,10 +73,14 @@ SOFTWARE.
                             <th>HGVSc</th>
                             <th>HGVSp</th>
                             <th>HGVSg</th>
+                   {% if sample_type == 'cancer' %}
+                            <th>Allele Origin</th>
+                   {% elif sample_type == 'raredisease' %}
+                            <th>Zygosity</th>
+                   {% endif %}
                             <th>Assigned User</th>
                             <th>Date Assigned</th>
-                            <th>Zygosity</th>
-                            <th>CIP Link</th>
+                            <th>Case</th>
                             <th>Outcome</th>
                         </tr>
                     </thead>
@@ -90,9 +96,17 @@ SOFTWARE.
                                     <td style="word-wrap: break-word; min-width: 100px;max-width: 100px;">{{pv.get_transcript_variant.hgvs_c}}</td>
                                     <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv.get_transcript_variant.hgvs_p}}</td>
                                     <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv.get_transcript_variant.hgvs_g}}</td>
-                                    <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv.validation_responsible_user.first_name}} {{pv.validation_responsible_user.last_name}}</td>
-                                    <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv.validation_datetime_set|date:"Y-m-d H:i:s"}}</td>
+                    {% if sample_type == 'cancer' %}
+                        {% if pv.somatic %}
+                            <td>Somatic</td>
+                        {% else %}
+                            <td>Germline</td>
+                        {% endif %}
+                   {% elif sample_type == 'raredisease' %}
                                     <td>{{pv.zygosity}}</td>
+                   {% endif %}
+                                    <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;"><a onclick="$('#validationModal{{forloop.counter}}').modal('show')"><i class="fas fa-pencil-alt"></i></a></span> {{pv.validation_responsible_user.first_name}} {{pv.validation_responsible_user.last_name}}</td>
+                                   <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv.validation_datetime_set|date:"Y-m-d H:i:s"}}</td>
                                     {% if config_dict|get_item:'cip_as_id' == 'True' %}
                                         <td>
                                             <a href="/proband/{{pv.interpretation_report.id }}">
