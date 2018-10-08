@@ -34,6 +34,7 @@ import re
 import copy
 import pprint
 from tqdm import tqdm
+from protocols.reports_6_0_0 import InterpretedGenome, InterpretationRequestRD
 
 
 class Case(object):
@@ -126,37 +127,36 @@ class Case(object):
         self.request_id = str(
             self.json["interpretation_request_id"]) \
             + "-" + str(self.json["version"])
+        self.ir_obj = InterpretationRequestRD.fromJsonDict(self.json_request_data)
 
         self.json_hash = self.hash_json()
-        self.proband = self.get_proband_json()
+        self.proband = [member for member in self.ir_obj.pedigree.members if member.isProband][0]
         self.family_members = self.get_family_members()
-        self.tools_and_versions = self.get_tools_and_versions()
-        self.status = self.get_status_json()
-        if self.json["sample_type"] == 'raredisease':
-            self.proband_sample = self.proband["samples"][0]
-            self.json_variants \
-                = self.json_case_data["json_request"]["TieredVariants"]
-        elif self.json["sample_type"] == 'cancer':
-            self.proband_sample = self.proband["matchedSamples"][0]['tumourSampleId']
-            self.json_variants \
-                = self.json_case_data["json_request"]["tieredVariants"]
-
-        self.panel_manager = panel_manager
-        self.variant_manager = variant_manager
-        self.gene_manager = gene_manager
-
-        self.panels = self.get_panels_json()
-        self.variants = self.get_case_variants()
-        self.transcripts = []  # set by MCM with a call to vep_utils
-        self.demographics = None
-        self.clinicians = None
-        self.diagnosis = None
-
-        # initialise a dict to contain the AttributeManagers for this case,
-        # which will be set by the MCA as they are required (otherwise there
-        # are missing dependencies)
-        self.skip_demographics = skip_demographics
-        self.attribute_managers = {}
+        # self.tools_and_versions = self.get_tools_and_versions()
+        # self.status = self.get_status_json()
+        # if self.json["sample_type"] == 'raredisease':
+        #     self.proband_sample = self.proband["samples"][0]
+        #     self.json_variants = self.json_case_data["json_request"]["TieredVariants"]
+        # elif self.json["sample_type"] == 'cancer':
+        #     self.proband_sample = self.proband["matchedSamples"][0]['tumourSampleId']
+        #     self.json_variants = self.json_case_data["json_request"]["tieredVariants"]
+        #
+        # self.panel_manager = panel_manager
+        # self.variant_manager = variant_manager
+        # self.gene_manager = gene_manager
+        #
+        # self.panels = self.get_panels_json()
+        # self.variants = self.get_case_variants()
+        # self.transcripts = []  # set by MCM with a call to vep_utils
+        # self.demographics = None
+        # self.clinicians = None
+        # self.diagnosis = None
+        #
+        # # initialise a dict to contain the AttributeManagers for this case,
+        # # which will be set by the MCA as they are required (otherwise there
+        # # are missing dependencies)
+        # self.skip_demographics = skip_demographics
+        # self.attribute_managers = {}
 
     def hash_json(self):
         """
@@ -169,21 +169,6 @@ class Case(object):
         hash_digest = hash_hex.hexdigest()
         return hash_digest
 
-    def get_proband_json(self):
-        """
-        Get the proband from the list of partcipants in the JSON.
-        """
-        proband_json = None
-        if self.json["sample_type"]=='raredisease':
-            participant_jsons = \
-                self.json_case_data["json_request"]["pedigree"]["participants"]
-            for participant in participant_jsons:
-                if participant["isProband"]:
-                    proband_json = participant
-        elif self.json["sample_type"]=='cancer':
-            proband_json = self.json_case_data["json_request"]["cancerParticipant"]
-        return proband_json
-
     def get_family_members(self):
         '''
         Gets the family member details from the JSON.
@@ -191,24 +176,14 @@ class Case(object):
         '''
         family_members = []
         if self.json["sample_type"] == 'raredisease':
-            participant_jsons = \
-                self.json_case_data["json_request"]["pedigree"]["participants"]
-            for participant in participant_jsons:
-                if not participant["isProband"] and participant["additionalInformation"]:
-                    if "relation_to_proband" not in participant["additionalInformation"]:
-                        continue
-                    family_member = {'gel_id': participant["gelId"],
-                                     'relation_to_proband': participant["additionalInformation"]["relation_to_proband"],
-                                     'affection_status': participant["affectionStatus"],
-                                     'sequenced': False,
-                                     'sex': participant['sex'],
+            for member in self.ir_obj.pedigree.members:
+                if not member.isProband:
+                    family_member = {'gel_id': member.participantId,
+                                     'relation_to_proband': member.additionalInformation.get('relation_to_proband', None),
+                                     'affection_status': True if member.disorderList else False,
+                                     'sequenced': True if member.samples else False,
+                                     'sex': member.sex,
                                      }
-
-                    # determine if participant has undergone sequencing for trio
-                    # calc
-                    if participant["samples"]:
-                        # family member has undergone sequencing
-                        family_member["sequenced"] = True
                     family_members.append(family_member)
         return family_members
 
