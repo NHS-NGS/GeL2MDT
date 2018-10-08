@@ -190,6 +190,7 @@ def panel_app(gene_panel, gp_version):
     gene_panel_info = {'gene_list': gene_list, 'panel_length': len(gene_list)}
     return gene_panel_info
 
+
 @task
 def update_for_t3(report_id):
     '''
@@ -198,8 +199,10 @@ def update_for_t3(report_id):
     :return: Nothing
     '''
     report = GELInterpretationReport.objects.get(id=report_id)
-    mca = MultipleCaseAdder(sample_type=report.sample_type, pullt3=True, sample=report.ir_family.participant_family.proband.gel_id)
-    mca.update_database()
+    MultipleCaseAdder(sample_type=report.sample_type,
+                      pullt3=True,
+                      sample=report.ir_family.participant_family.proband.gel_id)
+
 
 @task
 def listupdate_email():
@@ -221,6 +224,7 @@ def listupdate_email():
         except Exception as e:
             pass
 
+
 @task
 def update_cases():
     '''
@@ -228,10 +232,8 @@ def update_cases():
     the database with new cases
     :return:
     '''
-    mca = MultipleCaseAdder(sample_type='raredisease', pullt3=False, skip_demographics=False)
-    mca.update_database()
-    mca = MultipleCaseAdder(sample_type='cancer', pullt3=False, skip_demographics=False)
-    mca.update_database()
+    MultipleCaseAdder(sample_type='raredisease', pullt3=False, skip_demographics=False)
+    MultipleCaseAdder(sample_type='cancer', pullt3=False, skip_demographics=False)
 
 
 class VariantAdder(object):
