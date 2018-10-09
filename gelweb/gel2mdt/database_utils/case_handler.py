@@ -463,7 +463,7 @@ class CaseAttributeManager(object):
                             disease_subtype = row.get('gel_disease_information_disease_subgroup', None)
                     except IndexError:
                         pass
-                    
+
         proband = CaseModel(Proband, {
             "gel_id": participant_id,
             "family": family.entry,
@@ -836,10 +836,8 @@ class CaseAttributeManager(object):
         Through table linking panels to IRF when no variants have been reported
         within a particular panel for a case.
         """
-        # TODO
         # get the string names of all genes which fall below 95% 15x coverage
         genes_failing_coverage = []
-        panel=None
         for panel in self.case.attribute_managers[PanelVersion].case_model.case_models:
             if "entry" in vars(panel):
                 panel_coverage = self.case.ir_obj.genePanelsCoverage.get(panel.entry.panel.panelapp_id, {})
@@ -898,13 +896,13 @@ class CaseAttributeManager(object):
 
         tumour_content = None
         if self.case.json['sample_type'] == 'cancer':
-            tumour_content = self.case.proband['tumourSamples'][0]['tumourContent']
+            tumour_content = self.case.proband.tumourSamples[0].tumourContent
         has_germline_variant = False
         if self.case.json['sample_type'] == 'cancer':
-            alleleOrigins = [variant["alleleOrigins"][0]
-                             for variant in self.case.json_variants]
-            if "germline_variant" in alleleOrigins:
-                has_germline_variant = True
+            for ig_obj in self.case.ig_objs:
+                alleleorigins = [variant.variantAttributes.alleleOrigins[0] for variant in ig_obj.variants]
+                if "germline_variant" in alleleorigins:
+                    has_germline_variant = True
 
         ir = CaseModel(GELInterpretationReport, {
             "ir_family": ir_family.entry,
@@ -1087,153 +1085,68 @@ class CaseAttributeManager(object):
             for variant
             in self.case.attribute_managers[Variant].case_model.case_models
         ]
-        # tiered variants
-        tiered_proband_variants = []
-        for json_variant in self.case.json_variants:
+        raw_proband_variants = []
+        processed_proband_variants = []
+        for ig_obj in self.case.ig_objs:
+            for ig_variant in ig_obj.variants:
+                if ig_variant.case_variant:
+                    raw_proband_variants.append(ig_variant)
+        for clinical_report in self.case.clinical_report_objs:
+            for variant in clinical_report.variants:
+                raw_proband_variants.append(variant)
+
+        for ig_variant in raw_proband_variants:
             # some json_variants won't have an entry (T3), so:
-            json_variant['somatic'] = False
-            json_variant["variant_entry"] = None
+            ig_variant.somatic = False
+            ig_variant.variant_entry = None
             # for those that do, fetch from list of entries:
             # variant in json matches variant entry
             for variant in variant_entries:
-                if self.case.json['sample_type'] == 'raredisease':
-                    if (
-                        json_variant["chromosome"] == variant.chromosome and
-                        json_variant["position"] == variant.position and
-                        json_variant["reference"] == variant.reference and
-                        json_variant["alternate"] == variant.alternate
-                    ):
-                        # variant in json matches variant entry
-                        json_variant["variant_entry"] = variant
-                elif self.case.json['sample_type'] == 'cancer':
-                    if (
-                        json_variant['reportedVariantCancer']["chromosome"] == variant.chromosome and
-                        json_variant['reportedVariantCancer']["position"] == variant.position and
-                        json_variant['reportedVariantCancer']["reference"] == variant.reference and
-                        json_variant['reportedVariantCancer']["alternate"] == variant.alternate
-                    ):
-                        # variant in json matches variant entry
-                        json_variant["variant_entry"] = variant
-                json_variant['zygosity'] = 'unknown'
-                json_variant['maternal_zygosity'] = 'unknown'
-                json_variant['paternal_zygosity'] = 'unknown'
+                if (
+                        ig_variant.variantCoordinates.chromosome == variant.chromosome and
+                        ig_variant.variantCoordinates.position == variant.position and
+                        ig_variant.variantCoordinatesreference == variant.reference and
+                        ig_variant.variantCoordinates.alternate == variant.alternate
+                ):
+                    # variant in json matches variant entry
+                    ig_variant.variant_entry = variant
+                ig_variant.zygosity = 'unknown'
+                ig_variant.maternal_zygosity = 'unknown'
+                ig_variant.paternal_zygosity = 'unknown'
 
-                if 'calledGenotypes' in json_variant:
-                    for genotype in json_variant["calledGenotypes"]:
-                        genotype_gelid = genotype.get('gelId', None)
-                        if genotype_gelid == proband_manager.case_model.entry.gel_id:
-                            json_variant['zygosity'] = genotype["genotype"]
-                        elif genotype_gelid == self.case.mother.get("gel_id", None):
-                            json_variant['maternal_zygosity'] = genotype["genotype"]
-                        elif genotype_gelid == self.case.father.get("gel_id", None):
-                            json_variant['paternal_zygosity'] = genotype["genotype"]
+                for call in ig_variant.variantCalls:
+                    if call.participantId == proband_manager.case_model.entry.gel_id:
+                        ig_variant.zygosity = call.zygosity
+                    elif call.participantId == self.case.mother.get("gel_id", None):
+                        ig_variant.maternal_zygosity = call.zygosity
+                    elif call.participantId == self.case.father.get("gel_id", None):
+                        ig_variant.paternal_zygosity = call.zygosity
 
-                if 'alleleOrigins' in json_variant:
-                    if json_variant['alleleOrigins'][0] == 'somatic_variant':
-                        json_variant['somatic'] = True
+                    if call:
+                        if ig_variant.alleleOrigins[0] == 'somatic_variant':
+                            ig_variant.somatic = True
 
-        for variant in self.case.json_variants:
-            if variant["variant_entry"]:
-                tiered_proband_variant = {
-                    "max_tier": variant["max_tier"],
-                    "variant": variant["variant_entry"],
-                    "zygosity": variant["zygosity"],
-                    "maternal_zygosity": variant["maternal_zygosity"],
-                    "paternal_zygosity": variant["paternal_zygosity"],
-                    "somatic": variant["somatic"],
-                }
-                tiered_proband_variants.append(tiered_proband_variant)
+        for ig_variant in raw_proband_variants:
+            proband_variant = {
+                "max_tier": ig_variant.max_tier,
+                "variant": ig_variant.variant_entry,
+                "zygosity": ig_variant.zygosity,
+                "maternal_zygosity": ig_variant.maternal_zygosity,
+                "paternal_zygosity": ig_variant.paternal_zygosity,
+                "somatic": ig_variant.somatic,
+            }
+            processed_proband_variants.append(proband_variant)
 
-        # cip flagged variants
-
-        all_flagged_variants = []
-        for interpreted_genome in self.case.json["interpreted_genome"]:
-            for json_variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
-                interesting_variant = False
-                if interpreted_genome['interpreted_genome_data']['companyName'] == 'Exomiser':
-                    for report_event in json_variant['reportEvents']:
-                        if report_event['score'] >= 0.95:
-                            interesting_variant = False
-                else:
-                    interesting_variant = True
-                if interesting_variant:
-                    all_flagged_variants.append(json_variant)
-
-        for clinical_report in self.case.json["clinical_report"]:
-            for variant in clinical_report['clinical_report_data']['candidateVariants']:
-                all_flagged_variants.append(variant)
-
-        cip_proband_variants = []
-
-        for json_variant in all_flagged_variants:
-            json_variant['somatic'] = False
-            # all CIP flagged variants should have a variant entry.
-            json_variant["variant_entry"] = None
-            # variant in json matches variant entry
-            for variant in variant_entries:
-                if self.case.json['sample_type'] == 'raredisease':
-                    if (
-                            json_variant["chromosome"] == variant.chromosome and
-                            json_variant["position"] == variant.position and
-                            json_variant["reference"] == variant.reference and
-                            json_variant["alternate"] == variant.alternate
-                    ):
-                        # variant in json matches variant entry
-                        json_variant["variant_entry"] = variant
-                elif self.case.json['sample_type'] == 'cancer':
-                    if (
-                            json_variant['reportedVariantCancer']["chromosome"] == variant.chromosome and
-                            json_variant['reportedVariantCancer']["position"] == variant.position and
-                            json_variant['reportedVariantCancer']["reference"] == variant.reference and
-                            json_variant['reportedVariantCancer']["alternate"] == variant.alternate
-                    ):
-                        # variant in json matches variant entry
-                        json_variant["variant_entry"] = variant
-                json_variant['zygosity'] = 'unknown'
-                json_variant['maternal_zygosity'] = 'unknown'
-                json_variant['paternal_zygosity'] = 'unknown'
-
-                if 'calledGenotypes' in json_variant:
-                    for genotype in json_variant["calledGenotypes"]:
-                        genotype_gelid = genotype.get('gelId', None)
-                        if genotype_gelid == proband_manager.case_model.entry.gel_id:
-                            json_variant['zygosity'] = genotype["genotype"]
-                        elif genotype_gelid == self.case.mother.get("gel_id", None):
-                            json_variant['maternal_zygosity'] = genotype.get("genotype", 'unknown')
-                        elif genotype_gelid == self.case.father.get("gel_id", None):
-                            json_variant['paternal_zygosity'] = genotype.get('genotype', 'unknown')
-
-                if 'alleleOrigins' in json_variant:
-                    if json_variant['alleleOrigins'][0] == 'somatic_variant':
-                        json_variant['somatic'] = True
-
-        for variant in all_flagged_variants:
-            if variant["variant_entry"]:
-                cip_proband_variant = {
-                    "max_tier": None,  # CIP flagged variants assigned tier 0
-                    "variant": variant["variant_entry"],
-                    "zygosity": variant["zygosity"],
-                    "maternal_zygosity": variant["maternal_zygosity"],
-                    "paternal_zygosity": variant["paternal_zygosity"],
-                    "somatic": variant["somatic"],
-                }
-                cip_proband_variants.append(cip_proband_variant)
-
-        # remove CIP tiered variants which are in cip variants
-        tiered_and_cip_proband_variants = []
+        # remove duplicate variants
+        uniq_proband_variants = []
         seen_variants = []
 
-        for variant in tiered_proband_variants:
-            if variant['variant'] not in seen_variants:
-                tiered_and_cip_proband_variants.append(variant)
-                seen_variants.append(variant['variant'])
+        for variant in processed_proband_variants:
+            if variant.variant not in seen_variants:
+                uniq_proband_variants.append(variant)
+                seen_variants.append(variant.variant)
 
-        for cip_variant in cip_proband_variants:
-            if cip_variant['variant'] not in seen_variants:
-                tiered_and_cip_proband_variants.append(cip_variant)
-                seen_variants.append(cip_variant['variant'])
-
-        return tiered_and_cip_proband_variants
+        return uniq_proband_variants
 
     def get_proband_variants(self):
         """
