@@ -34,7 +34,7 @@ import re
 import copy
 import pprint
 from tqdm import tqdm
-from protocols.reports_6_0_0 import InterpretedGenome, InterpretationRequestRD, ClinicalReport
+from protocols.reports_6_0_0 import InterpretedGenome, InterpretationRequestRD, CancerInterpretationRequest, ClinicalReport
 
 
 class Case(object):
@@ -127,10 +127,13 @@ class Case(object):
         self.request_id = str(
             self.json["interpretation_request_id"]) \
             + "-" + str(self.json["version"])
-        self.ir_obj = InterpretationRequestRD.fromJsonDict(self.json_request_data)
+        if self.json["sample_type"] == 'raredisease':
+            self.ir_obj = InterpretationRequestRD.fromJsonDict(self.json_request_data)
+        elif self.json['sample_type'] == 'cancer':
+            self.ir_obj = CancerInterpretationRequest.fromJsonDict(self.json_request_data)
 
         self.json_hash = self.hash_json()
-        self.proband = [member for member in self.ir_obj.pedigree.members if member.isProband][0]
+        self.proband = self.get_proband_json()
         self.family_members = self.get_family_members()
         self.tools_and_versions = {'genome_build': self.json["assembly"]}
         self.status = self.get_status_json()
@@ -162,6 +165,17 @@ class Case(object):
         hash_hex = hashlib.sha512(hash_buffer)
         hash_digest = hash_hex.hexdigest()
         return hash_digest
+
+    def get_proband_json(self):
+        """
+        Get the proband from the list of partcipants in the JSON.
+        """
+        proband_json = None
+        if self.json["sample_type"]=='raredisease':
+            proband_json = [member for member in self.ir_obj.pedigree.members if member.isProband][0]
+        elif self.json["sample_type"]=='cancer':
+            proband_json = self.ir_obj.cancerParticipant
+        return proband_json
 
     def get_family_members(self):
         '''
