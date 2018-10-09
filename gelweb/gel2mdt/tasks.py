@@ -23,7 +23,7 @@ import requests
 from bs4 import BeautifulSoup
 import os
 from .api_utils.poll_api import PollAPI
-from .vep_utils import run_vep_batch
+from .annotation_utils import run_anno_batch
 from .models import *
 from .database_utils.multiple_case_adder import GeneManager, MultipleCaseAdder
 from celery import task
@@ -257,8 +257,9 @@ class VariantAdder(object):
         self.insert_proband_variant()
         self.insert_proband_transcript_variant()
 
-    def run_vep(self):
-        self.transcripts = run_vep_batch.generate_transcripts(self.variants)
+    # TODO fix
+    # def run_vep(self):
+    #     self.transcripts = run_vep_batch.generate_transcripts(self.variants)
 
     def insert_genes(self):
         gene_list = []
