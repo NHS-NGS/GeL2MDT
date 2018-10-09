@@ -431,15 +431,9 @@ class CaseAttributeManager(object):
         recruiting_disease = None
         disease_subtype = None
         disease_group = None
-        try:
-            if self.case.json['sample_type'] == 'cancer':
-                if 'cancerParticipant' in self.case.json_request_data:
-                    if 'primaryDiagnosisDisease' in self.case.json_request_data['cancerParticipant']:
-                        recruiting_disease = self.case.json_request_data['cancerParticipant']['primaryDiagnosisDisease']
-                    if 'primaryDiagnosisSubDisease' in self.case.json_request_data['cancerParticipant']:
-                        disease_subtype = self.case.json_request_data['cancerParticipant']['primaryDiagnosisSubDisease']
-        except IndexError as e:
-            pass
+        if self.case.json['sample_type'] == 'cancer':
+            recruiting_disease = self.case.proband.primaryDiagnosisDisease
+            disease_subtype = self.case.proband.primaryDiagnosisSubDisease
 
         if not self.case.skip_demographics:
             # set up LabKey to get recruited disease
@@ -515,7 +509,6 @@ class CaseAttributeManager(object):
         self.case.mother['sequenced'] = False
         self.case.father['sequenced'] = False
 
-
         for family_member in family_members:
             if family_member["relation_to_proband"] == "Father":
                 self.case.father = family_member
@@ -534,41 +527,29 @@ class CaseAttributeManager(object):
             variants_to_check = []
 
             # standard tiered variants
-            for json_variant in self.case.json_variants:
-                json_variant['maternal_zygosity'] = 'unknown'
-                json_variant['paternal_zygosity'] = 'unknown'
-                for genotype in json_variant["calledGenotypes"]:
-                    genotype_gelid = genotype.get('gelId', None)
-                    if genotype_gelid == self.case.mother["gel_id"]:
-                        json_variant['maternal_zygosity'] = genotype["genotype"]
-                    elif genotype_gelid == self.case.father["gel_id"]:
-                        json_variant['paternal_zygosity'] = genotype["genotype"]
-                variants_to_check.append(json_variant)
+            for ig in self.case.json['interpreted_genome']:
+                ig_obj = InterpretedGenome.fromJsonDict(ig['interpreted_genome_data'])
+                for variant in ig_obj.variants:
+                    variant.maternal_zygosity = 'unknown'
+                    variant.paternal_zygosity = 'unknown'
+                    for call in variant.variantCalls:
+                        if call.participantId == self.case.mother["gel_id"]:
+                            variant.maternal_zygosity = call.zygosity
+                        elif call.participantId == self.case.father["gel_id"]:
+                            variant.paternal_zygosity = call.zygosity
+                    variants_to_check.append(variant)
 
-            # cip-flagged variants
-            for interpreted_genome in self.case.json["interpreted_genome"]:
-                for json_variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
-                    json_variant['maternal_zygosity'] = 'unknown'
-                    json_variant['paternal_zygosity'] = 'unknown'
-                    for genotype in json_variant["calledGenotypes"]:
-                        genotype_gelid = genotype.get('gelId', None)
-                        if genotype_gelid == self.case.mother["gel_id"]:
-                            json_variant['maternal_zygosity'] = genotype["genotype"]
-                        elif genotype_gelid == self.case.father["gel_id"]:
-                            json_variant['paternal_zygosity'] = genotype["genotype"]
-                    variants_to_check.append(json_variant)
-
-            for clinical_report in self.case.json["clinical_report"]:
-                for json_variant in clinical_report['clinical_report_data']['candidateVariants']:
-                    json_variant['maternal_zygosity'] = 'unknown'
-                    json_variant['paternal_zygosity'] = 'unknown'
-                    for genotype in json_variant["calledGenotypes"]:
-                        genotype_gelid = genotype.get('gelId', None)
-                        if genotype_gelid == self.case.mother["gel_id"]:
-                            json_variant['maternal_zygosity'] = genotype["genotype"]
-                        elif genotype_gelid == self.case.father["gel_id"]:
-                            json_variant['paternal_zygosity'] = genotype["genotype"]
-                    variants_to_check.append(json_variant)
+            for clinical_report in self.case.json['clinical_report']:
+                cr_obj = ClinicalReport.fromJsonDict(clinical_report['clinical_report_data'])
+                for variant in cr_obj.variants:
+                    variant.maternal_zygosity = 'unknown'
+                    variant.paternal_zygosity = 'unknown'
+                    for call in variant.variantCalls:
+                        if call.participantId == self.case.mother["gel_id"]:
+                            variant.maternal_zygosity = call.zygosity
+                        elif call.participantId == self.case.father["gel_id"]:
+                            variant.paternal_zygosity = call.zygosity
+                    variants_to_check.append(variant)
 
             for variant in variants_to_check:
                 inheritance = self.determine_variant_inheritance(variant)
@@ -596,10 +577,10 @@ class CaseAttributeManager(object):
         """
         if 'hpoTermList' in self.case.proband:
             phenotypes = ManyCaseModel(Phenotype, [
-                {"hpo_terms": phenotype["term"],
+                {"hpo_terms": phenotype.term,
                  "description": "unknown"}
-                for phenotype in self.case.proband["hpoTermList"]
-                if phenotype["termPresence"] is True
+                for phenotype in self.case.proband.hpoTermList
+                if phenotype.termPresence == 'yes'
             ], self.model_objects)
         else:
             phenotypes = ManyCaseModel(Phenotype, [], self.model_objects)
@@ -636,14 +617,13 @@ class CaseAttributeManager(object):
         if self.case.panels:
             for panel in self.case.panels:
                 polled = self.case.panel_manager.fetch_panel_response(
-                    panelapp_id=panel["panelName"],
-                    panel_version=panel["panelVersion"]
+                    panelapp_id=panel.panelName,
+                    panel_version=panel.panelVersion
                 )
                 if polled:
-                    panel["panelapp_results"] = polled.results
+                    panel.panelapp_results = polled.results
                 if not polled:
-                    panel_file = os.path.join(panelapp_storage, '{}_{}.json'.format(panel['panelName'],
-                                                                                        panel['panelVersion']))
+                    panel_file = os.path.join(panelapp_storage, f'{panel.panelName}_{panel.panelVersion}.json')
                     if os.path.isfile(panel_file):
 
                         try:
@@ -655,22 +635,22 @@ class CaseAttributeManager(object):
 
                     # inform the PanelManager that a new panel has been added
                     polled = self.case.panel_manager.add_panel_response(
-                        panelapp_id=panel["panelName"],
-                        panel_version=panel["panelVersion"],
+                        panelapp_id=panel.panelName,
+                        panel_version=panel.panelVersion,
                         panelapp_response=panelapp_response["result"]
                     )
-                    panel["panelapp_results"] = polled.results
+                    panel.panelapp_results = polled.results
 
             for panel in self.case.panels:
-                panel["panel_name_results"] = self.case.panel_manager.fetch_panel_names(
-                    panelapp_id=panel["panelName"]
+                panel.panel_name_results = self.case.panel_manager.fetch_panel_names(
+                    panelapp_id=panel.panelName
                 )
 
             panels = ManyCaseModel(Panel, [{
-                "panelapp_id": panel["panelName"],
-                "panel_name": panel["panel_name_results"]["SpecificDiseaseName"],
-                "disease_group": panel["panel_name_results"]["DiseaseGroup"],
-                "disease_subgroup": panel["panel_name_results"]["DiseaseSubGroup"]
+                "panelapp_id": panel.panelName,
+                "panel_name": panel.panel_name_results["SpecificDiseaseName"],
+                "disease_group": panel.panel_name_results["DiseaseGroup"],
+                "disease_subgroup": panel.panel_name_results["DiseaseSubGroup"]
             } for panel in self.case.panels], self.model_objects)
         else:
             panels = ManyCaseModel(Panel, [], self.model_objects)
