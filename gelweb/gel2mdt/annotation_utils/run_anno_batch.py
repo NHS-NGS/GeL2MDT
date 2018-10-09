@@ -26,6 +26,8 @@ import csv
 from ..config import load_config
 from . import parse_vep
 import paramiko
+from pycellbase.cbclient import CellBaseClient
+
 
 class CaseVariant:
     def __init__(self, chromosome, position, case_id, variant_count, ref, alt, genome_build):
@@ -36,6 +38,7 @@ class CaseVariant:
         self.ref = ref
         self.alt = alt
         self.genome_build = genome_build
+
 
 class CaseTranscript:
     def __init__(self, case_id, variant_count, gene_ensembl_id, gene_hgnc_name, gene_hgnc_id, transcript_name, transcript_canonical,
@@ -62,10 +65,94 @@ class CaseTranscript:
         self.selected = False
 
 
+def get_variant_list(variants):
+    '''
+    Function which creates a list from variant objects specified from MCA.
+
+    :param variants: List of CaseVariant objects
+    :return: A dict of lists. Keys are GRCh37 and GRCh38 which releate to the different
+    genome builds
+    '''
+    grch37_variant_list = []
+    grch38_variant_list = []
+    for variant in variants:
+        if 'GRCh37' in variant.genome_build:
+            grch37_variant_list.append(f"{variant.chromosome}:{variant.position}:{variant.ref}:{variant.alt}")
+        elif 'GRCh38' in variant.genome_build:
+            grch38_variant_list.append(f"{variant.chromosome}:{variant.position}:{variant.ref}:{variant.alt}")
+    variant_dict = {'GRCh37': grch37_variant_list, 'GRCh38': grch38_variant_list}
+    return variant_dict
+
+
+def run_cellbase(variant_dict):
+    cbc = CellBaseClient()
+    vc = cbc.get_variant_client()
+    annotated_dict = {}
+    for key in variant_dict:
+        variants_info = vc.get_annotation(variant_dict[key], assembly=key)
+        annotated_dict[key] = variants_info
+    return annotated_dict
+
+
+def parse_cellbase(variants_list, annotated_variants_dict):
+    transcript_list = []
+    count = 0
+    for variant in variants_list:
+        for annotated_variant in annotated_variants_dict[variant.genome_build]:
+            if annotated_variant['id'] == f"{variant.chromosome}:{variant.position}:{variant.ref}:{variant.alt}":
+                for result in annotated_variant['result']: # Not sure why there would be 2 results
+                    for consequence in result['consequenceTypes']: # Again no idea why a list
+                        gene_id = consequence['ensemblGeneId']
+                        gene_name = consequence['geneName']
+                        canonical = False
+                        transcript_name = consequence['ensemblTranscriptId']
+                        transcript_strand = consequence['strand']
+                        for consequence_types in consequence['sequenceOntologyTerms']:
+                            proband_transcript_variant_effect = consequence_types['name']
+                            continue
+                        for scores in consequence['proteinVariantAnnotation']['substitutionScores']:
+                            if scores['source'] == 'sift':
+                                variant_sift = f"{scores['description']} {scores['score']}"
+
+
+
+                    # gene_id = result[]
+                    # gene_name = variant['transcript_data'][transcript]['SYMBOL']
+                    # hgnc_id = variant['transcript_data'][transcript]['HGNC_ID']
+                    # if hgnc_id.startswith('HGNC:'):
+                    #     hgnc_id = str(hgnc_id.split(':')[1])
+                    # if variant['transcript_data'][transcript]['CANONICAL'] == '':
+                    #     canonical = False
+                    # else:
+                    #     canonical = variant['transcript_data'][transcript]['CANONICAL']
+                    # transcript_name = variant['transcript_data'][transcript]['Feature']
+                    # transcript_strand = variant['transcript_data'][transcript]['STRAND']
+                    # proband_transcript_variant_effect = variant['transcript_data'][transcript]['Consequence']
+                    # transcript_variant_af_max = variant['transcript_data'][transcript]['MAX_AF']
+                    # variant_polyphen = variant['transcript_data'][transcript]['PolyPhen']
+                    # variant_sift = variant['transcript_data'][transcript]['SIFT']
+                    # transcript_variant_hgvs_c = variant['transcript_data'][transcript]['HGVSc']
+                    # transcript_variant_hgvs_p = variant['transcript_data'][transcript]['HGVSp']
+                    # transcript_variant_hgvs_g = variant['transcript_data'][transcript]['HGVSg']
+
+                continue
+
+        # case_transcript = CaseTranscript(variant.case_id,
+        #                                  count,
+        #                                  gene_id, gene_name, hgnc_id, transcript_name,
+        #                                  canonical,
+        #                                  transcript_strand, proband_transcript_variant_effect,
+        #                                  transcript_variant_af_max, variant_polyphen, variant_sift,
+        #                                  transcript_variant_hgvs_c, transcript_variant_hgvs_p,
+        #                                  transcript_variant_hgvs_g)
+        # transcripts_list.append(case_transcript)
+        # count += 1
+    return None
+
+
 def generate_vcf(variants):
     '''
     Function which creates a VCF formatted file from variant objects specified from MCA.
-
     :param variants: List of CaseVariant objects
     :return: A dict of 2 vcfs. Keys are hg19_vcf and hg38_vcf which releate to the different
     genome builds
@@ -86,139 +173,6 @@ def generate_vcf(variants):
     print(tmphg19.name, tmphg38.name)
     variant_dict = {'hg19_vcf': tmphg19.name, 'hg38_vcf': tmphg38.name}
     return variant_dict
-
-
-def run_vep(infile, config_dict):
-    '''
-    Function which runs VEP using subprocess. Takes multiple options from config.txt file
-
-    :param infile: Dict containing VCFs for the 2 genome builds
-    :param config_dict: Configuration dict
-    :return: Dict which contains the locations of the 2 results files relating to the 2 genome builds
-    '''
-    hg19_vcf = infile['hg19_vcf']
-    hg38_vcf = infile['hg38_vcf']
-    hg19_outfile = tempfile.NamedTemporaryFile(mode='w+t', delete=False)
-    hg38_outfile = tempfile.NamedTemporaryFile(mode='w+t', delete=False)
-    # run VEP for hg19 variants
-    annotated_variant_dict = {}
-
-
-    if os.stat(hg19_vcf).st_size != 0: # if file not empty
-        # builds command from locations supplied in config file
-        cmd = "{vep} -i {infile} -o {outfile} --species homo_sapiens --force_overwrite --cache --dir_cache {cache} " \
-              "--fork 4 --vcf --flag_pick --exclude_predicted --assembly GRCh37 --everything " \
-              "--hgvsg --dont_skip --total_length --offline --fasta {fasta_loc} --cache_version {cache_version}".format(
-                vep=config_dict['vep'],
-                infile=hg19_vcf,
-                outfile=hg19_outfile.name,
-                cache=config_dict['cache'],
-                cache_version=config_dict['cache_version'],
-                fasta_loc=config_dict['hg19_fasta_loc'],
-        )
-        if config_dict["mergedVEP"] == 'True':
-            cmd += ' --merged'
-        subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell=True).wait()
-        annotated_variant_dict['hg19_vep'] = hg19_outfile.name
-    # run VEP for hg38 variants
-    if os.stat(hg38_vcf).st_size != 0:
-        cmd = "{vep} -i {infile} -o {outfile} --species homo_sapiens --force_overwrite --cache --dir_cache {cache}" \
-              " --fork 4 --vcf --flag_pick  --exclude_predicted --assembly GRCh38 --everything " \
-              "--hgvsg --dont_skip --total_length --offline --fasta {fasta_loc} --cache_version {cache_version}".format(
-                vep=config_dict['vep'],
-                infile=hg38_vcf,
-                outfile=hg38_outfile.name,
-                cache=config_dict['cache'],
-                cache_version=config_dict['cache_version'],
-                fasta_loc=config_dict['hg38_fasta_loc'],
-        )
-        if config_dict["mergedVEP"] == 'True':
-            cmd += ' --merged'
-        subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell=True).wait()
-        annotated_variant_dict['hg38_vep'] = hg38_outfile.name
-    return annotated_variant_dict
-
-
-def run_vep_remotely(infile, config_dict):
-    '''
-    Function which runs VEP using paramiko on a remote machine.
-
-    :param infile: Dict containing VCFs for the 2 genome builds
-    :param config_dict: Configuration dict
-    :return: Dict which contains the locations of the 2 results files relating to the 2 genome builds
-    '''
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
-    # builds command from locations supplied in config file
-    ssh.connect(config_dict['remote_ip'],
-                username=config_dict['remote_username'],
-                password=config_dict['remote_password'])
-    sftp = ssh.open_sftp()
-    # run VEP for hg19 variants
-    annotated_variant_dict = {}
-
-    if not os.path.isdir('VEP'):
-        os.makedirs('VEP')
-
-    if 'hg19_vcf' in infile:
-        hg19_vcf = infile['hg19_vcf']
-        hg19_outfile = 'VEP/hg19_results.vcf'
-        if os.stat(hg19_vcf).st_size != 0:
-            sftp.put(hg19_vcf, '{remote_destination}/hg19_destination_file.txt'.format(
-                remote_destination=config_dict['remote_directory']
-            ))
-
-            cmd = "{vep} -i {remote_destination}/hg19_destination_file.txt " \
-                  " -o {remote_destination}/hg19_output.txt --species homo_sapiens "  \
-                  " --force_overwrite --cache --dir_cache {cache} --fork 4 --vcf --flag_pick --assembly GRCh37 " \
-                  " --exclude_predicted --everything --hgvsg --dont_skip --total_length --offline --fasta {fasta_loc} ".format(
-                    vep=config_dict['vep'],
-                    cache=config_dict['cache'],
-                    fasta_loc=config_dict['hg19_fasta_loc'],
-                    remote_destination=config_dict['remote_directory']
-
-            )
-            if config_dict["mergedVEP"] == 'True':
-                cmd += ' --merged'
-            stdin, stdout, stderr = ssh.exec_command(cmd)
-
-            print('stdin:', stdin, 'stdout:', stdout.read(), 'stderr:', stderr.read())
-            sftp.get('{remote_destination}/hg19_output.txt'.format(
-                remote_destination=config_dict['remote_directory']), hg19_outfile
-            )
-            annotated_variant_dict['hg19_vep'] = hg19_outfile
-    # run VEP for hg38 variants
-    if 'hg38_vcf' in infile:
-        hg38_vcf = infile['hg38_vcf']
-        hg38_outfile = 'VEP/hg38_results.vcf'
-        if os.stat(hg38_vcf).st_size != 0:
-            sftp.put(hg38_vcf, '{remote_destination}/hg38_destination_file.txt'.format(
-                remote_destination=config_dict['remote_directory']
-            ))
-
-            cmd = "{vep} -i {remote_destination}/hg38_destination_file.txt " \
-                  " -o {remote_destination}/hg38_output.txt --species homo_sapiens "  \
-                  " --force_overwrite --cache --dir_cache {cache} --fork 4 --vcf --flag_pick --assembly GRCh38 " \
-                  " --exclude_predicted --everything --hgvsg --dont_skip --total_length --offline --fasta {fasta_loc} ".format(
-                    vep=config_dict['vep'],
-                    cache=config_dict['cache'],
-                    fasta_loc=config_dict['hg38_fasta_loc'],
-                    remote_destination=config_dict['remote_directory']
-            )
-            if config_dict["mergedVEP"] == 'True':
-                cmd += ' --merged'
-            stdin, stdout, stderr = ssh.exec_command(cmd)
-
-            print('stdin:', stdin, 'stdout:', stdout.read(), 'stderr:', stderr.read())
-            sftp.get('{remote_destination}/hg38_output.txt'.format(remote_destination=config_dict['remote_directory']),
-                     hg38_outfile)
-            annotated_variant_dict['hg38_vep'] = hg38_outfile
-
-    sftp.close()
-    ssh.close()
-    return annotated_variant_dict
-
 
 def parse_vep_annotations(infile=None):
     '''
@@ -281,19 +235,7 @@ def generate_transcripts(variant_list):
     :param variant_list: A list of Casevariant objects
     :return: A list of CaseTranscript objects for all the CaseVariants
     '''
-    config_dict = load_config.LoadConfig().load()
-
-    if config_dict["bypass_VEP"] == "True":
-        print("Bypassing VEP")
-        transcript_list = parse_vep_annotations()
-
-    elif config_dict["bypass_VEP"] == "False":
-        print("Running VEP")
-        variant_vcf_dict = generate_vcf(variant_list)
-        if config_dict['remoteVEP'] == 'True':
-            annotated_files_dict = run_vep_remotely(variant_vcf_dict, config_dict)
-        else:
-            annotated_files_dict = run_vep(variant_vcf_dict, config_dict)
-        transcript_list = parse_vep_annotations(annotated_files_dict)
-
-    return transcript_list
+    variant_vcf_dict = get_variant_list(variant_list)
+    annotated_dict = run_cellbase(variant_vcf_dict)
+    transcripts_list = parse_cellbase(variant_list, annotated_dict)
+    return transcripts_list

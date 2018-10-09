@@ -28,7 +28,7 @@ from django.utils.dateparse import parse_date
 import time
 from ..models import *
 from ..api_utils.poll_api import PollAPI
-from ..vep_utils.run_vep_batch import CaseVariant, CaseTranscript
+from ..annotation_utils.run_anno_batch import CaseVariant, CaseTranscript
 from ..config import load_config
 import re
 import copy
@@ -228,12 +228,16 @@ class Case(object):
                 # Sort out tiers first
                 variant_min_tier = None
                 for report_event in variant.reportEvents:
-                    if report_event.tier:
-                        tier = int(report_event.tier[-1])
-                        if variant_min_tier is None:
-                            variant_min_tier = tier
-                        elif tier < variant_min_tier:
-                            variant_min_tier = tier
+                    if self.json['sample_type'] == 'raredisease':
+                        if report_event.tier:
+                            tier = int(report_event.tier[-1])
+                    elif self.json['sample_type'] == 'cancer':
+                        if report_event.domain:
+                            tier = int(report_event.domain[-1])
+                    if variant_min_tier is None:
+                        variant_min_tier = tier
+                    elif tier < variant_min_tier:
+                        variant_min_tier = tier
                 variant.max_tier = variant_min_tier
 
                 interesting_variant = False
@@ -357,12 +361,12 @@ class CaseAttributeManager(object):
         # family ID used to search for clinician details in labkey
         family_id = None
         clinician_details = {"name": "unknown", "hospital": "unknown"}
-        search_term = 'participant_identifiers_id'
         if self.case.json['sample_type'] == 'raredisease':
             family_id = self.case.json["family_id"]
             search_term = 'family_id'
         elif self.case.json['sample_type'] == 'cancer':
             family_id = self.case.json["proband"]
+            search_term = 'participant_identifiers_id'
         # load in site specific details from config file
         if not self.case.skip_demographics:
             for row in self.case.clinicians:
@@ -575,7 +579,7 @@ class CaseAttributeManager(object):
         """
         Create a list of CaseModels for phenotypes for this case.
         """
-        if 'hpoTermList' in self.case.proband:
+        if self.case.json['sample_type'] == 'raredisease':
             phenotypes = ManyCaseModel(Phenotype, [
                 {"hpo_terms": phenotype.term,
                  "description": "unknown"}
@@ -597,10 +601,7 @@ class CaseAttributeManager(object):
 
     def get_panelapp_api_response(self, panel, panel_file):
         panelapp_poll = PollAPI(
-            "panelapp", "get_panel/{panelapp_id}/?version={v}".format(
-                panelapp_id=panel["panelName"],
-                v=panel["panelVersion"])
-        )
+            "panelapp", f"get_panel/{panel.panelName}/?version={panel.panelVersion}")
         with open(panel_file, 'w') as f:
             json.dump(panelapp_poll.get_json_response(), f)
             panel_app_response = panelapp_poll.get_json_response()
@@ -671,13 +672,13 @@ class CaseAttributeManager(object):
             for panel in self.case.panels:
                 # set self.case.panels["model"] to the correct model
                 for panel_model in panel_models:
-                    if panel["panelName"] == panel_model.panelapp_id:
-                        panel["model"] = panel_model
+                    if panel.panelName == panel_model.panelapp_id:
+                        panel.model = panel_model
 
             panel_versions = ManyCaseModel(PanelVersion, [{
                 # create the MCM
-                "version_number": panel["panelapp_results"]["version"],
-                "panel": panel["model"]
+                "version_number": panel.panelapp_results["version"],
+                "panel": panel.model
             } for panel in self.case.panels], self.model_objects)
         else:
             panel_versions = ManyCaseModel(PanelVersion, [], self.model_objects)
@@ -693,7 +694,7 @@ class CaseAttributeManager(object):
         gene_list = []
         if panels:
             for panel in panels:
-                genes = panel["panelapp_results"]["Genes"]
+                genes = panel.panelapp_results["Genes"]
                 gene_list += genes
 
         for gene in gene_list:
@@ -1259,11 +1260,11 @@ class CaseAttributeManager(object):
 
         proband_variants = ManyCaseModel(ProbandVariant, [{
             "interpretation_report": ir_manager.case_model.entry,
-            "max_tier": variant["max_tier"],
+            "max_tier": variant.max_tier,
             "variant": variant["variant"],
             "zygosity": variant["zygosity"],
-            "maternal_zygosity": variant["maternal_zygosity"],
-            "paternal_zygosity": variant["paternal_zygosity"],
+            "maternal_zygosity": variant.maternal_zygosity,
+            "paternal_zygosity": variant.paternal_zygosity,
             "inheritance": self.determine_variant_inheritance(variant),
             "somatic": variant["somatic"]
         } for variant in tiered_and_cip_proband_variants], self.model_objects)
@@ -1276,15 +1277,15 @@ class CaseAttributeManager(object):
         inheritance.
         """
 
-        if variant["maternal_zygosity"] == 'reference_homozygous' and variant["paternal_zygosity"] == 'reference_homozygous':
+        if variant.maternal_zygosity == 'reference_homozygous' and variant.paternal_zygosity == 'reference_homozygous':
             # neither parent has variant, --/-- cross so must be de novo
             inheritance = 'de_novo'
 
-        elif "heterozygous" in variant["maternal_zygosity"] or "heterozygous" in variant["paternal_zygosity"]:
+        elif "heterozygous" in variant.maternal_zygosity or "heterozygous" in variant.paternal_zygosity:
             # catch +-/?? cross
             inheritance = 'inherited'
 
-        elif "alternate" in variant["maternal_zygosity"] or "alternate" in variant["paternal_zygosity"]:
+        elif "alternate" in variant.maternal_zygosity or "alternate" in variant.paternal_zygosity:
             # catch ++/?? cross
             inheritance = 'inherited'
 

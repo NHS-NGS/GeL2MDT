@@ -26,7 +26,7 @@ import json
 from ..models import *
 from ..api_utils.poll_api import PollAPI
 from ..api_utils.cip_utils import InterpretationList
-from ..vep_utils.run_vep_batch import generate_transcripts
+from ..annotation_utils.run_anno_batch import generate_transcripts
 from .case_handler import Case, CaseAttributeManager
 from ..config import load_config
 import pprint
@@ -234,13 +234,14 @@ class MultipleCaseAdder(object):
                 logger.info("Found case json at " + file_path + " for testing.")
                 with open(file_path) as json_file:
                     json_data = json.load(json_file)
-                    list_of_cases.append(Case(
-                        case_json=json_data,
-                        panel_manager=self.panel_manager,
-                        variant_manager=self.variant_manager,
-                        gene_manager=self.gene_manager,
-                        skip_demographics=self.skip_demographics,
-                        pullt3=self.pullt3))
+                    if json_data['sample_type'] == self.sample_type:
+                        list_of_cases.append(Case(
+                            case_json=json_data,
+                            panel_manager=self.panel_manager,
+                            variant_manager=self.variant_manager,
+                            gene_manager=self.gene_manager,
+                            skip_demographics=self.skip_demographics,
+                            pullt3=self.pullt3))
         logger.info("Found " + str(len(list_of_cases)) +  " test cases.")
         return list_of_cases
 
@@ -340,17 +341,17 @@ class MultipleCaseAdder(object):
             (PanelVersion, True),
             (Gene, True),
             (ToolOrAssemblyVersion, True),
-            (Transcript, True),
-            (Variant, True),
-            (Proband, False),
-            (Relative, True),
-            (InterpretationReportFamily, False),
-            (InterpretationReportFamilyPanel, True),
-            (GELInterpretationReport, False),
-            (ProbandVariant, True),
-            (PVFlag, True),
-            (TranscriptVariant, True),
-            (ProbandTranscriptVariant, True),
+            # (Transcript, True),
+            # (Variant, True),
+            # (Proband, False),
+            # (Relative, True),
+            # (InterpretationReportFamily, False),
+            # (InterpretationReportFamilyPanel, True),
+            # (GELInterpretationReport, False),
+            # (ProbandVariant, True),
+            # (PVFlag, True),
+            # (TranscriptVariant, True),
+            # (ProbandTranscriptVariant, True),
             #(ReportEvent, True)
         )
 
@@ -369,23 +370,23 @@ class MultipleCaseAdder(object):
 
             # fetch the transcripts and put them into TranscriptManager
             transcripts = generate_transcripts(variants)
-            for transcript in transcripts:
-                case_id = transcript.case_id
-                case = case_id_map[case_id]
-                self.transcript_manager.add_transcript(transcript, case.tools_and_versions['genome_build'] )
-
-            # assign transcripts
-            i = 0
-            while i < len(transcripts):  # keep going until no transcripts left
-                transcript = transcripts.pop(0) # check to see if transcript already exists in transcript manager
-                case_id = transcript.case_id
-                case = case_id_map[case_id]
-                fetched_transcript = self.transcript_manager.fetch_transcript(transcript)
-                # Reassigning case details
-                transcript.transcript_canonical = fetched_transcript.transcript_canonical
-                transcript.gene_model = fetched_transcript.gene_model
-                # Append to case transcripts
-                case.transcripts.append(transcript)
+            # for transcript in transcripts:
+            #     case_id = transcript.case_id
+            #     case = case_id_map[case_id]
+            #     self.transcript_manager.add_transcript(transcript, case.tools_and_versions['genome_build'] )
+            #
+            # # assign transcripts
+            # i = 0
+            # while i < len(transcripts):  # keep going until no transcripts left
+            #     transcript = transcripts.pop(0) # check to see if transcript already exists in transcript manager
+            #     case_id = transcript.case_id
+            #     case = case_id_map[case_id]
+            #     fetched_transcript = self.transcript_manager.fetch_transcript(transcript)
+            #     # Reassigning case details
+            #     transcript.transcript_canonical = fetched_transcript.transcript_canonical
+            #     transcript.gene_model = fetched_transcript.gene_model
+            #     # Append to case transcripts
+            #     case.transcripts.append(transcript)
 
             # Labkey lookup for all cases
             if not self.skip_demographics:
