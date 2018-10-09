@@ -34,7 +34,7 @@ import re
 import copy
 import pprint
 from tqdm import tqdm
-from protocols.reports_6_0_0 import InterpretedGenome, InterpretationRequestRD
+from protocols.reports_6_0_0 import InterpretedGenome, InterpretationRequestRD, ClinicalReport
 
 
 class Case(object):
@@ -132,31 +132,25 @@ class Case(object):
         self.json_hash = self.hash_json()
         self.proband = [member for member in self.ir_obj.pedigree.members if member.isProband][0]
         self.family_members = self.get_family_members()
-        # self.tools_and_versions = self.get_tools_and_versions()
-        # self.status = self.get_status_json()
-        # if self.json["sample_type"] == 'raredisease':
-        #     self.proband_sample = self.proband["samples"][0]
-        #     self.json_variants = self.json_case_data["json_request"]["TieredVariants"]
-        # elif self.json["sample_type"] == 'cancer':
-        #     self.proband_sample = self.proband["matchedSamples"][0]['tumourSampleId']
-        #     self.json_variants = self.json_case_data["json_request"]["tieredVariants"]
-        #
-        # self.panel_manager = panel_manager
-        # self.variant_manager = variant_manager
-        # self.gene_manager = gene_manager
-        #
-        # self.panels = self.get_panels_json()
-        # self.variants = self.get_case_variants()
-        # self.transcripts = []  # set by MCM with a call to vep_utils
-        # self.demographics = None
-        # self.clinicians = None
-        # self.diagnosis = None
-        #
-        # # initialise a dict to contain the AttributeManagers for this case,
-        # # which will be set by the MCA as they are required (otherwise there
-        # # are missing dependencies)
-        # self.skip_demographics = skip_demographics
-        # self.attribute_managers = {}
+        self.tools_and_versions = {'genome_build': self.json["assembly"]}
+        self.status = self.get_status_json()
+
+        self.panel_manager = panel_manager
+        self.variant_manager = variant_manager
+        self.gene_manager = gene_manager
+
+        self.panels = self.get_panels_json()
+        self.variants = self.get_case_variants()
+        self.transcripts = []  # set by MCM with a call to vep_utils
+        self.demographics = None
+        self.clinicians = None
+        self.diagnosis = None
+
+        # initialise a dict to contain the AttributeManagers for this case,
+        # which will be set by the MCA as they are required (otherwise there
+        # are missing dependencies)
+        self.skip_demographics = skip_demographics
+        self.attribute_managers = {}
 
     def hash_json(self):
         """
@@ -187,17 +181,6 @@ class Case(object):
                     family_members.append(family_member)
         return family_members
 
-    def get_tools_and_versions(self):
-        '''
-        Gets the genome build from the JSON. Details of other tools (VEP, Polyphen/SIFT) to be pulled from config file?
-        :return: A dictionary of tools and versions used for the case
-        '''
-        if self.json['sample_type'] == 'raredisease':
-            tools_dict = {'genome_build': self.json_request_data["genomeAssemblyVersion"]}
-        elif self.json['sample_type'] == 'cancer':
-            tools_dict = {'genome_build': self.json["assembly"]}
-        return tools_dict
-
     def get_status_json(self):
         """
         JSON has a list of statuses. Extract only the latest.
@@ -211,8 +194,7 @@ class Case(object):
         """
         analysis_panels = []
         if self.json["sample_type"] == 'raredisease':
-            json_request = self.json_case_data["json_request"]
-            analysis_panels = json_request["pedigree"]["analysisPanels"]
+            analysis_panels = self.ir_obj.pedigree.analysisPanels
         return analysis_panels
 
     def get_case_variants(self):
@@ -221,132 +203,68 @@ class Case(object):
         then return a list of all CaseVariants for construction of
         CaseTranscripts using VEP.
         """
-        json_variants = self.json_variants
+        json_variants = []
         case_variant_list = []
         # go through each variant in the json
         variant_object_count = 0
-        genome_build = None
-        if self.json['sample_type'] == 'cancer':
-            genome_build = self.json['assembly']
-        elif self.json['sample_type'] == 'raredisease':
-            genome_build = self.json_request_data["genomeAssemblyVersion"]
+        genome_build = self.json['assembly']
+        for ig in self.json['interpreted_genome']:
+            ig_obj = InterpretedGenome.fromJsonDict(ig['interpreted_genome_data'])
+            for variant in ig_obj.variants:
+                # Sort out tiers first
+                variant_min_tier = None
+                for report_event in variant.reportEvents:
+                    if report_event.tier:
+                        tier = int(report_event.tier[-1])
+                        if variant_min_tier is None:
+                            variant_min_tier = tier
+                        elif tier < variant_min_tier:
+                            variant_min_tier = tier
+                variant.max_tier = variant_min_tier
 
-        for variant in json_variants:
-            interesting_variant = False
-            # check if it has any Tier1 or Tier2 Report Events
-            variant_min_tier = None
-            if self.json['sample_type'] == 'raredisease':
-                for report_event in variant["reportEvents"]:
-                    tier = int(report_event["tier"][-1])
-                    if variant_min_tier is None:
-                        variant_min_tier = tier
-                    elif tier < variant_min_tier:
-                        variant_min_tier = tier
-            elif self.json['sample_type'] == 'cancer':
-                for report_event in variant['reportedVariantCancer']["reportEvents"]:
-                    tier = int(report_event["tier"][-1])
-                    if variant_min_tier is None:
-                        variant_min_tier = tier
-                    elif tier < variant_min_tier:
-                        variant_min_tier = tier
-
-            variant["max_tier"] = variant_min_tier
-            if not self.pullt3:
-                if variant["max_tier"] < 3:
-                    interesting_variant = True
-            else:
-                interesting_variant = True
-            if interesting_variant:
-                variant_object_count += 1
-                if self.json['sample_type'] == 'raredisease':
-                    case_variant = CaseVariant(
-                        chromosome=variant["chromosome"],
-                        position=variant["position"],
-                        ref=variant["reference"],
-                        alt=variant["alternate"],
-                        case_id=self.request_id,
-                        variant_count=str(variant_object_count),
-                        genome_build=genome_build
-                    )
-                elif self.json['sample_type'] == 'cancer':
-                    case_variant = CaseVariant(
-                        chromosome=variant['reportedVariantCancer']["chromosome"],
-                        position=variant['reportedVariantCancer']["position"],
-                        ref=variant['reportedVariantCancer']["reference"],
-                        alt=variant['reportedVariantCancer']["alternate"],
-                        case_id=self.request_id,
-                        variant_count=str(variant_object_count),
-                        genome_build=genome_build
-                    )
-                case_variant_list.append(case_variant)
-                variant["case_variant"] = case_variant
-            else:
-                variant["case_variant"] = False
-
-        # check for CIP flagged variants
-        for interpreted_genome in self.json["interpreted_genome"]:
-            for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
                 interesting_variant = False
-                if interpreted_genome['interpreted_genome_data']['companyName'] == 'Exomiser':
-                    for report_event in variant['reportEvents']:
-                        if report_event['score'] >= 0.95:
+                if ig_obj.interpretationService == 'Exomiser':
+                    for report_event in variant.reportEvents:
+                        if report_event.score >= 0.95:
                             interesting_variant = False
+                elif ig_obj.interpretationService == 'genomics_england_tiering':
+                    if not self.pullt3:
+                        if variant.max_tier < 3:
+                            interesting_variant = True
+                    else:
+                        interesting_variant = True
                 else:
-                    interesting_variant = True
+                    interesting_variant = True  # CIP variants all get pulled
                 if interesting_variant:
                     variant_object_count += 1
-                    if self.json['sample_type'] == 'raredisease':
-                        case_variant = CaseVariant(
-                            chromosome=variant["chromosome"],
-                            position=variant["position"],
-                            ref=variant["reference"],
-                            alt=variant["alternate"],
-                            case_id=self.request_id,
-                            variant_count=str(variant_object_count),
-                            genome_build=genome_build
-                        )
-                    elif self.json['sample_type'] == 'cancer':
-                        case_variant = CaseVariant(
-                            chromosome=variant['reportedVariantCancer']["chromosome"],
-                            position=variant['reportedVariantCancer']["position"],
-                            ref=variant['reportedVariantCancer']["reference"],
-                            alt=variant['reportedVariantCancer']["alternate"],
-                            case_id=self.request_id,
-                            variant_count=str(variant_object_count),
-                            genome_build=genome_build
-                        )
+                    case_variant = CaseVariant(
+                        chromosome=variant.variantCoordinates.chromosome,
+                        position=variant.variantCoordinates.position,
+                        ref=variant.variantCoordinates.reference,
+                        alt=variant.variantCoordinates.alternate,
+                        case_id=self.request_id,
+                        variant_count=str(variant_object_count),
+                        genome_build=genome_build
+                    )
                     case_variant_list.append(case_variant)
-                    # also add it to the dict within self.json_variants
-                    variant["case_variant"] = case_variant
+                    variant.case_variant = case_variant
                 else:
-                    variant["case_variant"] = False
-
+                    variant.case_variant = False
         for clinical_report in self.json['clinical_report']:
-            for variant in clinical_report['clinical_report_data']['candidateVariants']:
+            cr_obj = ClinicalReport.fromJsonDict(clinical_report['clinical_report_data'])
+            for variant in cr_obj.variants:
                 variant_object_count += 1
-                if self.json['sample_type'] == 'raredisease':
-                    case_variant = CaseVariant(
-                        chromosome=variant["chromosome"],
-                        position=variant["position"],
-                        ref=variant["reference"],
-                        alt=variant["alternate"],
-                        case_id=self.request_id,
-                        variant_count=str(variant_object_count),
-                        genome_build=genome_build
-                    )
-                elif self.json['sample_type'] == 'cancer':
-                    case_variant = CaseVariant(
-                        chromosome=variant['reportedVariantCancer']["chromosome"],
-                        position=variant['reportedVariantCancer']["position"],
-                        ref=variant['reportedVariantCancer']["reference"],
-                        alt=variant['reportedVariantCancer']["alternate"],
-                        case_id=self.request_id,
-                        variant_count=str(variant_object_count),
-                        genome_build=genome_build
-                    )
+                case_variant = CaseVariant(
+                    chromosome=variant.variantCoordinates.chromosome,
+                    position=variant.variantCoordinates.position,
+                    ref=variant.variantCoordinates.reference,
+                    alt=variant.variantCoordinates.alternate,
+                    case_id=self.request_id,
+                    variant_count=str(variant_object_count),
+                    genome_build=genome_build
+                )
                 case_variant_list.append(case_variant)
-                # also add it to the dict within self.json_variants
-                variant["case_variant"] = case_variant
+                variant.case_variant = case_variant
 
         return case_variant_list
 
