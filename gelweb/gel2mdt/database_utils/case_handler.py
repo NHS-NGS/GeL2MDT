@@ -280,6 +280,20 @@ class Case(object):
         for clinical_report in self.json['clinical_report']:
             cr_obj = ClinicalReport.fromJsonDict(clinical_report['clinical_report_data'])
             for variant in cr_obj.variants:
+                variant_min_tier = None
+                for report_event in variant.reportEvents:
+                    if self.json['sample_type'] == 'raredisease':
+                        if report_event.tier:
+                            tier = int(report_event.tier[-1])
+                    elif self.json['sample_type'] == 'cancer':
+                        if report_event.domain:
+                            tier = int(report_event.domain[-1])
+                    if variant_min_tier is None:
+                        variant_min_tier = tier
+                    elif tier < variant_min_tier:
+                        variant_min_tier = tier
+                variant.max_tier = variant_min_tier
+
                 variant_object_count += 1
                 case_variant = CaseVariant(
                     chromosome=variant.variantCoordinates.chromosome,
@@ -890,9 +904,9 @@ class CaseAttributeManager(object):
         self.case.processed_variants = self.process_proband_variants()
         self.case.max_tier = 3
         for variant in self.case.processed_variants:
-            if variant.max_tier:
-                if variant.max_tier < self.case.max_tier:
-                    self.case.max_tier = variant.max_tier
+            if variant['max_tier']:
+                if variant['max_tier'] < self.case.max_tier:
+                    self.case.max_tier = variant['max_tier']
 
         tumour_content = None
         if self.case.json['sample_type'] == 'cancer':
@@ -1105,7 +1119,7 @@ class CaseAttributeManager(object):
                 if (
                         ig_variant.variantCoordinates.chromosome == variant.chromosome and
                         ig_variant.variantCoordinates.position == variant.position and
-                        ig_variant.variantCoordinatesreference == variant.reference and
+                        ig_variant.variantCoordinates.reference == variant.reference and
                         ig_variant.variantCoordinates.alternate == variant.alternate
                 ):
                     # variant in json matches variant entry
@@ -1123,7 +1137,7 @@ class CaseAttributeManager(object):
                         ig_variant.paternal_zygosity = call.zygosity
 
                     if call:
-                        if ig_variant.alleleOrigins[0] == 'somatic_variant':
+                        if ig_variant.variantAttributes.alleleOrigins[0] == 'somatic_variant':
                             ig_variant.somatic = True
 
         for ig_variant in raw_proband_variants:
@@ -1134,6 +1148,7 @@ class CaseAttributeManager(object):
                 "maternal_zygosity": ig_variant.maternal_zygosity,
                 "paternal_zygosity": ig_variant.paternal_zygosity,
                 "somatic": ig_variant.somatic,
+                'variant_obj': ig_variant
             }
             processed_proband_variants.append(proband_variant)
 
@@ -1142,9 +1157,9 @@ class CaseAttributeManager(object):
         seen_variants = []
 
         for variant in processed_proband_variants:
-            if variant.variant not in seen_variants:
+            if variant['variant'] not in seen_variants:
                 uniq_proband_variants.append(variant)
-                seen_variants.append(variant.variant)
+                seen_variants.append(variant['variant'])
 
         return uniq_proband_variants
 
@@ -1159,12 +1174,12 @@ class CaseAttributeManager(object):
 
         proband_variants = ManyCaseModel(ProbandVariant, [{
             "interpretation_report": ir_manager.case_model.entry,
-            "max_tier": variant.max_tier,
+            "max_tier": variant['max_tier'],
             "variant": variant["variant"],
             "zygosity": variant["zygosity"],
-            "maternal_zygosity": variant.maternal_zygosity,
-            "paternal_zygosity": variant.paternal_zygosity,
-            "inheritance": self.determine_variant_inheritance(variant),
+            "maternal_zygosity": variant['maternal_zygosity'],
+            "paternal_zygosity": variant['paternal_zygosity'],
+            "inheritance": self.determine_variant_inheritance(variant['variant_obj']),
             "somatic": variant["somatic"]
         } for variant in tiered_and_cip_proband_variants], self.model_objects)
 
@@ -1199,35 +1214,28 @@ class CaseAttributeManager(object):
         proband_variants = [proband_variant.entry for proband_variant
                             in self.case.attribute_managers[ProbandVariant].case_model.case_models]
         pv_flags = []
-        for interpreted_genome in self.case.json["interpreted_genome"]:
-            for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
-                interesting_variant = False
-                if interpreted_genome['interpreted_genome_data']['companyName'] == 'Exomiser':
-                    for report_event in variant['reportEvents']:
-                        if report_event['score'] >= 0.95:
-                            interesting_variant = False
-                else:
-                    interesting_variant = True
-                if interesting_variant:
+        for interpreted_genome in self.case.ig_objs:
+            for variant in interpreted_genome.variants:
+                if variant.case_variant:
                     for proband_variant in proband_variants:
-                        if proband_variant.variant == variant["variant_entry"]:
-                            variant['proband_variant'] = proband_variant
-                            variant['company'] = interpreted_genome['interpreted_genome_data']['companyName']
+                        if proband_variant.variant == variant.variant_entry:
+                            variant.proband_variant = proband_variant
+                            variant.company = interpreted_genome.interpretationService
                             pv_flags.append(variant)
                             break
 
-        for clinical_report in self.case.json["clinical_report"]:
-            for variant in clinical_report['clinical_report_data']['candidateVariants']:
+        for clinical_report in self.case.clinical_report_objs:
+            for variant in clinical_report.variants:
                 for proband_variant in proband_variants:
-                    if proband_variant.variant == variant["variant_entry"]:
-                        variant['proband_variant'] = proband_variant
-                        variant['company'] = 'Clinical Report'
+                    if proband_variant.variant == variant.variant_entry:
+                        variant.proband_variant = proband_variant
+                        variant.company = 'Clinical Report'
                         pv_flags.append(variant)
                         break
 
         pv_flags = ManyCaseModel(PVFlag, [{
-            "proband_variant": variant['proband_variant'],
-            'flag_name': variant['company']
+            "proband_variant": variant.proband_variant,
+            'flag_name': variant.company
         } for variant in pv_flags], self.model_objects)
 
         return pv_flags
@@ -1457,17 +1465,16 @@ class CaseAttributeManager(object):
                 if proband_variant.variant == transcript.variant_entry:
                     transcript.proband_variant_entry = proband_variant
 
-        if self.case.json['sample_type'] == 'cancer':
-            for transcript in self.case.transcripts:
-                if transcript.transcript_entry:
-                    for variant in self.case.json_variants:
-                        if variant['variant_entry'] == transcript.variant_entry:
-                            for reportevent in variant['reportedVariantCancer']['reportEvents']:
-                                if 'genomicFeatureCancer' in reportevent:
-                                    if transcript.transcript_name == reportevent['genomicFeatureCancer']['ensemblId']:
-                                        transcript.selected = True
-                                    else:
-                                        transcript.selected = False
+        for transcript in self.case.transcripts:
+            if transcript.transcript_entry:
+                for variant in self.case.json_variants:
+                    if variant.variant_entry == transcript.variant_entry:
+                        for reportevent in variant.reportEvents:
+                            for en in reportevent.genomicEntities:
+                                if transcript.transcript_name == en['ensemblId']:
+                                    transcript.selected = True
+                                else:
+                                    transcript.selected = False
 
         proband_transcript_variants = ManyCaseModel(ProbandTranscriptVariant, [{
             "transcript": transcript.transcript_entry,
