@@ -96,58 +96,67 @@ def run_cellbase(variant_dict):
 
 def parse_cellbase(variants_list, annotated_variants_dict):
     transcript_list = []
-    count = 0
     for variant in variants_list:
         for annotated_variant in annotated_variants_dict[variant.genome_build]:
             if annotated_variant['id'] == f"{variant.chromosome}:{variant.position}:{variant.ref}:{variant.alt}":
-                for result in annotated_variant['result']: # Not sure why there would be 2 results
-                    for consequence in result['consequenceTypes']: # Again no idea why a list
-                        gene_id = consequence['ensemblGeneId']
-                        gene_name = consequence['geneName']
-                        canonical = False
-                        transcript_name = consequence['ensemblTranscriptId']
-                        transcript_strand = consequence['strand']
-                        for consequence_types in consequence['sequenceOntologyTerms']:
-                            proband_transcript_variant_effect = consequence_types['name']
-                            continue
-                        for scores in consequence['proteinVariantAnnotation']['substitutionScores']:
-                            if scores['source'] == 'sift':
-                                variant_sift = f"{scores['description']} {scores['score']}"
-
-
-
-                    # gene_id = result[]
-                    # gene_name = variant['transcript_data'][transcript]['SYMBOL']
-                    # hgnc_id = variant['transcript_data'][transcript]['HGNC_ID']
-                    # if hgnc_id.startswith('HGNC:'):
-                    #     hgnc_id = str(hgnc_id.split(':')[1])
-                    # if variant['transcript_data'][transcript]['CANONICAL'] == '':
-                    #     canonical = False
-                    # else:
-                    #     canonical = variant['transcript_data'][transcript]['CANONICAL']
-                    # transcript_name = variant['transcript_data'][transcript]['Feature']
-                    # transcript_strand = variant['transcript_data'][transcript]['STRAND']
-                    # proband_transcript_variant_effect = variant['transcript_data'][transcript]['Consequence']
-                    # transcript_variant_af_max = variant['transcript_data'][transcript]['MAX_AF']
-                    # variant_polyphen = variant['transcript_data'][transcript]['PolyPhen']
-                    # variant_sift = variant['transcript_data'][transcript]['SIFT']
-                    # transcript_variant_hgvs_c = variant['transcript_data'][transcript]['HGVSc']
-                    # transcript_variant_hgvs_p = variant['transcript_data'][transcript]['HGVSp']
-                    # transcript_variant_hgvs_g = variant['transcript_data'][transcript]['HGVSg']
-
-                continue
-
-        # case_transcript = CaseTranscript(variant.case_id,
-        #                                  count,
-        #                                  gene_id, gene_name, hgnc_id, transcript_name,
-        #                                  canonical,
-        #                                  transcript_strand, proband_transcript_variant_effect,
-        #                                  transcript_variant_af_max, variant_polyphen, variant_sift,
-        #                                  transcript_variant_hgvs_c, transcript_variant_hgvs_p,
-        #                                  transcript_variant_hgvs_g)
-        # transcripts_list.append(case_transcript)
-        # count += 1
-    return None
+                for result in annotated_variant['result']:  # Not sure why there would be 2 results
+                    count = 0
+                    for consequence in result['consequenceTypes']:  # Again no idea why a list
+                        canonical = count == 0
+                        transcript_variant_af_max = None  # Dont have this
+                        hgnc_id = None  # Don't have this
+                        proband_transcript_variant_effect = None
+                        variant_polyphen = None
+                        variant_sift = None
+                        transcript_variant_hgvs_c = None
+                        transcript_variant_hgvs_p = None
+                        required_fields = ['ensemblGeneId', 'geneName', 'ensemblTranscriptId', 'strand',
+                                           'sequenceOntologyTerms']
+                        if all([f in consequence for f in required_fields]):
+                            gene_id = consequence['ensemblGeneId']
+                            gene_name = consequence['geneName']
+                            transcript_name = consequence['ensemblTranscriptId']
+                            transcript_strand = consequence['strand']
+                            try:
+                                for consequence_types in consequence['sequenceOntologyTerms']:
+                                    proband_transcript_variant_effect = consequence_types['name']
+                                    break
+                            except KeyError:
+                                pass
+                            try:
+                                for scores in consequence['proteinVariantAnnotation']['substitutionScores']:
+                                    if scores['source'] == 'sift':
+                                        variant_sift = f"{scores['description']}({scores['score']})"
+                                    elif scores['source'] == 'polyphen':
+                                        variant_polyphen = f"{scores['description']}({scores['score']})"
+                            except KeyError:
+                                pass
+                            try:
+                                for hgvs in result['hgvs']:
+                                    if hgvs.startswith(transcript_name):
+                                        transcript_variant_hgvs_c = hgvs
+                                        break
+                            except KeyError:
+                                pass
+                            try:
+                                transcript_variant_hgvs_p = f"{consequence['proteinVariantAnnotation']['reference']}" \
+                                                            f"{consequence['proteinVariantAnnotation']['position']}" \
+                                                            f"{consequence['proteinVariantAnnotation']['alternate']}"
+                            except KeyError:
+                                pass
+                            transcript_variant_hgvs_g = f"{variant.chromosome}:g.{variant.position}" \
+                                                        f"{variant.ref}>{variant.alt}"  # Ugly hack
+                            case_transcript = CaseTranscript(variant.case_id,
+                                                             count,
+                                                             gene_id, gene_name, hgnc_id, transcript_name,
+                                                             canonical,
+                                                             transcript_strand, proband_transcript_variant_effect,
+                                                             transcript_variant_af_max, variant_polyphen, variant_sift,
+                                                             transcript_variant_hgvs_c, transcript_variant_hgvs_p,
+                                                             transcript_variant_hgvs_g)
+                            transcript_list.append(case_transcript)
+                            count += 1
+    return transcript_list
 
 
 def generate_vcf(variants):
