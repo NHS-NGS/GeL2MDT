@@ -27,6 +27,8 @@ from ..config import load_config
 from . import parse_vep
 import paramiko
 from pycellbase.cbclient import CellBaseClient
+import random
+from datetime import datetime
 
 
 class CaseVariant:
@@ -73,6 +75,7 @@ def get_variant_list(variants):
     :return: variant_dict: A dict of lists. Keys are GRCh37 and GRCh38 which releate to the different genome builds
     :return: A dict with translations of original variants to their string representations
     '''
+
     grch37_variant_list = []
     grch38_variant_list = []
     variant_reference = {}
@@ -95,7 +98,7 @@ def get_variant_list(variants):
         elif 'GRCh38' in variant.genome_build:
             grch38_variant_list.append(f"{variant.chromosome}:{pos}:{ref}:{alt}")
         variant_reference[variant] = f"{variant.chromosome}:{pos}:{ref}:{alt}"
-    variant_dict = {'GRCh37': grch37_variant_list, 'GRCh38': grch38_variant_list}
+    variant_dict = {'GRCh37': random.shuffle(grch37_variant_list), 'GRCh38': random.shuffle(grch38_variant_list)}
     return variant_dict, variant_reference
 
 
