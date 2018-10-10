@@ -351,6 +351,7 @@ class GELInterpretationReport(models.Model):
                 latest_report.user = self.user
                 latest_report.no_primary_findings = self.no_primary_findings
                 latest_report.archived_version = self.archived_version
+                latest_report.has_germline_variant = self.has_germline_variant
                 super(GELInterpretationReport, latest_report).save(*args, **kwargs)
             else:
                 self.assigned_user = latest_report.assigned_user

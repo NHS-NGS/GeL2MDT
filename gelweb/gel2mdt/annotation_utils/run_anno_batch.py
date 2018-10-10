@@ -103,7 +103,7 @@ def parse_cellbase(variants_list, annotated_variants_dict):
                     count = 0
                     for consequence in result['consequenceTypes']:  # Again no idea why a list
                         canonical = count == 0
-                        transcript_variant_af_max = None  # Dont have this
+                        transcript_variant_af_max = 0  # Dont have this
                         hgnc_id = None  # Don't have this
                         proband_transcript_variant_effect = None
                         variant_polyphen = None
