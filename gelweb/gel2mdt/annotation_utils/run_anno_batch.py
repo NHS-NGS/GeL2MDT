@@ -108,8 +108,8 @@ def parse_cellbase(variants_list, annotated_variants_dict):
                         proband_transcript_variant_effect = None
                         variant_polyphen = None
                         variant_sift = None
-                        transcript_variant_hgvs_c = None
-                        transcript_variant_hgvs_p = None
+                        transcript_variant_hgvs_c = ''
+                        transcript_variant_hgvs_p = ''
                         required_fields = ['ensemblGeneId', 'geneName', 'ensemblTranscriptId', 'strand',
                                            'sequenceOntologyTerms']
                         if all([f in consequence for f in required_fields]):
@@ -147,8 +147,11 @@ def parse_cellbase(variants_list, annotated_variants_dict):
                             transcript_variant_hgvs_g = f"{variant.chromosome}:g.{variant.position}" \
                                                         f"{variant.ref}>{variant.alt}"  # Ugly hack
                             case_transcript = CaseTranscript(variant.case_id,
-                                                             count,
-                                                             gene_id, gene_name, hgnc_id, transcript_name,
+                                                             variant.variant_count,
+                                                             gene_id,
+                                                             gene_name,
+                                                             hgnc_id,
+                                                             transcript_name,
                                                              canonical,
                                                              transcript_strand, proband_transcript_variant_effect,
                                                              transcript_variant_af_max, variant_polyphen, variant_sift,
