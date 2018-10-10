@@ -234,6 +234,7 @@ class Case(object):
             for variant in ig_obj.variants:
                 # Sort out tiers first
                 variant_min_tier = None
+                tier = None
                 for report_event in variant.reportEvents:
                     if self.json['sample_type'] == 'raredisease':
                         if report_event.tier:
@@ -1076,7 +1077,7 @@ class CaseAttributeManager(object):
         transcript_variants = ManyCaseModel(TranscriptVariant, [{
             "transcript": transcript.transcript_entry,
             "variant": transcript.variant_entry,
-            "af_max": 0,  # Cannot be null, hack for the moment
+            "af_max": transcript.transcript_variant_af_max,  # Cannot be null, hack for the moment
             "hgvs_c": transcript.transcript_variant_hgvs_c,
             "hgvs_p": transcript.transcript_variant_hgvs_p,
             "hgvs_g": transcript.transcript_variant_hgvs_g,
@@ -1130,11 +1131,14 @@ class CaseAttributeManager(object):
 
                 for call in ig_variant.variantCalls:
                     if call.participantId == proband_manager.case_model.entry.gel_id:
-                        ig_variant.zygosity = call.zygosity
+                        if call.zygosity != 'na':
+                            ig_variant.zygosity = call.zygosity
                     elif call.participantId == self.case.mother.get("gel_id", None):
-                        ig_variant.maternal_zygosity = call.zygosity
+                        if call.zygosity != 'na':
+                            ig_variant.maternal_zygosity = call.zygosity
                     elif call.participantId == self.case.father.get("gel_id", None):
-                        ig_variant.paternal_zygosity = call.zygosity
+                        if call.zygosity != 'na':
+                            ig_variant.paternal_zygosity = call.zygosity
 
                     if call:
                         if ig_variant.variantAttributes.alleleOrigins[0] == 'somatic_variant':
