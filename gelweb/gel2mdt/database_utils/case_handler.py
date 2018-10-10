@@ -812,12 +812,12 @@ class CaseAttributeManager(object):
             # convert canonical to bools:
             transcript.canonical = transcript.transcript_canonical is True
             transcript.selected = transcript.transcript_canonical is True
-            if not transcript.gene_hgnc_id:
+            if not transcript.gene_ensembl_id:
                 # if the transcript has no recognised gene associated
                 continue  # don't bother checking genes
             transcript.gene_model = None
             for gene in genes:
-                if gene.entry.hgnc_id == transcript.gene_hgnc_id:
+                if gene.entry.ensembl_id == transcript.gene_ensembl_id:
                     transcript.gene_model = gene.entry
 
         transcripts = ManyCaseModel(Transcript, [{
@@ -1076,7 +1076,7 @@ class CaseAttributeManager(object):
         transcript_variants = ManyCaseModel(TranscriptVariant, [{
             "transcript": transcript.transcript_entry,
             "variant": transcript.variant_entry,
-            "af_max": transcript.transcript_variant_af_max,
+            "af_max": 0,  # Cannot be null, hack for the moment
             "hgvs_c": transcript.transcript_variant_hgvs_c,
             "hgvs_p": transcript.transcript_variant_hgvs_p,
             "hgvs_g": transcript.transcript_variant_hgvs_g,
@@ -1240,217 +1240,6 @@ class CaseAttributeManager(object):
 
         return pv_flags
 
-    def get_report_events(self):
-
-        """
-        Get all the report events for each case from the json and populate an
-        MCM with this information.
-        """
-        # get gene and panel entries
-        config_dict = load_config.LoadConfig().load()
-        genes = [gene.entry for gene
-                 in self.case.attribute_managers[Gene].case_model.case_models]
-        panel_versions = [panel_version.entry for panel_version
-                          in self.case.attribute_managers[PanelVersion].case_model.case_models]
-        phenotypes = [phenotype.entry for phenotype
-                      in self.case.attribute_managers[Phenotype].case_model.case_models]
-        proband_variants = [proband_variant.entry for proband_variant
-                            in self.case.attribute_managers[ProbandVariant].case_model.case_models]
-
-        # get list of dicts of each report event
-        json_report_events = []
-
-        # modify report event dicts with gene and panel info
-        for variant in self.case.json_variants:
-            interesting_variant = False
-            if not self.case.pullt3:
-                if variant["max_tier"] < 3:
-                    interesting_variant = True
-            else:
-                interesting_variant=True
-            if interesting_variant:
-                # go through each RE in the variant
-                for report_event in variant["reportEvents"]:
-                    # set the Gene entry
-                    gene_found = False
-                    re_genomic_info = report_event.get("genomicFeature", None)
-                    if re_genomic_info:
-                        re_gene_ensembl_id = re_genomic_info.get("ensemblId", None)
-                        for gene in genes:
-                            if re_gene_ensembl_id == gene.ensembl_id:
-                                report_event["gene_entry"] = gene
-                                gene_found = True
-                                break
-                        if not gene_found:
-                            # re-attempt with HGNC
-                            re_gene_hgnc = re_genomic_info.get("HGNC", None)
-                            for gene in genes:
-                                if re_gene_hgnc == gene.hgnc_name:
-                                    report_event["gene_entry"] = gene
-                                    gene_found = True
-
-                    if not gene_found:
-                        report_event["gene_entry"] = None
-
-                    # set the Panel entry
-                    panel_found = False
-                    re_panel_name = report_event.get("panelName", None)
-                    re_panel_version = report_event.get("panelVersion", None)
-
-                    for panel_version in panel_versions:
-                        if (
-                            re_panel_name == panel_version.panel.panel_name and
-                            re_panel_version == panel_version.version_number
-                        ):
-                            report_event["panel_version_entry"] = panel_version
-                            panel_found = True
-                            break
-                    if not panel_found:
-                        report_event["panel_version_entry"] = None
-
-                    if panel_found:
-                        try:
-                            panel = report_event["panel_version_entry"].panel
-                            panelapp_id = panel.panelapp_id
-                            # coverages is a dict of dicts: (1) access panel using hash
-                            panel_coverages = self.case.json_request_data["genePanelsCoverage"]
-                            panel_coverage = panel_coverages.get(panelapp_id, None)
-                            # (2) access coverage info using gene hgnc
-
-                            re_gene_hgnc = report_event["genomicFeature"]["HGNC"]
-                            re_gene_coverage = panel_coverage[re_gene_hgnc]
-                            # coverage info lists samples, get correct sample
-                            proband_sample = self.case.proband["samples"][0]
-                            proband_sample_avg = proband_sample + "_avg"
-                            gene_avg_coverage = re_gene_coverage[proband_sample_avg]
-                            report_event["gene_coverage"] = gene_avg_coverage
-                        except KeyError as e:
-                            report_event["gene_coverage"] = None
-
-                    # set the ProbandVariant entry
-                    proband_variant_found = False
-                    for proband_variant in proband_variants:
-                        if proband_variant.variant == variant["variant_entry"]:
-                            report_event["proband_variant_entry"] = proband_variant
-                            proband_variant_found = True
-                            break
-                    if not proband_variant_found:
-                        report_event["proband_variant_entry"] = None
-
-                    try:
-                        report_event_tier = int(report_event["tier"][-1:])
-                    except:
-                        report_event_tier = None
-
-                    report_event_id = report_event.get("reportEventId", None)
-                    if report_event_id and report_event['proband_variant_entry']:
-                        json_report_events.append({
-                            "coverage": report_event.get("gene_coverage", None),
-                            "gene": report_event["gene_entry"],
-                            "mode_of_inheritance": report_event.get("modeOfInheritance", None),
-                            "panel": report_event["panel_version_entry"],
-                            "penetrance": report_event.get("penetrance", None),
-                            "proband_variant": report_event["proband_variant_entry"],
-                            "re_id": report_event_id,
-                            "tier": report_event_tier,
-                        })
-
-        # repeat for CIP flagged variants:
-        for interpreted_genome in self.case.json["interpreted_genome"]:
-            for variant in interpreted_genome["interpreted_genome_data"]["reportedVariants"]:
-                # go through each RE in the variant
-                for report_event in variant["reportEvents"]:
-                    # set the Gene entry
-                    found = False
-                    gene_found = False
-                    re_genomic_info = report_event.get("genomicFeature", None)
-                    if re_genomic_info:
-                        re_gene_ensembl_id = re_genomic_info.get("ensemblId", None)
-                        for gene in genes:
-                            if re_gene_ensembl_id == gene.ensembl_id:
-                                report_event["gene_entry"] = gene
-                                gene_found = True
-                                break
-
-                        if not gene_found:
-                            # re-attempt with HGNC
-                            re_gene_hgnc = re_genomic_info.get("HGNC", None)
-                            for gene in genes:
-                                if re_gene_hgnc == gene.hgnc_name:
-                                    report_event["gene_entry"] = gene
-                                    gene_found = True
-
-                    if not gene_found:
-                        report_event["gene_entry"] = None
-
-                    # set the Panel entry
-                    panel_found = False
-                    re_panel_name = report_event.get("panelName", None)
-                    re_panel_version = report_event.get("panelVersion", None)
-
-                    for panel_version in panel_versions:
-                        if (
-                            re_panel_name == panel_version.panel.panel_name and
-                            re_panel_version == panel_version.version_number
-                        ):
-                            report_event["panel_version_entry"] = panel_version
-                            panel_found = True
-                            break
-                    if not panel_found:
-                        report_event["panel_version_entry"] = None
-
-                    if panel_found:
-                        try:
-                            panel = report_event["panel_version_entry"].panel
-                            panelapp_id = panel.panelapp_id
-                            # coverages is a dict of dicts: (1) access panel using hash
-                            panel_coverages = self.case.json_request_data["genePanelsCoverage"]
-                            panel_coverage = panel_coverages.get(panelapp_id, None)
-                            # (2) access coverage info using gene hgnc
-
-                            re_gene_hgnc = report_event["genomicFeature"]["HGNC"]
-                            re_gene_coverage = panel_coverage[re_gene_hgnc]
-                            # coverage info lists samples, get correct sample
-                            proband_sample = self.case.proband["samples"][0]
-                            proband_sample_avg = proband_sample + "_avg"
-                            gene_avg_coverage = re_gene_coverage[proband_sample_avg]
-                            report_event["gene_coverage"] = gene_avg_coverage
-                        except KeyError as e:
-                            report_event["gene_coverage"] = None
-                    else:
-                        report_event["gene_coverage"] = None
-
-                    # set the ProbandVariant entry
-                    proband_variant_found = False
-                    for proband_variant in proband_variants:
-                        if proband_variant.variant == variant["variant_entry"]:
-                            report_event["proband_variant_entry"] = proband_variant
-                            proband_variant_found = True
-                            break
-                    if not proband_variant_found:
-                        report_event["proband_variant_entry"] = None
-
-                    try:
-                        report_event_tier = int(report_event["tier"][-1:])
-                    except:
-                        report_event_tier = None
-
-                    report_event_id = report_event.get("reportEventId", None)
-                    if report_event_id and report_event['proband_variant_entry']:
-                        json_report_events.append({
-                            "coverage": report_event.get("gene_coverage", None),
-                            "gene": report_event["gene_entry"],
-                            "mode_of_inheritance": report_event.get("modeOfInheritance", None),
-                            "panel": report_event["panel_version_entry"],
-                            "penetrance": report_event.get('penetrance', None),
-                            "proband_variant": report_event["proband_variant_entry"],
-                            "re_id": report_event_id,
-                            "tier": report_event_tier
-                        })
-
-        report_events = ManyCaseModel(ReportEvent, json_report_events, self.model_objects)
-        return report_events
-
     def get_proband_transcript_variants(self):
         """
         Get the ProbandTranscriptVariants associated with this case and return
@@ -1465,16 +1254,18 @@ class CaseAttributeManager(object):
                 if proband_variant.variant == transcript.variant_entry:
                     transcript.proband_variant_entry = proband_variant
 
-        for transcript in self.case.transcripts:
-            if transcript.transcript_entry:
-                for variant in self.case.json_variants:
-                    if variant.variant_entry == transcript.variant_entry:
-                        for reportevent in variant.reportEvents:
-                            for en in reportevent.genomicEntities:
-                                if transcript.transcript_name == en['ensemblId']:
-                                    transcript.selected = True
-                                else:
-                                    transcript.selected = False
+        # if self.case.json['sample_type'] == 'cancer':
+        #     for transcript in self.case.transcripts:
+        #         if transcript.transcript_entry:
+        #             for ig_obj in self.case.ig_objs:
+        #                 for variant in ig_obj.variants:
+        #                     if variant.variant_entry == transcript.variant_entry:
+        #                         for reportevent in variant.reportEvents:
+        #                             for en in reportevent.genomicEntities:
+        #                                 if transcript.transcript_name == en['ensemblId']:
+        #                                     transcript.selected = True
+        #                                 else:
+        #                                     transcript.selected = False
 
         proband_transcript_variants = ManyCaseModel(ProbandTranscriptVariant, [{
             "transcript": transcript.transcript_entry,

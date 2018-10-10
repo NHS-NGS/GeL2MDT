@@ -275,7 +275,7 @@ class MultipleCaseAdder(object):
         """
         request_poll = PollAPI(
             # instantiate a poll of CIP API for a given case json
-            "cip_api", "interpretation-request/{id}/{version}".format(
+            "cip_api", "interpretation-request/{id}/{version}?reports_v6=true".format(
                 id=interpretation_request_id.split("-")[0],
                 version=interpretation_request_id.split("-")[1]))
         response = request_poll.get_json_response()
