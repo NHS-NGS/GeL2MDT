@@ -70,21 +70,41 @@ def get_variant_list(variants):
     Function which creates a list from variant objects specified from MCA.
 
     :param variants: List of CaseVariant objects
-    :return: A dict of lists. Keys are GRCh37 and GRCh38 which releate to the different
-    genome builds
+    :return: variant_dict: A dict of lists. Keys are GRCh37 and GRCh38 which releate to the different genome builds
+    :return: A dict with translations of original variants to their string representations
     '''
     grch37_variant_list = []
     grch38_variant_list = []
+    variant_reference = {}
     for variant in variants:
+        ref = variant.ref
+        alt = variant.alt
+        pos = int(variant.position)
+        if len(alt) > 1:
+            if len(ref) == 1:  # This is a insertion
+                ref = ''
+                alt = alt[1:]
+                pos += 1
+        elif len(ref) > 1:
+            if len(alt) == 1:  # This is a deletion
+                ref = ref[1:]
+                alt = ''
+                pos += 1
         if 'GRCh37' in variant.genome_build:
-            grch37_variant_list.append(f"{variant.chromosome}:{variant.position}:{variant.ref}:{variant.alt}")
+            grch37_variant_list.append(f"{variant.chromosome}:{pos}:{ref}:{alt}")
         elif 'GRCh38' in variant.genome_build:
-            grch38_variant_list.append(f"{variant.chromosome}:{variant.position}:{variant.ref}:{variant.alt}")
+            grch38_variant_list.append(f"{variant.chromosome}:{pos}:{ref}:{alt}")
+        variant_reference[variant] = f"{variant.chromosome}:{pos}:{ref}:{alt}"
     variant_dict = {'GRCh37': grch37_variant_list, 'GRCh38': grch38_variant_list}
-    return variant_dict
+    return variant_dict, variant_reference
 
 
 def run_cellbase(variant_dict):
+    '''
+    Runs cellbase to get annotation
+    :param variant_dict: Dict with keys as assemblies and values are variants in string format
+    :return: dictionary with keys are assemblies and values as json results from cellbase
+    '''
     cbc = CellBaseClient()
     vc = cbc.get_variant_client()
     annotated_dict = {}
@@ -94,11 +114,18 @@ def run_cellbase(variant_dict):
     return annotated_dict
 
 
-def parse_cellbase(variants_list, annotated_variants_dict):
+def parse_cellbase(variants_list, annotated_variants_dict, variant_reference):
+    '''
+
+    :param variants_list: A list of CaseVariants to be annotated
+    :param annotated_variants_dict: A dict from run_cellbase with the annotated variants jsons
+    :param variant_reference: A dict with translations of CaseVariants to their string representations
+    :return: A list of CaseTranscript objects which are returned to MCA
+    '''
     transcript_list = []
     for variant in variants_list:
         for annotated_variant in annotated_variants_dict[variant.genome_build]:
-            if annotated_variant['id'] == f"{variant.chromosome}:{variant.position}:{variant.ref}:{variant.alt}":
+            if annotated_variant['id'] == variant_reference[variant]:
                 for result in annotated_variant['result']:  # Not sure why there would be 2 results
                     count = 0
                     for consequence in result['consequenceTypes']:  # Again no idea why a list
@@ -171,7 +198,7 @@ def generate_transcripts(variant_list):
     :param variant_list: A list of Casevariant objects
     :return: A list of CaseTranscript objects for all the CaseVariants
     '''
-    variant_vcf_dict = get_variant_list(variant_list)
+    variant_vcf_dict, variant_reference = get_variant_list(variant_list)
     annotated_dict = run_cellbase(variant_vcf_dict)
-    transcripts_list = parse_cellbase(variant_list, annotated_dict)
+    transcripts_list = parse_cellbase(variant_list, annotated_dict, variant_reference)
     return transcripts_list
