@@ -4,9 +4,13 @@ This docker configuration creates two containers:
 1. Gel2MDT Django installation with VEP
 2. Postgres database backend
 
-Whilst VEP is intalled within the container, it requires that the reference genome files and VEP cache to be available on the host machine. These can be downloaded from the Ensembl ftp site.
+Whilst VEP is intalled within the container, it requires that the reference genome files and VEP cache to be available 
+on the host machine. These can be downloaded from the Ensembl ftp site. **As per the main Readme, Gel2MDT has been 
+ tested with version 92 so that is the version that is installed. The correct VEP files will need to be downloaded 
+ to reflect this.**
 
-Likewise, in order to maintain a persistent database the Postgres install stores the database files on the local machine and the cached JSON files from GEL are also stored on the host.
+Likewise, in order to maintain a persistent database the Postgres install stores the database files on the local 
+machine and the cached JSON files from GEL are also stored on the host.
 
 ### Clone the Repo
     git clone -b docker https://github.com/KingsPM/GeL2MDT.git
@@ -53,7 +57,8 @@ You can build the images with the standard:
     docker-compose build
     
 ...however the first time a Django app is run, the app needs to create the database schema. So in order to keep this
- out of the build process _and_ out of the routine containter startup, the commands for this are located in
+ out of the build process (because you may need to build the container in a different location than it is being run) 
+ _and_ out of the routine containter startup, the commands for this are located in
 the `initial_script.sh` script, so from the Docker directory, run (**for a one time creation of the database**):  
 
     docker-compose run web bash initial_script.sh
