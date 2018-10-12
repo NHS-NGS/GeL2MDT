@@ -4,7 +4,8 @@ This docker configuration creates two containers:
 1. Gel2MDT Django installation with VEP
 2. Postgres database backend
 
-Whilst VEP is intalled within the container, it requires that the reference genome files and VEP cache to be available on the host machine.
+Whilst VEP is intalled within the container, it requires that the reference genome files and VEP cache to be available on the host machine. These can be downloaded from the Ensembl ftp site.
+
 Likewise, in order to maintain a persistent database the Postgres install stores the database files on the local machine and the cached JSON files from GEL are also stored on the host.
 
 ### Clone the Repo
