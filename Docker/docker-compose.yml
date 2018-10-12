@@ -4,8 +4,6 @@ services:
   db:
     image: postgres:10
     restart: always
-    ports:
-      - "5432:5432"
     environment:
       - POSTGRES_USER=gel2mdtuser
       - POSTGRES_PASSWORD=gel2mdtpassword
@@ -17,18 +15,19 @@ services:
     build:
       context: ..
       args:
-        - CPI_API_USERNAME=jsmith
-        - CPI_API_PASSWORD=xxxx
-        - LABKEY_USERNAME=sss@fdgdg.com
+        - CPI_API_USERNAME=xxx
+        - CPI_API_PASSWORD=xxx
+        - LABKEY_USERNAME=xxx@nhs.net
         - LABKEY_PASSWORD=xxxx
         - DJANGO_SUPERUSER=admin
-        - DJANGO_EMAIL=name@nhs.net
+        - DJANGO_EMAIL=xxx@nhs.net
         - DJANGO_PASSWORD=password123
     command: bash -c "cd /root/gel2mdt/gelweb && python manage.py runserver 0.0.0.0:8000"
     #restart: always
     volumes:
       - /mnt/cd43cd07-630b-4e68-ab79-9a7ab51910a7/resources:/root/reference
       - /mnt/cd43cd07-630b-4e68-ab79-9a7ab51910a7/resources/.vep:/root/.vep
+      - /mnt/cd43cd07-630b-4e68-ab79-9a7ab51910a7/resources/gel2mdt_cache:/root/gel2mdt_cache
     ports:
       - "8000:8000"
     depends_on:

@@ -7,8 +7,7 @@ SECRET_KEY = 'PickYourOwnSecurityKeyHere'
 DEBUG = True
 
 # Allowed hosts
-ALLOWED_HOSTS = ['localhost',
-                 '127.0.0.1']
+ALLOWED_HOSTS = ['*']
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
@@ -18,8 +17,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'gel2mdt_db',
         'USER': 'gel2mdtuser',
-        'PASSWORD': 'gel2mdtpassword',  # Need to set env var
-        'HOST': 'db',  # IP of the dbserver
+        'PASSWORD': 'gel2mdtpassword',
+        'HOST': 'db',
         'PORT': '5432',
     },
 }
