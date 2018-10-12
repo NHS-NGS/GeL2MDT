@@ -13,17 +13,21 @@ to relevant GEL services
 - `Volumes` for the persistant postgres db on the host (db container), and reference fasta file and vep_cache 
 (web container):
 
-    The postgres database directory
+    Where the postgress db will reside on the host:
 
     ```
-    volumes:
-        - <edit host directory>:/var/lib/postgresql/data 
+    db:
+        volumes:
+            - <edit host directory>:/var/lib/postgresql/data
     ```
-    The directory containing the reference genomes (37 and 38) and .vep cache
+    Where the reference genome fasta files, vep cache and gel2mdt_cache (cip_api_storage, 
+    panelapp_storage & gene_storage) directories, respectively, will reside on the host:
     ```
-    volumes:
-        - <edit host directory>:/root/reference 
-        - <edit host directory>:/root/vep_cache
+    web:
+        volumes:
+            - <edit host directory>:/root/reference
+            - <edit host directory>:/root/vep_cache
+            - <edit host directory>:/root/gel2mdt_cache
     ``` 
 **my_config.txt**:
 - Edit the `labkey_server_request` and `labkey_cancer_server_request` URLs & `GMC` variables
@@ -36,26 +40,32 @@ to relevant GEL services
 - Leave the database connection settings unless you are also going to reconfigure the database docker container
 
 ### Build the images
-The first time the images are build, Django needs to create the database schema, the commands for this are located in
+You can build the images with the standard:
+
+    docker-compose build
+    
+...however the first time a Django app is run, the app needs to create the database schema. So in order to keep this
+ out of the build process _and_ out of the routine containter startup, the commands for this are located in
 the `initial_script.sh` script, so from the Docker directory, run (**for a one time creation of the database**):  
 
-    run docker-compose run web bash initial_script.sh
+    docker-compose run web bash initial_script.sh
 
 Thereafter, you just need to run: 
 
-    run docker-compose up
+    docker-compose up
 
-The system can be shutdown with:
+and system can be *stopped/started/removed with:
 
-    run docker-compose down
+    docker-compose *stop/start/down
 
-This destroys the containers and their associated network, but will leave the postgres databse on the host machine 
-(assuming all has been configured correctly!)
+This `docker-compose down` will destroy the containers and their associated network, but will leave the persisent 
+folders, i.e. postgres database on the host machine (assuming all has been configured correctly!)
 
 ### Caveats / To do...
 
 - This runs the app using the Django development webservice - this needs to be rebuild with Nginx or Apache
 - I have not configured the `DAILY_UPDATE.sh` script yet.
+- Need to think about permissions for the host directories.
  
 Contact:
 philip.davidson2@nhs.net
