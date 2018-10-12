@@ -1,5 +1,12 @@
 # GeL2MDT Docker installation - experimental #
 
+This docker configuration creates two containers:
+1. Gel2MDT Django installation with VEP
+2. Postgres database backend
+
+Whilst VEP is intalled within the container, it requires that the reference genome files and VEP cache to be available on the host machine.
+Likewise, in order to maintain a persistent database the Postgres install stores the database files on the local machine and the cached JSON files from GEL are also stored on the host.
+
 ### Clone the Repo
     git clone -b docker https://github.com/KingsPM/GeL2MDT.git
 ### Edit site-specific details
@@ -64,8 +71,8 @@ folders, i.e. postgres database on the host machine (assuming all has been confi
 ### Caveats / To do...
 
 - This runs the app using the Django development webservice - this needs to be rebuild with Nginx or Apache
-- I have not configured the `DAILY_UPDATE.sh` script yet.
-- Need to think about permissions for the host directories.
+- I have not configured the `DAILY_UPDATE.sh` script yet
+- Need to think about permissions for the host directories
  
 Contact:
 philip.davidson2@nhs.net
