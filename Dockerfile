@@ -51,7 +51,7 @@ RUN pip install -r requirements.txt
 
 # Make cache directories
 WORKDIR /root/gel2mdt_cache
-RUN mkdir cip_api_storage panelapp_storage gene_storage
+RUN mkdir -p cip_api_storage panelapp_storage gene_storage
 
 # Copy config file from docker folder to correct gel2mdt folders
 WORKDIR /root/gel2mdt/Docker
