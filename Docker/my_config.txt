@@ -3,8 +3,8 @@ vep=/root/ensembl-vep/vep
 cache=/root/.vep
 
 cache_version=92
-hg19_fasta_loc=/root/resources/Homo_sapiens.GRCh37.dna.primary_assembly.fa
-hg38_fasta_loc=/root/resources/Homo_sapiens.GRCh38.dna.primary_assembly.fa
+hg19_fasta_loc=/root/reference/Homo_sapiens.GRCh37.dna.primary_assembly.fa
+hg38_fasta_loc=/root/reference/Homo_sapiens.GRCh38.dna.primary_assembly.fa
 labkey_server_request=Genomics England Portal/South London/MeRCURy/Rare Diseases/Core
 labkey_cancer_server_request=Genomics England Portal/South London/MeRCURy/Cancer/Core
 cip_api_storage=/root/gel2mdt_cache/cip_api_storage
