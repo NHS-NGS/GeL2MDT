@@ -14,17 +14,10 @@ services:
     image: gel2mdt_web
     build:
       context: .
-      args:
-        - CPI_API_USERNAME=xxx
-        - CPI_API_PASSWORD=xxx
-        - LABKEY_USERNAME=xxx@nhs.net
-        - LABKEY_PASSWORD=xxxx
-        - DJANGO_SUPERUSER=admin
-        - DJANGO_EMAIL=xxx@nhs.net
-        - DJANGO_PASSWORD=password123
-    command: bash -c "cd /root/gel2mdt/gelweb && gunicorn gelweb.wsgi -b 0.0.0.0:8000"
+    command: bash -c ". /code/Docker/startup_script.sh && cd /root/gel2mdt/gelweb && gunicorn gelweb.wsgi -b 0.0.0.0:8000"
     #restart: always
     volumes:
+      - .:/code
       - /media/sf_shared_resources:/root/reference
       - /media/sf_shared_resources/.vep:/root/.vep
       - /home/phil/Documents/gel2mdt_resources:/root/gel2mdt_cache
