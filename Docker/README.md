@@ -1,8 +1,9 @@
 # GeL2MDT Docker installation - experimental #
 
-This docker configuration creates two containers:
-1. Gel2MDT Django installation with VEP
-2. Postgres database backend
+This docker configuration creates three containers:
+1. Nginx webserver
+2. Gel2MDT Django installation, plus VEP & Gunicorn
+3. Postgres database backend
 
 Whilst VEP is installed within the container, it requires that the reference genome files and VEP cache to be available 
 on the host machine. These can be downloaded from the Ensembl ftp site. **As per the main Readme, Gel2MDT has been 
@@ -74,11 +75,14 @@ and system can be *stopped/started/removed with:
 This `docker-compose down` will destroy the containers and their associated network, but will leave the persisent 
 folders, i.e. postgres database on the host machine (assuming all has been configured correctly!)
 
+### Gel2MDT will be available at http://<your_server>:8000
+
 ### Caveats / To do...
 
-- This runs the app using the Django development webservice - this needs to be rebuild with Nginx or Apache
-- I have not configured the `DAILY_UPDATE.sh` script yet
-- Need to think about permissions for the host directories
+- I have not configured the `DAILY_UPDATE.sh` script - should/is this configured with celery?
+- Need to think about permissions for the host directories: db & cache folders are inaccessable with the host ATM
+- The gel2mdt_web image is not strictly portable at the moment as site-specific data is submitted during the build process 
+(usernames as env variables, netrc file creation). These need to be moved to make the final image portable/shareable
  
 Contact:
 philip.davidson2@nhs.net
