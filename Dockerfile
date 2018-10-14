@@ -51,6 +51,7 @@ WORKDIR /root/gel2mdt
 # This is already installed with Anaconda and fails to 'downgrade'. Remove from requirements file?
 RUN sed -i 's/certifi==/# certifi==/g' requirements.txt
 RUN pip install -r requirements.txt
+RUN pip install psycopg2-binary gunicorn
 
 # Make cache directories
 WORKDIR /root/gel2mdt_cache
