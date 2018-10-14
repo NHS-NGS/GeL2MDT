@@ -81,6 +81,8 @@ folders, i.e. postgres database on the host machine (assuming all has been confi
 
 - I have not configured the `DAILY_UPDATE.sh` script - should/is this configured with celery?
 - Need to think about permissions for the host directories: db & cache folders are inaccessable with the host ATM
+- The gel2mdt_web image is not strictly portable at the moment as site-specific data is submitted during the build process 
+(usernames as env variables, netrc file creation). These need to be moved to make the final image portable/shareable
  
 Contact:
 philip.davidson2@nhs.net
