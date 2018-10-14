@@ -75,7 +75,7 @@ and system can be *stopped/started/removed with:
 This `docker-compose down` will destroy the containers and their associated network, but will leave the persisent 
 folders, i.e. postgres database on the host machine (assuming all has been configured correctly!)
 
-**Gel2MDT will be available at http://<your_server>:8000**
+### Gel2MDT will be available at http://<your_server>:8000
 
 ### Caveats / To do...
 
