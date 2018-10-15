@@ -28,7 +28,7 @@ RUN cpanm DBI
 WORKDIR /root
 RUN git clone https://github.com/Ensembl/ensembl-vep.git
 WORKDIR /root/ensembl-vep
-RUN perl INSTALL.pl --VERSION 92 --AUTO a -l -n
+RUN perl INSTALL.pl --VERSION 92 --AUTO a -n
 
 # Create virtual env and set path (equivalent to 'activate')
 WORKDIR /root
