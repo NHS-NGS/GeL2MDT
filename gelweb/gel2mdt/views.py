@@ -281,6 +281,9 @@ def proband_view(request, report_id):
     report_history_formatter = ReportHistoryFormatter(report=report)
     report_history = report_history_formatter.get_report_history()
     proband_history = report_history_formatter.get_proband_history()
+    ir_family = report.ir_family
+    other_cases = GELInterpretationReport.objects.latest_cases_by_sample_type(report.sample_type).filter(
+        ir_family=ir_family) # .exclude(ir_family=report.ir_family)
 
     if request.method == "POST":
         demogs_form = DemogsForm(request.POST, instance=report.ir_family.participant_family.proband)
@@ -392,7 +395,8 @@ def proband_view(request, report_id):
                                                     'report_history': report_history,
                                                     'proband_history': proband_history,
                                                     'report_fields': report_history_formatter.report_interesting_fields,
-                                                    'proband_fields': report_history_formatter.proband_interesting_fields})
+                                                    'proband_fields': report_history_formatter.proband_interesting_fields,
+                                                    'other_cases': other_cases})
 
 
 @login_required

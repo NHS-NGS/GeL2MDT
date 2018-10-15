@@ -107,7 +107,7 @@ class GELIRForm(forms.ModelForm):
     '''
     class Meta:
         model = GELInterpretationReport
-        fields = ['case_status', 'mdt_status', 'pilot_case', 'case_sent', 'no_primary_findings']
+        fields = ['case_status', 'mdt_status', 'pilot_case', 'case_sent', 'no_primary_findings', 'case_code']
 
     def save(self):
         gelir = self.instance
@@ -117,6 +117,7 @@ class GELIRForm(forms.ModelForm):
         gelir.pilot_case = data['pilot_case']
         gelir.case_sent = data['case_sent']
         gelir.no_primary_findings = data['no_primary_findings']
+        gelir.case_code = data['case_code']
         gelir.save(overwrite=True)
 
 
