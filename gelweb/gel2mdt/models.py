@@ -323,6 +323,8 @@ class GELInterpretationReport(models.Model):
         ('R', 'Required'), ('N', 'Not Required'), ('I', 'In Progress'), ('D', 'Done'),), default='U')
     pilot_case = models.BooleanField(default=False)
     no_primary_findings = models.BooleanField(default=False)
+    case_code = models.CharField(max_length=20, null=True, blank=True, choices=(
+        ('REANALYSE', 'REANALYSE'), ('NEW', 'NEW')), )
 
     def save(self, overwrite=False, *args, **kwargs):
         """
@@ -362,6 +364,7 @@ class GELInterpretationReport(models.Model):
                 self.polled_at_datetime = timezone.now()
                 self.user = latest_report.user
                 self.no_primary_findings = latest_report.no_primary_findings
+                self.case_code = latest_report.case_code
                 # update the latest saved version.
                 self.archived_version = latest_report.archived_version + 1
                 super(GELInterpretationReport, self).save(*args, **kwargs)
@@ -400,7 +403,7 @@ class ClinicalScientist(models.Model):
     class Meta:
         managed = True
         db_table = 'ClinicalScientist'
-        app_label= 'gel2mdt'
+        app_label = 'gel2mdt'
 
 
 class Proband(models.Model):
@@ -890,4 +893,14 @@ class MDTReport(models.Model):
     class Meta:
         managed = True
         db_table = 'MDTReport'
+        app_label = 'gel2mdt'
+
+
+class CaseAlert(models.Model):
+    gel_id = models.CharField(max_length=30)
+    comment = models.CharField(max_length=255)
+
+    class Meta:
+        managed = True
+        db_table = 'GELAlert'
         app_label= 'gel2mdt'
