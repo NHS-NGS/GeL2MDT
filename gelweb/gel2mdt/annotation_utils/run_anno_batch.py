@@ -29,6 +29,14 @@ import paramiko
 from pycellbase.cbclient import CellBaseClient
 import random
 from datetime import datetime
+os.environ['UTA_DB_URL'] = 'postgresql://anonymous@localhost:5432/uta/uta_20171026'
+import hgvs
+import hgvs.parser
+import hgvs.assemblymapper
+import hgvs.dataproviders.uta
+hp = hgvs.parser.Parser()
+hdp = hgvs.dataproviders.uta.connect()
+import re
 
 
 class CaseVariant:
@@ -80,6 +88,7 @@ def get_variant_list(variants):
     grch38_variant_list = []
     variant_reference = {}
     for variant in variants:
+        print(variant.genome_build)
         ref = variant.ref
         alt = variant.alt
         pos = int(variant.position)
@@ -95,10 +104,13 @@ def get_variant_list(variants):
                 pos += 1
         if 'GRCh37' in variant.genome_build:
             grch37_variant_list.append(f"{variant.chromosome}:{pos}:{ref}:{alt}")
+            random.shuffle(grch37_variant_list)
         elif 'GRCh38' in variant.genome_build:
             grch38_variant_list.append(f"{variant.chromosome}:{pos}:{ref}:{alt}")
+            random.shuffle(grch38_variant_list)
         variant_reference[variant] = f"{variant.chromosome}:{pos}:{ref}:{alt}"
-    variant_dict = {'GRCh37': random.shuffle(grch37_variant_list), 'GRCh38': random.shuffle(grch38_variant_list)}
+
+    variant_dict = {'GRCh37': grch37_variant_list, 'GRCh38': grch38_variant_list}
     return variant_dict, variant_reference
 
 
@@ -111,6 +123,7 @@ def run_cellbase(variant_dict):
     cbc = CellBaseClient()
     vc = cbc.get_variant_client()
     annotated_dict = {}
+    print(variant_dict)
     for key in variant_dict:
         variants_info = vc.get_annotation(variant_dict[key], assembly=key)
         annotated_dict[key] = variants_info
@@ -162,18 +175,30 @@ def parse_cellbase(variants_list, annotated_variants_dict, variant_reference):
                             except KeyError:
                                 pass
                             try:
-                                for hgvs in result['hgvs']:
-                                    if hgvs.startswith(transcript_name):
-                                        transcript_variant_hgvs_c = hgvs
+                                for hgvs_code in result['hgvs']:
+                                    if hgvs_code.startswith(transcript_name):
+                                        transcript_variant_hgvs_c = hgvs_code
                                         break
                             except KeyError:
                                 pass
-                            try:
-                                transcript_variant_hgvs_p = f"{consequence['proteinVariantAnnotation']['reference']}" \
-                                                            f"{consequence['proteinVariantAnnotation']['position']}" \
-                                                            f"{consequence['proteinVariantAnnotation']['alternate']}"
-                            except KeyError:
-                                pass
+                            if transcript_variant_hgvs_c:
+                                try:
+                                    transcript_variant_hgvs_c = re.sub(r'\([^)]*\)', '', transcript_variant_hgvs_c)
+                                    var_c1 = hp.parse_hgvs_variant(transcript_variant_hgvs_c)
+                                    print(str(var_c1))
+                                    am = hgvs.assemblymapper.AssemblyMapper(hdp,
+                                                                            assembly_name=variant.genome_build,
+                                                                            alt_aln_method='splign',
+                                                                            replace_reference=False)
+                                    var_p = am.c_to_p(var_c1)
+                                    print(var_p)
+                                    transcript_variant_hgvs_p = str(var_p)
+                                except (hgvs.exceptions.HGVSInvalidVariantError,
+                                        hgvs.exceptions.HGVSUsageError,
+                                        NotImplementedError,
+                                        TypeError,
+                                        hgvs.exceptions.HGVSDataNotAvailableError) as e:
+                                    print(e)
                             transcript_variant_hgvs_g = f"{variant.chromosome}:g.{variant.position}" \
                                                         f"{variant.ref}>{variant.alt}"  # Ugly hack
                             case_transcript = CaseTranscript(variant.case_id,
