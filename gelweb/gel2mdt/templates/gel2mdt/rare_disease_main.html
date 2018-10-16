@@ -283,6 +283,7 @@ SOFTWARE.
                             <th>Gender</th>
                             <th>Disease Subtype</th>
                             <th>NHS number</th>
+                            <th>Case Code</th>
                         </tr>
                     </thead>
                     </table>
@@ -551,6 +552,10 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
                 {
                     "data": "nhs_num",
                     "visible": false
+                },
+                {
+                    "data": "case_code",
+                    "visible": true
                 }
             ],
             "order": [[12, "desc"]]
@@ -630,6 +635,10 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
                 {
                     "data": "nhs_num",
                     "visible": false
+                },
+                {
+                    "data": "case_code",
+                    "visible": true
                 }
             ],
             "order": [[12, "desc"]]
