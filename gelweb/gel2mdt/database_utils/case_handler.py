@@ -855,10 +855,11 @@ class CaseAttributeManager(object):
         genes_failing_coverage = []
         for panel in self.case.attribute_managers[PanelVersion].case_model.case_models:
             if "entry" in vars(panel):
-                panel_coverage = self.case.ir_obj.genePanelsCoverage.get(panel.entry.panel.panelapp_id, {})
-                for gene, coverage_dict in panel_coverage.items():
-                    if float(coverage_dict["_".join((self.case.proband_sample, "gte15x"))]) < 0.95:
-                        genes_failing_coverage.append(gene)
+                if self.case.ir_obj.genePanelsCoverage:
+                    panel_coverage = self.case.ir_obj.genePanelsCoverage.get(panel.entry.panel.panelapp_id, {})
+                    for gene, coverage_dict in panel_coverage.items():
+                        if float(coverage_dict["_".join((self.case.proband_sample, "gte15x"))]) < 0.95:
+                            genes_failing_coverage.append(gene)
 
         genes_failing_coverage = sorted(set(genes_failing_coverage))
         str_genes_failing_coverage = ''
@@ -869,17 +870,20 @@ class CaseAttributeManager(object):
 
         ir_family = self.case.attribute_managers[InterpretationReportFamily].case_model
 
-        ir_family_panels = ManyCaseModel(InterpretationReportFamilyPanel, [{
-            "ir_family": ir_family.entry,
-            "panel": panel.entry,
-            "custom": False,
-            "average_coverage": self.case.ir_obj.genePanelsCoverage[panel.entry.panel.panelapp_id]["SUMMARY"].get("_".join((self.case.proband_sample, "avg")), None),
-            "proportion_above_15x": self.case.ir_obj.genePanelsCoverage[panel.entry.panel.panelapp_id]["SUMMARY"].get("_".join((self.case.proband_sample, "gte15x")), None),
-            "genes_failing_coverage": str_genes_failing_coverage
-        } for panel in self.case.attribute_managers[PanelVersion].case_model.case_models if "entry" in vars(panel) and
-            panel.entry.panel.panelapp_id in self.case.ir_obj.genePanelsCoverage and
-            'SUMMARY' in self.case.ir_obj.genePanelsCoverage[panel.entry.panel.panelapp_id]],
-            self.model_objects)
+        if self.case.ir_obj.genePanelsCoverage:
+            ir_family_panels = ManyCaseModel(InterpretationReportFamilyPanel, [{
+                "ir_family": ir_family.entry,
+                "panel": panel.entry,
+                "custom": False,
+                "average_coverage": self.case.ir_obj.genePanelsCoverage[panel.entry.panel.panelapp_id]["SUMMARY"].get("_".join((self.case.proband_sample, "avg")), None),
+                "proportion_above_15x": self.case.ir_obj.genePanelsCoverage[panel.entry.panel.panelapp_id]["SUMMARY"].get("_".join((self.case.proband_sample, "gte15x")), None),
+                "genes_failing_coverage": str_genes_failing_coverage
+            } for panel in self.case.attribute_managers[PanelVersion].case_model.case_models if "entry" in vars(panel) and
+                panel.entry.panel.panelapp_id in self.case.ir_obj.genePanelsCoverage and
+                'SUMMARY' in self.case.ir_obj.genePanelsCoverage[panel.entry.panel.panelapp_id]],
+                self.model_objects)
+        else:
+            ir_family_panels = ManyCaseModel(InterpretationReportFamilyPanel, [], self.model_objects)
 
         return ir_family_panels
 
