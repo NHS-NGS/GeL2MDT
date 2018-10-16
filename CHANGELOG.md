@@ -5,7 +5,7 @@
 
 ### Changed
 - Made cancer tweaks to proband page
-
+- Proband page now shows related GELIRs
 
 ## [0.5.4]- 2018-10-03
 ### Added
