@@ -381,3 +381,10 @@ class GenomicsEnglandform(forms.Form):
 
 class GeneSearchForm(forms.Form):
     gene = forms.CharField(max_length=25, widget = forms.TextInput(attrs={'style': 'width:200px'}))
+
+
+class AddCaseAlert(forms.ModelForm):
+
+    class Meta:
+        model = CaseAlert
+        fields = ['gel_id', 'comment', 'sample_type']

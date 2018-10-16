@@ -899,8 +899,10 @@ class MDTReport(models.Model):
 class CaseAlert(models.Model):
     gel_id = models.CharField(max_length=30)
     comment = models.CharField(max_length=255)
+    sample_type = models.CharField(max_length=20, choices=(('cancer', 'cancer'),
+                                                           ('raredisease', 'raredisease')))
 
     class Meta:
         managed = True
         db_table = 'GELAlert'
-        app_label= 'gel2mdt'
+        app_label = 'gel2mdt'

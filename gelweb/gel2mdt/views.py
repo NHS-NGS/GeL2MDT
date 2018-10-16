@@ -283,7 +283,7 @@ def proband_view(request, report_id):
     proband_history = report_history_formatter.get_proband_history()
     ir_family = report.ir_family
     other_cases = GELInterpretationReport.objects.latest_cases_by_sample_type(report.sample_type).filter(
-        ir_family=ir_family) # .exclude(ir_family=report.ir_family)
+        ir_family=ir_family).exclude(ir_family=report.ir_family)
 
     if request.method == "POST":
         demogs_form = DemogsForm(request.POST, instance=report.ir_family.participant_family.proband)
@@ -1243,3 +1243,55 @@ def audit(request, sample_type):
     script, div = components(plots, CDN)
     return render(request, 'gel2mdt/audit.html', {'script': script,
                   'div': div, 'sample_type': sample_type})
+
+@login_required
+def case_alert(request, sample_type):
+    '''
+    Shows a list of cases which have an alert on them
+    :param request:
+    :param sample_type:
+    :return:
+    '''
+    case_alerts = CaseAlert.objects.filter(sample_type=sample_type)
+    gel_reports = GELInterpretationReport.objects.filter(
+        sample_type=sample_type).prefetch_related('ir_family__participant_family__proband')
+    matching_cases = {}
+    case_alert_form = AddCaseAlert()
+    for case in case_alerts:
+        for report in gel_reports:
+            matching_cases[case.id] = []
+            if report.ir_family.participant_family.proband.gel_id == case.gel_id:
+                matching_cases[case.id].append((report.id,
+                                                report.ir_family.ir_family_id))
+
+    return render(request, 'gel2mdt/case_alert.html', {'case_alerts': case_alerts,
+                                                       'matching_cases': matching_cases,
+                                                       'sample_type': sample_type,
+                                                       'case_alert_form': case_alert_form})
+
+
+@login_required
+def add_case_alert(request):
+    if request.method == 'POST':
+        case_alert_form = AddCaseAlert(request.POST)
+        if case_alert_form.is_valid():
+            case_alert_form.save()
+            messages.add_message(request, 25, 'Case Added!')
+    return redirect('case-alert', sample_type=case_alert_form.cleaned_data['sample_type'])
+
+
+@login_required
+def edit_case_alert(request, case_alert_id):
+    data = {}
+    case_alert_instance = CaseAlert.objects.get(id=case_alert_id)
+    case_alert_form = AddCaseAlert(instance=case_alert_instance)
+    if request.method == 'POST':
+        case_alert_form = AddCaseAlert(request.POST, instance=case_alert_instance)
+        if case_alert_form.is_valid():
+            case_alert_form.save()
+            data['form_is_valid'] = True
+        return redirect('case-alert', sample_type=case_alert_instance.sample_type)
+    context = {'case_alert_form': case_alert_form, 'case_alert_instance': case_alert_instance}
+    html_form = render_to_string('gel2mdt/modals/case_alert_modal.html', context, request=request)
+    data['html_form'] = html_form
+    return JsonResponse(data)
