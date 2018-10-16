@@ -7,11 +7,10 @@ This docker configuration creates three containers:
 
 Whilst VEP is installed within the container, it requires that the reference genome files and VEP cache to be available 
 on the host machine. These can be downloaded from the Ensembl ftp site. **As per the main Readme, Gel2MDT has been 
- tested with version 92 so that is the version that is installed. The correct VEP files will need to be downloaded 
- to reflect this.**
+ tested with version 92 so that is the version that is installed. The correct VEP files will need to be downloaded to the host and be to reflect this.**
 
-Likewise, in order to maintain a persistent database the Postgres install stores the database files on the local 
-machine and the cached JSON files from GEL are also stored on the host.
+Likewise, in order to maintain a persistent database the Postgres container stores the database files on the host 
+machine, as are the cached JSON files from GEL.
 
 ### Clone the Repo
     git clone -b docker https://github.com/KingsPM/GeL2MDT.git
@@ -20,9 +19,6 @@ From the 'Docker' directory, edit the following files where necessary (don't ren
 copied to the correct location during the image build):
 
 **docker-compose.yml**:
-- Edit the `CPI_API_USERNAME` and `LABKEY_USERNAME` and password fields with the credentials you will use to connect 
-to relevant GEL services
-- Edit the main Django superuser credentials: `DJANGO_SUPERUSER`, `DJANGO_EMAIL` and `DJANGO_PASSWORD`
 - `Volumes` for the persistant postgres db on the host (db container), and reference fasta file and vep_cache 
 (web container):
 
@@ -42,15 +38,22 @@ to relevant GEL services
             - <edit host directory>:/root/vep_cache
             - <edit host directory>:/root/gel2mdt_cache
     ``` 
-**my_config.txt**:
-- Edit the `labkey_server_request` and `labkey_cancer_server_request` URLs & `GMC` variables
-- Leave all the VEP file locations and GeL2MDT file locations (these were edited in the docker-compose file)
+**Docker/my_config.txt**:
+- Edit the `labkey_server_request` and `labkey_cancer_server_request` URLs & `GMC` variables for your site
+- _Leave_ all the VEP file locations and GeL2MDT file locations (these were edited in the docker-compose file)
 
-**my_local_settings.py**:
+**Docker/my_local_settings.py**:
 - Create your own `SECRET_KEY`
 - Edit `ALLOWED_HOSTS` as appropriate
 - Set `DEBUG` to `False` when you're done testing    
-- Leave the database connection settings unless you are also going to reconfigure the database docker container
+- _Leave_ the database connection settings unless you are also going to reconfigure the database docker container
+
+**Docker/startup_script.sh**
+- Edit the `CPI_API_USERNAME` and `LABKEY_USERNAME` and password fields with the credentials you will use to connect 
+to relevant GEL services
+
+**Docker/initial_script.sh**
+- Edit the main Django superuser credentials: `DJANGO_SUPERUSER`, `DJANGO_EMAIL` and `DJANGO_PASSWORD`
 
 ### Build the images
 You can build the images with the standard:
@@ -81,8 +84,8 @@ folders, i.e. postgres database on the host machine (assuming all has been confi
 
 - I have not configured the `DAILY_UPDATE.sh` script - should/is this configured with celery?
 - Need to think about permissions for the host directories: db & cache folders are inaccessable with the host ATM
-- The gel2mdt_web image is not strictly portable at the moment as site-specific data is submitted during the build process 
-(usernames as env variables, netrc file creation). These need to be moved to make the final image portable/shareable
+- Still a bit clunky with needing to edit four separate files to configure everything
+- Security of having usernames/passwords in plain text docs.  Maybe these should be supplied on the commandline when starting the containers?
  
-Contact:
+Contact (for this dockerisation test, for other queries see the main readme file):
 philip.davidson2@nhs.net
