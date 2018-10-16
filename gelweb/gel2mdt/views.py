@@ -1244,6 +1244,7 @@ def audit(request, sample_type):
     return render(request, 'gel2mdt/audit.html', {'script': script,
                   'div': div, 'sample_type': sample_type})
 
+
 @login_required
 def case_alert(request, sample_type):
     '''
@@ -1253,14 +1254,14 @@ def case_alert(request, sample_type):
     :return:
     '''
     case_alerts = CaseAlert.objects.filter(sample_type=sample_type)
-    gel_reports = GELInterpretationReport.objects.filter(
+    gel_reports = GELInterpretationReport.objects.latest_cases_by_sample_type(
         sample_type=sample_type).prefetch_related('ir_family__participant_family__proband')
     matching_cases = {}
     case_alert_form = AddCaseAlert()
     for case in case_alerts:
+        matching_cases[case.id] = []
         for report in gel_reports:
-            matching_cases[case.id] = []
-            if report.ir_family.participant_family.proband.gel_id == case.gel_id:
+            if report.ir_family.participant_family.proband.gel_id == str(case.gel_id):
                 matching_cases[case.id].append((report.id,
                                                 report.ir_family.ir_family_id))
 
@@ -1295,3 +1296,12 @@ def edit_case_alert(request, case_alert_id):
     html_form = render_to_string('gel2mdt/modals/case_alert_modal.html', context, request=request)
     data['html_form'] = html_form
     return JsonResponse(data)
+
+
+@login_required
+def delete_case_alert(request, case_alert_id):
+    case_alert_instance = CaseAlert.objects.get(id=case_alert_id)
+    sample_type = case_alert_instance.sample_type
+    case_alert_instance.delete()
+    messages.add_message(request, 25, 'Alert Deleted')
+    return redirect('case-alert', sample_type=sample_type)
