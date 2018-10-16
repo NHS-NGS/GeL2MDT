@@ -19,6 +19,5 @@ export cip_api_username=$CIP_API_USERNAME
 export cip_api_password=$CIP_API_PASSWORD
 
 # Create the cache folders if they don't already exist
-cd /root/gel2mdt_cache
-mkdir -p cip_api_storage panelapp_storage gene_storage
+mkdir -p /root/gel2mdt_cache/cip_api_storage /root/gel2mdt_cache/panelapp_storage /root/gel2mdt_cache/gene_storage
 
