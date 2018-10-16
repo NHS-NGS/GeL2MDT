@@ -157,8 +157,6 @@ class MultipleCaseAdder(object):
                         set(self.cases_to_update)
                     self.update_database()
 
-                    print("Finished processing bin", bin_count, "of", len(bins))
-
                     for case in self.cases_to_add:
                         del case
                     for case in self.cases_to_update:
@@ -217,6 +215,8 @@ class MultipleCaseAdder(object):
             listupdate.reports_added.add(*added_cases)
             listupdate.reports_updated.add(*updated_cases)
 
+            # Add in case alert
+
     def fetch_test_data(self):
         """
         This will run and convert our test data to a list of jsons if
@@ -234,13 +234,14 @@ class MultipleCaseAdder(object):
                 logger.info("Found case json at " + file_path + " for testing.")
                 with open(file_path) as json_file:
                     json_data = json.load(json_file)
-                    list_of_cases.append(Case(
-                        case_json=json_data,
-                        panel_manager=self.panel_manager,
-                        variant_manager=self.variant_manager,
-                        gene_manager=self.gene_manager,
-                        skip_demographics=self.skip_demographics,
-                        pullt3=self.pullt3))
+                    if json_data['sample_type'] == self.sample_type:
+                        list_of_cases.append(Case(
+                            case_json=json_data,
+                            panel_manager=self.panel_manager,
+                            variant_manager=self.variant_manager,
+                            gene_manager=self.gene_manager,
+                            skip_demographics=self.skip_demographics,
+                            pullt3=self.pullt3))
         logger.info("Found " + str(len(list_of_cases)) +  " test cases.")
         return list_of_cases
 

@@ -37,28 +37,20 @@
     <div class="tab-content">
         <div id="proband" class="tab-pane fade in active">
             <div class="container-fluid" >
+            <div style="text-align:right">
                 {% if config_dict|get_item:'cip_as_id' == 'True' %}
-                    <h1>{{report.ir_family.ir_family_id}}</h1>
+                    <h1  style="text-align:left;float:left;">{{report.ir_family.ir_family_id}}</h1>
                 {% else %}
-                    <h1>{{report.ir_family.participant_family.proband.gel_id}} </h1>
+                    <h1  style="text-align:left;float:left;">{{report.ir_family.participant_family.proband.gel_id}} </h1>
              {% endif %}
-            <div class="row">
-            <div class="col-md-12">
-            <div class="col-md-2">
             {% if other_cases %}
-            <p>Other cases associated with {{ report.ir_family.participant_family.proband.gel_id }}:</p>
-                </div>
-                <div class="col-md-2">
             {% for case in other_cases %}
     <form action="/proband/{{ case.id }}" role="form">
         {% csrf_token %} {% bootstrap_button case.ir_family.ir_family_id button_type="submit" button_class="btn-primary" %}
     </form>
      {% endfor %}
-            {% endif  %}
-                </div>
+            {% endif %}
             </div>
-            </div>
-
 
                 <form role="form" method="post" enctype="multipart/form-data" action="/update_proband/{{ report.id }}">
                     {% csrf_token %}
