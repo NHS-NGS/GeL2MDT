@@ -19,7 +19,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 -->
-{% extends 'gel2mdt/base.html' %}
+{% extends 'gel2clin/base.html' %}
 {% load bootstrap3 %}
 {% load static %}
 {% block content %}
@@ -180,6 +180,7 @@ SOFTWARE.
                                             <th>MDT Date</th>
                                             <th>Status</th>
                                             <th>Creator</th>
+                                            <th>Outcome Form</th>
 
                                         </tr>
                                     </thead>
@@ -190,6 +191,7 @@ SOFTWARE.
                                         <td>{{mdt.MDT.date_of_mdt|date}}</td>
                                             <td>{{mdt.MDT.get_status_display}}</td>
                                         <td>{{mdt.MDT.creator}}</td>
+                                        <td><a href="/export_mdt_outcome_form/{{report.id}}"><i class="fas fa-external-link-alt"></i> MDM Outcome</a></td>
 
                                     </tr>
                                 {% endfor %}

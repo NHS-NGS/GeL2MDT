@@ -45,6 +45,10 @@ class Command(BaseCommand):
         parser.add_argument('--pullt3', action='store_true',
                             help='Include the Tier 3 variants (this is time'
                             ' consuming!)')
+        parser.add_argument('--bins', action='store',
+                            help='Whether to bin cases, and size of bins to'
+                            'use. This increases update time but reduces RAM'
+                            'usage for less powerful servers.')
 
     def handle(self, *args, **options):
         """Run the MultipleCaseAdder with the supplied options."""
@@ -53,5 +57,5 @@ class Command(BaseCommand):
                                 head=options['case_count'],
                                 test_data=options['test_data'],
                                 skip_demographics=options['skip_demographics'],
-                                pullt3=options['pullt3'])
-        mca.update_database()
+                                pullt3=options['pullt3'],
+                                bins=options['bins'])
