@@ -50,7 +50,7 @@ def get_gel_content(user_email, ir, ir_version):
     # otherwise get uname and password from a file
 
     interpretation_reponse = PollAPI(
-        "cip_api", f'interpretation-request/{ir}/{ir_version}/')
+        "cip_api", f'interpretation-request/{ir}/{ir_version}')
     interp_json = interpretation_reponse.get_json_response()
     analysis_versions = []
     latest = None
@@ -62,29 +62,26 @@ def get_gel_content(user_email, ir, ir_version):
         except ValueError as e:
             latest = 1
 
-    html_report = PollAPI(
-        "cip_api", f"clinical-report/{ir}/{ir_version}/{latest}"
-    )
-    gel_content = html_report.get_json_response(content=True)
-    print(latest)
     try:
-        gel_json_content = json.loads(gel_content)
-        print(gel_json_content)
-        if gel_json_content['detail'].startswith('Not found') or gel_json_content['detail'].startswith(
-                'Method \"GET\" not allowed'):
-            if latest > 1:
-                latest -= 1
+        if latest == 1:
+            print('latest',  1)
+            html_report = PollAPI(
+                "cip_api_for_report", f"ClinicalReport/{ir}/{ir_version}/{latest}"
+            )
+            gel_content = html_report.get_json_response(content=True)
+        else:
+            while latest > 0:
+                print('latest', latest)
                 html_report = PollAPI(
-                    "cip_api", f"clinical-report/{ir}/{ir_version}/{latest}"
+                    "cip_api_for_report", f"ClinicalReport/{ir}/{ir_version}/{latest}"
                 )
                 gel_content = html_report.get_json_response(content=True)
                 gel_json_content = json.loads(gel_content)
-                print(gel_json_content)
                 if gel_json_content['detail'].startswith('Not found') or gel_json_content['detail'].startswith(
                         'Method \"GET\" not allowed'):
-                    raise Exception('Error')
-            else:
-                raise Exception('Error')
+                    latest -= 1
+                else:
+                    break
     except JSONDecodeError as e:
         print('JSONDecodeError')
 
@@ -168,6 +165,7 @@ def get_gel_content(user_email, ir, ir_version):
     gel_content = gel_content.prettify()
     return gel_content
 
+
 def panel_app(gene_panel, gp_version):
     '''
     Returns the list of genes associated with a panel in a dictionary which are then placed in the GEL clinical report
@@ -185,6 +183,7 @@ def panel_app(gene_panel, gp_version):
     gene_panel_info = {'gene_list': gene_list, 'panel_length': len(gene_list)}
     return gene_panel_info
 
+
 @task
 def update_for_t3(report_id):
     '''
@@ -193,8 +192,10 @@ def update_for_t3(report_id):
     :return: Nothing
     '''
     report = GELInterpretationReport.objects.get(id=report_id)
-    mca = MultipleCaseAdder(sample_type=report.sample_type, pullt3=True, sample=report.ir_family.participant_family.proband.gel_id)
-    mca.update_database()
+    MultipleCaseAdder(sample_type=report.sample_type,
+                      pullt3=True,
+                      sample=report.ir_family.participant_family.proband.gel_id)
+
 
 @task
 def listupdate_email():
@@ -216,6 +217,7 @@ def listupdate_email():
         except Exception as e:
             pass
 
+
 @task
 def update_cases():
     '''
@@ -223,10 +225,8 @@ def update_cases():
     the database with new cases
     :return:
     '''
-    mca = MultipleCaseAdder(sample_type='raredisease', pullt3=False, skip_demographics=False)
-    mca.update_database()
-    mca = MultipleCaseAdder(sample_type='cancer', pullt3=False, skip_demographics=False)
-    mca.update_database()
+    MultipleCaseAdder(sample_type='raredisease', pullt3=False, skip_demographics=False)
+    MultipleCaseAdder(sample_type='cancer', pullt3=False, skip_demographics=False)
 
 
 class VariantAdder(object):

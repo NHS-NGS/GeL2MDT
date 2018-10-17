@@ -33,6 +33,7 @@ from ..config import load_config
 import re
 import copy
 import pprint
+from tqdm import tqdm
 
 
 class Case(object):
@@ -736,7 +737,6 @@ class CaseAttributeManager(object):
                 if not polled:
                     panel_file = os.path.join(panelapp_storage, '{}_{}.json'.format(panel['panelName'],
                                                                                         panel['panelVersion']))
-                    print(panel["panelName"], panel["panelVersion"])
                     if os.path.isfile(panel_file):
 
                         try:
@@ -830,9 +830,10 @@ class CaseAttributeManager(object):
                 })
                 self.case.gene_manager.add_searched(transcript.gene_ensembl_id, str(transcript.gene_hgnc_id))
 
-        for gene in gene_list:
+        for gene in tqdm(gene_list, desc=self.case.request_id):
             gene['HGNC_ID'] = None
             if gene['EnsembleGeneIds']:
+                tqdm.write(gene["EnsembleGeneIds"])
                 polled = self.case.gene_manager.fetch_searched(gene['EnsembleGeneIds'])
                 if polled == 'Not_found':
                     gene['HGNC_ID'] = None
@@ -1001,6 +1002,12 @@ class CaseAttributeManager(object):
         tumour_content = None
         if self.case.json['sample_type'] == 'cancer':
             tumour_content = self.case.proband['tumourSamples'][0]['tumourContent']
+        has_germline_variant = False
+        if self.case.json['sample_type'] == 'cancer':
+            alleleOrigins = [variant["alleleOrigins"][0]
+                             for variant in self.case.json_variants]
+            if "germline_variant" in alleleOrigins:
+                has_germline_variant = True
 
         ir = CaseModel(GELInterpretationReport, {
             "ir_family": ir_family.entry,
@@ -1018,6 +1025,7 @@ class CaseAttributeManager(object):
             'sample_type': self.case.json['sample_type'],
             "sample_id": self.case.proband_sample,
             'tumour_content': tumour_content,
+            "has_germline_variant": has_germline_variant,
             "case_status": 'N',  # initialised to not started? (N)
         }, self.model_objects)
         return ir

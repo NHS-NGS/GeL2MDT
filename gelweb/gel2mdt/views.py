@@ -226,7 +226,9 @@ def cancer_main(request):
     :param request:
     :return:
     '''
-    return render(request, 'gel2mdt/cancer_main.html', {'sample_type': 'cancer'})
+    gene_search_form = GeneSearchForm()
+    return render(request, 'gel2mdt/cancer_main.html', {'sample_type': 'cancer',
+                                                        'gene_search_form': gene_search_form})
 
 
 @login_required
@@ -238,7 +240,31 @@ def rare_disease_main(request):
     :param request:
     :return:
     '''
-    return render(request, 'gel2mdt/rare_disease_main.html', {'sample_type': 'raredisease'})
+    gene_search_form = GeneSearchForm()
+    return render(request, 'gel2mdt/rare_disease_main.html', {'sample_type': 'raredisease',
+                                                              'gene_search_form': gene_search_form})
+
+
+@login_required
+def search_by_gene(request, sample_type):
+    latest_reports = GELInterpretationReport.objects.latest_cases_by_sample_type(
+        sample_type=sample_type
+    )
+    gene_search_form = GeneSearchForm()
+    proband_variants = []
+    gene = None
+    if request.method == 'POST':
+        gene_search_form = GeneSearchForm(request.POST)
+        if gene_search_form.is_valid():
+            gene = gene_search_form.cleaned_data['gene']
+            genes = Gene.objects.filter(hgnc_name__icontains=gene_search_form.cleaned_data['gene'])
+            proband_variants = ProbandVariant.objects.filter(probandtranscriptvariant__transcript__gene__in=genes,
+                                                             interpretation_report__in=latest_reports).distinct()
+    return render(request, 'gel2mdt/gene_search.html', {'gene_search_form': gene_search_form,
+                                                        'proband_variants': proband_variants,
+                                                        'gene': gene,
+                                                        'sample_type': sample_type})
+
 
 
 @login_required
@@ -685,6 +711,11 @@ def mdt_view(request, mdt_id):
     :param mdt_id: MDT ID
     :return: Main MDT page
     """
+    clinician = False
+    clinicians_emails = Clinician.objects.all().values_list('email', flat=True)
+    if request.user.email in clinicians_emails:
+        clinician = True
+
     mdt_instance = MDT.objects.get(id=mdt_id)
     report_list = MDTReport.objects.filter(MDT=mdt_instance).values_list('interpretation_report', flat=True)
     reports = GELInterpretationReport.objects.filter(id__in=report_list)
@@ -729,7 +760,8 @@ def mdt_view(request, mdt_id):
                                                       'mdt_form': mdt_form,
                                                       'mdt_id': mdt_id,
                                                       'attendees': attendees,
-                                                     'sample_type': mdt_instance.sample_type})
+                                                     'sample_type': mdt_instance.sample_type,
+                                                     'clinician': clinician})
 
 
 @login_required
@@ -742,6 +774,10 @@ def mdt_proband_view(request, mdt_id, pk, important):
     :param important: Either 1 or 0; Whether to display T3 or non T3 variants
     :return:
     '''
+    clinician = False
+    clinicians_emails = Clinician.objects.all().values_list('email', flat=True)
+    if request.user.email in clinicians_emails:
+        clinician = True
     mdt_instance = MDT.objects.get(id=mdt_id)
     report = GELInterpretationReport.objects.get(id=pk)
     proband_variants = []
@@ -809,7 +845,8 @@ def mdt_proband_view(request, mdt_id, pk, important):
         'variant_formset': variant_formset,
         'panels': panels,
         'sample_type':report.sample_type,
-        'gelir_form':gelir_form
+        'gelir_form':gelir_form,
+        'clinician': clinician
     })
 
 
@@ -876,6 +913,10 @@ def recent_mdts(request, sample_type):
     :param sample_type: Either cancer or raredisease
     :return: A list of cancer or raredisease MDTs
     '''
+    clinician = False
+    clinicians_emails = Clinician.objects.all().values_list('email', flat=True)
+    if request.user.email in clinicians_emails:
+        clinician = True
     recent_mdt = list(MDT.objects.filter(sample_type=sample_type).order_by('-date_of_mdt'))
     config_dict = load_config.LoadConfig().load()
     # Need to get which probands were in MDT
@@ -893,7 +934,8 @@ def recent_mdts(request, sample_type):
 
     return render(request, 'gel2mdt/recent_mdts.html', {'recent_mdt': recent_mdt,
                                                         'probands_in_mdt': probands_in_mdt,
-                                                        'sample_type': sample_type})
+                                                        'sample_type': sample_type,
+                                                        'clinician': clinician})
 
 
 @login_required
