@@ -1,26 +1,5 @@
-"""Copyright (c) 2018 Great Ormond Street Hospital for Children NHS Foundation
-Trust & Birmingham Women's and Children's NHS Foundation Trust
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-"""
 from .poll_api import PollAPI
-
+import csv
 
 class InterpretationList(object):
     """
@@ -31,8 +10,12 @@ class InterpretationList(object):
     def __init__(self, sample_type, sample=None):
         self.sample_type = sample_type
         self.sample = sample
+        self.londonNW_codes = ['RYJ', 'RQM', 'RPY', 'RT3']
+        self.londonNW_cases = []
+        self.get_genie_list()
         self.all_cases = self.get_all_cases()
         self.cases_to_poll = self.get_poll_cases()
+
 
     def get_all_cases(self):
         """
@@ -65,17 +48,24 @@ class InterpretationList(object):
                     and result['proband'] == self.sample
                        and result["last_status"] != "blocked"]
             else:
-                all_cases += [{
-                    # add the ir_id, sample type, and latest status to dict
-                    "interpretation_request_id":
-                        result["interpretation_request_id"],
-                    "sample_type":
-                        result["sample_type"],
-                    "last_status":
-                        result["last_status"]}
-                    for result in request_list_results
-                    if result["sample_type"] == self.sample_type
-                    and result["last_status"] != "blocked"]
+                for result in request_list_results:
+                    if result["sample_type"] == self.sample_type:
+                        if result["last_status"] != "blocked":
+                            if result['proband'].startswith('12') or result['proband'] in self.londonNW_cases or result['proband'].startswith('22'):
+                                all_cases.append({
+                                    # add the ir_id, sample type, and latest status to dict
+                                    "interpretation_request_id":
+                                        result["interpretation_request_id"],
+                                    "sample_type":
+                                        result["sample_type"],
+                                    "last_status":
+                                        result["last_status"]})
+                    # for result in request_list_results
+                    # if result["sample_type"] == self.sample_type
+                    # and result["last_status"] != "blocked"
+                    # and result['proband'].startswith('12')
+                    # or result['proband'] in self.londonNW_cases]
+                    # #or result['proband'].startswith('22')]
 
             if request_list_poll.response_json["next"]:
                 page += 1
@@ -96,3 +86,11 @@ class InterpretationList(object):
             case for case in self.all_cases if case["last_status"] in status_lookup[self.sample_type]]
 
         return cases_to_poll
+
+    def get_genie_list(self):
+        with open('/home/genseqservadmin/WL_GEL2MDT/GeL2MDT/gelweb/gel2mdt/api_utils/GENIE_Extract_20180731.csv') as f:
+            filedata = csv.DictReader(f, dialect='excel')
+            for row in filedata:
+                if row['\ufeffOrgCode'] in self.londonNW_codes:
+                    self.londonNW_cases.append(row['ParticipantID'])
+        print(self.londonNW_cases)
