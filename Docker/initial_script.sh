@@ -3,11 +3,12 @@
 # This script only needs to be run once on first setting up the Gel2MDT database. Assuming a persistent db, any new containers will not require this to be run again
 
 # Create your own superuser account:
-DJANGO_SUPERUSER=admin
-DJANGO_EMAIL=admin@nhs.net
-DJANGO_PASSWORD=a_password
+DJANGO_SUPERUSER=lombap
+DJANGO_EMAIL=patrick.lombard@gosh.nhs.uk
+DJANGO_PASSWORD=admin_password
 
 # Django creates the database schema
+. /code/Docker/startup_script.sh
 cd /root/gel2mdt/gelweb/
 python manage.py migrate
 python manage.py makemigrations gel2mdt

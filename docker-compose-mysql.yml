@@ -1,0 +1,56 @@
+version: '3'
+
+services:
+  redis:
+    image: "redis:alpine"
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./Docker/nginx/conf.d:/etc/nginx/conf.d
+      - ./gelweb/gel2mdt/static:/static
+    depends_on:
+      - web
+      - redis
+  web:
+    image: gel2mdt_web
+    build:
+      context: .
+    command: bash -c ". /root/gel2mdt/Docker/startup_script.sh && cd /root/gel2mdt/gelweb && gunicorn gelweb.wsgi -b 0.0.0.0:8000"
+    #restart: always
+    volumes:
+      - .:/root
+      - /home/bioadmin/.vep:/root/.vep
+      - /home/bioadmin/patrick/GeL2MDT/resources:/root/gel2mdt_cache
+    depends_on:
+      - db
+      - redis
+  db:
+    image: mysql:5.7
+    restart: always
+    # ports:
+    #   - "33060:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=gel2mdt_db
+      - MYSQL_USER=paddy
+      - MYSQL_PASSWORD=password
+    volumes:
+      - /home/bioadmin/patrick/GeL2MDT/resources/gel2mdt_db:/var/lib/mysql
+  celery:
+    build: .
+    command: bash -c "cd /root/gel2mdt/gelweb && celery -A gelweb worker -l info"
+    depends_on:
+      - db
+      - redis
+  celery-beat:
+    build: .
+    command: bash -c "cd /root/gel2mdt/gelweb && celery -A gelweb beat -l info"
+    depends_on:
+      - db
+      - redis
+
+
+
+
