@@ -213,7 +213,7 @@ def remove_case(request, case_id):
     '''
     case = GELInterpretationReport.objects.get(id=case_id)
     case.assigned_user = None
-    case.save()
+    case.save(overwrite=True)
     return redirect('profile')
 
 
