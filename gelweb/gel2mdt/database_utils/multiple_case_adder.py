@@ -319,7 +319,8 @@ class MultipleCaseAdder(object):
             }
 
             for case in cases_to_check:
-                if case.json_hash != latest_hashes[case.request_id]:
+                hash = latest_hashes.get(case.request_id, None)
+                if not hash or case.json_hash != latest_hashes.get(case.request_id, None):
                     cases_to_update.append(case)
 
         except GELInterpretationReport.DoesNotExist as e:
