@@ -17,10 +17,10 @@ services:
     image: gel2mdt_web
     build:
       context: .
-    command: bash -c ". /root/gel2mdt/Docker/startup_script.sh && cd /root/gel2mdt/gelweb && gunicorn gelweb.wsgi -b 0.0.0.0:8000"
+    command: bash -c ". /code/Docker/startup_script.sh && cd /root/gel2mdt/gelweb && gunicorn gelweb.wsgi -b 0.0.0.0:8000"
     #restart: always
     volumes:
-      - .:/root
+      - .:/code
       - /home/bioadmin/.vep:/root/.vep
       - /home/bioadmin/patrick/GeL2MDT/resources:/root/gel2mdt_cache
     depends_on:
