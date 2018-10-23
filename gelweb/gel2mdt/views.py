@@ -723,10 +723,14 @@ def mdt_view(request, mdt_id):
     proband_variants = ProbandVariant.objects.filter(interpretation_report__in=report_list)
     proband_variant_count = {}
     t3_proband_variant_count = {}
+    report_proband_variants = {}
+    proband_panels = {}
     for report in reports:
         proband_variant_count[report.id] = 0
         t3_proband_variant_count[report.id] = 0
         pvs = ProbandVariant.objects.filter(interpretation_report=report)
+        report_proband_variants[report.id] = pvs
+        proband_panels[report.id] = InterpretationReportFamilyPanel.objects.filter(ir_family_id = report.ir_family_id)
         for pv in pvs:
             if pv.pvflag_set.all() or pv.max_tier < 3:
                 proband_variant_count[report.id] += 1
@@ -761,7 +765,9 @@ def mdt_view(request, mdt_id):
                                                       'mdt_id': mdt_id,
                                                       'attendees': attendees,
                                                      'sample_type': mdt_instance.sample_type,
-                                                     'clinician': clinician})
+                                                     'clinician': clinician,
+                                                     'report_proband_variants': report_proband_variants,
+                                                     'proband_panels': proband_panels,})
 
 
 @login_required
@@ -836,6 +842,7 @@ def mdt_proband_view(request, mdt_id, pk, important):
     for form in variant_formset:
         pv = form.instance.proband_variant
         form.initial["requires_validation"] = pv.validation_status
+    print(variant_formset)
     return render(request, 'gel2mdt/mdt_proband_view.html', {
         'proband_variants': proband_variants,
         'report': report,
