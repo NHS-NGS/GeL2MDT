@@ -204,30 +204,40 @@ def update_for_t3(report_id):
                       sample=report.ir_family.participant_family.proband.gel_id)
 
 @task
-def case_alert_email(sample_type):
+def case_alert_email():
     '''
     Utility function designed to be run with celery. Emails GELTeam nightly about CaseAlert cases
     :param report_id: GEL InterpretationReport ID
     :return: Nothing
     '''
-    case_alerts = CaseAlert.objects.filter(sample_type=sample_type)
-    gel_reports = GELInterpretationReport.objects.latest_cases_by_sample_type(
-        sample_type=sample_type).prefetch_related('ir_family__participant_family__proband')
+    sample_types = {'raredisease': False, 'cancer': False}
     matching_cases = {}
-    for case in case_alerts:
-        matching_cases[case.id] = []
-        for report in gel_reports:
-            try:
-                if report.ir_family.participant_family.proband.gel_id == str(case.gel_id):
-                    matching_cases[case.id].append((report.id,
-                                                    report.ir_family.ir_family_id))
-            except Proband.DoesNotExist:
-                pass
+    for s_type in sample_types:
+        case_alerts = CaseAlert.objects.filter(sample_type=s_type)
+        gel_reports = GELInterpretationReport.objects.latest_cases_by_sample_type(
+            sample_type=s_type).prefetch_related('ir_family__participant_family__proband')
+        matching_cases[s_type] = {}
+        for case in case_alerts:
+            matching_cases[s_type][case.id] = []
+            for report in gel_reports:
+                try:
+                    if report.ir_family.participant_family.proband.gel_id == str(case.gel_id):
+                        matching_cases[s_type][case.id].append((report.id,
+                                                                report.ir_family.ir_family_id))
+                    sample_types[s_type] = True
+                except Proband.DoesNotExist:
+                    pass
+
     text_content = ''
-    if matching_cases:
-        for case in matching_cases:
-            text_content += f'Case {matching_cases[case][0][1]} has been added to the database\n'
-        subject, from_email, to = f'GeL2MDT {sample_type} CaseAlert', 'bioinformatics@gosh.nhs.uk', 'bioinformatics@gosh.nhs.uk'
+    if sample_types['cancer'] or sample_types['raredisease']:
+        for s_type in sample_types:
+            if matching_cases[s_type]:
+                text_content += f'{s_type} Case Alert:\n'
+                for case in matching_cases[s_type]:
+                    case_alert = CaseAlert.objects.get(id=case)
+                    text_content += f'Case {case_alert.gel_id} with CIP-ID of {matching_cases[s_type][case][0][1]} ' \
+                                    f'has been added to the database. CaseAlert comment: {case_alert.comment}\n'
+        subject, from_email, to = f'GeL2MDT CaseAlert', 'bioinformatics@gosh.nhs.uk', 'GELTeam@gosh.nhs.uk'
         msg = EmailMessage(subject, text_content, from_email, [to])
         try:
             msg.send()
