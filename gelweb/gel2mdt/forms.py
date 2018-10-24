@@ -385,6 +385,9 @@ class GeneSearchForm(forms.Form):
 
 class AddCaseAlert(forms.ModelForm):
 
+    def clean_gel_id(self):
+        return self.cleaned_data['gel_id'].strip()
+
     class Meta:
         model = CaseAlert
         fields = ['gel_id', 'comment', 'sample_type']

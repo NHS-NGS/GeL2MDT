@@ -203,6 +203,36 @@ def update_for_t3(report_id):
                       pullt3=True,
                       sample=report.ir_family.participant_family.proband.gel_id)
 
+@task
+def case_alert_email(sample_type):
+    '''
+    Utility function designed to be run with celery. Emails GELTeam nightly about CaseAlert cases
+    :param report_id: GEL InterpretationReport ID
+    :return: Nothing
+    '''
+    case_alerts = CaseAlert.objects.filter(sample_type=sample_type)
+    gel_reports = GELInterpretationReport.objects.latest_cases_by_sample_type(
+        sample_type=sample_type).prefetch_related('ir_family__participant_family__proband')
+    matching_cases = {}
+    for case in case_alerts:
+        matching_cases[case.id] = []
+        for report in gel_reports:
+            try:
+                if report.ir_family.participant_family.proband.gel_id == str(case.gel_id):
+                    matching_cases[case.id].append((report.id,
+                                                    report.ir_family.ir_family_id))
+            except Proband.DoesNotExist:
+                pass
+    text_content = ''
+    if matching_cases:
+        for case in matching_cases:
+            text_content += f'Case {matching_cases[case][0][1]} has been added to the database\n'
+        subject, from_email, to = f'GeL2MDT {sample_type} CaseAlert', 'bioinformatics@gosh.nhs.uk', 'bioinformatics@gosh.nhs.uk'
+        msg = EmailMessage(subject, text_content, from_email, [to])
+        try:
+            msg.send()
+        except Exception as e:
+            pass
 
 @task
 def listupdate_email():

@@ -1261,9 +1261,12 @@ def case_alert(request, sample_type):
     for case in case_alerts:
         matching_cases[case.id] = []
         for report in gel_reports:
-            if report.ir_family.participant_family.proband.gel_id == str(case.gel_id):
-                matching_cases[case.id].append((report.id,
-                                                report.ir_family.ir_family_id))
+            try:
+                if report.ir_family.participant_family.proband.gel_id == str(case.gel_id):
+                    matching_cases[case.id].append((report.id,
+                                                    report.ir_family.ir_family_id))
+            except Proband.DoesNotExist:
+                pass
 
     return render(request, 'gel2mdt/case_alert.html', {'case_alerts': case_alerts,
                                                        'matching_cases': matching_cases,
