@@ -386,7 +386,11 @@ class GeneSearchForm(forms.Form):
 class AddCaseAlert(forms.ModelForm):
 
     def clean_gel_id(self):
-        return self.cleaned_data['gel_id'].strip()
+        if self.cleaned_data['gel_id'].isdigit() and len(self.cleaned_data['gel_id']) >= 8:
+            return self.cleaned_data['gel_id'].strip()
+        else:
+            forms.ValidationError("Doesn't look like a GELID")
+
 
     class Meta:
         model = CaseAlert
