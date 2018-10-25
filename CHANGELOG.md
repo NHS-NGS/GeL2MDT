@@ -1,4 +1,4 @@
-## [0.5.5]- 2018-10-XX
+## [0.5.5]- 2018-10-25
 ### Added
 - Case alert feature
 - Case code flag
