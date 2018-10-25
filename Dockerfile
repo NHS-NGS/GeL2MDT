@@ -1,8 +1,8 @@
 # Base image
-FROM continuumio/miniconda3:4.5.11
+FROM python:3.6
 
 # Maintainer
-MAINTAINER Philip Davidson<philip.davidson2@nhs.net>
+MAINTAINER Patrick Lombard<patrick.lombard@gosh.nhs.uk>
 
 ENV http_proxy=http://10.101.112.70:8080
 ENV https_proxy=http://10.101.112.70:8080
@@ -35,8 +35,8 @@ RUN perl INSTALL.pl --VERSION 92 --AUTO a -n
 
 # Create virtual env and set path (equivalent to 'activate')
 WORKDIR /root
-RUN conda create -n gel2mdt python=3.6
-ENV PATH /opt/conda/envs/gel2mdt/bin:$PATH
+#RUN conda create -n gel2mdt python=3.6
+#ENV PATH /opt/conda/envs/gel2mdt/bin:$PATH
 
 # Install Gel2MDT
 RUN mkdir /root/gel2mdt
@@ -47,4 +47,5 @@ RUN sed -i 's/certifi==/# certifi==/g' requirements.txt
 RUN pip install -r requirements.txt
 RUN pip install gunicorn
 RUN pip install mysqlclient
+RUN pip install flower
 
