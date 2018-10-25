@@ -34,15 +34,18 @@
         <script src="{% static 'js/custom.js' %}"></script>
     {% endblock %}
 
-
     <div class="tab-content">
         <div id="proband" class="tab-pane fade in active">
             <div class="container-fluid" >
+            <div style="text-align:right">
                 {% if config_dict|get_item:'cip_as_id' == 'True' %}
-                    <h1>{{report.ir_family.ir_family_id}}</h1>
+                    <h1  style="text-align:left;float:left;">{{report.ir_family.ir_family_id}}</h1>
                 {% else %}
-                    <h1>{{report.ir_family.participant_family.proband.gel_id}}</h1>
-                {% endif %}
+                    <h1  style="text-align:left;float:left;">{{report.ir_family.participant_family.proband.gel_id}} </h1>
+             {% endif %}
+
+            </div>
+
                 <form role="form" method="post" enctype="multipart/form-data" action="/update_proband/{{ report.id }}">
                     {% csrf_token %}
                     <div class="row">
@@ -94,6 +97,7 @@
                                             {{report.ir_family.participant_family.proband.sex}}
                                         </div>
                                         </br>
+                                      {% if report.sample_type == 'raredisease' %}
                                         {% bootstrap_label "Panels" %}
                                         <div class="block">
 
@@ -108,6 +112,7 @@
 
                                         </div>
                                         </br>
+                                    {% endif %}
 
                                     </div>
 
@@ -135,7 +140,19 @@
                                             <a href=# data-toggle="modal" data-target="#changeclinicianModal"><i class="fas fa-pencil-alt"></i></a>
                                             <a href=# data-toggle="modal" data-target="#addclinicianModal"><i class="fas fa-plus"></i></a>
                                         </div>
+                                    </br>
+                                    {% if other_cases %}
+                                     {% bootstrap_label "Other Interpretations" %}
+                                        <div class="block">
 
+                                        {% for case in other_cases %}
+                                            <a href="/proband/{{case.id}}">
+                                                {{case.ir_family.ir_family_id}}</a>
+                                        {% endfor %}
+
+
+                                    </div>
+                                    {% endif %}
                                     </div>
                                     <div class="col-md-3">
                                         {% bootstrap_label "CIP ID" %}
@@ -273,7 +290,11 @@
                                 <div class="panel-body">
                                     <div class="col-md-12">
                                         {% bootstrap_field gelir_form.case_status %}
+                                        {% if report.sample_type == 'raredisease'%}
                                         {% bootstrap_field gelir_form.mdt_status %}
+                                        {% else %}
+                                        {% bootstrap_field gelir_form.mdt_status label='GTAB Status' %}
+                                        {% endif %}
                                     </div>
 
                                     <div class="col-md-2">
@@ -291,6 +312,9 @@
                                         {% bootstrap_field gelir_form.no_primary_findings label="No Primary Findings" %}
                                     </div>
                                     {% endif %}
+                                    <div class="col-md-2">
+                                        {% bootstrap_field gelir_form.case_code label='Case Code' %}
+                                    </div>
                                     {% if proband_mdt|length > 0 %}
                                         <div class="col-md-2">
                                             <a href="/export_mdt_outcome_form/{{report.id}}"><i class="fas fa-external-link-alt"></i> MDM Outcome</a>
@@ -402,8 +426,13 @@
                                         <table width="100%" class="table table-striped table-bordered table-hover">
                                             <thead>
                                                 <tr>
+                                                    {% if report.sample_type == 'raredisease' %}
                                                     <th>MDT Name</th>
                                                     <th>MDT Date</th>
+                                                        {% else %}
+                                                        <th>GTAB Name</th>
+                                                    <th>GTAB Date</th>
+                                                        {% endif  %}
                                                     <th>Status</th>
                                                     <th>Creator</th>
 
@@ -537,13 +566,21 @@
                                     <div class="row">
 
                                         <div class="col-md-2">
+                                            {% if report.sample_type == 'raredisease'%}
                                             {% bootstrap_label "MDT Discussion" %}
+                                            {% else %}
+                                            {% bootstrap_label "GTAB Discussion" %}
+                                            {% endif %}
                                             <div class="block">
                                                 {{report.ir_family.participant_family.proband.discussion}}
                                             </div>
                                         </div>
                                         <div class="col-md-2">
+                                            {% if report.sample_type == 'raredisease'%}
                                             {% bootstrap_label "MDT Action" %}
+                                            {% else %}
+                                            {% bootstrap_label "GTAB Action" %}
+                                            {% endif %}
                                             <div class="block">
                                                 {{report.ir_family.participant_family.proband.action}}
                                             </div>
@@ -565,7 +602,11 @@
                                     <th>Variant</th>
                                     <th>Interpretation</th>
                                     <th>Gene</th>
+                                {% if report.sample_type == 'cancer' %}
+                                    <th>Domain</th>
+                                {% else %}
                                     <th>Tier</th>
+                                {% endif %}
                                     <th>Flag</th>
                                     <th>Transcript</th>
                                     <th>HGVSc</th>
