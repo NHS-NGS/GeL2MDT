@@ -170,12 +170,13 @@ def run_vep_remotely(infile, config_dict):
             ))
 
             cmd = "{vep} -i {remote_destination}/hg19_destination_file.txt " \
-                  " -o {remote_destination}/hg19_output.txt --species homo_sapiens "  \
+                  " -o {remote_destination}/hg19_output.txt --species homo_sapiens --cache_version {cache_version} "  \
                   " --force_overwrite --cache --dir_cache {cache} --fork 4 --vcf --flag_pick --assembly GRCh37 " \
                   " --exclude_predicted --everything --hgvsg --dont_skip --total_length --offline --fasta {fasta_loc} ".format(
                     vep=config_dict['vep'],
                     cache=config_dict['cache'],
                     fasta_loc=config_dict['hg19_fasta_loc'],
+                    cache_version=config_dict['cache_version'],
                     remote_destination=config_dict['remote_directory']
 
             )
@@ -198,11 +199,12 @@ def run_vep_remotely(infile, config_dict):
             ))
 
             cmd = "{vep} -i {remote_destination}/hg38_destination_file.txt " \
-                  " -o {remote_destination}/hg38_output.txt --species homo_sapiens "  \
+                  " -o {remote_destination}/hg38_output.txt --species homo_sapiens --cache_version {cache_version} "  \
                   " --force_overwrite --cache --dir_cache {cache} --fork 4 --vcf --flag_pick --assembly GRCh38 " \
                   " --exclude_predicted --everything --hgvsg --dont_skip --total_length --offline --fasta {fasta_loc} ".format(
                     vep=config_dict['vep'],
                     cache=config_dict['cache'],
+                    cache_version=config_dict['cache_version'],
                     fasta_loc=config_dict['hg38_fasta_loc'],
                     remote_destination=config_dict['remote_directory']
             )

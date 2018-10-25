@@ -218,10 +218,19 @@ class Case(object):
         :return: A dictionary of tools and versions used for the case
         '''
         if self.json['sample_type'] == 'raredisease':
-            tools_dict = {'genome_build': self.json_request_data["genomeAssemblyVersion"]}
+            if self.json_request_data['genomeAssemblyVersion'].startswith('GRCh37'):
+                genome_build = 'GRCh37'
+            elif self.json_request_data['genomeAssemblyVersion'].startswith('GRCh38'):
+                genome_build = 'GRCh38'
         elif self.json['sample_type'] == 'cancer':
-            tools_dict = {'genome_build': self.json["assembly"]}
-        return tools_dict
+            if self.json["assembly"].startswith('GRCh37'):
+                genome_build = 'GRCh37'
+            elif self.json["assembly"].startswith('GRCh38'):
+                genome_build = 'GRCh38'
+        else:
+            raise Exception(f'{self.request_id} has unknown genome build')
+
+        return {'genome_build': genome_build}
 
     def get_status_json(self):
         """
