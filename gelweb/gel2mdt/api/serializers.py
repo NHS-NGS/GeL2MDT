@@ -284,5 +284,6 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
             'recruiting_disease',
             'sex',
             'nhs_num',
-            'disease_subtype'
+            'disease_subtype',
+            'case_code'
         )
