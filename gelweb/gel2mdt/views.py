@@ -1281,6 +1281,8 @@ def add_case_alert(request):
         if case_alert_form.is_valid():
             case_alert_form.save()
             messages.add_message(request, 25, 'Case Added!')
+        else:
+            messages.add_message(request, 40, 'Not successful, is the GELID correct?')
     return redirect('case-alert', sample_type=case_alert_form.cleaned_data['sample_type'])
 
 
