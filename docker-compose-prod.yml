@@ -1,0 +1,70 @@
+version: '3'
+
+services:
+  redis:
+    image: "redis:alpine"
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./Docker/nginx/conf.d:/etc/nginx/conf.d
+      - ./gelweb/gelweb/static_files:/static
+    depends_on:
+      - web
+      - redis
+  web:
+    image: gel2mdt_web
+    build:
+      context: .
+    command: bash -c ". /root/gel2mdt/Docker/startup_script.sh && cd /root/gel2mdt/gelweb && gunicorn gelweb.wsgi -b 0.0.0.0:8001"
+    volumes:
+      - .:/root/gel2mdt/
+      - /home/genseqservadmin/.vep:/root/.vep
+      - /home/genseqservadmin/WL_GEL2MDT/gel2mdt_resources:/root/gel2mdt_cache
+    depends_on:
+      - db
+      - redis
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=wl_gel2mdt
+      - MYSQL_USER=paddy
+      - MYSQL_PASSWORD=SummerIsOver
+    volumes:
+      - /home/genseqservadmin/WL_GEL2MDT/gel2mdt_resources/gel2mdt_db:/var/lib/mysql
+  celery:
+    build: .
+    command: bash -c ". /root/gel2mdt/Docker/startup_script.sh && cd /root/gel2mdt/gelweb && celery -A gelweb worker -l info"
+    volumes:
+      - .:/root/gel2mdt/
+      - /home/genseqservadmin/.vep:/root/.vep
+      - /home/genseqservadmin/WL_GEL2MDT/gel2mdt_resources:/root/gel2mdt_cache
+    depends_on:
+      - db
+      - redis
+  celery-beat:
+    build: .
+    command: bash -c ". /root/gel2mdt/Docker/startup_script.sh && cd /root/gel2mdt/gelweb && rm -f celerybeat.pid && celery -A gelweb beat -l info"
+    volumes:
+      - .:/root/gel2mdt/
+      - /home/genseqservadmin/.vep:/root/.vep
+      - /home/genseqservadmin/WL_GEL2MDT/gel2mdt_resources:/root/gel2mdt_cache
+    depends_on:
+      - db
+      - redis
+  flower:
+    build: .
+    command: bash -c "cd /root/gel2mdt/gelweb && celery flower -A gelweb --broker=redis://redis:6379 --port=5555"
+    ports:
+      - "5555:5555"
+    depends_on:
+      - db
+      - redis
+      - celery
+      - celery-beat
+
+
+

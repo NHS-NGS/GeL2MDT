@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  web:
+    image: gel2mdt_web
+    build:
+      context: .
+    command: bash -c ". /root/gel2mdt/Docker/startup_script.sh && cd /root/gel2mdt/gelweb && python manage.py runserver_plus 0.0.0.0:8001"
+    ports:
+      - "8001:8001"
+    stdin_open: true
+    tty: true
+    volumes:
+      - .:/root/gel2mdt/
+      - /home/bioadmin/.vep:/root/.vep
+      - /home/bioadmin/patrick/gel2mdt_resources:/root/gel2mdt_cache
+    depends_on:
+      - db
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=gel2mdt_db
+      - MYSQL_USER=paddy
+      - MYSQL_PASSWORD=password
+    volumes:
+      - /home/bioadmin/patrick/gel2mdt_resources/gel2mdt_db:/var/lib/mysql
+
+
