@@ -17,9 +17,9 @@ services:
     image: gel2mdt_web
     build:
       context: .
-    command: bash -c ". /code/Docker/startup_script.sh && cd /root/gel2mdt/gelweb && gunicorn gelweb.wsgi -b 0.0.0.0:8000"
+    command: bash -c ". /root/gel2mdt/Docker/startup_script.sh && cd /root/gel2mdt/gelweb && gunicorn gelweb.wsgi -b 0.0.0.0:8000"
     volumes:
-      - .:/code
+      - .:/root/gel2mdt/
       - /home/bioadmin/.vep:/root/.vep
       - /home/bioadmin/patrick/gel2mdt_resources:/root/gel2mdt_cache
     depends_on:
@@ -37,24 +37,24 @@ services:
       - /home/bioadmin/patrick/gel2mdt_resources/gel2mdt_db:/var/lib/mysql
   celery:
     build: .
-    command: bash -c ". /code/Docker/startup_script.sh && cd /root/gel2mdt/gelweb && celery -A gelweb worker -l info"
+    command: bash -c ". /root/gel2mdt/Docker/startup_script.sh && cd /root/gel2mdt/gelweb && celery worker -A gelweb --loglevel=debug --concurrency=2 -B"
     volumes:
-      - .:/code
+      - .:/root/gel2mdt/
       - /home/bioadmin/.vep:/root/.vep
       - /home/bioadmin/patrick/gel2mdt_resources:/root/gel2mdt_cache
     depends_on:
       - db
       - redis
-  celery-beat:
-    build: .
-    command: bash -c ". /code/Docker/startup_script.sh && cd /root/gel2mdt/gelweb && celery -A gelweb beat -l info"
-    volumes:
-      - .:/code
-      - /home/bioadmin/.vep:/root/.vep
-      - /home/bioadmin/patrick/gel2mdt_resources:/root/gel2mdt_cache
-    depends_on:
-      - db
-      - redis
+#  celery-beat:
+#    build: .
+#    command: bash -c ". /root/gel2mdt/Docker/startup_script.sh && cd /root/gel2mdt/gelweb && celery -A gelweb beat -l info"
+#    volumes:
+#      - .:/root/gel2mdt/
+#      - /home/bioadmin/.vep:/root/.vep
+#      - /home/bioadmin/patrick/gel2mdt_resources:/root/gel2mdt_cache
+#    depends_on:
+#      - db
+#      - redis
   flower:
     build: .
     command: bash -c "cd /root/gel2mdt/gelweb && celery flower -A gelweb --broker=redis://redis:6379 --port=5555"
@@ -64,7 +64,7 @@ services:
       - db
       - redis
       - celery
-      - celery-beat
+      #- celery-beat
 
 
 

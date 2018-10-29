@@ -33,11 +33,6 @@ RUN git clone https://github.com/Ensembl/ensembl-vep.git
 WORKDIR /root/ensembl-vep
 RUN perl INSTALL.pl --VERSION 92 --AUTO a -n
 
-# Create virtual env and set path (equivalent to 'activate')
-WORKDIR /root
-#RUN conda create -n gel2mdt python=3.6
-#ENV PATH /opt/conda/envs/gel2mdt/bin:$PATH
-
 # Install Gel2MDT
 RUN mkdir /root/gel2mdt
 COPY . /root/gel2mdt
@@ -48,4 +43,4 @@ RUN pip install -r requirements.txt
 RUN pip install gunicorn
 RUN pip install mysqlclient
 RUN pip install flower
-
+# RUN pip install pip install Werkzeug
