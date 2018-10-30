@@ -65,6 +65,16 @@ services:
       - redis
       - celery
       - celery-beat
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    volumes:
+      - /sessions
+    ports:
+      - 8080:80
+    environment:
+      - PMA_ARBITRARY=1
+    depends_on:
+      - db
 
 
 
