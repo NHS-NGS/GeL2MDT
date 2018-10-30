@@ -281,9 +281,8 @@ def proband_view(request, report_id):
     report_history_formatter = ReportHistoryFormatter(report=report)
     report_history = report_history_formatter.get_report_history()
     proband_history = report_history_formatter.get_proband_history()
-    ir_family = report.ir_family
     other_cases = GELInterpretationReport.objects.latest_cases_by_sample_type(report.sample_type).filter(
-        ir_family=ir_family).exclude(ir_family=report.ir_family)
+        ir_family__participant_family=report.ir_family.participant_family).exclude(ir_family=report.ir_family)
 
     if request.method == "POST":
         demogs_form = DemogsForm(request.POST, instance=report.ir_family.participant_family.proband)
