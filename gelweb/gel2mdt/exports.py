@@ -95,7 +95,10 @@ def write_mdt_outcome_template(report):
                   + ' ' \
                   + str(report.ir_family.participant_family.proband.surname)
     row[1].text = str(report.ir_family.participant_family.proband.date_of_birth.date())
-    row[2].text = report.ir_family.participant_family.proband.nhs_number
+    try:
+        row[2].text = report.ir_family.participant_family.proband.nhs_number
+    except TypeError:
+        row[2].text = ''
     if report.ir_family.participant_family.proband.local_id:
         row[3].text = report.ir_family.participant_family.proband.local_id
 
