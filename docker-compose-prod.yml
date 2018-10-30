@@ -3,7 +3,9 @@ version: '3'
 services:
   redis:
     image: "redis:alpine"
+    restart: always
   nginx:
+    restart: always
     image: nginx:latest
     ports:
       - "8001:8001"
@@ -15,6 +17,7 @@ services:
       - redis
   web:
     image: gel2mdt_web
+    restart: always
     build:
       context: .
     command: bash -c ". /root/gel2mdt/Docker/startup_script.sh && cd /root/gel2mdt/gelweb && gunicorn gelweb.wsgi -b 0.0.0.0:8001"
@@ -37,6 +40,7 @@ services:
       - /home/genseqservadmin/WL_GEL2MDT/gel2mdt_resources/gel2mdt_db:/var/lib/mysql
   celery:
     build: .
+    restart: always
     command: bash -c ". /root/gel2mdt/Docker/startup_script.sh && cd /root/gel2mdt/gelweb && celery -A gelweb worker -l info"
     volumes:
       - .:/root/gel2mdt/
@@ -47,6 +51,7 @@ services:
       - redis
   celery-beat:
     build: .
+    restart: always
     command: bash -c ". /root/gel2mdt/Docker/startup_script.sh && cd /root/gel2mdt/gelweb && rm -f celerybeat.pid && celery -A gelweb beat -l info"
     volumes:
       - .:/root/gel2mdt/
@@ -57,6 +62,7 @@ services:
       - redis
   flower:
     build: .
+    restart: always
     command: bash -c "cd /root/gel2mdt/gelweb && celery flower -A gelweb --broker=redis://redis:6379 --port=5555"
     ports:
       - "5555:5555"
@@ -67,6 +73,7 @@ services:
       - celery-beat
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
+    restart: always
     volumes:
       - /sessions
     ports:
