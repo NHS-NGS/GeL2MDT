@@ -230,7 +230,7 @@ def case_alert_email():
                     case_alert = CaseAlert.objects.get(id=case)
                     text_content += f'Case {case_alert.gel_id} with CIP-ID of {matching_cases[s_type][case][0][1]} ' \
                                     f'has been added to the database. CaseAlert comment: {case_alert.comment}\n'
-        subject, from_email, to = f'GeL2MDT CaseAlert', 'bioinformatics@gosh.nhs.uk', 'GELTeam@gosh.nhs.uk'
+        subject, from_email, to = f'West London GeL2MDT CaseAlert', 'bioinformatics@gosh.nhs.uk', 'GELTeam@gosh.nhs.uk'
         msg = EmailMessage(subject, text_content, from_email, [to])
         try:
             msg.send()
@@ -250,7 +250,7 @@ def listupdate_email():
                 text_content = text_content + f'{update.id}\t{update.update_time}' \
                                               f'\t{update.cases_added}\t{update.cases_updated}\t{update.error}\n'
     if text_content:
-        subject, from_email, to = 'GeL2MDT ListUpdate', 'bioinformatics@gosh.nhs.uk', 'bioinformatics@gosh.nhs.uk'
+        subject, from_email, to = 'West London GeL2MDT ListUpdate', 'bioinformatics@gosh.nhs.uk', 'bioinformatics@gosh.nhs.uk'
         msg = EmailMessage(subject, text_content, from_email, [to])
         try:
             msg.send()
