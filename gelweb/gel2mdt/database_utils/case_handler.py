@@ -1788,7 +1788,7 @@ class CaseModel(object):
             cmd = ''.join([
                 "SELECT * FROM \"PanelVersion\"",
                 " WHERE panel_id = '{panel_id}'",
-                " AND version_number = {version_number}"
+                " AND version_number = '{version_number}'"
             ]).format(
                 panel_id=self.model_attributes["panel"].id,
                 version_number=self.model_attributes["version_number"]
@@ -1901,7 +1901,6 @@ class CaseModel(object):
         attributes. Returns True if found, False if not.
         """
         sql_cmd = self.set_sql_cmd()
-        print(sql_cmd)
 
         entry = [
             db_obj for db_obj in self.model_type.objects.raw(sql_cmd)
@@ -1917,6 +1916,8 @@ class CaseModel(object):
         else:
             print(entry)
             raise ValueError("Multiple entries found for same object.")
+
+        print(sql_cmd, entry, sep="\t")
 
         return entry
 
