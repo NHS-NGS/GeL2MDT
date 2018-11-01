@@ -1903,30 +1903,12 @@ class CaseModel(object):
         sql_cmd = self.set_sql_cmd()
         print(sql_cmd)
 
-        """
-        if self.model_type == Clinician:
-        elif self.model_type == Proband:
-        elif self.model_type == Family:
-        elif self.model_type == Relative:
-        elif self.model_type == InterpretationReportFamily:
-        elif self.model_type == Panel:
-        elif self.model_type == PanelVersion:
-        elif self.model_type == InterpretationReportFamilyPanel:
-        elif self.model_type == Gene:
-        elif self.model_type == Transcript:
-        elif self.model_type == GELInterpretationReport:
-        elif self.model_type == Variant:
-        elif self.model_type == TranscriptVariant:
-        elif self.model_type == ProbandVariant:
-        elif self.model_type == PVFlag:
-        elif self.model_type == ProbandTranscriptVariant:
-        elif self.model_type == ReportEvent:
-        elif self.model_type == ToolOrAssemblyVersion:
-            """
+        entry = [
+            db_obj for db_obj in self.model_type.objects.raw(sql_cmd)
+        ]
 
         if len(entry) == 1:
             entry = entry[0]
-            entry = self.model_type.objects.get(id=entry['id'])
             # also need to set self.entry here as it may not be called in init
             self.entry = entry
         elif len(entry) == 0:
