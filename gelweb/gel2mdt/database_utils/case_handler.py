@@ -1893,6 +1893,8 @@ class CaseModel(object):
                 version_number=self.model_attributes["version_number"]
             )
 
+        return cmd
+
     def check_found_in_db(self, queryset):
         """
         Queries the database for a model of the given type with the given
