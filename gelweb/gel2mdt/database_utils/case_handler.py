@@ -1795,7 +1795,7 @@ class CaseModel(object):
             )
         elif self.model_type == InterpretationReportFamilyPanel:
             cmd = ''.join([
-                "SELECT * FROM \"InterpretationReportFamilyPanel\"",
+                "SELECT * FROM \"gel2mdt_interpretationreportfamilypanel\"",
                 " WHERE ir_family_id = {ir_family_id}",  # no ' because FKID
                 " AND panel_id = {panel_id}"
             ]).format(
