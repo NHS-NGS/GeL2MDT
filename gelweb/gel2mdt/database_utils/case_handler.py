@@ -1728,85 +1728,200 @@ class CaseModel(object):
         self.model_objects = model_objects
         self.entry = self.check_found_in_db(self.model_objects)
 
+    def set_sql_cmd(self):
+        # set raw sql to run against database to fetch matching record
+        if self.model_type == Clinician:
+            cmd = ''.join([
+                "SELECT * FROM \"Clinician\"",
+                " WHERE name = '{name}'",
+                " AND hospital = '{hospital}'",
+                " AND email = '{email}'"
+            ]).format(
+                name=self.model_attributes["name"],
+                hospital=self.model_attributes["hospital"],
+                email=self.model_attributes["email"]
+            )
+        elif self.model_type == Proband:
+            cmd = ''.join([
+                "SELECT * FROM \"Proband\"",
+                " WHERE gel_id = '{gel_id}'"
+            ]).format(
+                gel_id=self.model_attributes["gel_id"]
+            )
+        elif self.model_type == Family:
+            cmd = ''.join([
+                "SELECT * FROM \"Family\"",
+                " WHERE gel_family_id = '{gel_family_id}'"
+            ]).format(
+                gel_family_id=self.model_attributes["gel_family_id"]
+            )
+        elif self.model_type == Relative:
+            cmd = ''.join([
+                "SELECT * FROM \"Relative\"",
+                " WHERE gel_id = '{gel_id}'",
+                " AND proband_id = {proband_id}"
+            ]).format(
+                gel_id=self.model_attributes["gel_id"],
+                proband_id=self.model_attributes["proband"].id
+            )
+        elif self.model_type == Phenotype:
+            cmd = ''.join([
+                "SELECT * FROM \"Phenotype\"",
+                " WHERE hpo_terms = '{hpo_terms}'"
+            ]).format(
+                hpo_terms=self.model_attributes["hpo_terms"]
+            )
+        elif self.model_type == InterpretationReportFamily:
+            cmd = ''.join([
+                "SELECT * FROM \"InterpretationReportFamily\"",
+                " WHERE ir_family_id = '{ir_family_id}'",
+            ]).format(
+                ir_family_id=self.model_attributes["ir_family_id"]
+            )
+        elif self.model_type == Panel:
+            cmd = ''.join([
+                "SELECT * FROM \"Panel\"",
+                " WHERE panelapp_id = '{panelapp_id}'",
+            ]).format(
+                panelapp_id=self.model_attributes["panelapp_id"]
+            )
+        elif self.model_type == PanelVersion:
+            cmd = ''.join([
+                "SELECT * FROM \"PanelVersion\"",
+                " WHERE panel_id = '{panel_id}'",
+                " AND version_number = {version_number}"
+            ]).format(
+                panel_id=self.model_attributes["panel"].id,
+                version_number=self.model_attributes["version_number"]
+            )
+        elif self.model_type == InterpretationReportFamilyPanel:
+            cmd = ''.join([
+                "SELECT * FROM \"InterpretationReportFamilyPanel\"",
+                " WHERE ir_family_id = {ir_family_id}",  # no ' because FKID
+                " AND panel_id = {panel_id}"
+            ]).format(
+                ir_family_id=self.model_attributes["ir_family"].id,
+                panel_id=self.model_attributes["panel"].id
+            )
+        elif self.model_type == Gene:
+            cmd = ''.join([
+                "SELECT * FROM \"Gene\"",
+                " WHERE hgnc_id = '{hgnc_id}'",
+            ]).format(
+                hgnc_id=self.model_attributes["hgnc_id"]
+            )
+        elif self.model_type == Transcript:
+            cmd = ''.join([
+                "SELECT * FROM \"Transcript\"",
+                " WHERE name = '{name}'",
+                " AND genome_assembly_id = {genome_assembly_id}"
+            ]).format(
+                name=self.model_attributes["name"],
+                genome_assmebly_id=self.model_attributes["genome_assembly"].id
+            )
+        elif self.model_type == GELInterpretationReport:
+            cmd = ''.join([
+                "SELECT * FROM \"GELInterpretationReport\"",
+                " WHERE sha_hash = '{sha_hash}'",
+            ]).format(
+                sha_hash=self.model_attributes["sha_hash"]
+            )
+        elif self.model_type == Variant:
+            cmd = ''.join([
+                "SELECT * FROM \"Variant\"",
+                " WHERE chromosome = '{chromosome}'",
+                " AND position = {position}"
+                " AND reference = '{reference}'"
+                " AND alternate = '{alternate}'"
+            ]).format(
+                chromosome=self.model_attributes["chromosome"],
+                position=self.model_attributes["position"],
+                reference=self.model_attributes["reference"],
+                alternate=self.model_attributes["alternate"]
+            )
+        elif self.model_type == TranscriptVariant:
+            cmd = ''.join([
+                "SELECT * FROM \"TranscriptVariant\"",
+                " WHERE transcript_id = {transcript_id}",
+                " AND variant_id = {variant_id}"
+            ]).format(
+                transcript_id=self.model_attributes["transcript"].id,
+                variant_id=self.model_attributes["variant"].id
+            )
+        elif self.model_type == ProbandVariant:
+            cmd = ''.join([
+                "SELECT * FROM \"ProbandVariant\"",
+                " WHERE variant_id = {variant_id}",
+                " AND interpretation_report_id = {interpretation_report_id}"
+            ]).format(
+                variant_id=self.model_attributes["variant"].id,
+                interpretation_report_id=self.model_attributes["interpretation_report"].id
+            )
+        elif self.model_type == PVFlag:
+            cmd = ''.join([
+                "SELECT * FROM \"PVFlag\"",
+                " WHERE proband_variant_id = {proband_variant_id}",
+                " AND flag_name = '{flag_name}'"
+            ]).format(
+                proband_variant_id=self.model_attributes["proband_variant"].id,
+                flag_name=self.model_attributes["flag_name"]
+            )
+        elif self.model_type == ProbandTranscriptVariant:
+            cmd = ''.join([
+                "SELECT * FROM \"ProbandTranscriptVariant\"",
+                " WHERE transcript_id = {transcript_id}",
+                " AND proband_variant_id = {proband_variant_id}"
+            ]).format(
+                transcript_id=self.model_attributes["transcript"].id,
+                proband_variant_id=self.model_attributes["proband_variant"].id
+            )
+        elif self.model_type == ReportEvent:
+            cmd = ''.join([
+                "SELECT * FROM \"ReportEvent\"",
+                " WHERE re_id = '{re_id}'",
+                " AND proband_variant_id = {proband_variant_id}"
+            ]).format(
+                re_id=self.model_attributes["re_id"],
+                proband_variant_id=self.model_attributes["proband_variant"].id
+            )
+        elif self.model_type == ToolOrAssemblyVersion:
+            cmd = ''.join([
+                "SELECT * FROM \"ToolOrAssemblyVersion\"",
+                " WHERE tool_name = '{tool_name}'",
+                " AND version_number = '{version_number}'"
+            ]).format(
+                tool_name=self.model_attributes["tool_name"],
+                version_number=self.model_attributes["version_number"]
+            )
+
     def check_found_in_db(self, queryset):
         """
         Queries the database for a model of the given type with the given
         attributes. Returns True if found, False if not.
         """
+        sql_cmd = self.set_sql_cmd()
+        print(sql_cmd)
 
+        """
         if self.model_type == Clinician:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj['name'] == self.model_attributes["name"]
-                     and db_obj['hospital'] == self.model_attributes["hospital"]
-                     and db_obj['email'] == self.model_attributes["email"]]
         elif self.model_type == Proband:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj['gel_id'] == str(self.model_attributes["gel_id"])]
         elif self.model_type == Family:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj['gel_family_id'] == str(self.model_attributes["gel_family_id"])]
         elif self.model_type == Relative:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj['gel_id'] == str(self.model_attributes["gel_id"])
-                     and db_obj['proband'] == self.model_attributes['proband'].id]
-        elif self.model_type == Phenotype:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj['hpo_terms'] == self.model_attributes["hpo_terms"]]
         elif self.model_type == InterpretationReportFamily:
-            entry =[db_obj for db_obj in queryset
-                    if db_obj['ir_family_id'] == self.model_attributes["ir_family_id"]]
         elif self.model_type == Panel:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj['panelapp_id'] == self.model_attributes["panelapp_id"]]
         elif self.model_type == PanelVersion:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj['panel'] == self.model_attributes["panel"].id
-                     and db_obj['version_number'] == self.model_attributes["version_number"]]
         elif self.model_type == InterpretationReportFamilyPanel:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj['ir_family'] == self.model_attributes["ir_family"].id
-                     and db_obj['panel'] == self.model_attributes["panel"].id]
         elif self.model_type == Gene:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj['hgnc_id'] == self.model_attributes["hgnc_id"]]
         elif self.model_type == Transcript:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj['name'] == self.model_attributes["name"]
-                     and db_obj['genome_assembly'] == self.model_attributes['genome_assembly'].id]
         elif self.model_type == GELInterpretationReport:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj['sha_hash'] == self.model_attributes["sha_hash"]]
         elif self.model_type == Variant:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj['chromosome'] == self.model_attributes["chromosome"]
-                     and db_obj['position'] == self.model_attributes["position"]
-                     and db_obj['reference'] == self.model_attributes["reference"]
-                     and db_obj['alternate'] == self.model_attributes["alternate"]
-                     and db_obj['genome_assembly'] == self.model_attributes["genome_assembly"].id]
         elif self.model_type == TranscriptVariant:
-            entry = [db_obj for db_obj in queryset
-                    if db_obj['transcript'] == self.model_attributes["transcript"].id
-                    and db_obj['variant'] == self.model_attributes["variant"].id]
         elif self.model_type == ProbandVariant:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj['variant'] == self.model_attributes["variant"].id
-                     and db_obj['interpretation_report'] == self.model_attributes["interpretation_report"].id]
         elif self.model_type == PVFlag:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj['proband_variant'] == self.model_attributes["proband_variant"].id
-                     and db_obj['flag_name'] == self.model_attributes["flag_name"]]
         elif self.model_type == ProbandTranscriptVariant:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj['transcript'] == self.model_attributes["transcript"].id
-                     and db_obj['proband_variant'] == self.model_attributes["proband_variant"].id]
         elif self.model_type == ReportEvent:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj['re_id'] == self.model_attributes["re_id"]
-                     and db_obj['proband_variant'] == self.model_attributes["proband_variant"].id]
         elif self.model_type == ToolOrAssemblyVersion:
-            entry = [db_obj for db_obj in queryset
-                     if db_obj['tool_name'] == self.model_attributes["tool_name"]
-                     and db_obj['version_number'] == self.model_attributes["version_number"]]
+            """
 
         if len(entry) == 1:
             entry = entry[0]
