@@ -1917,8 +1917,6 @@ class CaseModel(object):
             print(entry)
             raise ValueError("Multiple entries found for same object.")
 
-        print(sql_cmd, entry, sep="\t")
-
         return entry
 
 
