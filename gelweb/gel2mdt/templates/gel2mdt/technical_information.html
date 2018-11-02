@@ -90,7 +90,7 @@ SOFTWARE.
 				<tr>
 					<td class="tgd tg-lqy6">Sex:</td>
 <td></td>
-					<td class="tg-yw4l">{{report.ir_family.participant_family.proband.gender}}</td>
+					<td class="tg-yw4l">{{report.ir_family.participant_family.proband.sex|title}}</td>
 				</tr>
 				<tr>
 					<td class="tg-lqy6">NHS No.:</td>
@@ -129,11 +129,9 @@ SOFTWARE.
 </table>
 
 <hr style="margin: 0px; height: 0px; border: 1px solid black; color: black; background: black;">
+    {% if outcome == "positive" %}
     <p style="margin: 5px 0; font-size: 12pt;"><strong>Variant Details</strong></p>
 
-    {% if outcome != "positive" %}
-        <strong>No variants have been detected.</strong>
-    {% elif outcome == "positive" %}
         <small>
             <table style="margin: 5px;" class="table table-bordered table-condensed" style="font-size:10px;">
                 <thead>
