@@ -1724,8 +1724,10 @@ class CaseModel(object):
     def __init__(self, model_type, model_attributes, model_objects):
         self.model_type = model_type
 
-        self.model_attributes = model_attributes
-        self.escaped_model_attributes = model_attributes
+        self.model_attributes = model_attributes.copy()
+        self.escaped_model_attributes = model_attributes.copy()
+        print(id(self.model_attributes))
+        print(id(self.escaped_model_attributes))
         self.string_escape_model_attributes()  # prevent sql injection
 
         self.model_objects = model_objects
@@ -1828,7 +1830,7 @@ class CaseModel(object):
                 " AND genome_assembly_id = {genome_assembly_id}"
             ]).format(
                 name=self.escaped_model_attributes["name"],
-                genome_assmebly_id=self.escaped_model_attributes["genome_assembly"].id
+                genome_assembly_id=self.escaped_model_attributes["genome_assembly"].id
             )
         elif self.model_type == GELInterpretationReport:
             table = 'SELECT * FROM "GELInterpretationReport"'
