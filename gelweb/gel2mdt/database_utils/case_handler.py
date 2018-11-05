@@ -1734,7 +1734,7 @@ class CaseModel(object):
     def string_escape_model_attributes(self):
         # string escape ' characters in model attributes for use with raw sql
         for k, v in self.escaped_model_attributes.items():
-            if isinstance(self.model_attributes[k], str):
+            if isinstance(self.escaped_model_attributes[k], str):
                 self.escaped_model_attributes[k] = self.escaped_model_attributes[k].replace(
                     "'", "''"  # psql takes '' when ' is used in string to avoid term
                 )
@@ -1896,7 +1896,7 @@ class CaseModel(object):
                 proband_variant_id=self.escaped_model_attributes["proband_variant"].id
             )
         elif self.model_type == ToolOrAssemblyVersion:
-            table = 'SELECT * FROM \"ToolOrAssemblyVersion\"'
+            table = 'SELECT * FROM "ToolOrAssemblyVersion"'
             cmd = ''.join([
                 " WHERE tool_name = '{tool_name}'",
                 " AND version_number = '{version_number}'"
@@ -1922,6 +1922,7 @@ class CaseModel(object):
         entry = [
             db_obj for db_obj in self.model_type.objects.raw(sql_cmd)
         ]
+        tqdm.write(sql_cmd + "\t>>>\t" + str(entry))
 
         if len(entry) == 1:
             entry = entry[0]
@@ -1934,7 +1935,6 @@ class CaseModel(object):
             print(entry)
             raise ValueError("Multiple entries found for same object.")
 
-        tqdm.write(sql_cmd + "\t>>>\t" + str(entry))
         return entry
 
 
