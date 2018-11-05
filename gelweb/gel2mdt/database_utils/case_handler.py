@@ -1723,177 +1723,194 @@ class CaseModel(object):
     """
     def __init__(self, model_type, model_attributes, model_objects):
         self.model_type = model_type
+
         self.model_attributes = model_attributes
+        self.escaped_model_attributes = model_attributes
+        self.string_escape_model_attributes()  # prevent sql injection
+
         self.model_objects = model_objects
         self.entry = self.check_found_in_db(self.model_objects)
+
+    def string_escape_model_attributes(self):
+        # string escape ' characters in model attributes for use with raw sql
+        for k, v in self.escaped_model_attributes.items():
+            if isinstance(self.model_attributes[k], str):
+                self.escaped_model_attributes[k] = self.escaped_model_attributes[k].replace(
+                    "'", "''"  # psql takes '' when ' is used in string to avoid term
+                )
 
     def set_sql_cmd(self):
         # set raw sql to run against database to fetch matching record
         if self.model_type == Clinician:
+            table = 'SELECT * FROM "Clinician"'
             cmd = ''.join([
-                "SELECT * FROM \"Clinician\"",
                 " WHERE name = '{name}'",
                 " AND hospital = '{hospital}'",
                 " AND email = '{email}'"
             ]).format(
-                name=self.model_attributes["name"],
-                hospital=self.model_attributes["hospital"],
-                email=self.model_attributes["email"]
+                name=self.escaped_model_attributes["name"],
+                hospital=self.escaped_model_attributes["hospital"],
+                email=self.escaped_model_attributes["email"]
             )
         elif self.model_type == Proband:
+            table = 'SELECT * FROM "Proband"'
             cmd = ''.join([
-                "SELECT * FROM \"Proband\"",
                 " WHERE gel_id = '{gel_id}'"
             ]).format(
-                gel_id=self.model_attributes["gel_id"]
+                gel_id=self.escaped_model_attributes["gel_id"]
             )
         elif self.model_type == Family:
+            table = 'SELECT * FROM "Family"'
             cmd = ''.join([
-                "SELECT * FROM \"Family\"",
                 " WHERE gel_family_id = '{gel_family_id}'"
             ]).format(
-                gel_family_id=self.model_attributes["gel_family_id"]
+                gel_family_id=self.escaped_model_attributes["gel_family_id"]
             )
         elif self.model_type == Relative:
+            table = 'SELECT * FROM "Relative"'
             cmd = ''.join([
-                "SELECT * FROM \"Relative\"",
                 " WHERE gel_id = '{gel_id}'",
                 " AND proband_id = {proband_id}"
             ]).format(
-                gel_id=self.model_attributes["gel_id"],
-                proband_id=self.model_attributes["proband"].id
+                gel_id=self.escaped_model_attributes["gel_id"],
+                proband_id=self.escaped_model_attributes["proband"].id
             )
         elif self.model_type == Phenotype:
+            table = 'SELECT * FROM "Phenotype"'
             cmd = ''.join([
-                "SELECT * FROM \"Phenotype\"",
                 " WHERE hpo_terms = '{hpo_terms}'"
             ]).format(
-                hpo_terms=self.model_attributes["hpo_terms"]
+                hpo_terms=self.escaped_model_attributes["hpo_terms"]
             )
         elif self.model_type == InterpretationReportFamily:
+            table = 'SELECT * FROM "InterpretationReportFamily"'
             cmd = ''.join([
-                "SELECT * FROM \"InterpretationReportFamily\"",
                 " WHERE ir_family_id = '{ir_family_id}'",
             ]).format(
-                ir_family_id=self.model_attributes["ir_family_id"]
+                ir_family_id=self.escaped_model_attributes["ir_family_id"]
             )
         elif self.model_type == Panel:
+            table = 'SELECT * FROM "Panel"'
             cmd = ''.join([
-                "SELECT * FROM \"Panel\"",
                 " WHERE panelapp_id = '{panelapp_id}'",
             ]).format(
-                panelapp_id=self.model_attributes["panelapp_id"]
+                panelapp_id=self.escaped_model_attributes["panelapp_id"]
             )
         elif self.model_type == PanelVersion:
+            table = 'SELECT * FROM "PanelVersion"'
             cmd = ''.join([
-                "SELECT * FROM \"PanelVersion\"",
                 " WHERE panel_id = '{panel_id}'",
                 " AND version_number = '{version_number}'"
             ]).format(
-                panel_id=self.model_attributes["panel"].id,
-                version_number=self.model_attributes["version_number"]
+                panel_id=self.escaped_model_attributes["panel"].id,
+                version_number=self.escaped_model_attributes["version_number"]
             )
         elif self.model_type == InterpretationReportFamilyPanel:
+            table = 'SELECT * FROM "gel2mdt_interpretationreportfamilypanel"'
             cmd = ''.join([
-                "SELECT * FROM \"gel2mdt_interpretationreportfamilypanel\"",
                 " WHERE ir_family_id = {ir_family_id}",  # no ' because FKID
                 " AND panel_id = {panel_id}"
             ]).format(
-                ir_family_id=self.model_attributes["ir_family"].id,
-                panel_id=self.model_attributes["panel"].id
+                ir_family_id=self.escaped_model_attributes["ir_family"].id,
+                panel_id=self.escaped_model_attributes["panel"].id
             )
         elif self.model_type == Gene:
+            table = 'SELECT * FROM "Gene"'
             cmd = ''.join([
-                "SELECT * FROM \"Gene\"",
                 " WHERE hgnc_id = '{hgnc_id}'",
             ]).format(
-                hgnc_id=self.model_attributes["hgnc_id"]
+                hgnc_id=self.escaped_model_attributes["hgnc_id"]
             )
         elif self.model_type == Transcript:
+            table = 'SELECT * FROM "Transcript"'
             cmd = ''.join([
-                "SELECT * FROM \"Transcript\"",
                 " WHERE name = '{name}'",
                 " AND genome_assembly_id = {genome_assembly_id}"
             ]).format(
-                name=self.model_attributes["name"],
-                genome_assmebly_id=self.model_attributes["genome_assembly"].id
+                name=self.escaped_model_attributes["name"],
+                genome_assmebly_id=self.escaped_model_attributes["genome_assembly"].id
             )
         elif self.model_type == GELInterpretationReport:
+            table = 'SELECT * FROM "GELInterpretationReport"'
             cmd = ''.join([
-                "SELECT * FROM \"GELInterpretationReport\"",
                 " WHERE sha_hash = '{sha_hash}'",
             ]).format(
-                sha_hash=self.model_attributes["sha_hash"]
+                sha_hash=self.escaped_model_attributes["sha_hash"]
             )
         elif self.model_type == Variant:
+            table = 'SELECT * FROM "Variant"'
             cmd = ''.join([
-                "SELECT * FROM \"Variant\"",
                 " WHERE chromosome = '{chromosome}'",
                 " AND position = {position}"
                 " AND reference = '{reference}'"
                 " AND alternate = '{alternate}'"
             ]).format(
-                chromosome=self.model_attributes["chromosome"],
-                position=self.model_attributes["position"],
-                reference=self.model_attributes["reference"],
-                alternate=self.model_attributes["alternate"]
+                chromosome=self.escaped_model_attributes["chromosome"],
+                position=self.escaped_model_attributes["position"],
+                reference=self.escaped_model_attributes["reference"],
+                alternate=self.escaped_model_attributes["alternate"]
             )
         elif self.model_type == TranscriptVariant:
+            table = 'SELECT * FROM "TranscriptVariant"'
             cmd = ''.join([
-                "SELECT * FROM \"TranscriptVariant\"",
                 " WHERE transcript_id = {transcript_id}",
                 " AND variant_id = {variant_id}"
             ]).format(
-                transcript_id=self.model_attributes["transcript"].id,
-                variant_id=self.model_attributes["variant"].id
+                transcript_id=self.escaped_model_attributes["transcript"].id,
+                variant_id=self.escaped_model_attributes["variant"].id
             )
         elif self.model_type == ProbandVariant:
+            table = 'SELECT * FROM "ProbandVariant"'
             cmd = ''.join([
-                "SELECT * FROM \"ProbandVariant\"",
                 " WHERE variant_id = {variant_id}",
                 " AND interpretation_report_id = {interpretation_report_id}"
             ]).format(
-                variant_id=self.model_attributes["variant"].id,
-                interpretation_report_id=self.model_attributes["interpretation_report"].id
+                variant_id=self.escaped_model_attributes["variant"].id,
+                interpretation_report_id=self.escaped_model_attributes["interpretation_report"].id
             )
         elif self.model_type == PVFlag:
+            table = 'SELECT * FROM "PVFlag"'
             cmd = ''.join([
-                "SELECT * FROM \"PVFlag\"",
                 " WHERE proband_variant_id = {proband_variant_id}",
                 " AND flag_name = '{flag_name}'"
             ]).format(
-                proband_variant_id=self.model_attributes["proband_variant"].id,
-                flag_name=self.model_attributes["flag_name"]
+                proband_variant_id=self.escaped_model_attributes["proband_variant"].id,
+                flag_name=self.escaped_model_attributes["flag_name"]
             )
         elif self.model_type == ProbandTranscriptVariant:
+            table = 'SELECT * FROM "ProbandTranscriptVariant"'
             cmd = ''.join([
-                "SELECT * FROM \"ProbandTranscriptVariant\"",
                 " WHERE transcript_id = {transcript_id}",
                 " AND proband_variant_id = {proband_variant_id}"
             ]).format(
-                transcript_id=self.model_attributes["transcript"].id,
-                proband_variant_id=self.model_attributes["proband_variant"].id
+                transcript_id=self.escaped_model_attributes["transcript"].id,
+                proband_variant_id=self.escaped_model_attributes["proband_variant"].id
             )
         elif self.model_type == ReportEvent:
+            table = 'SELECT * FROM "ReportEvent"'
             cmd = ''.join([
-                "SELECT * FROM \"ReportEvent\"",
                 " WHERE re_id = '{re_id}'",
                 " AND proband_variant_id = {proband_variant_id}"
             ]).format(
-                re_id=self.model_attributes["re_id"],
-                proband_variant_id=self.model_attributes["proband_variant"].id
+                re_id=self.escaped_model_attributes["re_id"],
+                proband_variant_id=self.escaped_model_attributes["proband_variant"].id
             )
         elif self.model_type == ToolOrAssemblyVersion:
+            table = 'SELECT * FROM \"ToolOrAssemblyVersion\"'
             cmd = ''.join([
-                "SELECT * FROM \"ToolOrAssemblyVersion\"",
                 " WHERE tool_name = '{tool_name}'",
                 " AND version_number = '{version_number}'"
             ]).format(
-                tool_name=self.model_attributes["tool_name"],
-                version_number=self.model_attributes["version_number"]
+                tool_name=self.escaped_model_attributes["tool_name"],
+                version_number=self.escaped_model_attributes["version_number"]
             )
 
-        return cmd
+        sql =  ''.join([
+            table,
+            cmd
+        ])
+
+        return sql
 
     def check_found_in_db(self, queryset):
         """
@@ -1917,6 +1934,7 @@ class CaseModel(object):
             print(entry)
             raise ValueError("Multiple entries found for same object.")
 
+        tqdm.write(sql_cmd + "\t>>>\t" + str(entry))
         return entry
 
 
