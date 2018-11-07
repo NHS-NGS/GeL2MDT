@@ -1726,8 +1726,6 @@ class CaseModel(object):
 
         self.model_attributes = model_attributes.copy()
         self.escaped_model_attributes = model_attributes.copy()
-        print(id(self.model_attributes))
-        print(id(self.escaped_model_attributes))
         self.string_escape_model_attributes()  # prevent sql injection
 
         self.model_objects = model_objects
@@ -1846,11 +1844,13 @@ class CaseModel(object):
                 " AND position = {position}"
                 " AND reference = '{reference}'"
                 " AND alternate = '{alternate}'"
+                " AND genome_assembly_id = {genome_assembly_id}'"
             ]).format(
                 chromosome=self.escaped_model_attributes["chromosome"],
                 position=self.escaped_model_attributes["position"],
                 reference=self.escaped_model_attributes["reference"],
-                alternate=self.escaped_model_attributes["alternate"]
+                alternate=self.escaped_model_attributes["alternate"],
+                genome_assmebly_id=self.escaped_model_attributes["genome_assembly"].id
             )
         elif self.model_type == TranscriptVariant:
             table = 'SELECT * FROM "TranscriptVariant"'
