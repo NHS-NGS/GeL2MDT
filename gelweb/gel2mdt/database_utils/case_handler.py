@@ -1844,7 +1844,7 @@ class CaseModel(object):
                 " AND position = {position}"
                 " AND reference = '{reference}'"
                 " AND alternate = '{alternate}'"
-                " AND genome_assembly_id = {genome_assembly_id}'"
+                " AND genome_assembly_id = {genome_assembly_id}"
             ]).format(
                 chromosome=self.escaped_model_attributes["chromosome"],
                 position=self.escaped_model_attributes["position"],
