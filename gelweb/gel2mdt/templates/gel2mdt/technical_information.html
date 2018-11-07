@@ -98,11 +98,6 @@ SOFTWARE.
 					<td class="tg-yw4l">{{report.ir_family.participant_family.proband.nhs_number}}</td>
 				</tr>
 				<tr>
-					<td class="tg-lqy6">Hospital No.:</td>
-<td></td>
-					<td class="tg-yw4l">{{report.ir_family.participant_family.proband.cgu_number}}</td>
-				</tr>
-				<tr>
 					<td class="tg-lqy6">100,000 Genomes ID:</td>
 <td></td>
 					<td class="tg-yw4l">{{report.ir_family.participant_family.proband.gel_id}}</td>
@@ -113,7 +108,7 @@ SOFTWARE.
 
 
 <p style="font-size: 8pt">Our reference: {{report.ir_family.participant_family.proband.lab_number}}</p>
-<br><br><br><br>
+<br><br><br>
 <p style="margin: 0; padding:0"><strong>Recruiting Disease:</strong>
 {{report.ir_family.participant_family.proband.recruiting_disease}}<p>
 		</td>
@@ -183,8 +178,8 @@ SOFTWARE.
     depth coverage and incomplete ascertainment of disease-gene associations. The analysis
 	does not currently reliably detect larger copy number variants or structural abnormalities.
     {% if outcome == "positive" %}
-        Variants are classified using the latest ACGS and ACMG/AMP guidelines
-        (Ellard et al 2017, ACGS and Richards et al 2015, Genet Med) and confirmed using in-house Sanger sequencing.
+        Variants are classified using the latest ACGS, ACMG/AMP, and supplementary guidelines
+        (Ellard et al 2018, ACGS and Richards et al 2015, Genet Med) and confirmed using in-house Sanger sequencing.
     {% endif %}
     </h6>
 
