@@ -28,7 +28,7 @@ from django.utils.dateparse import parse_date
 import time
 from ..models import *
 from ..api_utils.poll_api import PollAPI
-from ..annotation_utils.run_anno_batch import CaseVariant, CaseTranscript
+from ..vep_utils.run_vep_batch import CaseVariant, CaseTranscript
 from ..config import load_config
 import re
 import copy

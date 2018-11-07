@@ -26,7 +26,7 @@ import json
 from ..models import *
 from ..api_utils.poll_api import PollAPI
 from ..api_utils.cip_utils import InterpretationList
-from ..annotation_utils.run_anno_batch import generate_transcripts
+from ..vep_utils.run_vep_batch import generate_transcripts
 from .case_handler import Case, CaseAttributeManager
 from ..config import load_config
 import pprint
