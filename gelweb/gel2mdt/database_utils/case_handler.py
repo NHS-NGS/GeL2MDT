@@ -202,6 +202,26 @@ class Case(object):
                     family_members.append(family_member)
         return family_members
 
+    def get_tools_and_versions(self):
+        '''
+        Gets the genome build from the JSON. Details of other tools (VEP, Polyphen/SIFT) to be pulled from config file?
+        :return: A dictionary of tools and versions used for the case
+        '''
+        if self.json['sample_type'] == 'raredisease':
+            if self.json_request_data['genomeAssemblyVersion'].startswith('GRCh37'):
+                genome_build = 'GRCh37'
+            elif self.json_request_data['genomeAssemblyVersion'].startswith('GRCh38'):
+                genome_build = 'GRCh38'
+        elif self.json['sample_type'] == 'cancer':
+            if self.json["assembly"].startswith('GRCh37'):
+                genome_build = 'GRCh37'
+            elif self.json["assembly"].startswith('GRCh38'):
+                genome_build = 'GRCh38'
+        else:
+            raise Exception(f'{self.request_id} has unknown genome build')
+
+        return {'genome_build': genome_build}
+
     def get_status_json(self):
         """
         JSON has a list of statuses. Extract only the latest.

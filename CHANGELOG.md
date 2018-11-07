@@ -1,4 +1,53 @@
-## [0.4.5]- 2018-08-2X
+## [0.5.5]- 2018-10-25
+### Added
+- Case alert feature
+- Case code flag
+
+### Changed
+- Made cancer tweaks to proband page
+- Proband page now shows related GELIRs
+
+## [0.5.4]- 2018-10-03
+### Added
+- Cancer germline selection
+
+### Changes
+- Improved MDT selection page
+
+## [0.5.3]- 2018-09-14
+### Added 
+- Added binning to case updates
+
+### Changed
+- UI improvements
+- Nicer display during update process
+- Patched security flaws
+
+## [0.5.2]- 2018-09-03
+### Added 
+- Report history feature
+
+### Changed
+- Fixed cancer MDT page bug
+
+## [0.5.1]- 2018-07-26
+### Changed 
+- Updated reporting templates
+
+## [0.5.0]- 2018-07-11
+### Added
+- PVFlag feature to describe variant flags
+
+### Changed
+- Labkey speed up
+- Removed T0 feature
+- speed improvements to updates
+
+## [0.4.6]- 2018-06-18
+### Changed
+- Fixed minor bug where export buttons removed pagination
+
+## [0.4.5]- 2018-06-18
 ### Added
 - History tab to cases which shows history of changes to cases, ordered by oldest to newest
 

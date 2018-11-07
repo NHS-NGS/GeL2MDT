@@ -213,7 +213,7 @@ def remove_case(request, case_id):
     '''
     case = GELInterpretationReport.objects.get(id=case_id)
     case.assigned_user = None
-    case.save()
+    case.save(overwrite=True)
     return redirect('profile')
 
 
@@ -281,6 +281,8 @@ def proband_view(request, report_id):
     report_history_formatter = ReportHistoryFormatter(report=report)
     report_history = report_history_formatter.get_report_history()
     proband_history = report_history_formatter.get_proband_history()
+    other_cases = GELInterpretationReport.objects.latest_cases_by_sample_type(report.sample_type).filter(
+        ir_family__participant_family=report.ir_family.participant_family).exclude(ir_family=report.ir_family)
 
     if request.method == "POST":
         demogs_form = DemogsForm(request.POST, instance=report.ir_family.participant_family.proband)
@@ -392,7 +394,8 @@ def proband_view(request, report_id):
                                                     'report_history': report_history,
                                                     'proband_history': proband_history,
                                                     'report_fields': report_history_formatter.report_interesting_fields,
-                                                    'proband_fields': report_history_formatter.proband_interesting_fields})
+                                                    'proband_fields': report_history_formatter.proband_interesting_fields,
+                                                    'other_cases': other_cases})
 
 
 @login_required
@@ -1186,8 +1189,8 @@ def genomics_england_report(request, report_id):
     report = GELInterpretationReport.objects.get(id=report_id)
     cip_id = report.ir_family.ir_family_id.split('-')
     gel_content = get_gel_content.delay(request.user.email, cip_id[0], cip_id[1])
-    context = {'gel_content': gel_content}
-    return render(request, 'gel2mdt/gel_template.html', context)
+    messages.add_message(request, 25, 'Report will be emailed to you if it exists')
+    return HttpResponseRedirect(f'/proband/{report_id}')
 
 
 @login_required
@@ -1239,3 +1242,70 @@ def audit(request, sample_type):
     script, div = components(plots, CDN)
     return render(request, 'gel2mdt/audit.html', {'script': script,
                   'div': div, 'sample_type': sample_type})
+
+
+@login_required
+def case_alert(request, sample_type):
+    '''
+    Shows a list of cases which have an alert on them
+    :param request:
+    :param sample_type:
+    :return:
+    '''
+    case_alerts = CaseAlert.objects.filter(sample_type=sample_type)
+    gel_reports = GELInterpretationReport.objects.latest_cases_by_sample_type(
+        sample_type=sample_type).prefetch_related('ir_family__participant_family__proband')
+    matching_cases = {}
+    case_alert_form = AddCaseAlert()
+    for case in case_alerts:
+        matching_cases[case.id] = []
+        for report in gel_reports:
+            try:
+                if report.ir_family.participant_family.proband.gel_id == str(case.gel_id):
+                    matching_cases[case.id].append((report.id,
+                                                    report.ir_family.ir_family_id))
+            except Proband.DoesNotExist:
+                pass
+
+    return render(request, 'gel2mdt/case_alert.html', {'case_alerts': case_alerts,
+                                                       'matching_cases': matching_cases,
+                                                       'sample_type': sample_type,
+                                                       'case_alert_form': case_alert_form})
+
+
+@login_required
+def add_case_alert(request):
+    if request.method == 'POST':
+        case_alert_form = AddCaseAlert(request.POST)
+        if case_alert_form.is_valid():
+            case_alert_form.save()
+            messages.add_message(request, 25, 'Case Added!')
+        else:
+            messages.add_message(request, 40, 'Not successful, is the GELID correct?')
+    return redirect('case-alert', sample_type=case_alert_form.cleaned_data['sample_type'])
+
+
+@login_required
+def edit_case_alert(request, case_alert_id):
+    data = {}
+    case_alert_instance = CaseAlert.objects.get(id=case_alert_id)
+    case_alert_form = AddCaseAlert(instance=case_alert_instance)
+    if request.method == 'POST':
+        case_alert_form = AddCaseAlert(request.POST, instance=case_alert_instance)
+        if case_alert_form.is_valid():
+            case_alert_form.save()
+            data['form_is_valid'] = True
+        return redirect('case-alert', sample_type=case_alert_instance.sample_type)
+    context = {'case_alert_form': case_alert_form, 'case_alert_instance': case_alert_instance}
+    html_form = render_to_string('gel2mdt/modals/case_alert_modal.html', context, request=request)
+    data['html_form'] = html_form
+    return JsonResponse(data)
+
+
+@login_required
+def delete_case_alert(request, case_alert_id):
+    case_alert_instance = CaseAlert.objects.get(id=case_alert_id)
+    sample_type = case_alert_instance.sample_type
+    case_alert_instance.delete()
+    messages.add_message(request, 25, 'Alert Deleted')
+    return redirect('case-alert', sample_type=sample_type)
