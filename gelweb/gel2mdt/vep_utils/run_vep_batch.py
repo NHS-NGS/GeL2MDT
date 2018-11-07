@@ -1,16 +1,13 @@
 """Copyright (c) 2018 Great Ormond Street Hospital for Children NHS Foundation
 Trust & Birmingham Women's and Children's NHS Foundation Trust
-
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
 of the Software, and to permit persons to whom the Software is furnished to do
 so, subject to the following conditions:
-
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
-
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -65,7 +62,6 @@ class CaseTranscript:
 def generate_vcf(variants):
     '''
     Function which creates a VCF formatted file from variant objects specified from MCA.
-
     :param variants: List of CaseVariant objects
     :return: A dict of 2 vcfs. Keys are hg19_vcf and hg38_vcf which releate to the different
     genome builds
@@ -91,7 +87,6 @@ def generate_vcf(variants):
 def run_vep(infile, config_dict):
     '''
     Function which runs VEP using subprocess. Takes multiple options from config.txt file
-
     :param infile: Dict containing VCFs for the 2 genome builds
     :param config_dict: Configuration dict
     :return: Dict which contains the locations of the 2 results files relating to the 2 genome builds
@@ -142,7 +137,6 @@ def run_vep(infile, config_dict):
 def run_vep_remotely(infile, config_dict):
     '''
     Function which runs VEP using paramiko on a remote machine.
-
     :param infile: Dict containing VCFs for the 2 genome builds
     :param config_dict: Configuration dict
     :return: Dict which contains the locations of the 2 results files relating to the 2 genome builds
@@ -226,7 +220,6 @@ def parse_vep_annotations(infile=None):
     '''
     Takes the results from VEP and converts them into CaseTranscript objects which will then be passed to CAM for
     inserting into the database
-
     :param infile: Dict from run_vep function which contains VEP vcf file locations
     :return: List of CaseTranscript objects
     '''
@@ -279,7 +272,6 @@ def generate_transcripts(variant_list):
     Wrapper function for running VEP for MCA. This take as input a variant_list which contains all the variants
     for the cases which MCA will update/add. If bypass_VEP function is used from the config, this will read in
     the temp.vep.vcf file for transcripts
-
     :param variant_list: A list of Casevariant objects
     :return: A list of CaseTranscript objects for all the CaseVariants
     '''
