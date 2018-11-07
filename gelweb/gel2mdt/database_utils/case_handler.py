@@ -960,6 +960,8 @@ class CaseAttributeManager(object):
                     else:
                         self.case.json_request_data['genePanelsCoverage'] = []
         genes_failing_coverage = sorted(set(genes_failing_coverage))
+        if 'SUMMARY' in genes_failing_coverage: 
+            genes_failing_coverage.remove('SUMMARY')
         str_genes_failing_coverage = ''
         for gene in genes_failing_coverage:
             str_genes_failing_coverage += gene + ', '
