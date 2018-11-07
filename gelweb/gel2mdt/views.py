@@ -48,7 +48,7 @@ from .decorators import user_is_clinician
 from .api.api_views import *
 
 from .database_utils.multiple_case_adder import MultipleCaseAdder
-from .annotation_utils.run_anno_batch import CaseVariant
+from .vep_utils.run_vep_batch import CaseVariant
 
 from bokeh.resources import CDN
 from bokeh.embed import components
