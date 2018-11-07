@@ -107,7 +107,7 @@ class GELIRForm(forms.ModelForm):
     '''
     class Meta:
         model = GELInterpretationReport
-        fields = ['case_status', 'mdt_status', 'pilot_case', 'case_sent', 'no_primary_findings']
+        fields = ['case_status', 'mdt_status', 'pilot_case', 'case_sent', 'no_primary_findings', 'case_code']
 
     def save(self):
         gelir = self.instance
@@ -117,6 +117,7 @@ class GELIRForm(forms.ModelForm):
         gelir.pilot_case = data['pilot_case']
         gelir.case_sent = data['case_sent']
         gelir.no_primary_findings = data['no_primary_findings']
+        gelir.case_code = data['case_code']
         gelir.save(overwrite=True)
 
 
@@ -380,3 +381,17 @@ class GenomicsEnglandform(forms.Form):
 
 class GeneSearchForm(forms.Form):
     gene = forms.CharField(max_length=25, widget = forms.TextInput(attrs={'style': 'width:200px'}))
+
+
+class AddCaseAlert(forms.ModelForm):
+
+    def clean_gel_id(self):
+        if self.cleaned_data['gel_id'].isdigit() and len(self.cleaned_data['gel_id']) >= 8:
+            return self.cleaned_data['gel_id'].strip()
+        else:
+            forms.ValidationError("Doesn't look like a GELID")
+
+
+    class Meta:
+        model = CaseAlert
+        fields = ['gel_id', 'comment', 'sample_type']

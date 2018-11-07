@@ -157,8 +157,6 @@ class MultipleCaseAdder(object):
                         set(self.cases_to_update)
                     self.update_database()
 
-                    print("Finished processing bin", bin_count, "of", len(bins))
-
                     for case in self.cases_to_add:
                         del case
                     for case in self.cases_to_update:
@@ -216,6 +214,8 @@ class MultipleCaseAdder(object):
             )
             listupdate.reports_added.add(*added_cases)
             listupdate.reports_updated.add(*updated_cases)
+
+            # Add in case alert
 
     def fetch_test_data(self):
         """
@@ -306,12 +306,13 @@ class MultipleCaseAdder(object):
         cases_to_update = []
         # use set subtraction to get only cases that haven't already been added
         cases_to_check = set(self.list_of_cases) - set(self.cases_to_add)
+        all_latest_reports = GELInterpretationReport.objects.latest_cases_by_sample_type(sample_type=self.sample_type)
         try:
-            latest_report_list = [
-                GELInterpretationReport.objects.filter(
-                    ir_family=InterpretationReportFamily.objects.get(
-                        ir_family_id=case.request_id
-                    )).latest("updated") for case in cases_to_check]
+            latest_report_list = []
+            for case in cases_to_check:
+                for report in all_latest_reports:
+                    if case.request_id == report.ir_family.ir_family_id:
+                        latest_report_list.append(report)
 
             latest_hashes = {
                 ir.ir_family.ir_family_id: ir.sha_hash
@@ -319,7 +320,8 @@ class MultipleCaseAdder(object):
             }
 
             for case in cases_to_check:
-                if case.json_hash != latest_hashes[case.request_id]:
+                latest_hash = latest_hashes.get(case.request_id, None)
+                if not latest_hash or case.json_hash != latest_hash:
                     cases_to_update.append(case)
 
         except GELInterpretationReport.DoesNotExist as e:
