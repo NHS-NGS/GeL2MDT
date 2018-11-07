@@ -1850,7 +1850,7 @@ class CaseModel(object):
                 position=self.escaped_model_attributes["position"],
                 reference=self.escaped_model_attributes["reference"],
                 alternate=self.escaped_model_attributes["alternate"],
-                genome_assmebly_id=self.escaped_model_attributes["genome_assembly"].id
+                genome_assembly_id=self.escaped_model_attributes["genome_assembly"].id
             )
         elif self.model_type == TranscriptVariant:
             table = 'SELECT * FROM "TranscriptVariant"'
