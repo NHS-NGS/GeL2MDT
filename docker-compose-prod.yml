@@ -28,6 +28,20 @@ services:
     depends_on:
       - db
       - redis
+  jupyter:
+    build: .
+    restart: always
+    build:
+      context: .
+    command: bash -c ". /root/gel2mdt/Docker/startup_script.sh && jupyter notebook --generate-config && cd /root/gel2mdt/gelweb && python manage.py shell_plus --notebook"
+    volumes:
+      - .:/root/gel2mdt/
+    ports:
+      - "8890:8888"
+    depends_on:
+      - db
+      - redis
+      - web
   db:
     image: mysql:5.7
     restart: always
