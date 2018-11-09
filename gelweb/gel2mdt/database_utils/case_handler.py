@@ -1101,7 +1101,7 @@ class CaseAttributeManager(object):
         transcript_variants = ManyCaseModel(TranscriptVariant, [{
             "transcript": transcript.transcript_entry,
             "variant": transcript.variant_entry,
-            "af_max": transcript.transcript_variant_af_max,  # Cannot be null, hack for the moment
+            "af_max": transcript.transcript_variant_af_max,
             "hgvs_c": transcript.transcript_variant_hgvs_c,
             "hgvs_p": transcript.transcript_variant_hgvs_p,
             "hgvs_g": transcript.transcript_variant_hgvs_g,
@@ -1282,18 +1282,19 @@ class CaseAttributeManager(object):
                 if proband_variant.variant == transcript.variant_entry:
                     transcript.proband_variant_entry = proband_variant
 
-        # if self.case.json['sample_type'] == 'cancer':
-        #     for transcript in self.case.transcripts:
-        #         if transcript.transcript_entry:
-        #             for ig_obj in self.case.ig_objs:
-        #                 for variant in ig_obj.variants:
-        #                     if variant.variant_entry == transcript.variant_entry:
-        #                         for reportevent in variant.reportEvents:
-        #                             for en in reportevent.genomicEntities:
-        #                                 if transcript.transcript_name == en['ensemblId']:
-        #                                     transcript.selected = True
-        #                                 else:
-        #                                     transcript.selected = False
+        if self.case.json['sample_type'] == 'cancer':
+            for transcript in self.case.transcripts:
+                if transcript.transcript_entry:
+                    for ig_obj in self.case.ig_objs:
+                        for variant in ig_obj.variants:
+                            if variant.case_variant:
+                                if variant.variant_entry == transcript.variant_entry:
+                                    for reportevent in variant.reportEvents:
+                                        for en in reportevent.genomicEntities:
+                                            if transcript.transcript_name == en.ensemblId:
+                                                transcript.selected = True
+                                            else:
+                                                transcript.selected = False
 
         proband_transcript_variants = ManyCaseModel(ProbandTranscriptVariant, [{
             "transcript": transcript.transcript_entry,
@@ -1347,7 +1348,10 @@ class CaseModel(object):
     def set_sql_cmd(self):
         # set raw sql to run against database to fetch matching record
         if self.model_type == Clinician:
-            table = 'SELECT * FROM "Clinician"'
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM Clinician'
+            else:
+                table = 'SELECT * FROM "Clinician"'
             cmd = ''.join([
                 " WHERE name = '{name}'",
                 " AND hospital = '{hospital}'",
@@ -1358,21 +1362,30 @@ class CaseModel(object):
                 email=self.escaped_model_attributes["email"]
             )
         elif self.model_type == Proband:
-            table = 'SELECT * FROM "Proband"'
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM Proband'
+            else:
+                table = 'SELECT * FROM "Proband"'
             cmd = ''.join([
                 " WHERE gel_id = '{gel_id}'"
             ]).format(
                 gel_id=self.escaped_model_attributes["gel_id"]
             )
         elif self.model_type == Family:
-            table = 'SELECT * FROM "Family"'
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM Family'
+            else:
+                table = 'SELECT * FROM "Family"'
             cmd = ''.join([
                 " WHERE gel_family_id = '{gel_family_id}'"
             ]).format(
                 gel_family_id=self.escaped_model_attributes["gel_family_id"]
             )
         elif self.model_type == Relative:
-            table = 'SELECT * FROM "Relative"'
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM Relative'
+            else:
+                table = 'SELECT * FROM "Relative"'
             cmd = ''.join([
                 " WHERE gel_id = '{gel_id}'",
                 " AND proband_id = {proband_id}"
@@ -1381,28 +1394,40 @@ class CaseModel(object):
                 proband_id=self.escaped_model_attributes["proband"].id
             )
         elif self.model_type == Phenotype:
-            table = 'SELECT * FROM "Phenotype"'
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM Phenotype'
+            else:
+                table = 'SELECT * FROM "Phenotype"'
             cmd = ''.join([
                 " WHERE hpo_terms = '{hpo_terms}'"
             ]).format(
                 hpo_terms=self.escaped_model_attributes["hpo_terms"]
             )
         elif self.model_type == InterpretationReportFamily:
-            table = 'SELECT * FROM "InterpretationReportFamily"'
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM InterpretationReportFamily'
+            else:
+                table = 'SELECT * FROM "InterpretationReportFamily"'
             cmd = ''.join([
                 " WHERE ir_family_id = '{ir_family_id}'",
             ]).format(
                 ir_family_id=self.escaped_model_attributes["ir_family_id"]
             )
         elif self.model_type == Panel:
-            table = 'SELECT * FROM "Panel"'
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM Panel'
+            else:
+                table = 'SELECT * FROM "Panel"'
             cmd = ''.join([
                 " WHERE panelapp_id = '{panelapp_id}'",
             ]).format(
                 panelapp_id=self.escaped_model_attributes["panelapp_id"]
             )
         elif self.model_type == PanelVersion:
-            table = 'SELECT * FROM "PanelVersion"'
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM PanelVersion'
+            else:
+                table = 'SELECT * FROM "PanelVersion"'
             cmd = ''.join([
                 " WHERE panel_id = '{panel_id}'",
                 " AND version_number = '{version_number}'"
@@ -1411,7 +1436,10 @@ class CaseModel(object):
                 version_number=self.escaped_model_attributes["version_number"]
             )
         elif self.model_type == InterpretationReportFamilyPanel:
-            table = 'SELECT * FROM "gel2mdt_interpretationreportfamilypanel"'
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM gel2mdt_interpretationreportfamilypanel'
+            else:
+                table = 'SELECT * FROM "gel2mdt_interpretationreportfamilypanel"'
             cmd = ''.join([
                 " WHERE ir_family_id = {ir_family_id}",  # no ' because FKID
                 " AND panel_id = {panel_id}"
@@ -1420,14 +1448,20 @@ class CaseModel(object):
                 panel_id=self.escaped_model_attributes["panel"].id
             )
         elif self.model_type == Gene:
-            table = 'SELECT * FROM "Gene"'
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM Gene'
+            else:
+                table = 'SELECT * FROM "Gene"'
             cmd = ''.join([
                 " WHERE hgnc_id = '{hgnc_id}'",
             ]).format(
                 hgnc_id=self.escaped_model_attributes["hgnc_id"]
             )
         elif self.model_type == Transcript:
-            table = 'SELECT * FROM "Transcript"'
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM Transcript'
+            else:
+                table = 'SELECT * FROM "Transcript"'
             cmd = ''.join([
                 " WHERE name = '{name}'",
                 " AND genome_assembly_id = {genome_assembly_id}"
@@ -1436,14 +1470,20 @@ class CaseModel(object):
                 genome_assembly_id=self.escaped_model_attributes["genome_assembly"].id
             )
         elif self.model_type == GELInterpretationReport:
-            table = 'SELECT * FROM "GELInterpretationReport"'
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM GELInterpretationReport'
+            else:
+                table = 'SELECT * FROM "GELInterpretationReport"'
             cmd = ''.join([
                 " WHERE sha_hash = '{sha_hash}'",
             ]).format(
                 sha_hash=self.escaped_model_attributes["sha_hash"]
             )
         elif self.model_type == Variant:
-            table = 'SELECT * FROM "Variant"'
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM Variant'
+            else:
+                table = 'SELECT * FROM "Variant"'
             cmd = ''.join([
                 " WHERE chromosome = '{chromosome}'",
                 " AND position = {position}"
@@ -1458,7 +1498,10 @@ class CaseModel(object):
                 genome_assembly_id=self.escaped_model_attributes["genome_assembly"].id
             )
         elif self.model_type == TranscriptVariant:
-            table = 'SELECT * FROM "TranscriptVariant"'
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM TranscriptVariant'
+            else:
+                table = 'SELECT * FROM "TranscriptVariant"'
             cmd = ''.join([
                 " WHERE transcript_id = {transcript_id}",
                 " AND variant_id = {variant_id}"
@@ -1467,7 +1510,10 @@ class CaseModel(object):
                 variant_id=self.escaped_model_attributes["variant"].id
             )
         elif self.model_type == ProbandVariant:
-            table = 'SELECT * FROM "ProbandVariant"'
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM ProbandVariant'
+            else:
+                table = 'SELECT * FROM "ProbandVariant"'
             cmd = ''.join([
                 " WHERE variant_id = {variant_id}",
                 " AND interpretation_report_id = {interpretation_report_id}"
@@ -1476,7 +1522,10 @@ class CaseModel(object):
                 interpretation_report_id=self.escaped_model_attributes["interpretation_report"].id
             )
         elif self.model_type == PVFlag:
-            table = 'SELECT * FROM "PVFlag"'
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM PVFlag'
+            else:
+                table = 'SELECT * FROM "PVFlag"'
             cmd = ''.join([
                 " WHERE proband_variant_id = {proband_variant_id}",
                 " AND flag_name = '{flag_name}'"
@@ -1485,7 +1534,10 @@ class CaseModel(object):
                 flag_name=self.escaped_model_attributes["flag_name"]
             )
         elif self.model_type == ProbandTranscriptVariant:
-            table = 'SELECT * FROM "ProbandTranscriptVariant"'
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM ProbandTranscriptVariant'
+            else:
+                table = 'SELECT * FROM "ProbandTranscriptVariant"'
             cmd = ''.join([
                 " WHERE transcript_id = {transcript_id}",
                 " AND proband_variant_id = {proband_variant_id}"
@@ -1494,7 +1546,10 @@ class CaseModel(object):
                 proband_variant_id=self.escaped_model_attributes["proband_variant"].id
             )
         elif self.model_type == ReportEvent:
-            table = 'SELECT * FROM "ReportEvent"'
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM ReportEvent'
+            else:
+                table = 'SELECT * FROM "ReportEvent"'
             cmd = ''.join([
                 " WHERE re_id = '{re_id}'",
                 " AND proband_variant_id = {proband_variant_id}"
@@ -1503,7 +1558,10 @@ class CaseModel(object):
                 proband_variant_id=self.escaped_model_attributes["proband_variant"].id
             )
         elif self.model_type == ToolOrAssemblyVersion:
-            table = 'SELECT * FROM "ToolOrAssemblyVersion"'
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM ToolOrAssemblyVersion'
+            else:
+                table = 'SELECT * FROM "ToolOrAssemblyVersion"'
             cmd = ''.join([
                 " WHERE tool_name = '{tool_name}'",
                 " AND version_number = '{version_number}'"
@@ -1516,7 +1574,6 @@ class CaseModel(object):
             table,
             cmd
         ])
-
         return sql
 
     def check_found_in_db(self, queryset):
