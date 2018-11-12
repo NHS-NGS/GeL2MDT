@@ -314,7 +314,7 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
                 title: 'Data export'
             }],
             "ajax": {
-                "url": '{% url 'gelir-json' sample_type=sample_type %}',
+                "url": '{% url 'gelir-json-user' sample_type=sample_type %}',
                 "dataSrc": ''
             },
             "columns": [
@@ -382,7 +382,7 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
                 title: 'Data export'
             }],
             "ajax": {
-                "url": '{% url 'gelir-json' sample_type=sample_type %}',
+                "url": '{% url 'gelir-json-user' sample_type=sample_type %}',
                 "dataSrc": ''
             },
             "columns": [
