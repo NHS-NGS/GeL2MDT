@@ -426,9 +426,9 @@ class CaseAttributeManager(object):
                 except IndexError as e:
                     pass
         clinician = CaseModel(Clinician, {
-            "name": clinician_details['name'].title(),
+            "name": clinician_details['name'],
             "email": "unknown",  # clinician email not on labkey
-            "hospital": clinician_details['hospital'].upper(),
+            "hospital": clinician_details['hospital'],
             "added_by_user": False
         }, self.model_objects)
         return clinician
@@ -1350,17 +1350,26 @@ class CaseModel(object):
         if self.model_type == Clinician:
             if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
                 table = 'SELECT * FROM Clinician'
+                cmd = ''.join([
+                    " WHERE BINARY name = '{name}'",
+                    " AND BINARY hospital = '{hospital}'",
+                    " AND BINARY email = '{email}'"
+                ]).format(
+                    name=self.escaped_model_attributes["name"],
+                    hospital=self.escaped_model_attributes["hospital"],
+                    email=self.escaped_model_attributes["email"]
+                )
             else:
                 table = 'SELECT * FROM "Clinician"'
-            cmd = ''.join([
-                " WHERE name = '{name}'",
-                " AND hospital = '{hospital}'",
-                " AND email = '{email}'"
-            ]).format(
-                name=self.escaped_model_attributes["name"],
-                hospital=self.escaped_model_attributes["hospital"],
-                email=self.escaped_model_attributes["email"]
-            )
+                cmd = ''.join([
+                    " WHERE name = '{name}'",
+                    " AND hospital = '{hospital}'",
+                    " AND email = '{email}'"
+                ]).format(
+                    name=self.escaped_model_attributes["name"],
+                    hospital=self.escaped_model_attributes["hospital"],
+                    email=self.escaped_model_attributes["email"]
+                )
         elif self.model_type == Proband:
             if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
                 table = 'SELECT * FROM Proband'
