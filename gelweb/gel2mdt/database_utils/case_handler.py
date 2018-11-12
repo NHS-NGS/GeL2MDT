@@ -426,9 +426,9 @@ class CaseAttributeManager(object):
                 except IndexError as e:
                     pass
         clinician = CaseModel(Clinician, {
-            "name": clinician_details['name'],
+            "name": clinician_details['name'].title(),
             "email": "unknown",  # clinician email not on labkey
-            "hospital": clinician_details['hospital'],
+            "hospital": clinician_details['hospital'].upper(),
             "added_by_user": False
         }, self.model_objects)
         return clinician
