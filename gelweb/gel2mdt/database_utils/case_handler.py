@@ -426,9 +426,9 @@ class CaseAttributeManager(object):
                 except IndexError as e:
                     pass
         clinician = CaseModel(Clinician, {
-            "name": clinician_details['name'].title(),
+            "name": clinician_details['name'],
             "email": "unknown",  # clinician email not on labkey
-            "hospital": clinician_details['hospital'].upper(),
+            "hospital": clinician_details['hospital'],
             "added_by_user": False
         }, self.model_objects)
         return clinician
@@ -757,12 +757,14 @@ class CaseAttributeManager(object):
 
         self.case.gene_manager.load_genes()
 
-        # Previously VEP gave us this, now have to do everything
         for transcript in self.case.transcripts:
-            if transcript.gene_ensembl_id:
-                 gene_list.append({
-                     'EnsembleGeneIds': transcript.gene_ensembl_id,
-                     'GeneSymbol': transcript.gene_hgnc_name})
+            if transcript.gene_ensembl_id and transcript.gene_hgnc_id:
+                gene_list.append({
+                    'EnsembleGeneIds': transcript.gene_ensembl_id,
+                    'GeneSymbol': transcript.gene_hgnc_name,
+                    'HGNC_ID': str(transcript.gene_hgnc_id),
+                })
+                self.case.gene_manager.add_searched(transcript.gene_ensembl_id, str(transcript.gene_hgnc_id))
 
         for gene in tqdm(gene_list, desc=self.case.request_id):
             gene['HGNC_ID'] = None
@@ -1350,17 +1352,26 @@ class CaseModel(object):
         if self.model_type == Clinician:
             if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
                 table = 'SELECT * FROM Clinician'
+                cmd = ''.join([
+                    " WHERE BINARY name = '{name}'",
+                    " AND BINARY hospital = '{hospital}'",
+                    " AND BINARY email = '{email}'"
+                ]).format(
+                    name=self.escaped_model_attributes["name"],
+                    hospital=self.escaped_model_attributes["hospital"],
+                    email=self.escaped_model_attributes["email"]
+                )
             else:
                 table = 'SELECT * FROM "Clinician"'
-            cmd = ''.join([
-                " WHERE name = '{name}'",
-                " AND hospital = '{hospital}'",
-                " AND email = '{email}'"
-            ]).format(
-                name=self.escaped_model_attributes["name"],
-                hospital=self.escaped_model_attributes["hospital"],
-                email=self.escaped_model_attributes["email"]
-            )
+                cmd = ''.join([
+                    " WHERE name = '{name}'",
+                    " AND hospital = '{hospital}'",
+                    " AND email = '{email}'"
+                ]).format(
+                    name=self.escaped_model_attributes["name"],
+                    hospital=self.escaped_model_attributes["hospital"],
+                    email=self.escaped_model_attributes["email"]
+                )
         elif self.model_type == Proband:
             if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
                 table = 'SELECT * FROM Proband'
