@@ -133,6 +133,25 @@ SOFTWARE.
                                             </td>
                                         </tr>
                                         <tr>
+                                            <td>CIP API status:</td>
+                                            <td>
+                                                <div class="btn-group" data-toggle="buttons">
+                                                <label class="btn btn-success">
+                                                    <input type="radio" name="cipStatus" id="apistatus_all" autocomplete="off" value="">
+                                                    All
+                                                </label>
+                                                <label class="btn btn-success active">
+                                                    <input type="radio" name="cipStatus" id="notBlocked" autocomplete="off" value="not_blocked" checked>
+                                                    Not Blocked
+                                                </label>
+                                                <label class="btn btn-success">
+                                                    <input type="radio" name="cipStatus" id="blocked" autocomplete="off" value="blocked">
+                                                    Blocked
+                                                </label>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
                                             <td>Case status:</td>
                                             <td>
                                                 <div class="btn-group" data-toggle="buttons">
@@ -284,6 +303,7 @@ SOFTWARE.
                             <th>Disease Subtype</th>
                             <th>NHS number</th>
                             <th>Case Code</th>
+                            <th>CIP Status</th>
                         </tr>
                     </thead>
                     </table>
@@ -368,6 +388,26 @@ function redrawMaxTier(table, maxTier) {
     }
 };
 
+function redrawCipStatus(table, cipStatus) {
+    var searchRegex;
+    if (cipStatus == '') {
+        searchRegex = '';
+    } else if (cipStatus == 'not_blocked') {
+        // regex for not "blocked"
+        searchRegex = '^(?!blocked|\\.).*';
+    } else if (cipStatus == 'blocked') {
+        searchRegex = 'blocked';
+    }
+
+    // select the DataTable API object
+    table
+        // filter based on the value specified in HTML
+        .column(20)
+        .search(searchRegex, regex=true);
+    table.draw();
+
+};
+
 function redrawCaseStatus(table, caseStatus) {
     console.log(caseStatus);
     // select the DataTable API object
@@ -433,6 +473,10 @@ $("input[name='maxTier']").change(function() {
     var table = $('#rare-disease-main').DataTable()
     redrawMaxTier(table, $(this).val());
 });
+$("input[name='cipStatus']").change(function() {
+    var table = $('#rare-disease-main').DataTable()
+    redrawCipStatus(table, $(this).val());
+});
 $("input[name='caseStatus']").change(function() {
     var table = $('#rare-disease-main').DataTable()
     redrawCaseStatus(table, $(this).val());
@@ -457,6 +501,7 @@ function initaliseTable() {
     var caseType = getRadioValue("caseType");
     var genomeBuild = getRadioValue("genomeBuild");
     var maxTier = getRadioValue("maxTier");
+    var cipStatus = getRadioValue("cipStatus");
     var caseStatus = getRadioValue("caseStatus");
     var trioStatus = getRadioValue("trioStatus");
     var deNovoStatus = getRadioValue("deNovoStatus");
@@ -468,6 +513,7 @@ function initaliseTable() {
     redrawCaseType(table, caseType);
     redrawGenomeBuild(table, genomeBuild);
     redrawMaxTier(table, maxTier);
+    redrawCipStatus(table, cipStatus);
     redrawCaseStatus(table, caseStatus);
     redrawTrioStatus(table, trioStatus);
     redrawDeNovoStatus(table, deNovoStatus);
@@ -556,6 +602,10 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
                 {
                     "data": "case_code",
                     "visible": true
+                },
+                {
+                    "data": "cip_status",
+                    "visible": false
                 }
             ],
             "order": [[12, "desc"]]
@@ -639,6 +689,10 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
                 {
                     "data": "case_code",
                     "visible": true
+                },
+                {
+                    "data": "cip_status",
+                    "visible": false
                 }
             ],
             "order": [[12, "desc"]]

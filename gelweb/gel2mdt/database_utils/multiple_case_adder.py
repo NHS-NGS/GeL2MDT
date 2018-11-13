@@ -99,6 +99,8 @@ class MultipleCaseAdder(object):
         elif sample:
             interpretation_list_poll = InterpretationList(sample_type=sample_type, sample=sample)
             self.cases_to_poll = interpretation_list_poll.cases_to_poll
+            self.blocked_cases = interpretation_list_poll.blocked_cases
+            self.block_cases()
             self.list_of_cases = self.fetch_api_data()
             self.cases_to_update = self.list_of_cases
             print(self.cases_to_update)
@@ -110,6 +112,8 @@ class MultipleCaseAdder(object):
             print("Fetching live API data.")
             print("Polling for list of available cases...")
             interpretation_list_poll = InterpretationList(sample_type=sample_type)
+            self.blocked_cases = interpretation_list_poll.blocked_cases
+            self.block_cases()
             cases_fetched = len(interpretation_list_poll.cases_to_poll)
             print("Fetched", cases_fetched, "available cases")
 
@@ -163,6 +167,7 @@ class MultipleCaseAdder(object):
                         del case
 
                     bin_count += 1
+                self.cases_to_block = interpretation_list_poll.blocked_cases
 
             else:
                 # no bins, update as normal
@@ -195,6 +200,7 @@ class MultipleCaseAdder(object):
             added_cases = self.add_cases()
             print("Updating", len(self.cases_to_update), "cases")
             updated_cases = self.add_cases(update=True)
+            print
             success = True
         except Exception as e:
             print("Encountered error:", e)
@@ -329,6 +335,25 @@ class MultipleCaseAdder(object):
             pass
 
         return cases_to_update
+
+    def block_cases(self):
+        """
+        Go through list of cases that are blocked and identifies and updates those that need
+        to have their status updated in the database
+        """
+        print('Attempting to block cases that need blocking...')
+        all_latest_reports = GELInterpretationReport.objects.latest_cases_by_sample_type(sample_type=self.sample_type)
+        latest_report_list = []
+        for case in self.blocked_cases:
+            for report in all_latest_reports:
+                if case['interpretation_request_id'] == report.ir_family.ir_family_id:
+                    latest_report_list.append(report)
+        for report in latest_report_list:
+            if report.status != 'blocked':
+                print('Blocking case:', report)
+                report.status = 'blocked'
+                report.save(overwrite=True)
+
 
     def add_cases(self, update=False):
         """

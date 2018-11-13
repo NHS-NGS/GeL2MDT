@@ -148,6 +148,8 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
             patient surname.
         date_of_birth (serializers.DateTimeField): define source of DT repr of
             cases' patient date of birth.
+        cip_status (serializers.CharField): define source of string repr of
+            the CIP API status of the case.
         case_status (serializers.CharField): define source of string repr of
             the status of the case, as manually set by users.
         trio_sequenced (serializer.BooleanField): define source of bool repr of
@@ -225,6 +227,11 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
         read_only=True
     )
 
+    cip_status = serializers.CharField(
+        source="status",
+        read_only=True
+    )
+
     case_status = serializers.CharField(
         source="get_case_status_display",
         read_only=True
@@ -285,5 +292,6 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
             'sex',
             'nhs_num',
             'disease_subtype',
-            'case_code'
+            'case_code',
+            'cip_status'
         )
