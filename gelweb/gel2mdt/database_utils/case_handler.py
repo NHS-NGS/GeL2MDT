@@ -757,12 +757,14 @@ class CaseAttributeManager(object):
 
         self.case.gene_manager.load_genes()
 
-        # Previously VEP gave us this, now have to do everything
         for transcript in self.case.transcripts:
-            if transcript.gene_ensembl_id:
-                 gene_list.append({
-                     'EnsembleGeneIds': transcript.gene_ensembl_id,
-                     'GeneSymbol': transcript.gene_hgnc_name})
+            if transcript.gene_ensembl_id and transcript.gene_hgnc_id:
+                gene_list.append({
+                    'EnsembleGeneIds': transcript.gene_ensembl_id,
+                    'GeneSymbol': transcript.gene_hgnc_name,
+                    'HGNC_ID': str(transcript.gene_hgnc_id),
+                })
+                self.case.gene_manager.add_searched(transcript.gene_ensembl_id, str(transcript.gene_hgnc_id))
 
         for gene in tqdm(gene_list, desc=self.case.request_id):
             gene['HGNC_ID'] = None
