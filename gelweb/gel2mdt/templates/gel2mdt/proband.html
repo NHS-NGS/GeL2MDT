@@ -25,6 +25,9 @@
 {% block content %}
     {% load gel2mdt_extras %}
 
+    {% if report.status == 'blocked' %}
+        <div class="alert alert-danger" role="alert"><strong>Warning, the CIP-API status for this case has been changed to "Blocked"</strong></div>'
+    {% endif %}
     <ul class="nav nav-tabs" data-options="deep_linking: true">
         <li class="active"><a data-toggle="tab" href="#proband">Proband</a></li>
         <li><a data-toggle="tab" href="#variants">Variants</a></li>
@@ -289,6 +292,7 @@
                                 <div class="panel-heading">Status</div>
                                 <div class="panel-body">
                                     <div class="col-md-12">
+                                        {% bootstrap_label "CIP-API status" %} &emsp; {{ report.status }}
                                         {% bootstrap_field gelir_form.case_status %}
                                         {% if report.sample_type == 'raredisease'%}
                                         {% bootstrap_field gelir_form.mdt_status %}
