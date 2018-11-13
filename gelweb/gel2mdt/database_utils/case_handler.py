@@ -199,7 +199,7 @@ class Case(object):
                         continue
                     family_member = {'gel_id': participant["gelId"],
                                      'relation_to_proband': participant["additionalInformation"]["relation_to_proband"],
-                                     'affection_status': participant["affectionStatus"],
+                                     'affection_status': True if len(participant['disorderList'] > 0) else False,
                                      'sequenced': False,
                                      'sex': participant['sex'],
                                      }
