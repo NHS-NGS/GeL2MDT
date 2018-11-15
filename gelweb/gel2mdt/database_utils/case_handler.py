@@ -833,14 +833,14 @@ class CaseAttributeManager(object):
         # for each transcript, add an FK to the gene with matching ensg ID
         for transcript in case_transcripts:
             # convert canonical to bools:
-            transcript.canonical = transcript.transcript_canonical is True
-            transcript.selected = transcript.transcript_canonical is True
-            if not transcript.gene_ensembl_id:
+            transcript.canonical = transcript.transcript_canonical == "YES"
+            transcript.selected = transcript.transcript_canonical == "YES"
+            if not transcript.gene_hgnc_id:
                 # if the transcript has no recognised gene associated
                 continue  # don't bother checking genes
             transcript.gene_model = None
             for gene in genes:
-                if gene.entry.ensembl_id == transcript.gene_ensembl_id:
+                if gene.entry.hgnc_id == transcript.gene_hgnc_id:
                     transcript.gene_model = gene.entry
 
         transcripts = ManyCaseModel(Transcript, [{
@@ -1597,7 +1597,7 @@ class CaseModel(object):
         entry = [
             db_obj for db_obj in self.model_type.objects.raw(sql_cmd)
         ]
-        tqdm.write(sql_cmd + "\t>>>\t" + str(entry))
+        # tqdm.write(sql_cmd + "\t>>>\t" + str(entry))
 
         if len(entry) == 1:
             entry = entry[0]
