@@ -232,11 +232,12 @@ def case_alert_email():
     if sample_types['cancer'] or sample_types['raredisease']:
         for s_type in sample_types:
             if matching_cases[s_type]:
-                text_content += f'{s_type} Case Alert:\n'
+                text_content += f'{s_type.title()} Case Alert:\n'
                 for case in matching_cases[s_type]:
                     case_alert = CaseAlert.objects.get(id=case)
-                    text_content += f'Case {case_alert.gel_id} with CIP-ID of {matching_cases[s_type][case][0][1]} ' \
-                                    f'has been added to the database. CaseAlert comment: {case_alert.comment}\n'
+                    if matching_cases[s_type][case]:
+                        text_content += f'Case {case_alert.gel_id} with CIP-ID of {matching_cases[s_type][case][0][1]} ' \
+                                        f'has been added to the database. CaseAlert comment: {case_alert.comment}\n'
         subject, from_email, to = f'GeL2MDT CaseAlert', 'bioinformatics@gosh.nhs.uk', 'bioinformatics@gosh.nhs.uk'
         msg = EmailMessage(subject, text_content, from_email, [to])
         try:
@@ -263,23 +264,26 @@ def listupdate_email():
                             f'\t{update.cases_added}\t{update.cases_updated}\t{update.error}\n'
     text_content = ''
     for i, sample_type in enumerate(['raredisease', 'cancer']):
-        total_updated = listupdates.aggregate(Sum('cases_updated'))['cases_updated__sum']
+        listupdates = ListUpdate.objects.filter(update_time__gte=date.today()).filter(sample_type=sample_type)
         total_added = listupdates.aggregate(Sum('cases_added'))['cases_added__sum']
-        text_content += f'{sample_type.title()} Update Report:\n\nTotal number of cases added: {total_added}\n' \
-                        f'Total number of cases updated: {total_updated}\n\n'
-        text_content += f'Summary of Cases Added:\n'
-        text_content += f'CIPID\tGELID\tForename\tSurname\n'
-        for update in listupdates:
-            reports_added = update.reports_added.all()
-            for report in reports_added:
-                text_content += f'{report.ir_family.ir_family_id}\t' \
-                                f'{report.ir_family.participant_family.proband.gel_id}\t' \
-                                f'{report.ir_family.participant_family.proband.forename}\t' \
-                                f'{report.ir_family.participant_family.proband.surname}\n'
+        if total_added > 0:
+            text_content += f'{sample_type.title()} Update Report:\n\nTotal number of cases added: {total_added}\n\n'
+            text_content += f'Summary of Cases Added:\n'
+            text_content += f'CIPID\tGELID\tForename\tSurname\n'
+            for update in listupdates:
+                reports_added = update.reports_added.all()
+                for report in reports_added:
+                    text_content += f'{report.ir_family.ir_family_id}\t' \
+                                    f'{report.ir_family.participant_family.proband.gel_id}\t' \
+                                    f'{report.ir_family.participant_family.proband.forename}\t' \
+                                    f'{report.ir_family.participant_family.proband.surname}\n'
+        else:
+            text_content += f'No new cases were added for {sample_type.title()}\n'
         text_content += '\n----------------------------------------------------------------------------------------\n\n'
 
+
     if all(listupdates.values_list('success', flat=True)) and send and text_content:
-        subject, from_email, to = 'GeL2MDT Update Report', 'bioinformatics@gosh.nhs.uk', 'bioinformatics@gosh.nhs.uk'
+        subject, from_email, to = 'GeL2MDT Update Report', 'bioinformatics@gosh.nhs.uk', 'GELTeam@gosh.nhs.uk'
         msg = EmailMessage(subject, text_content, from_email, [to])
         try:
             msg.send()
