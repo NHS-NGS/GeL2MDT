@@ -236,6 +236,10 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
         source="get_case_status_display",
         read_only=True
     )
+    mdt_status = serializers.CharField(
+        source="get_mdt_status_display",
+        read_only=True
+    )
     updated = serializers.DateTimeField(
         format='%Y/%m/%d',
         read_only=True
@@ -293,5 +297,6 @@ class GELInterpretationReportSerializer(serializers.ModelSerializer):
             'nhs_num',
             'disease_subtype',
             'case_code',
-            'cip_status'
+            'cip_status',
+            'mdt_status'
         )

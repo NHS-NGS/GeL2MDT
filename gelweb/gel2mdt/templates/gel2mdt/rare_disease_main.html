@@ -155,7 +155,6 @@ SOFTWARE.
                                             <td>Case status:</td>
                                             <td>
                                                 <div class="btn-group" data-toggle="buttons">
-
                                                 <label class="btn btn-success active">
                                                     <input type="radio" name="caseStatus" id="casestatus_all" autocomplete="off" value="" checked>
                                                     All
@@ -187,7 +186,6 @@ SOFTWARE.
                                                     <input type="radio" name="caseStatus" id="reported" autocomplete="off" value="Reported">
                                                     Reported
                                                 </label>
-
                                                 <label class="btn btn-success">
                                                     <input type="radio" name="caseStatus" id="completed" autocomplete="off" value="Completed">
                                                     Completed
@@ -195,6 +193,41 @@ SOFTWARE.
                                                 <label class="btn btn-success">
                                                     <input type="radio" name="caseStatus" id="external" autocomplete="off" value="External">
                                                     External
+                                                </label>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>MDT status:</td>
+                                            <td>
+                                                <div class="btn-group" data-toggle="buttons">
+
+                                                <label class="btn btn-success active">
+                                                    <input type="radio" name="mdtStatus" id="mdtstatus_all" autocomplete="off" value="" checked>
+                                                    All
+                                                </label>
+                                                <label class="btn btn-success">
+                                                    <input type="radio" name="mdtStatus" id="unknown" autocomplete="off" value="Unknown">
+                                                    Unknown
+                                                </label>
+                                                <label class="btn btn-success">
+                                                    <input type="radio" name="mdtStatus" id="required" autocomplete="off" value="Required">
+                                                    Required
+                                                </label>
+
+                                                <label class="btn btn-success">
+                                                    <input type="radio" name="mdtStatus" id="notRequired" autocomplete="off" value="Not Required">
+                                                    Not Required
+                                                </label>
+
+                                                <label class="btn btn-success">
+                                                    <input type="radio" name="mdtStatus" id="inProgress" autocomplete="off" value="In Progress">
+                                                    In Progress
+                                                </label>
+
+                                                <label class="btn btn-success">
+                                                    <input type="radio" name="mdtStatus" id="done" autocomplete="off" value="Done">
+                                                    Done
                                                 </label>
                                                 </div>
                                             </td>
@@ -304,6 +337,8 @@ SOFTWARE.
                             <th>NHS number</th>
                             <th>Case Code</th>
                             <th>CIP Status</th>
+                            <th>MDT Status</th>
+                            <th>Assigned User</th>
                         </tr>
                     </thead>
                     </table>
@@ -423,6 +458,23 @@ function redrawCaseStatus(table, caseStatus) {
     } else {
         $('#caseStatusSpec').text(caseStatus);
     }
+};
+
+function redrawMdtStatus(table, mdtStatus) {
+    var searchRegex;
+    // need to use regex for starts with Required otherwise Not Required cases returned also
+    if (mdtStatus == 'Required') {
+        searchRegex = '^Required';
+    } else {
+        // regex for not "blocked"
+        searchRegex = mdtStatus;
+    } 
+    // select the DataTable API object
+    table
+        // filter based on the value specified in HTML
+        .column(21)
+        .search(searchRegex, regex=true);
+    table.draw();
 
 };
 
@@ -432,7 +484,7 @@ function redrawTrioStatus(table, trioStatus) {
         .column(10)
         .search(trioStatus);
     table.draw()
-}
+};
 
 function redrawTier3Only(table, tier3Only) {
     console.log(tier3Only)
@@ -450,7 +502,7 @@ function redrawTier3Only(table, tier3Only) {
         var maxTier = getRadioValue("maxTier");
         redrawMaxTier(table, maxTier);
     }
-}
+};
 
 function redrawDeNovoStatus(table, deNovoStatus) {
     console.log(deNovoStatus)
@@ -458,7 +510,7 @@ function redrawDeNovoStatus(table, deNovoStatus) {
         .column(11)
         .search(deNovoStatus);
     table.draw()
-}
+};
 
 // filter value change listeners
 $("input[name='caseType']").change(function() {
@@ -480,6 +532,10 @@ $("input[name='cipStatus']").change(function() {
 $("input[name='caseStatus']").change(function() {
     var table = $('#rare-disease-main').DataTable()
     redrawCaseStatus(table, $(this).val());
+});
+$("input[name='mdtStatus']").change(function() {
+    var table = $('#rare-disease-main').DataTable()
+    redrawMdtStatus(table, $(this).val());
 });
 $("input[name='trioStatus']").change(function() {
     var table = $('#rare-disease-main').DataTable()
@@ -503,6 +559,7 @@ function initaliseTable() {
     var maxTier = getRadioValue("maxTier");
     var cipStatus = getRadioValue("cipStatus");
     var caseStatus = getRadioValue("caseStatus");
+    var mdtStatus = getRadioValue("mdtStatus");
     var trioStatus = getRadioValue("trioStatus");
     var deNovoStatus = getRadioValue("deNovoStatus");
     
@@ -515,6 +572,7 @@ function initaliseTable() {
     redrawMaxTier(table, maxTier);
     redrawCipStatus(table, cipStatus);
     redrawCaseStatus(table, caseStatus);
+    redrawMdtStatus(table, mdtStatus);
     redrawTrioStatus(table, trioStatus);
     redrawDeNovoStatus(table, deNovoStatus);
 }
@@ -606,6 +664,14 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
                 {
                     "data": "cip_status",
                     "visible": false
+                },
+                {
+                    "data": "mdt_status",
+                    "visible": false
+                },
+                {
+                    "data": "assigned_user",
+                    "visible": false
                 }
             ],
             "order": [[12, "desc"]]
@@ -692,6 +758,14 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
                 },
                 {
                     "data": "cip_status",
+                    "visible": false
+                },
+                {
+                    "data": "mdt_status",
+                    "visible": false
+                },
+                {
+                    "data": "assigned_user",
                     "visible": false
                 }
             ],
