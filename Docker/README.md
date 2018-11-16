@@ -4,7 +4,7 @@ This docker configuration creates the following containers:
 1. Nginx webserver
 2. Gel2MDT Django installation which includes VEP and GeLReportModels
 3. Postgres database backend
-4. celery and celerybeat processes
+4. celery and celerybeat processes 
 5. Flower for monitoring celery processes
 5. Optional phpadmin for mysql installations
 
@@ -41,6 +41,7 @@ can be edited as described in the main Readme.
 - Edit `ALLOWED_HOSTS` as appropriate
 - Set `DEBUG` to `False` when you're done testing    
 - _Leave_ the database connection settings unless you are also going to reconfigure the database docker container
+- It is setup currently to update the database every night, please test this update process!
 
 
 **docker-compose-prod.yml**:
