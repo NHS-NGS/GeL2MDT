@@ -56,13 +56,12 @@ The following changes can be made:
         volumes:
             - <edit host directory>:/var/lib/postgresql/data
     ```
-    Where the reference genome fasta files, vep cache and gel2mdt_cache (cip_api_storage, 
+    Where the vep cache and gel2mdt_cache (cip_api_storage, 
     panelapp_storage & gene_storage) directories, respectively, will reside on the host:
     ```
     web:
         volumes:
-            - <edit host directory>:/root/reference
-            - <edit host directory>:/root/vep_cache
+            - <edit host directory>:/root/.vep
             - <edit host directory>:/root/gel2mdt_cache
     ``` 
 
@@ -76,7 +75,7 @@ You can build the images with the standard:
     
 ...however the first time a Django app is run, the app needs to create the database schema. So in order to keep this
  out of the build process (because you may need to build the container in a different location than it is being run) 
- _and_ out of the routine containter startup, the commands for this are located in
+ _and_ out of the routine container startup, the commands for this are located in
 the `initial_script.sh` script, so from the Docker directory, run (**for a one time creation of the database**):  
 
     docker-compose -f docker-compose-prod.yml run web bash /root/gel2mdt/Docker/initial_script.sh
@@ -93,5 +92,3 @@ This `docker-compose down` will destroy the containers and their associated netw
 folders, i.e. postgres database on the host machine (assuming all has been configured correctly!)
 
 ### Gel2MDT will be available at http://<your_server>:8000
-
-Contact (for this dockerisation test, for other queries see the main readme file):
