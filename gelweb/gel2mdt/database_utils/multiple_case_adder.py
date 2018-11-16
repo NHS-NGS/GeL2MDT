@@ -200,7 +200,6 @@ class MultipleCaseAdder(object):
             added_cases = self.add_cases()
             print("Updating", len(self.cases_to_update), "cases")
             updated_cases = self.add_cases(update=True)
-            print
             success = True
         except Exception as e:
             print("Encountered error:", e)
