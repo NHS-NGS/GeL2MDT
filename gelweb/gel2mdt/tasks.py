@@ -163,15 +163,8 @@ def get_gel_content(user_email, ir, ir_version):
 
     div_tag.insert(1, h3_tag)
     div_tag.insert(2, table_tag)
-    gel_content = gel_content.prettify('utf-8')
-    with open(f"{ir}_{ir_version}_clinical_report.html", "wb") as file:
-        file.write(gel_content)
-    subject, from_email, to = 'GEL Report', 'bioinformatics@gosh.nhs.uk', user_email
-    text_content = f'Please see attached GEL Report for case {ir}-{ir_version}'
-    msg = EmailMessage(subject, text_content, from_email, [to])
-    msg.attach_file(f"{ir}_{ir_version}_clinical_report.html")
-    msg.send()
-    os.remove(f"{ir}_{ir_version}_clinical_report.html")
+    gel_content = gel_content.prettify()
+    return gel_content
 
 def panel_app(gene_panel, gp_version):
     '''
