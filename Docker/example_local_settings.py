@@ -36,18 +36,6 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'gel2mdt.tasks.update_cases',
         'schedule': crontab(minute=0, hour=0),
     },
-    'task-number-two': {
-        'task': 'gel2mdt.tasks.listupdate_email',
-        'schedule': crontab(minute=0, hour=7),
-    },
-    'task-number-three': {
-        'task': 'gel2mdt.tasks.case_alert_email',
-        'schedule': crontab(minute=0, hour=7),
-    },
-    'task-number-four': {
-        'task': 'gel2mdt.tasks.update_report_email',
-        'schedule': crontab(day_of_week=0),
-    },
 }
 
 EMAIL_HOST = ''
