@@ -292,10 +292,10 @@
                                 <div class="panel-heading">Status</div>
                                 <div class="panel-body">
                                     <div class="col-md-12">
-                                        {% bootstrap_label "CIP-API status" %} &emsp; {{ report.status }}
                                         {% bootstrap_field gelir_form.case_status %}
                                         {% if report.sample_type == 'raredisease'%}
                                         {% bootstrap_field gelir_form.mdt_status %}
+                                        {% bootstrap_label "CIP-API status" %} &emsp; {{ report.status }}
                                         {% else %}
                                         {% bootstrap_field gelir_form.mdt_status label='GTAB Status' %}
                                         {% endif %}
