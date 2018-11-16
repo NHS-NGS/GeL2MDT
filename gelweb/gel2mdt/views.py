@@ -1214,7 +1214,11 @@ def genomics_england_report(request, report_id):
     """
     report = GELInterpretationReport.objects.get(id=report_id)
     cip_id = report.ir_family.ir_family_id.split('-')
-    gel_content = get_gel_content.delay(request.user.email, cip_id[0], cip_id[1])
+    try:
+        gel_content = get_gel_content(cip_id[0], cip_id[1])
+    except:
+        messages.add_message(request, 40, 'Not successful, please contact bioinformatics about this')
+        return HttpResponseRedirect(f'/proband/{report_id}')
     return render(request, 'gel2mdt/gel_template.html', {'gel_content': gel_content})
 
 

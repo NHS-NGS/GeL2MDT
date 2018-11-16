@@ -39,8 +39,8 @@ from bokeh.plotting import figure
 from django.core.mail import EmailMessage
 from reversion.models import Version, Revision
 
-@task
-def get_gel_content(user_email, ir, ir_version):
+
+def get_gel_content(ir, ir_version):
     '''
     Downloads and formats the GEL Clinical Report. Removes warning signs and inserts the genes in the panel
     :param user_email: Logged in user email address
