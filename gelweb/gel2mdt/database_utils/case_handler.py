@@ -194,7 +194,7 @@ class Case(object):
             for member in self.ir_obj.pedigree.members:
                 if not member.isProband:
                     family_member = {'gel_id': member.participantId,
-                                     'relation_to_proband': member.additionalInformation.get('relation_to_proband', None),
+                                     'relation_to_proband': member.additionalInformation.get('relation_to_proband', 'unknown'),
                                      'affection_status': True if member.disorderList else False,
                                      'sequenced': True if member.samples else False,
                                      'sex': member.sex,
