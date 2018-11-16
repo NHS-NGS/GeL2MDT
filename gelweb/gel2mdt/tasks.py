@@ -39,8 +39,8 @@ from bokeh.plotting import figure
 from django.core.mail import EmailMessage
 from reversion.models import Version, Revision
 
-@task
-def get_gel_content(user_email, ir, ir_version):
+
+def get_gel_content(ir, ir_version):
     '''
     Downloads and formats the GEL Clinical Report. Removes warning signs and inserts the genes in the panel
     :param user_email: Logged in user email address
@@ -163,15 +163,8 @@ def get_gel_content(user_email, ir, ir_version):
 
     div_tag.insert(1, h3_tag)
     div_tag.insert(2, table_tag)
-    gel_content = gel_content.prettify('utf-8')
-    with open(f"{ir}_{ir_version}_clinical_report.html", "wb") as file:
-        file.write(gel_content)
-    subject, from_email, to = 'GEL Report', 'bioinformatics@gosh.nhs.uk', user_email
-    text_content = f'Please see attached GEL Report for case {ir}-{ir_version}'
-    msg = EmailMessage(subject, text_content, from_email, [to])
-    msg.attach_file(f"{ir}_{ir_version}_clinical_report.html")
-    msg.send()
-    os.remove(f"{ir}_{ir_version}_clinical_report.html")
+    gel_content = gel_content.prettify()
+    return gel_content
 
 def panel_app(gene_panel, gp_version):
     '''
@@ -238,12 +231,54 @@ def case_alert_email():
                     if matching_cases[s_type][case]:
                         text_content += f'Case {case_alert.gel_id} with CIP-ID of {matching_cases[s_type][case][0][1]} ' \
                                         f'has been added to the database. CaseAlert comment: {case_alert.comment}\n'
-        subject, from_email, to = f'GeL2MDT CaseAlert', 'bioinformatics@gosh.nhs.uk', 'bioinformatics@gosh.nhs.uk'
+        subject, from_email, to = f'GeL2MDT CaseAlert', 'bioinformatics@gosh.nhs.uk', 'GELTeam@gosh.nhs.uk'
         msg = EmailMessage(subject, text_content, from_email, [to])
         try:
             msg.send()
         except Exception as e:
             pass
+
+@task
+def update_report_email():
+    '''
+    Utility function which sends emails to GELTeam about last weeks updates
+    :return:
+    '''
+    from datetime import date
+    from django.db.models import Sum
+    text_content = ''
+    today = date.today()
+    import datetime
+    week_ago = today - datetime.timedelta(days=7)
+    for i, sample_type in enumerate(['raredisease', 'cancer']):
+        listupdates = ListUpdate.objects.filter(update_time__gte=week_ago).filter(sample_type=sample_type)
+        total_added = listupdates.aggregate(Sum('cases_added'))['cases_added__sum']
+        if total_added > 0:
+            text_content += f'{sample_type.title()} Update Report:\n\nTotal number of cases added: {total_added}\n\n'
+            text_content += f'Summary of Cases Added:\n'
+            text_content += f'CIPID\tGELID\tForename\tSurname\tClinician\tCenter\n'
+            for update in listupdates:
+                reports_added = update.reports_added.all()
+                for report in reports_added:
+                    text_content += f'{report.ir_family.ir_family_id}\t' \
+                                    f'{report.ir_family.participant_family.proband.gel_id}\t' \
+                                    f'{report.ir_family.participant_family.proband.forename}\t' \
+                                    f'{report.ir_family.participant_family.proband.surname}\t' \
+                                    f'{report.ir_family.participant_family.clinician}\t' \
+                                    f'{report.ir_family.participant_family.proband.gmc}\n'
+        else:
+            text_content += f'No new cases were added for {sample_type.title()}\n'
+        text_content += '\n----------------------------------------------------------------------------------------\n\n'
+
+    listupdates = ListUpdate.objects.filter(update_time__gte=date.today())
+    if all(listupdates.values_list('success', flat=True)) and text_content:
+        subject, from_email, to = 'GeL2MDT Weekly Update Report', 'bioinformatics@gosh.nhs.uk', 'bioinformatics@gosh.nhs.uk'
+        msg = EmailMessage(subject, text_content, from_email, [to])
+        try:
+            msg.send()
+        except Exception as e:
+            pass
+
 
 @task
 def listupdate_email():
@@ -252,7 +287,6 @@ def listupdate_email():
     :return:
     '''
     from datetime import date
-    from django.db.models import Sum
     send = False
     bioinfo_content = 'Sample Type\tUpdate Time\tNo. Cases Added\tNo. Cases Updated\tError\n'
     for i, sample_type in enumerate(['raredisease', 'cancer']):
@@ -261,35 +295,7 @@ def listupdate_email():
             send = True
         for update in listupdates:
             bioinfo_content += f'{update.sample_type}\t{update.update_time}' \
-                            f'\t{update.cases_added}\t{update.cases_updated}\t{update.error}\n'
-    text_content = ''
-    for i, sample_type in enumerate(['raredisease', 'cancer']):
-        listupdates = ListUpdate.objects.filter(update_time__gte=date.today()).filter(sample_type=sample_type)
-        total_added = listupdates.aggregate(Sum('cases_added'))['cases_added__sum']
-        if total_added > 0:
-            text_content += f'{sample_type.title()} Update Report:\n\nTotal number of cases added: {total_added}\n\n'
-            text_content += f'Summary of Cases Added:\n'
-            text_content += f'CIPID\tGELID\tForename\tSurname\n'
-            for update in listupdates:
-                reports_added = update.reports_added.all()
-                for report in reports_added:
-                    text_content += f'{report.ir_family.ir_family_id}\t' \
-                                    f'{report.ir_family.participant_family.proband.gel_id}\t' \
-                                    f'{report.ir_family.participant_family.proband.forename}\t' \
-                                    f'{report.ir_family.participant_family.proband.surname}\n'
-        else:
-            text_content += f'No new cases were added for {sample_type.title()}\n'
-        text_content += '\n----------------------------------------------------------------------------------------\n\n'
-
-
-    if all(listupdates.values_list('success', flat=True)) and send and text_content:
-        subject, from_email, to = 'GeL2MDT Update Report', 'bioinformatics@gosh.nhs.uk', 'GELTeam@gosh.nhs.uk'
-        msg = EmailMessage(subject, text_content, from_email, [to])
-        try:
-            msg.send()
-        except Exception as e:
-            pass
-
+                               f'\t{update.cases_added}\t{update.cases_updated}\t{update.error}\n'
     if send:
         subject, from_email, to = 'GeL2MDT ListUpdate', 'bioinformatics@gosh.nhs.uk', \
                                   'bioinformatics@gosh.nhs.uk'
@@ -298,7 +304,6 @@ def listupdate_email():
             msg.send()
         except Exception:
             pass
-
 
 @task
 def update_cases():
