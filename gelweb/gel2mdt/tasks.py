@@ -263,7 +263,7 @@ def update_report_email():
         if total_added > 0:
             text_content += f'{sample_type.title()} Update Report:\n\nTotal number of cases added: {total_added}\n\n'
             text_content += f'Summary of Cases Added:\n'
-            text_content += f'CIPID\tGELID\tForename\tSurname\tCenter\tClinician\n'
+            text_content += f'CIPID\tGELID\tForename\tSurname\tClinician\tCenter\n'
             for update in listupdates:
                 reports_added = update.reports_added.all()
                 for report in reports_added:
