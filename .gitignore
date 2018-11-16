@@ -12,10 +12,10 @@ PROJECT-SPECIFIC
 __pycache__/
 *.py[cod]
 *$py.class
-
+Docker/credentials
 # C extensions
 *.so
-
+*pid
 # Distribution / packaging
 .Python
 env/
