@@ -25,7 +25,7 @@ from docx import Document
 from django.conf import settings
 import os
 from docx.shared import Pt
-
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 def write_mdt_export(writer, mdt_instance, mdt_reports):
     '''
@@ -204,3 +204,63 @@ def write_mdt_outcome_template(report):
     run.bold = True
     paragraph.add_run('{}\n'.format(report.ir_family.participant_family.proband.action.rstrip()))
     return document, mdt
+
+
+def write_gtab_template(report):
+    document = Document()
+    document.add_picture(os.path.join(settings.STATIC_DIR, 'north_thames.png'))
+    table = document.add_table(rows=1, cols=1, style='Table Grid')
+    heading_cells = table.rows[0].cells
+    run = heading_cells[0].paragraphs[0].add_run('GTAB SUMMARY SHEET')
+    run.bold = True
+    run.font.size = Pt(15)
+    heading_cells[0].paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    table = document.add_table(rows=2, cols=1, style='Table Grid')
+    table.rows[0].cells[0].paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run = table.rows[0].cells[0].paragraphs[0].add_run(
+        'FOR RESEARCH PURPOSES ONLY- THESE RESULTS HAVE NOT BEEN VALIDATED.\n')
+    run = table.rows[0].cells[0].paragraphs[0].add_run(
+        'UNVALIDATED FINDINGS MUST NOT BE ACTED UPON.\n')
+    run = table.rows[0].cells[0].paragraphs[0].add_run(
+        'PLEASE CONTACT THE LABORATORY IF VALIDATION TESTING IS REQUIRED\n')
+    heading_cells = table.rows[1].cells
+    run = table.rows[1].cells[0].paragraphs[0].add_run('Specialist Integrated Haematological Malignancy Diagnostic Service\n')
+    run.font.size = Pt(6)
+    run = table.rows[1].cells[0].paragraphs[0].add_run('Acquired Genomics (SIHMDS-AG), Camelia Botnar Laboratories, '
+                                                 'Great Ormond Street Hospital NHS Trust,\n')
+    run.font.size = Pt(6)
+    run = table.rows[1].cells[0].paragraphs[0].add_run('London, WC1N 3JH. Tel: 020 7405 9200 Ex: 5755')
+    run.font.size = Pt(6)
+    heading_cells[0].paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    table = document.add_table(rows=1, cols=1, style='Table Grid')
+    run = table.rows[0].cells[0].paragraphs[0].add_run('GENOMICS ENGLAND PARTICIPANT INFORMATION')
+    table = document.add_table(rows=4, cols=2, style='Table Grid')
+    run = table.rows[0].cells[0].paragraphs[0].add_run(f'Patient Name: '
+                                                       f'{report.ir_family.participant_family.proband.forename} '
+                                                       f'{report.ir_family.participant_family.proband.surname}')
+    run = table.rows[0].cells[1].paragraphs[0].add_run(f'GEL Participant ID: '
+                                                       f'{report.ir_family.participant_family.proband.gel_id}')
+    run = table.rows[1].cells[0].paragraphs[0].add_run(f'Gender: '
+                                                       f'{report.ir_family.participant_family.proband.sex}')
+    run = table.rows[1].cells[1].paragraphs[0].add_run(f'CIP ID: '
+                                                       f'{report.ir_family.ir_family_id}')
+    run = table.rows[2].cells[0].paragraphs[0].add_run(f'Date of Birth: '
+                                                       f'{report.ir_family.participant_family.proband.date_of_birth.date()}')
+    run = table.rows[2].cells[1].paragraphs[0].add_run(f'NHS number: '
+                                                       f'{report.ir_family.participant_family.proband.nhs_number}')
+    run = table.rows[3].cells[0].paragraphs[0].add_run(f'Referring Clinician: '
+                                                       f'{report.ir_family.participant_family.clinician.name}')
+    run = table.rows[3].cells[1].paragraphs[0].add_run(f'Total somatic SNVs: ')
+    table = document.add_table(rows=3, cols=1, style='Table Grid')
+    run = table.rows[0].cells[0].paragraphs[0].add_run('ADDITIONAL RECRUITMENT INFORMATION ')
+    run = table.rows[1].cells[0].paragraphs[0].add_run('Multi-regional sampling (Yes / No):   ')
+    run = table.rows[2].cells[0].paragraphs[0].add_run('GENOMICS TUMOUR ADVISORY BOARD (GTAB) SUMMARY  ')
+    table.rows[2].cells[0].paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run.bold = True
+    table = document.add_table(rows=1, cols=1, style='Table Grid')
+    run = table.rows[0].cells[0].paragraphs[0].add_run('CLINICAL UPDATE\t\t\t\t\tGTAB date: dd/mm/yyyy\n')
+    run = table.rows[0].cells[0].paragraphs[0].add_run('Include any SOC testing already performed, dates of treatment, clinical trials etc.\n')
+    run.italic = True
+
+
+    return document

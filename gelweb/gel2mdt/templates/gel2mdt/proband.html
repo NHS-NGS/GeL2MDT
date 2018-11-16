@@ -163,7 +163,7 @@
                                             <a href="https://cipapi.genomicsengland.nhs.uk/interpretationportal/#/participant/{{report.ir_family.ir_family_id}}" target="_blank"><i class="fas fa-external-link-alt"></i> {{report.ir_family.ir_family_id}}</a>
                                         </div>
                                         </br>
-                                        {% bootstrap_label "CGU Number" %}
+                                        {% bootstrap_label "Local ID" %}
                                         <div class="block">
                                             {% if report.ir_family.participant_family.proband.local_id %}
                                                 {{ report.ir_family.participant_family.proband.local_id }}
