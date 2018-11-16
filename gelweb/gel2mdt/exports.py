@@ -22,6 +22,7 @@ SOFTWARE.
 from .models import *
 import csv
 from docx import Document
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 from django.conf import settings
 import os
 from docx.shared import Pt
@@ -81,6 +82,9 @@ def write_mdt_outcome_template(report):
     """
     document = Document()
     document.add_picture(os.path.join(settings.STATIC_DIR, 'nhs_image.png'))
+    header_image = document.paragraphs[-1]
+    header_image.alignment = WD_ALIGN_PARAGRAPH.RIGHT 
+ 
     document.add_heading('Genomics MDM record', 0)
 
     table = document.add_table(rows=2, cols=4, style='Table Grid')
@@ -191,7 +195,7 @@ def write_mdt_outcome_template(report):
     other_staff = OtherStaff.objects.filter(mdt=mdt.id).values_list('name', flat=True)
 
     attendees = list(clinicians) + list(clinical_scientists) + list(other_staff)
-    paragraph.add_run('{}\n\n'.format(','.join(attendees)))
+    paragraph.add_run('{}\n\n'.format(', '.join(attendees)))
     paragraph.add_run()
     run = paragraph.add_run('Discussion:\n')
     run.font.size = Pt(13)
