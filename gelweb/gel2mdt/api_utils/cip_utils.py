@@ -10,9 +10,9 @@ class InterpretationList(object):
     def __init__(self, sample_type, sample=None):
         self.sample_type = sample_type
         self.sample = sample
-        self.londonNW_codes = ['RYJ', 'RQM', 'RPY', 'RT3']
+        #self.londonNW_codes = ['RYJ', 'RQM', 'RPY', 'RT3']
         self.londonNW_cases = []
-        self.get_genie_list()
+        #self.get_genie_list()
         self.all_cases = self.get_all_cases()
         self.cases_to_poll = self.get_poll_cases()
 
@@ -87,10 +87,13 @@ class InterpretationList(object):
 
         return cases_to_poll
 
+    # Redundant as using local users WL credentials
+    """
     def get_genie_list(self):
-        with open('/home/genseqservadmin/WL_GEL2MDT/GeL2MDT/gelweb/gel2mdt/api_utils/GENIE_Extract_20180731.csv') as f:
+        with open('/root/gel2mdt/gelweb/gel2mdt/api_utils/GENIE_Extract_20180731.csv') as f:
             filedata = csv.DictReader(f, dialect='excel')
             for row in filedata:
                 if row['\ufeffOrgCode'] in self.londonNW_codes:
                     self.londonNW_cases.append(row['ParticipantID'])
         print(self.londonNW_cases)
+    """
