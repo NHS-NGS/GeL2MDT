@@ -5,11 +5,13 @@ services:
     image: gel2mdt_web
     build:
       context: .
-    command: bash -c ". /root/gel2mdt/Docker/startup_script.sh && cd /root/gel2mdt/gelweb && python manage.py runserver_plus 0.0.0.0:8000"
+    command: bash -c ". /root/gel2mdt/Docker/startup_script.sh && cd /root/gel2mdt/gelweb && python manage.py runserver 0.0.0.0:8001"
     ports:
       - "8001:8001"
     stdin_open: true
     tty: true
+    env_file:
+      - /etc/gel2mdt/credentials
     volumes:
       - .:/root/gel2mdt/
       - ~/.vep:/root/.vep
@@ -27,6 +29,22 @@ services:
       - /etc/gel2mdt/credentials
     volumes:
       - ~/gel2mdt_resources/gel2mdt_db:/var/lib/mysql
+  jupyter:
+    image: gel2mdt_jupyter
+    build: .
+    restart: always
+    build:
+      context: .
+    command: bash -c ". /root/gel2mdt/Docker/startup_script.sh && jupyter notebook --generate-config -y && cd /root/gel2mdt/gelweb && python manage.py shell_plus --notebook"
+    volumes:
+      - .:/root/gel2mdt/
+    env_file:
+      - /etc/gel2mdt/credentials
+    ports:
+      - "8891:8888"
+    depends_on:
+      - db
+      - web
 #  db:
 #    image: postgres:10
 #    restart: always

@@ -251,52 +251,53 @@ class Case(object):
         genome_build = self.json['assembly']
         for ig in self.json['interpreted_genome']:
             ig_obj = InterpretedGenome.fromJsonDict(ig['interpreted_genome_data'])
-            for variant in ig_obj.variants:
-                # Sort out tiers first
-                variant_min_tier = None
-                tier = None
-                for report_event in variant.reportEvents:
-                    if self.json['sample_type'] == 'raredisease':
-                        if report_event.tier:
-                            tier = int(report_event.tier[-1])
-                    elif self.json['sample_type'] == 'cancer':
-                        if report_event.domain:
-                            tier = int(report_event.domain[-1])
-                    if variant_min_tier is None:
-                        variant_min_tier = tier
-                    elif tier < variant_min_tier:
-                        variant_min_tier = tier
-                variant.max_tier = variant_min_tier
-
-                interesting_variant = False
-                if ig_obj.interpretationService == 'Exomiser':
+            if ig_obj.variants:
+                for variant in ig_obj.variants:
+                    # Sort out tiers first
+                    variant_min_tier = None
+                    tier = None
                     for report_event in variant.reportEvents:
-                        if report_event.score >= 0.95:
-                            interesting_variant = False
-                elif ig_obj.interpretationService == 'genomics_england_tiering':
-                    if not self.pullt3:
-                        if variant.max_tier < 3:
+                        if self.json['sample_type'] == 'raredisease':
+                            if report_event.tier:
+                                tier = int(report_event.tier[-1])
+                        elif self.json['sample_type'] == 'cancer':
+                            if report_event.domain:
+                                tier = int(report_event.domain[-1])
+                        if variant_min_tier is None:
+                            variant_min_tier = tier
+                        elif tier < variant_min_tier:
+                            variant_min_tier = tier
+                    variant.max_tier = variant_min_tier
+
+                    interesting_variant = False
+                    if ig_obj.interpretationService == 'Exomiser':
+                        for report_event in variant.reportEvents:
+                            if report_event.score >= 0.95:
+                                interesting_variant = False
+                    elif ig_obj.interpretationService == 'genomics_england_tiering':
+                        if not self.pullt3:
+                            if variant.max_tier < 3:
+                                interesting_variant = True
+                        else:
                             interesting_variant = True
                     else:
-                        interesting_variant = True
-                else:
-                    interesting_variant = True  # CIP variants all get pulled
+                        interesting_variant = True  # CIP variants all get pulled
 
-                if interesting_variant:
-                    variant_object_count += 1
-                    case_variant = CaseVariant(
-                        chromosome=variant.variantCoordinates.chromosome,
-                        position=variant.variantCoordinates.position,
-                        ref=variant.variantCoordinates.reference,
-                        alt=variant.variantCoordinates.alternate,
-                        case_id=self.request_id,
-                        variant_count=str(variant_object_count),
-                        genome_build=genome_build
-                    )
-                    case_variant_list.append(case_variant)
-                    variant.case_variant = case_variant
-                else:
-                    variant.case_variant = False
+                    if interesting_variant:
+                        variant_object_count += 1
+                        case_variant = CaseVariant(
+                            chromosome=variant.variantCoordinates.chromosome,
+                            position=variant.variantCoordinates.position,
+                            ref=variant.variantCoordinates.reference,
+                            alt=variant.variantCoordinates.alternate,
+                            case_id=self.request_id,
+                            variant_count=str(variant_object_count),
+                            genome_build=genome_build
+                        )
+                        case_variant_list.append(case_variant)
+                        variant.case_variant = case_variant
+                    else:
+                        variant.case_variant = False
             self.ig_objs.append(ig_obj)
         for clinical_report in self.json['clinical_report']:
             cr_obj = ClinicalReport.fromJsonDict(clinical_report['clinical_report_data'])
@@ -582,15 +583,16 @@ class CaseAttributeManager(object):
             # standard tiered variants
             for ig in self.case.json['interpreted_genome']:
                 ig_obj = InterpretedGenome.fromJsonDict(ig['interpreted_genome_data'])
-                for variant in ig_obj.variants:
-                    variant.maternal_zygosity = 'unknown'
-                    variant.paternal_zygosity = 'unknown'
-                    for call in variant.variantCalls:
-                        if call.participantId == self.case.mother["gel_id"]:
-                            variant.maternal_zygosity = call.zygosity
-                        elif call.participantId == self.case.father["gel_id"]:
-                            variant.paternal_zygosity = call.zygosity
-                    variants_to_check.append(variant)
+                if ig_obj.variants:
+                    for variant in ig_obj.variants:
+                        variant.maternal_zygosity = 'unknown'
+                        variant.paternal_zygosity = 'unknown'
+                        for call in variant.variantCalls:
+                            if call.participantId == self.case.mother["gel_id"]:
+                                variant.maternal_zygosity = call.zygosity
+                            elif call.participantId == self.case.father["gel_id"]:
+                                variant.paternal_zygosity = call.zygosity
+                        variants_to_check.append(variant)
 
             for clinical_report in self.case.json['clinical_report']:
                 cr_obj = ClinicalReport.fromJsonDict(clinical_report['clinical_report_data'])
@@ -988,21 +990,22 @@ class CaseAttributeManager(object):
         variants_list = []
         # loop through all variants and check that they have a case_variant
         for ig_obj in self.case.ig_objs:
-            for variant in ig_obj.variants:
-                if variant.case_variant:
-                    variant.dbsnp = None
-                    if variant.variantAttributes.variantIdentifiers.dbSnpId:
-                        if re.match('rs\d+', variant.variantAttributes.variantIdentifiers.dbSnpId):
-                            variant.dbsnp = variant.variantAttributes.variantIdentifiers.dbSnpId
-                    tiered_variant = {
-                        "genome_assembly": genome_assembly,
-                        "alternate": variant.case_variant.alt,
-                        "chromosome": variant.case_variant.chromosome,
-                        "db_snp_id": variant.dbsnp,
-                        "reference": variant.case_variant.ref,
-                        "position": variant.case_variant.position,
-                    }
-                    variants_list.append(tiered_variant)
+            if ig_obj.variants:
+                for variant in ig_obj.variants:
+                    if variant.case_variant:
+                        variant.dbsnp = None
+                        if variant.variantAttributes.variantIdentifiers.dbSnpId:
+                            if re.match('rs\d+', variant.variantAttributes.variantIdentifiers.dbSnpId):
+                                variant.dbsnp = variant.variantAttributes.variantIdentifiers.dbSnpId
+                        tiered_variant = {
+                            "genome_assembly": genome_assembly,
+                            "alternate": variant.case_variant.alt,
+                            "chromosome": variant.case_variant.chromosome,
+                            "db_snp_id": variant.dbsnp,
+                            "reference": variant.case_variant.ref,
+                            "position": variant.case_variant.position,
+                        }
+                        variants_list.append(tiered_variant)
 
         for clinical_report in self.case.clinical_report_objs:
             if clinical_report.variants:
@@ -1134,9 +1137,10 @@ class CaseAttributeManager(object):
         raw_proband_variants = []
         processed_proband_variants = []
         for ig_obj in self.case.ig_objs:
-            for ig_variant in ig_obj.variants:
-                if ig_variant.case_variant:
-                    raw_proband_variants.append(ig_variant)
+            if ig_obj.variants:
+                for ig_variant in ig_obj.variants:
+                    if ig_variant.case_variant:
+                        raw_proband_variants.append(ig_variant)
         for clinical_report in self.case.clinical_report_objs:
             if clinical_report.variants:
                 for variant in clinical_report.variants:
@@ -1251,14 +1255,15 @@ class CaseAttributeManager(object):
                             in self.case.attribute_managers[ProbandVariant].case_model.case_models]
         pv_flags = []
         for interpreted_genome in self.case.ig_objs:
-            for variant in interpreted_genome.variants:
-                if variant.case_variant:
-                    for proband_variant in proband_variants:
-                        if proband_variant.variant == variant.variant_entry:
-                            variant.proband_variant = proband_variant
-                            variant.company = interpreted_genome.interpretationService
-                            pv_flags.append(variant)
-                            break
+            if interpreted_genome.variants:
+                for variant in interpreted_genome.variants:
+                    if variant.case_variant:
+                        for proband_variant in proband_variants:
+                            if proband_variant.variant == variant.variant_entry:
+                                variant.proband_variant = proband_variant
+                                variant.company = interpreted_genome.interpretationService
+                                pv_flags.append(variant)
+                                break
 
         for clinical_report in self.case.clinical_report_objs:
             if clinical_report.variants:
@@ -1295,15 +1300,16 @@ class CaseAttributeManager(object):
             for transcript in self.case.transcripts:
                 if transcript.transcript_entry:
                     for ig_obj in self.case.ig_objs:
-                        for variant in ig_obj.variants:
-                            if variant.case_variant:
-                                if variant.variant_entry == transcript.variant_entry:
-                                    for reportevent in variant.reportEvents:
-                                        for en in reportevent.genomicEntities:
-                                            if transcript.transcript_name == en.ensemblId:
-                                                transcript.selected = True
-                                            else:
-                                                transcript.selected = False
+                        if ig_obj.variants:
+                            for variant in ig_obj.variants:
+                                if variant.case_variant:
+                                    if variant.variant_entry == transcript.variant_entry:
+                                        for reportevent in variant.reportEvents:
+                                            for en in reportevent.genomicEntities:
+                                                if transcript.transcript_name == en.ensemblId:
+                                                    transcript.selected = True
+                                                else:
+                                                    transcript.selected = False
 
         proband_transcript_variants = ManyCaseModel(ProbandTranscriptVariant, [{
             "transcript": transcript.transcript_entry,
