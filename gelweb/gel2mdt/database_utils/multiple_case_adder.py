@@ -393,7 +393,12 @@ class MultipleCaseAdder(object):
             # Labkey lookup for all cases
             if not self.skip_demographics:
                 family_ids = []
+                family_ids_nt = []
+                family_ids_wl = []
                 participant_ids = []
+                participant_ids_nt = [] # wl_list
+                participant_ids_wl = [] # nt_list
+
                 demographic_handler = DemographicsHandler(self.sample_type)
                 if self.sample_type == 'raredisease':
                     for case in cases:
@@ -401,16 +406,76 @@ class MultipleCaseAdder(object):
                         participant_ids.append(case.json["proband"])
                         for family_member in case.family_members:
                             participant_ids.append(family_member['gel_id'])
-                    demographics = demographic_handler.get_demographics(participant_ids)
-                    clinicians = demographic_handler.get_clinicians(family_ids)
-                    diagnosis = demographic_handler.get_diagnosis(participant_ids)
+
+                    # rd pids 115* (nt) and 120* (wl) & ca 215* (nt) 220* (wl)
+                    # fyi, format of participant_id if no result recorded in LabKey=NR_120000299_1233951
+                    for participant_id in participant_ids:
+                        if participant_id.startswith("NR_"):
+                            pass # ignore
+                        elif participant_id.startswith("115"):
+                            participant_ids_nt.append(participant_id)
+                        elif participant_id.startswith("120"):
+                            participant_ids_wl.append(participant_id)
+
+                    for family_id in family_ids:
+                        if participant_id.startswith("NR_"):
+                            pass # ignore
+                        elif family_id.startswith("115"):
+                            family_id_nt.append(family_id)
+                        elif family_id.startswith("120"):
+                            family_id_wl.append(family_id)
+                    
+                    # temp printing to file
+                    # raw pid list
+                    output_path = os.path.abspath('/root/gel2mdt/gelweb/')
+                    pid_file_output = os.path.join(output_path, 'participant_ids.txt')
+                    with open(pid_file_output,'w') as f:                      
+                        for item in participant_ids:
+                            f.write(item)
+                            f.write('\n')
+
+                    # nt list
+                    output_path = os.path.abspath('/root/gel2mdt/gelweb/')
+                    pid_file_output = os.path.join(output_path, 'participant_ids_nt.txt')
+                    with open(pid_file_output,'w') as f:                      
+                        for item in participant_ids_nt:
+                            f.write(item)
+                            f.write('\n')
+
+                    # wl list
+                    output_path = os.path.abspath('/root/gel2mdt/gelweb/')
+                    pid_file_output = os.path.join(output_path, 'participant_ids_wl.txt')
+                    with open(pid_file_output,'w') as f:                      
+                        for item in participant_ids_wl:
+                            f.write(item)
+                            f.write('\n')
+
+                    demographics = demographic_handler.get_demographics_wl(participant_ids_wl) # separate gmc split lists
+                    demographics = demographic_handler.get_demographics_nt(participant_ids_nt)                   
+                    clinicians = demographic_handler.get_clinicians_wl(family_ids_wl)
+                    clinicians = demographic_handler.get_clinicians_nt(family_ids_nt)                    
+                    diagnosis = demographic_handler.get_diagnosis_wl(participant_ids_wl)
+                    diagnosis = demographic_handler.get_diagnosis_nt(participant_ids_nt)
+
                 elif self.sample_type == 'cancer':
                     for case in cases:
                         participant_ids.append(case.json["proband"])
                         for family_member in case.family_members:  # Shouldn't be any but just for futureproofing!
                             participant_ids.append(family_member['gel_id'])
-                    demographics = demographic_handler.get_demographics(participant_ids)
-                    clinicians = demographic_handler.get_clinicians(participant_ids)
+
+                    # fyi, format of participant_id if no result recorded in LabKey=NR_120000299_1233951
+                    for participant_id in participant_ids:
+                        if participant_id.startswith("NR_"):
+                            pass # ignore
+                        elif participant_id.startswith("215"):
+                            participant_ids_nt.append(participant_id)
+                        elif participant_id.startswith("220"):
+                            participant_ids_wl.append(participant_id)
+
+                    demographics = demographic_handler.get_demographics_wl(participant_ids_wl) # separate gmc split lists
+                    demographics = demographic_handler.get_demographics_nt(participant_ids_nt) # adding gmc split lists                    
+                    clinicians = demographic_handler.get_clinicians_wl(participant_ids_wl)
+                    clinicians = demographic_handler.get_clinicians_nt(participant_ids_nt)                                   
                     diagnosis = None
 
                 for case in cases:
