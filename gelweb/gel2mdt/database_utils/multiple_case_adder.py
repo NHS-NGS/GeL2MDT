@@ -426,23 +426,18 @@ class MultipleCaseAdder(object):
                             family_id_wl.append(family_id)
                     
                     # temp printing to file
-                    # raw pid list
                     output_path = os.path.abspath('/root/gel2mdt/gelweb/')
                     pid_file_output = os.path.join(output_path, 'participant_ids.txt')
                     with open(pid_file_output,'w') as f:                      
                         for item in participant_ids:
                             f.write(item)
                             f.write('\n')
-
-                    # nt list
                     output_path = os.path.abspath('/root/gel2mdt/gelweb/')
                     pid_file_output = os.path.join(output_path, 'participant_ids_nt.txt')
                     with open(pid_file_output,'w') as f:                      
                         for item in participant_ids_nt:
                             f.write(item)
                             f.write('\n')
-
-                    # wl list
                     output_path = os.path.abspath('/root/gel2mdt/gelweb/')
                     pid_file_output = os.path.join(output_path, 'participant_ids_wl.txt')
                     with open(pid_file_output,'w') as f:                      
@@ -450,12 +445,24 @@ class MultipleCaseAdder(object):
                             f.write(item)
                             f.write('\n')
 
-                    demographics = demographic_handler.get_demographics_wl(participant_ids_wl) # separate gmc split lists
-                    demographics = demographic_handler.get_demographics_nt(participant_ids_nt)                   
+                    combined_demographics = []
+                    demographics = demographic_handler.get_demographics_nt(participant_ids_nt) # separate gmc split lists
+                    combined_demographics.extend(demographics)
+                    demographics = demographic_handler.get_demographics_wl(participant_ids_wl)
+                    combined_demographics.extend(demographics)
+                    
+                    combined_clinicians = []
+                    clinicians = demographic_handler.get_clinicians_nt(family_ids_nt)
+                    combined_clinicians.extend(clinicians)
                     clinicians = demographic_handler.get_clinicians_wl(family_ids_wl)
-                    clinicians = demographic_handler.get_clinicians_nt(family_ids_nt)                    
-                    diagnosis = demographic_handler.get_diagnosis_wl(participant_ids_wl)
+                    combined_clinicians.extend(clinicians)
+
+                    combined_diagnosis = []
                     diagnosis = demographic_handler.get_diagnosis_nt(participant_ids_nt)
+                    combined_diagnosis.extend(diagnosis)
+                    diagnosis = demographic_handler.get_diagnosis_wl(participant_ids_wl)
+                    combined_diagnosis.extend(diagnosis)
+
 
                 elif self.sample_type == 'cancer':
                     for case in cases:
@@ -472,16 +479,24 @@ class MultipleCaseAdder(object):
                         elif participant_id.startswith("220"):
                             participant_ids_wl.append(participant_id)
 
-                    demographics = demographic_handler.get_demographics_wl(participant_ids_wl) # separate gmc split lists
-                    demographics = demographic_handler.get_demographics_nt(participant_ids_nt) # adding gmc split lists                    
+                    combined_demographics = []
+                    demographics = demographic_handler.get_demographics_nt(participant_ids_nt) # separate gmc split lists
+                    combined_demographics.extend(demographics)
+                    demographics = demographic_handler.get_demographics_wl(participant_ids_wl) # adding gmc split lists
+                    combined_demographics.extend(demographics)
+
+                    combined_clinicians = []
+                    clinicians = demographic_handler.get_clinicians_nt(participant_ids_nt)
+                    combined_clinicians.extend(clinicians)
                     clinicians = demographic_handler.get_clinicians_wl(participant_ids_wl)
-                    clinicians = demographic_handler.get_clinicians_nt(participant_ids_nt)                                   
+                    combined_clinicians.extend(clinicians)
+
                     diagnosis = None
 
                 for case in cases:
-                    case.demographics = demographics
-                    case.clinicians = clinicians
-                    case.diagnosis = diagnosis
+                    case.demographics = combined_demographics
+                    case.clinicians = combined_clinicians
+                    case.diagnosis = combined_diagnosis
 
         # ------------------- #
         # BULK UPDATE PROCESS #
