@@ -193,8 +193,12 @@ class Case(object):
         if self.json["sample_type"] == 'raredisease':
             for member in self.ir_obj.pedigree.members:
                 if not member.isProband:
+                    if member.additionalInformation:
+                        relation = member.additionalInformation.get('relation_to_proband', 'unknown')
+                    else:
+                        relation = 'unknown'
                     family_member = {'gel_id': member.participantId,
-                                     'relation_to_proband': member.additionalInformation.get('relation_to_proband', 'unknown'),
+                                     'relation_to_proband': relation,
                                      'affection_status': True if member.disorderList else False,
                                      'sequenced': True if member.samples else False,
                                      'sex': member.sex,
@@ -486,7 +490,7 @@ class CaseAttributeManager(object):
             if self.case.json['sample_type'] == 'cancer':
                 recruiting_disease = self.case.proband.primaryDiagnosisDisease[0]
                 disease_subtype = self.case.proband.primaryDiagnosisSubDisease[0]
-        except KeyError:
+        except (TypeError, KeyError):
             pass
 
         if not self.case.skip_demographics:
