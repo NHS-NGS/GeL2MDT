@@ -426,11 +426,12 @@ class CaseAttributeManager(object):
                         if row.get('consultant_details_full_name_of_responsible_consultant'):
                             clinician_details['name'] = row.get(
                                 'consultant_details_full_name_of_responsible_consultant')
-                        if row.get('consultant_details_hospital_of_responsible_consultant'):
-                            clinician_details['hospital'] = row.get(
-                                'consultant_details_hospital_of_responsible_consultant')
                 except IndexError as e:
                     pass
+        if self.case.ir_obj.workspace:
+            clinician_details['hospital'] = self.case.ir_obj.workspace[0]
+        else:
+            clinician_details['hospital'] = 'unknown'
         clinician = CaseModel(Clinician, {
             "name": clinician_details['name'],
             "email": "unknown",  # clinician email not on labkey
