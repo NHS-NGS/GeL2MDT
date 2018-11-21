@@ -45,6 +45,19 @@ services:
     depends_on:
       - db
       - web
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    volumes:
+      - /sessions
+    ports:
+      - 8080:80
+    environment:
+      - PMA_ARBITRARY=1
+    depends_on:
+      - db
+
+
 #  db:
 #    image: postgres:10
 #    restart: always
