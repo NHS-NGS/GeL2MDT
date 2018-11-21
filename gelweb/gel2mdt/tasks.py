@@ -584,28 +584,34 @@ class UpdateDemographics(object):
         else:
             return None
 
-class UpdaterFromStorage(object):
+from protocols.reports_6_0_0 import InterpretedGenome, InterpretationRequestRD, CancerInterpretationRequest, ClinicalReport
+
+class UpdaterFromStorage:
     '''
     Utility class to allow you to use the local jsons to insert something new into the database
     Done for gel_sequence_id but will obviously need to be edited for any other value
     '''
 
-    def __init__(self):
-        self.reports = GELInterpretationReport.objects.all().prefetch_related(
+    def __init__(self, sample_type):
+        self.reports = GELInterpretationReport.objects.latest_cases_by_sample_type(sample_type).prefetch_related(
             *[
                 'ir_family',
+                'ir_family__participant_family__proband'
             ]
         )
-        print(self.reports.count())
         config_dict = load_config.LoadConfig().load()
         self.cip_api_storage = config_dict['cip_api_storage']
         for report in self.reports:
             self.json = self.load_json_data(report)
             if self.json:
                 self.json_case_data = self.json["interpretation_request_data"]
-                self.proband = self.get_proband_json()
-                self.proband_sample = self.get_gel_sequence_id()
-                self.insert_into_db(report)
+                self.json_request_data = self.json_case_data["json_request"]
+                self.ir_obj = InterpretationRequestRD.fromJsonDict(self.json_request_data)
+                if self.ir_obj.workspace:
+                    workspace = self.ir_obj.workspace[0]
+                else:
+                    workspace = 'unknown'
+                self.insert_into_db(report, workspace)
 
     def load_json_data(self, report):
         '''
@@ -625,7 +631,6 @@ class UpdaterFromStorage(object):
         """
         proband_json = None
         if self.json["sample_type"]=='raredisease':
-
             participant_jsons = \
                 self.json_case_data["json_request"]["pedigree"]["participants"]
             for participant in participant_jsons:
@@ -643,10 +648,10 @@ class UpdaterFromStorage(object):
             proband_sample = self.proband["matchedSamples"][0]['tumourSampleId']
         return proband_sample
 
-    def insert_into_db(self, report):
-        report.sample_id = self.proband_sample
-        print(self.proband_sample)
-        report.save(overwrite=True)
+    def insert_into_db(self, report, workspace):
+        proband = report.ir_family.participant_family.proband
+        proband.gmc = workspace
+        proband.save()
 
 
 def create_bokeh_barplot(names, values, title):
