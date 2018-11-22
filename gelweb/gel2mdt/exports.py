@@ -307,12 +307,6 @@ def write_gtab_template(report):
     run = table.rows[0].cells[0].paragraphs[0].add_run('Oncologist:')
     run = table.rows[0].cells[1].paragraphs[0].add_run('Clinician in lieu of referrer: ')
 
-    #table = document.add_table(rows=1, cols=1, style='Table Grid')
-    #table.rows[0].cells[0].paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    #run = table.rows[0].cells[0].paragraphs[0].add_run(
-    #    'FOR RESEARCH PURPOSES ONLY- THESE RESULTS HAVE NOT BEEN VALIDATED')
-    #run.bold=True
-
     table = document.add_table(rows=1, cols=1, style='Table Grid')
     run = table.rows[0].cells[0].paragraphs[0].add_run("SOMATIC VARIANTS\n")
     run.underline=True
@@ -340,43 +334,6 @@ def write_gtab_template(report):
     run = table.rows[0].cells[0].paragraphs[0].add_run("Note: Please see individual "
                                                        "variant for assessment of pathogenicity\n\n") #\t1)\n")
     count = 1
-    # write_table = False
-    # for proband_variant in proband_variants:
-    #     if proband_variant.max_tier == 1 and proband_variant.somatic is True:
-    #         write_table = True
-    # if write_table:
-    #     table = document.add_table(rows=1, cols=7, style='Table Grid')
-    #     heading_cells = table.rows[0].cells
-    #     run = heading_cells[0].paragraphs[0].add_run('Gene')
-    #     run.bold = True
-    #     run.font.size = Pt(9)
-    #     run = heading_cells[2].paragraphs[0].add_run('HGVSc')
-    #     run.bold = True
-    #     run.font.size = Pt(9)
-    #     run = heading_cells[3].paragraphs[0].add_run('HGVSp')
-    #     run.bold = True
-    #     run.font.size = Pt(9)
-    #     run = heading_cells[4].paragraphs[0].add_run('VAF')
-    #     run.bold = True
-    #     run.font.size = Pt(9)
-    #     run = heading_cells[5].paragraphs[0].add_run('Transcript')
-    #     run.bold = True
-    #     run.font.size = Pt(9)
-    # for proband_variant in proband_variants:
-    #     if proband_variant.max_tier == 1 and proband_variant.somatic is True:
-    #         cells = table.add_row().cells
-    #         transcript = proband_variant.get_transcript()
-    #         transcript_variant = proband_variant.get_transcript_variant()
-    #         run = cells[0].paragraphs[0].add_run(str(transcript.gene))
-    #         run.font.size = Pt(7)
-    #         run = cells[2].paragraphs[0].add_run(str(transcript_variant.hgvs_c))
-    #         run.font.size = Pt(7)
-    #         run = cells[3].paragraphs[0].add_run(str(transcript_variant.hgvs_p))
-    #         run.font.size = Pt(7)
-    #         run = cells[3].paragraphs[0].add_run(str(proband_variant.vaf))
-    #         run.font.size = Pt(7)
-    #         run = cells[3].paragraphs[0].add_run(str(transcript.name))
-    #         run.font.size = Pt(7)
     for proband_variant in proband_variants:
         if proband_variant.max_tier == 1 and proband_variant.somatic is True:
             transcript = proband_variant.get_transcript()
@@ -406,12 +363,6 @@ def write_gtab_template(report):
     run.font.size = Pt(9)
     run = table.rows[0].cells[0].paragraphs[0].add_run("Note: Please see individual "
                                                        "variant for assessment of pathogenicity\n\n")
-
-    #table = document.add_table(rows=1, cols=1, style='Table Grid')
-    #table.rows[0].cells[0].paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    #run = table.rows[0].cells[0].paragraphs[0].add_run(
-    #    'FOR RESEARCH PURPOSES ONLY- THESE RESULTS HAVE NOT BEEN VALIDATED')
-    #run.bold=True
 
     table = document.add_table(rows=1, cols=1, style='Table Grid')
     run =  table.rows[0].cells[0].paragraphs[0].add_run("ADDITIONAL FINDINGS\n\n")
