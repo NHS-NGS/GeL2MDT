@@ -167,7 +167,6 @@ class MultipleCaseAdder(object):
                         del case
 
                     bin_count += 1
-                self.cases_to_block = interpretation_list_poll.blocked_cases
 
             else:
                 # no bins, update as normal
