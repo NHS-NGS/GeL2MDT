@@ -286,6 +286,7 @@ class GELInterpretationReportQuerySet(models.QuerySet):
         ids_of_latest_cases = rm_dup_old["id"].tolist()
         return self.filter(id__in=ids_of_latest_cases, assigned_user__username=username)
 
+
 class GELInterpretationReport(models.Model):
     objects = GELInterpretationReportQuerySet.as_manager()
 

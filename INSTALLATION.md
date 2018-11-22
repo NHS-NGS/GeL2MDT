@@ -37,6 +37,11 @@ Navigate to https://github.com/NHS-NGS/GeL2MDT/releases and download the latest 
 
     cd GeL2MDT
     pip install -r requirements
+    
+If you have an existing pre v0.6 installation, an installation of GeLReportModels is required. This can be downloaded with GEL2MDT using the following:
+
+    git submodule update --init --recursive
+    
         
 ### 3) Setup Storage Locations
 
