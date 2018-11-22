@@ -287,6 +287,8 @@ def write_gtab_template(report):
                                                        f'{report.ir_family.participant_family.proband.nhs_number}')
     run = table.rows[3].cells[0].paragraphs[0].add_run(f'Referring Clinician:\t'
                                                        f'{report.ir_family.participant_family.clinician.name}')
+    run = table.rows[3].cells[1].paragraphs[0].add_run(f'Referring Hospital:\t'
+                                                       f'{report.ir_family.participant_family.proband.gmc}')
 
     table = document.add_table(rows=1, cols=1, style='Table Grid')
     run = table.rows[0].cells[0].paragraphs[0].add_run('GENOMICS ENGLAND REPORT DETAILS')
@@ -310,7 +312,7 @@ def write_gtab_template(report):
     run.bold=True
     table.rows[0].cells[0].paragraphs[0].paragraph_format.space_before = Cm(0.2)
     table.rows[0].cells[0].paragraphs[0].paragraph_format.space_after = Cm(0.2)
-    run = table.rows[1].cells[0].paragraphs[0].add_run('Multiple sampling (Yes / No):   ')
+    run = table.rows[1].cells[0].paragraphs[0].add_run('Multiple samples (Yes / No):   ')
     run = table.rows[2].cells[0].paragraphs[0].add_run('GENOMICS TUMOUR ADVISORY BOARD (GTAB) SUMMARY  ')
     table.rows[2].cells[0].paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
     run.bold = True
