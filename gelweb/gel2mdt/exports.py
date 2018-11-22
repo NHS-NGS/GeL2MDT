@@ -224,7 +224,7 @@ def write_gtab_template(report):
     font = style.font
     font.name = 'Arial'
     font.size = Pt(10)
-    document.add_picture(os.path.join(settings.STATIC_DIR, 'north_thames.png'), height=Inches(0.63), width=Inches(2.39))
+    document.add_picture(os.path.join(settings.STATIC_DIR, 'nhs_image.png'), height=Inches(0.63), width=Inches(2.39))
     last_paragraph = document.paragraphs[-1]
     last_paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
 
@@ -288,7 +288,7 @@ def write_gtab_template(report):
     run = table.rows[2].cells[0].paragraphs[0].add_run(f'Tumour Type: ')
     run = table.rows[2].cells[1].paragraphs[0].add_run(f'Total Somatic SNVs: ')
     run = table.rows[3].cells[0].paragraphs[0].add_run(f'Tumour sample cross-contamination: Pass ')
-    run = table.rows[3].cells[0].paragraphs[0].add_run(f'Library Prep:')
+    run = table.rows[3].cells[1].paragraphs[0].add_run(f'Library Prep:')
     table = document.add_table(rows=3, cols=1, style='Table Grid')
     run = table.rows[0].cells[0].paragraphs[0].add_run('ADDITIONAL RECRUITMENT INFORMATION ')
     run.bold=True
@@ -308,7 +308,7 @@ def write_gtab_template(report):
     run = table.rows[0].cells[1].paragraphs[0].add_run('Clinician in lieu of referrer: ')
 
     table = document.add_table(rows=1, cols=1, style='Table Grid')
-    run = table.rows[0].cells[0].paragraphs[0].add_run("SOMATIC VARIANTS\n")
+    run = table.rows[0].cells[0].paragraphs[0].add_run("SOMATIC VARIANTS\n\n")
     run.underline=True
     run = table.rows[0].cells[0].paragraphs[0].add_run("Only variants with specific consequences "
                                                        "(transcript ablation, splice acceptor variant, splice donor "
