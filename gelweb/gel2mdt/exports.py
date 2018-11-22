@@ -25,7 +25,7 @@ from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from django.conf import settings
 import os
-from docx.shared import Pt, Inches
+from docx.shared import Pt, Inches, RGBColor, Cm
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 def write_mdt_export(writer, mdt_instance, mdt_reports):
@@ -219,6 +219,10 @@ def write_gtab_template(report):
     proband_variants = list(ProbandVariant.objects.filter(interpretation_report=report))
 
     document = Document()
+    sections = document.sections
+    for section in sections:
+        section.left_margin = Inches(0.5)
+        section.right_margin = Inches(0.5)
 
     style = document.styles['Normal']
     font = style.font
@@ -232,17 +236,23 @@ def write_gtab_template(report):
     heading_cells = table.rows[0].cells
     run = heading_cells[0].paragraphs[0].add_run('GTAB SUMMARY SHEET')
     run.bold = True
-    run.font.size = Pt(15)
     heading_cells[0].paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    heading_cells[0].paragraphs[0].paragraph_format.space_before = Cm(0.3)
+    heading_cells[0].paragraphs[0].paragraph_format.space_after = Cm(0.3)
 
     table = document.add_table(rows=2, cols=1, style='Table Grid')
     table.rows[0].cells[0].paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
     run = table.rows[0].cells[0].paragraphs[0].add_run(
         'FOR RESEARCH PURPOSES ONLY- THESE RESULTS HAVE NOT BEEN VALIDATED.\n')
+    run.font.color.rgb = RGBColor(255, 0, 0)
     run = table.rows[0].cells[0].paragraphs[0].add_run(
         'UNVALIDATED FINDINGS MUST NOT BE ACTED UPON.\n')
+    run.font.color.rgb = RGBColor(255, 0, 0)
     run = table.rows[0].cells[0].paragraphs[0].add_run(
         'PLEASE CONTACT THE LABORATORY IF VALIDATION TESTING IS REQUIRED')
+    run.font.color.rgb = RGBColor(255, 0, 0)
+    table.rows[0].cells[0].paragraphs[0].paragraph_format.space_before = Cm(0.3)
+    table.rows[0].cells[0].paragraphs[0].paragraph_format.space_after = Cm(0.3)
     run = table.rows[1].cells[0].paragraphs[0].add_run('Specialist Integrated Haematological Malignancy '
                                                        'Diagnostic Service\n')
     run.font.size = Pt(6)
@@ -251,54 +261,64 @@ def write_gtab_template(report):
     run.font.size = Pt(6)
     run = table.rows[1].cells[0].paragraphs[0].add_run('London, WC1N 3JH. Tel: 020 7405 9200 Ex: 5755')
     run.font.size = Pt(6)
+    table.rows[1].cells[0].paragraphs[0].paragraph_format.space_before = Cm(0.2)
+    table.rows[1].cells[0].paragraphs[0].paragraph_format.space_after = Cm(0.2)
     table.rows[1].cells[0].paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
     table = document.add_table(rows=1, cols=1, style='Table Grid')
     run = table.rows[0].cells[0].paragraphs[0].add_run('GENOMICS ENGLAND PARTICIPANT INFORMATION')
     run.bold = True
+    table.rows[0].cells[0].paragraphs[0].paragraph_format.space_before = Cm(0.2)
+    table.rows[0].cells[0].paragraphs[0].paragraph_format.space_after = Cm(0.2)
 
     table = document.add_table(rows=4, cols=2, style='Table Grid')
-    run = table.rows[0].cells[0].paragraphs[0].add_run(f'Patient Name: '
+    run = table.rows[0].cells[0].paragraphs[0].add_run(f'Patient Name:\t\t'
                                                        f'{report.ir_family.participant_family.proband.forename} '
                                                        f'{report.ir_family.participant_family.proband.surname}')
-    run = table.rows[0].cells[1].paragraphs[0].add_run(f'GEL Participant ID: '
+    run = table.rows[0].cells[1].paragraphs[0].add_run(f'GEL Participant ID:\t'
                                                        f'{report.ir_family.participant_family.proband.gel_id}')
-    run = table.rows[1].cells[0].paragraphs[0].add_run(f'Gender: '
+    run = table.rows[1].cells[0].paragraphs[0].add_run(f'Gender:\t\t'
                                                        f'{report.ir_family.participant_family.proband.sex}')
-    run = table.rows[1].cells[1].paragraphs[0].add_run(f'CIP ID: '
-                                                       f'{report.ir_family.ir_family_id}')
-    run = table.rows[2].cells[0].paragraphs[0].add_run(f'Date of Birth: '
+    run = table.rows[1].cells[1].paragraphs[0].add_run(f'CIP ID:\t\t\t'
+                                                       f'ILMN-{report.ir_family.ir_family_id}')
+    run = table.rows[2].cells[0].paragraphs[0].add_run(f'Date of Birth:\t\t'
                                                        f'{report.ir_family.participant_family.proband.date_of_birth.date()}')
-    run = table.rows[2].cells[1].paragraphs[0].add_run(f'NHS number: '
+    run = table.rows[2].cells[1].paragraphs[0].add_run(f'NHS number:\t\t'
                                                        f'{report.ir_family.participant_family.proband.nhs_number}')
-    run = table.rows[3].cells[0].paragraphs[0].add_run(f'Referring Clinician: '
+    run = table.rows[3].cells[0].paragraphs[0].add_run(f'Referring Clinician:\t'
                                                        f'{report.ir_family.participant_family.clinician.name}')
 
     table = document.add_table(rows=1, cols=1, style='Table Grid')
     run = table.rows[0].cells[0].paragraphs[0].add_run('GENOMICS ENGLAND REPORT DETAILS')
     run.bold = True
+    table.rows[0].cells[0].paragraphs[0].paragraph_format.space_before = Cm(0.2)
+    table.rows[0].cells[0].paragraphs[0].paragraph_format.space_after = Cm(0.2)
 
     table = document.add_table(rows=4, cols=2, style='Table Grid')
-    run = table.rows[0].cells[0].paragraphs[0].add_run(f'Disease Type: '
+    run = table.rows[0].cells[0].paragraphs[0].add_run(f'Disease Type:\t\t'
                                                        f'{report.ir_family.participant_family.proband.disease_group}')
-    run = table.rows[0].cells[1].paragraphs[0].add_run(f'Tumour Content: ')
-    run = table.rows[1].cells[0].paragraphs[0].add_run(f'Disease Subtype: '
+    run = table.rows[0].cells[1].paragraphs[0].add_run(f'Tumour Content:\t\t')
+    run = table.rows[1].cells[0].paragraphs[0].add_run(f'Disease Subtype:\t'
                                                        f'{report.ir_family.participant_family.proband.disease_subtype}')
-    run = table.rows[1].cells[1].paragraphs[0].add_run(f'Version Number: ')
-    run = table.rows[2].cells[0].paragraphs[0].add_run(f'Tumour Type: ')
-    run = table.rows[2].cells[1].paragraphs[0].add_run(f'Total Somatic SNVs: ')
+    run = table.rows[1].cells[1].paragraphs[0].add_run(f'Version Number:\t\t')
+    run = table.rows[2].cells[0].paragraphs[0].add_run(f'Tumour Type:\t\t')
+    run = table.rows[2].cells[1].paragraphs[0].add_run(f'Total Somatic SNVs:\t\t')
     run = table.rows[3].cells[0].paragraphs[0].add_run(f'Tumour sample cross-contamination: Pass ')
-    run = table.rows[3].cells[1].paragraphs[0].add_run(f'Library Prep:')
+    run = table.rows[3].cells[1].paragraphs[0].add_run(f'Library Prep:\t\t')
     table = document.add_table(rows=3, cols=1, style='Table Grid')
-    run = table.rows[0].cells[0].paragraphs[0].add_run('ADDITIONAL RECRUITMENT INFORMATION ')
+    run = table.rows[0].cells[0].paragraphs[0].add_run('ADDITIONAL RECRUITMENT INFORMATION')
     run.bold=True
-    run = table.rows[1].cells[0].paragraphs[0].add_run('Multi-regional sampling (Yes / No):   ')
+    table.rows[0].cells[0].paragraphs[0].paragraph_format.space_before = Cm(0.2)
+    table.rows[0].cells[0].paragraphs[0].paragraph_format.space_after = Cm(0.2)
+    run = table.rows[1].cells[0].paragraphs[0].add_run('Multiple sampling (Yes / No):   ')
     run = table.rows[2].cells[0].paragraphs[0].add_run('GENOMICS TUMOUR ADVISORY BOARD (GTAB) SUMMARY  ')
     table.rows[2].cells[0].paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
     run.bold = True
+    table.rows[2].cells[0].paragraphs[0].paragraph_format.space_before = Cm(0.2)
+    table.rows[2].cells[0].paragraphs[0].paragraph_format.space_after = Cm(0.2)
 
     table = document.add_table(rows=1, cols=1, style='Table Grid')
-    run = table.rows[0].cells[0].paragraphs[0].add_run('CLINICAL UPDATE\t\t\t\t\tGTAB date: dd/mm/yyyy\n')
+    run = table.rows[0].cells[0].paragraphs[0].add_run('CLINICAL UPDATE\t\t\t\t\t\t\tGTAB date: dd/mm/yyyy\n')
     run = table.rows[0].cells[0].paragraphs[0].add_run('Include any SOC testing already performed, dates of '
                                                        'treatment, clinical trials etc.\n\n\n\n\n\n\n\n\n\n')
     run.italic = True
@@ -308,6 +328,10 @@ def write_gtab_template(report):
     run = table.rows[0].cells[1].paragraphs[0].add_run('Clinician in lieu of referrer: ')
 
     table = document.add_table(rows=1, cols=1, style='Table Grid')
+    run = table.rows[0].cells[0].paragraphs[0].add_run(
+        "FOR RESEARCH PURPOSES ONLY- THESE RESULTS HAVE NOT BEEN VALIDATED\n")
+    run.font.color.rgb = RGBColor(255, 0, 0)
+
     run = table.rows[0].cells[0].paragraphs[0].add_run("SOMATIC VARIANTS\n\n")
     run.underline=True
     run = table.rows[0].cells[0].paragraphs[0].add_run("Only variants with specific consequences "
@@ -338,10 +362,23 @@ def write_gtab_template(report):
         if proband_variant.max_tier == 1 and proband_variant.somatic is True:
             transcript = proband_variant.get_transcript()
             transcript_variant = proband_variant.get_transcript_variant()
-            table.rows[0].cells[0].paragraphs[0].add_run(f"{count}) Gene: {transcript.gene}\n"
-                                                         f"HGVSc: {transcript_variant.hgvs_c}\n"
-                                                         f"HGVSp: {transcript_variant.hgvs_p}\n"
-                                                         f"VAF: {proband_variant.vaf}\n"
+            if transcript_variant.hgvs_c:
+                hgvs_c = transcript_variant.hgvs_c.split(':')
+                if len(hgvs_c) > 1:
+                    hgvs_c = hgvs_c[1]
+                else:
+                    hgvs_c = hgvs_c[1]
+            else:
+                hgvs_c = None
+            if transcript_variant.hgvs_p:
+                hgvs_p = transcript_variant.hgvs_p.split(':')
+                if len(hgvs_p) > 1:
+                    hgvs_p = hgvs_p[1]
+                else:
+                    hgvs_p = hgvs_p[1]
+            else:
+                hgvs_p = None
+            table.rows[0].cells[0].paragraphs[0].add_run(f"{count}) {transcript.gene} {hgvs_c} {hgvs_p} VAF: XX\n"
                                                          f"Transcript: {transcript.name}\n\n")
             count += 1
     table.rows[0].cells[0].paragraphs[0].add_run("\n")
@@ -353,10 +390,23 @@ def write_gtab_template(report):
         if proband_variant.max_tier == 2 and proband_variant.somatic is True:
             transcript = proband_variant.get_transcript()
             transcript_variant = proband_variant.get_transcript_variant()
-            table.rows[0].cells[0].paragraphs[0].add_run(f"{count}) Gene: {transcript.gene}\n"
-                                                         f"HGVSc: {transcript_variant.hgvs_c}\n"
-                                                         f"HGVSp: {transcript_variant.hgvs_p}\n"
-                                                         f"VAF: {proband_variant.vaf}\n"
+            if transcript_variant.hgvs_c:
+                hgvs_c = transcript_variant.hgvs_c.split(':')
+                if len(hgvs_c) > 1:
+                    hgvs_c = hgvs_c[1]
+                else:
+                    hgvs_c = hgvs_c[1]
+            else:
+                hgvs_c = None
+            if transcript_variant.hgvs_p:
+                hgvs_p = transcript_variant.hgvs_p.split(':')
+                if len(hgvs_p) > 1:
+                    hgvs_p = hgvs_p[1]
+                else:
+                    hgvs_p = hgvs_p[1]
+            else:
+                hgvs_p = None
+            table.rows[0].cells[0].paragraphs[0].add_run(f"{count}) {transcript.gene} {hgvs_c} {hgvs_p} VAF: XX\n"
                                                          f"Transcript: {transcript.name}\n\n")
             count += 1
     run.underline=True
@@ -365,7 +415,10 @@ def write_gtab_template(report):
                                                        "variant for assessment of pathogenicity\n\n")
 
     table = document.add_table(rows=1, cols=1, style='Table Grid')
-    run =  table.rows[0].cells[0].paragraphs[0].add_run("ADDITIONAL FINDINGS\n\n")
+    run = table.rows[0].cells[0].paragraphs[0].add_run(
+        "FOR RESEARCH PURPOSES ONLY- THESE RESULTS HAVE NOT BEEN VALIDATED\n")
+    run.font.color.rgb = RGBColor(255, 0, 0)
+    run = table.rows[0].cells[0].paragraphs[0].add_run("ADDITIONAL FINDINGS\n\n")
     run.underline=True
     run = table.rows[0].cells[0].paragraphs[0].add_run("Cancer Pertinent Germline Susceptibility\n\n")
     run.underline=True
@@ -374,10 +427,23 @@ def write_gtab_template(report):
         if proband_variant.somatic is False:
             transcript = proband_variant.get_transcript()
             transcript_variant = proband_variant.get_transcript_variant()
-            table.rows[0].cells[0].paragraphs[0].add_run(f"{count}) Gene: {transcript.gene}\n"
-                                                         f"HGVSc: {transcript_variant.hgvs_c}\n"
-                                                         f"HGVSp: {transcript_variant.hgvs_p}\n"
-                                                         f"VAF: {proband_variant.vaf}\n"
+            if transcript_variant.hgvs_c:
+                hgvs_c = transcript_variant.hgvs_c.split(':')
+                if len(hgvs_c) > 1:
+                    hgvs_c = hgvs_c[1]
+                else:
+                    hgvs_c = hgvs_c[1]
+            else:
+                hgvs_c = None
+            if transcript_variant.hgvs_p:
+                hgvs_p = transcript_variant.hgvs_p.split(':')
+                if len(hgvs_p) > 1:
+                    hgvs_p = hgvs_p[1]
+                else:
+                    hgvs_p = hgvs_p[1]
+            else:
+                hgvs_p = None
+            table.rows[0].cells[0].paragraphs[0].add_run(f"{count}) {transcript.gene} {hgvs_c} {hgvs_p} VAF: XX\n"
                                                          f"Transcript: {transcript.name}\n\n")
             count += 1
     run.italic=True
