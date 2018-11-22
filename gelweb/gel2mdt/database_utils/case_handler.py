@@ -530,20 +530,21 @@ class CaseAttributeManager(object):
         for family_member in family_members:
             demographics = self.get_paricipant_demographics(family_member['gel_id'])
             proband = self.case.attribute_managers[Proband].case_model
-            relative = {
-                "gel_id": family_member['gel_id'],
-                "relation_to_proband": family_member["relation_to_proband"],
-                "affected_status": family_member["affection_status"],
-                "sequenced": family_member["sequenced"],
-                "proband": proband.entry,
-                "nhs_number": demographics["nhs_num"],
-                "forename": demographics["forename"],
-                "surname":demographics["surname"],
-                "date_of_birth": demographics["date_of_birth"],
-                "sex": family_member["sex"],
-            }
-            relative_list.append(relative)
-        relatives = ManyCaseModel(Relative,[{
+            if family_member['gel_id'] != 'None':
+                relative = {
+                    "gel_id": family_member['gel_id'],
+                    "relation_to_proband": family_member["relation_to_proband"],
+                    "affected_status": family_member["affection_status"],
+                    "sequenced": family_member["sequenced"],
+                    "proband": proband.entry,
+                    "nhs_number": demographics["nhs_num"],
+                    "forename": demographics["forename"],
+                    "surname":demographics["surname"],
+                    "date_of_birth": demographics["date_of_birth"],
+                    "sex": family_member["sex"],
+                }
+                relative_list.append(relative)
+        relatives = ManyCaseModel(Relative, [{
             "gel_id": relative['gel_id'],
             "relation_to_proband": relative["relation_to_proband"],
             "affected_status": relative["affected_status"],
