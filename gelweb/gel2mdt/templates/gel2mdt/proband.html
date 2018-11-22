@@ -319,9 +319,16 @@
                                     <div class="col-md-3">
                                         {% bootstrap_field gelir_form.case_code label='Case Code' %}
                                     </div>
+                                    {% if sample_type == 'raredisease' %}
                                     {% if proband_mdt|length > 0 %}
                                         <div class="col-md-2">
                                             <a href="/export_mdt_outcome_form/{{report.id}}"><i class="fas fa-external-link-alt"></i> MDM Outcome</a>
+                                        </div>
+                                    {% endif %}
+                                    {% endif %}
+                                    {% if sample_type == 'cancer' %}
+                                    <div class="col-md-2">
+                                            <a href="/export_gtab_template/{{report.id}}"><i class="fas fa-external-link-alt"></i> GTAB Template</a>
                                         </div>
                                     {% endif %}
                                     <div class="col-md-12">
