@@ -33,12 +33,12 @@ class InterpretationList(object):
         self.sample = sample
         self.all_cases = self.get_all_cases()
         self.cases_to_poll = self.get_poll_cases()
+        self.blocked_cases = self.get_blocked_cases()
 
     def get_all_cases(self):
         """
         Invokes PollAPI to retrieve a list of all the cases available to a
-        given user, then returns a list of cases which are raredsease and not
-        blocked.
+        given user.
         """
         all_cases = []
         last_page = False
@@ -62,8 +62,7 @@ class InterpretationList(object):
                         result["last_status"]}
                     for result in request_list_results
                     if result["sample_type"] == self.sample_type
-                    and result['proband'] == self.sample
-                       and result["last_status"] != "blocked"]
+                    and result['proband'] == self.sample]
             else:
                 all_cases += [{
                     # add the ir_id, sample type, and latest status to dict
@@ -74,8 +73,7 @@ class InterpretationList(object):
                     "last_status":
                         result["last_status"]}
                     for result in request_list_results
-                    if result["sample_type"] == self.sample_type
-                    and result["last_status"] != "blocked"]
+                    if result["sample_type"] == self.sample_type]
 
             if request_list_poll.response_json["next"]:
                 page += 1
@@ -96,3 +94,10 @@ class InterpretationList(object):
             case for case in self.all_cases if case["last_status"] in status_lookup[self.sample_type]]
 
         return cases_to_poll
+
+    def get_blocked_cases(self):
+        """
+        Finds all cases with a blocked status so the status of these cases can be updated
+        """
+        blocked_cases = [case for case in self.all_cases if case["last_status"] == 'blocked']
+        return blocked_cases

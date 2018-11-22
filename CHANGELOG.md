@@ -1,3 +1,15 @@
+## [0.6.0]- 2018-11-22
+### Added
+- GTAB template export
+- Docker support
+- Further customisation for cancer cases
+- Cases are now flagged if they are blocked in the CIPAPI
+
+### Changed
+- GEL2MDT backend now relies on GeLReportModels
+- SQL instead of ORM for querying whether a model existing in the database
+- GMC information now obtained from JSON
+
 ## [0.5.5]- 2018-10-25
 ### Added
 - Case alert feature

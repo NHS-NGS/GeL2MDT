@@ -1,0 +1,3 @@
+[submodule "GelReportModels"]
+	path = GelReportModels
+	url = https://github.com/genomicsengland/GelReportModels.git
