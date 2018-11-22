@@ -234,7 +234,7 @@ class MultipleCaseAdder(object):
             file_path = os.path.join(
                 os.getcwd(), "gel2mdt/tests/test_files/{filename}".format(
                     filename=filename))
-            print(filename)
+  
             if filename.endswith('.json'):
                 logger.info("Found case json at " + file_path + " for testing.")
                 with open(file_path) as json_file:
