@@ -38,6 +38,7 @@ from bokeh.palettes import Spectral8
 from bokeh.plotting import figure
 from django.core.mail import EmailMessage
 from reversion.models import Version, Revision
+from protocols.reports_6_0_0 import InterpretedGenome, InterpretationRequestRD, CancerInterpretationRequest, ClinicalReport
 
 
 def get_gel_content(ir, ir_version):
@@ -584,7 +585,6 @@ class UpdateDemographics(object):
         else:
             return None
 
-from protocols.reports_6_0_0 import InterpretedGenome, InterpretationRequestRD, CancerInterpretationRequest, ClinicalReport
 
 class UpdaterFromStorage:
     '''
