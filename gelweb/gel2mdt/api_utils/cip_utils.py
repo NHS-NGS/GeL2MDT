@@ -86,14 +86,3 @@ class InterpretationList(object):
             case for case in self.all_cases if case["last_status"] in status_lookup[self.sample_type]]
 
         return cases_to_poll
-
-    # Redundant as using local users WL credentials
-    """
-    def get_genie_list(self):
-        with open('/root/gel2mdt/gelweb/gel2mdt/api_utils/GENIE_Extract_20180731.csv') as f:
-            filedata = csv.DictReader(f, dialect='excel')
-            for row in filedata:
-                if row['\ufeffOrgCode'] in self.londonNW_codes:
-                    self.londonNW_cases.append(row['ParticipantID'])
-        print(self.londonNW_cases)
-    """
