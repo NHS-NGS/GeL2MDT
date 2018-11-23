@@ -418,12 +418,12 @@ class MultipleCaseAdder(object):
                             participant_ids_wl.append(participant_id)
 
                     for family_id in family_ids:
-                        if participant_id.startswith("NR_"):
+                        if family_id.startswith("NR_"):
                             pass # ignore
                         elif family_id.startswith("115"):
-                            family_id_nt.append(family_id)
+                            family_ids_nt.append(family_id)
                         elif family_id.startswith("120"):
-                            family_id_wl.append(family_id)
+                            family_ids_wl.append(family_id)
                     
                     # temp printing to file
                     output_path = os.path.abspath('/root/gel2mdt/gelweb/')
