@@ -606,12 +606,14 @@ class UpdaterFromStorage:
             if self.json:
                 self.json_case_data = self.json["interpretation_request_data"]
                 self.json_request_data = self.json_case_data["json_request"]
-                self.ir_obj = InterpretationRequestRD.fromJsonDict(self.json_request_data)
+                if sample_type == 'raredisease':
+                    self.ir_obj = InterpretationRequestRD.fromJsonDict(self.json_request_data)
+                elif sample_type == 'cancer':
+                    self.ir_obj = CancerInterpretationRequest.fromJsonDict(self.json_request_data)
                 if self.ir_obj.workspace:
+                    print(report, self.ir_obj.workspace)
                     workspace = self.ir_obj.workspace[0]
-                else:
-                    workspace = 'unknown'
-                self.insert_into_db(report, workspace)
+                    self.insert_into_db(report, workspace)
 
     def load_json_data(self, report):
         '''
@@ -622,7 +624,6 @@ class UpdaterFromStorage:
             with open(json_path, 'r') as f:
                 return json.load(f)
         else:
-            print('{}.json'.format(report.ir_family.ir_family_id +  "-" +  str(report.archived_version)))
             return None
 
     def get_proband_json(self):
@@ -649,9 +650,13 @@ class UpdaterFromStorage:
         return proband_sample
 
     def insert_into_db(self, report, workspace):
-        proband = report.ir_family.participant_family.proband
-        proband.gmc = workspace
-        proband.save()
+        try:
+            proband = report.ir_family.participant_family.proband
+            proband.gmc = workspace
+            proband.save()
+        except Proband.DoesNotExist:
+            pass
+
 
 
 def create_bokeh_barplot(names, values, title):
