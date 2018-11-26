@@ -23,7 +23,7 @@ from datetime import datetime
 
 from django import forms
 from django.contrib.auth.models import User
-from django.forms import HiddenInput, Textarea, CheckboxInput, Select
+from django.forms import HiddenInput, Textarea, CheckboxInput, Select, ModelChoiceField
 from django.forms import BaseFormSet
 
 from .models import *
@@ -174,10 +174,17 @@ class AddClinicianForm(forms.ModelForm):
         fields = ['name', 'hospital', 'email']
 
 
+class UserChoiceField(ModelChoiceField):
+    def label_from_instance(self, obj):
+        return "%s %s" % (obj.first_name, obj.last_name)
+
+
 class CaseAssignForm(forms.ModelForm):
     '''
     Form for specifying which user a case is assigned to
     '''
+    assigned_user = UserChoiceField(queryset=User.objects.all().order_by('first_name'))
+
     class Meta:
         model = GELInterpretationReport
         fields = ["assigned_user"]
