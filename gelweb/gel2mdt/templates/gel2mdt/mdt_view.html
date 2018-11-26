@@ -97,7 +97,11 @@ SOFTWARE.
                                                 <th>Edit Important Variants</th>
                                                 <th>Edit T3 Variants</th>
                                                 <th>Disease Type</th>
+                                                {% if sample_type == 'cancer' %}
+                                                <th>GTAB template</th>
+                                                {% else %}
                                                 <th>MDT Outcome Form</tH>
+                                                {% endif %}
                                             </tr>
                                         </thead>
                                         <tbody>
