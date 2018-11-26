@@ -50,6 +50,10 @@ SOFTWARE.
 
     </td>
     <td>{{report.ir_family.participant_family.proband.recruiting_disease}}
+    {% if report.sample_type == 'raredisease' %}
     <td><a href="/export_mdt_outcome_form/{{report.id}}"><i class="fas fa-external-link-alt"></i></a></td>
+    {% else %}
+    <td><a href="/export_gtab_template/{{report.id}}"><i class="fas fa-external-link-alt"></i></a></td>
+    {% endif %}
 </tr>
 {% endfor %}
