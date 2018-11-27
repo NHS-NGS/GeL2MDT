@@ -29,4 +29,10 @@ api_urlpatterns = [
         api_views.RareDiseaseCases.as_view(),
         name='gelir-json'
     ),
+    path(
+        'api/gelir-user/<str:sample_type>',
+        api_views.RareDiseaseCasesByUser.as_view(),
+        name='gelir-json-user'
+    ),
+
 ]

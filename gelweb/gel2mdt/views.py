@@ -42,7 +42,7 @@ from .forms import *
 from .models import *
 from .filters import *
 from .tasks import *
-from .exports import write_mdt_outcome_template, write_mdt_export
+from .exports import write_mdt_outcome_template, write_mdt_export, write_gtab_template
 from .decorators import user_is_clinician
 
 from .api.api_views import *
@@ -281,9 +281,8 @@ def proband_view(request, report_id):
     report_history_formatter = ReportHistoryFormatter(report=report)
     report_history = report_history_formatter.get_report_history()
     proband_history = report_history_formatter.get_proband_history()
-    ir_family = report.ir_family
     other_cases = GELInterpretationReport.objects.latest_cases_by_sample_type(report.sample_type).filter(
-        ir_family=ir_family).exclude(ir_family=report.ir_family)
+        ir_family__participant_family=report.ir_family.participant_family).exclude(ir_family=report.ir_family)
 
     if request.method == "POST":
         demogs_form = DemogsForm(request.POST, instance=report.ir_family.participant_family.proband)
@@ -1133,6 +1132,32 @@ def export_mdt_outcome_form(request, report_id):
     response['Content-Length'] = length
     return response
 
+@login_required
+def export_gtab_template(request, report_id):
+    '''
+    Exports MDT outcome form which is proband specific after a case has been to MDT
+    :param request:
+    :param report_id:  GEL Interpretation report
+    :return: DOCX format file
+    '''
+    report = GELInterpretationReport.objects.get(id=report_id)
+    document = write_gtab_template(report)
+    f = BytesIO()
+    document.save(f)
+    length = f.tell()
+    f.seek(0)
+    response = HttpResponse(
+        f.getvalue(),
+        content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    )
+
+    filename = '{}_{}_{}.docx'.format(report.ir_family.participant_family.proband.surname,
+                                         report.ir_family.participant_family.proband.forename,
+                                         report.ir_family.ir_family_id,)
+    response['Content-Disposition'] = 'attachment; filename=' + filename
+    response['Content-Length'] = length
+    return response
+
 
 @login_required
 def report(request, report_id, outcome):
@@ -1189,10 +1214,12 @@ def genomics_england_report(request, report_id):
     """
     report = GELInterpretationReport.objects.get(id=report_id)
     cip_id = report.ir_family.ir_family_id.split('-')
-    gel_content = get_gel_content(request.user.email, cip_id[0], cip_id[1])
-    context = {}
-    context['gel_content'] = gel_content
-    return render(request, 'gel2mdt/gel_template.html', context)
+    try:
+        gel_content = get_gel_content(cip_id[0], cip_id[1])
+    except:
+        messages.add_message(request, 40, 'Not successful, please contact bioinformatics about this')
+        return HttpResponseRedirect(f'/proband/{report_id}')
+    return render(request, 'gel2mdt/gel_template.html', {'gel_content': gel_content})
 
 
 @login_required
@@ -1212,7 +1239,7 @@ def audit(request, sample_type):
     qs_df = pd.DataFrame(list(qs.values())).sort_values(by=['ir_family_id', 'archived_version'])
     multi_archived = qs_df.drop_duplicates(subset=['ir_family_id'], keep='last')
     ids_of_latest = multi_archived["id"].tolist()
-    queryset = GELInterpretationReport.objects.filter(id__in=ids_of_latest)
+    queryset = GELInterpretationReport.objects.filter(id__in=ids_of_latest).filter(~Q(status='blocked'))
 
     # Getting case status options
     status_choices = dict(GELInterpretationReport._meta.get_field('case_status').choices)

@@ -133,6 +133,25 @@ SOFTWARE.
                                             </td>
                                         </tr>
                                         <tr>
+                                            <td>CIP API status:</td>
+                                            <td>
+                                                <div class="btn-group" data-toggle="buttons">
+                                                <label class="btn btn-success">
+                                                    <input type="radio" name="cipStatus" id="apistatus_all" autocomplete="off" value="">
+                                                    All
+                                                </label>
+                                                <label class="btn btn-success active">
+                                                    <input type="radio" name="cipStatus" id="notBlocked" autocomplete="off" value="not_blocked" checked>
+                                                    Not Blocked
+                                                </label>
+                                                <label class="btn btn-success">
+                                                    <input type="radio" name="cipStatus" id="blocked" autocomplete="off" value="blocked">
+                                                    Blocked
+                                                </label>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
                                             <td>Case status:</td>
                                             <td>
                                                 <div class="btn-group" data-toggle="buttons">
@@ -180,7 +199,41 @@ SOFTWARE.
                                                 </div>
                                             </td>
                                         </tr>
+                                        <tr>
+                                            <td>GTAB status:</td>
+                                            <td>
+                                                <div class="btn-group" data-toggle="buttons">
 
+                                                <label class="btn btn-success active">
+                                                    <input type="radio" name="mdtStatus" id="mdtstatus_all" autocomplete="off" value="" checked>
+                                                    All
+                                                </label>
+                                                <label class="btn btn-success">
+                                                    <input type="radio" name="mdtStatus" id="unknown" autocomplete="off" value="Unknown">
+                                                    Unknown
+                                                </label>
+                                                <label class="btn btn-success">
+                                                    <input type="radio" name="mdtStatus" id="required" autocomplete="off" value="Required">
+                                                    Required
+                                                </label>
+
+                                                <label class="btn btn-success">
+                                                    <input type="radio" name="mdtStatus" id="notRequired" autocomplete="off" value="Not Required">
+                                                    Not Required
+                                                </label>
+
+                                                <label class="btn btn-success">
+                                                    <input type="radio" name="mdtStatus" id="inProgress" autocomplete="off" value="In Progress">
+                                                    In Progress
+                                                </label>
+
+                                                <label class="btn btn-success">
+                                                    <input type="radio" name="mdtStatus" id="done" autocomplete="off" value="Done">
+                                                    Done
+                                                </label>
+                                                </div>
+                                            </td>
+                                        </tr>
                                         <tr>
                                             <td>Germline status:</td>
                                             <td>
@@ -285,10 +338,13 @@ SOFTWARE.
                             <th>LDP</th>
                             <th>Clinician</th>
                             <th>Case Code</th>
+                            <th>CIP Status</th>
+                            <th>GTAB Status</th>  
+                            <th>Assigned User</th>  
                             <th>Gender</th>
                             <th>Disease Subtype</th>
                             <th>NHS number</th>
-
+                            <th>Has Germline Variant</th>    
                         </tr>
                     </thead>
                     </table>
@@ -373,6 +429,27 @@ function redrawMaxTier(table, maxTier) {
     }
 };
 
+
+function redrawCipStatus(table, cipStatus) {
+    var searchRegex;
+    if (cipStatus == '') {
+        searchRegex = '';
+    } else if (cipStatus == 'not_blocked') {
+        // regex for not "blocked"
+        searchRegex = '^(?!blocked|\\.).*';
+    } else if (cipStatus == 'blocked') {
+        searchRegex = 'blocked';
+    }
+
+    // select the DataTable API object
+    table
+        // filter based on the value specified in HTML
+        .column(19)
+        .search(searchRegex, regex=true);
+    table.draw();
+
+};
+
 function redrawCaseStatus(table, caseStatus) {
     console.log(caseStatus);
     // select the DataTable API object
@@ -388,7 +465,23 @@ function redrawCaseStatus(table, caseStatus) {
     } else {
         $('#caseStatusSpec').text(caseStatus);
     }
+};
 
+function redrawMdtStatus(table, mdtStatus) {
+    var searchRegex;
+    // need to use regex for starts with Required otherwise Not Required cases returned also
+    if (mdtStatus == 'Required') {
+        searchRegex = '^Required';
+    } else {
+        // regex for not "blocked"
+        searchRegex = mdtStatus;
+    } 
+    // select the DataTable API object
+    table
+        // filter based on the value specified in HTML
+        .column(20)
+        .search(searchRegex, regex=true);
+    table.draw();
 };
 
 function redrawTrioStatus(table, trioStatus) {
@@ -428,7 +521,7 @@ function redrawDeNovoStatus(table, deNovoStatus) {
 function redrawGermlineStatus(table, germlineStatus) {
     console.log(germlineStatus);
     table
-        .column(21)
+        .column(25)
         .search(germlineStatus);
     table.draw();
 }
@@ -446,9 +539,17 @@ $("input[name='maxTier']").change(function() {
     var table = $('#rare-disease-main').DataTable()
     redrawMaxTier(table, $(this).val());
 });
+$("input[name='cipStatus']").change(function() {
+    var table = $('#rare-disease-main').DataTable()
+    redrawCipStatus(table, $(this).val());
+});
 $("input[name='caseStatus']").change(function() {
     var table = $('#rare-disease-main').DataTable()
     redrawCaseStatus(table, $(this).val());
+});
+$("input[name='mdtStatus']").change(function() {
+    var table = $('#rare-disease-main').DataTable()
+    redrawMdtStatus(table, $(this).val());
 });
 $("input[name='trioStatus']").change(function() {
     var table = $('#rare-disease-main').DataTable()
@@ -474,7 +575,9 @@ function initaliseTable() {
     var caseType = getRadioValue("caseType");
     var genomeBuild = getRadioValue("genomeBuild");
     var maxTier = getRadioValue("maxTier");
+    var cipStatus = getRadioValue("cipStatus");
     var caseStatus = getRadioValue("caseStatus");
+    var mdtStatus = getRadioValue("mdtStatus");
     var trioStatus = getRadioValue("trioStatus");
     var deNovoStatus = getRadioValue("deNovoStatus");
     var germlineStatus = getRadioValue("germlineStatus");
@@ -486,7 +589,9 @@ function initaliseTable() {
     redrawCaseType(table, caseType);
     redrawGenomeBuild(table, genomeBuild);
     redrawMaxTier(table, maxTier);
+    redrawCipStatus(table, cipStatus);
     redrawCaseStatus(table, caseStatus);
+    redrawMdtStatus(table, mdtStatus);
     redrawTrioStatus(table, trioStatus);
     redrawDeNovoStatus(table, deNovoStatus);
     redrawGermlineStatus(table, germlineStatus);
@@ -562,12 +667,24 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
                 {"data": "clinician"},
                 {"data": "case_code"},
                 {
+                    "data": "cip_status",
+                    "visible": false,
+                },
+                {
+                    "data": "mdt_status",
+                    "visible": false,
+                },
+                {
+                    "data": "assigned_user",
+                    "visible": false,
+                },
+                {
                     "data": "sex",
-                    "visible": false
+                    "visible": false,
                 },
                 {
                     "data": "disease_subtype",
-                    "visible": false
+                    "visible": false,
                 },
                 {
                     "data": "nhs_num",
@@ -575,7 +692,7 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
                 },
                 {
                     "data": "has_germline_variant",
-                    "visible": false
+                    "visible": false,
                 }
             ],
             "order": [[12, "desc"]]
@@ -654,6 +771,18 @@ function fetchDataTable(caseType, genomeBuild, maxTier, caseStatus) {
                 },
                 {
                     "data": "nhs_num",
+                    "visible": false
+                },
+                {
+                    "data": "cip_status",
+                    "visible": false
+                },
+                {
+                    "data": "mdt_status",
+                    "visible": false
+                },
+                {
+                    "data": "assigned_user",
                     "visible": false
                 }
             ],

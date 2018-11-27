@@ -38,8 +38,11 @@ from bokeh.palettes import Spectral8
 from bokeh.plotting import figure
 from django.core.mail import EmailMessage
 from reversion.models import Version, Revision
+from protocols.reports_6_0_0 import InterpretedGenome, InterpretationRequestRD, CancerInterpretationRequest, ClinicalReport
 
-def get_gel_content(user_email, ir, ir_version):
+
+def get_gel_content(ir, ir_version):
+
     '''
     Downloads and formats the GEL Clinical Report. Removes warning signs and inserts the genes in the panel
     :param user_email: Logged in user email address
@@ -225,12 +228,13 @@ def case_alert_email():
     if sample_types['cancer'] or sample_types['raredisease']:
         for s_type in sample_types:
             if matching_cases[s_type]:
-                text_content += f'{s_type} Case Alert:\n'
+                text_content += f'{s_type.title()} Case Alert:\n'
                 for case in matching_cases[s_type]:
                     case_alert = CaseAlert.objects.get(id=case)
-                    text_content += f'Case {case_alert.gel_id} with CIP-ID of {matching_cases[s_type][case][0][1]} ' \
-                                    f'has been added to the database. CaseAlert comment: {case_alert.comment}\n'
-        subject, from_email, to = f'West London GeL2MDT CaseAlert', 'bioinformatics@gosh.nhs.uk', 'GELTeam@gosh.nhs.uk'
+                    if matching_cases[s_type][case]:
+                        text_content += f'Case {case_alert.gel_id} with CIP-ID of {matching_cases[s_type][case][0][1]} ' \
+                                        f'has been added to the database. CaseAlert comment: {case_alert.comment}\n'
+        subject, from_email, to = f'GeL2MDT CaseAlert', 'bioinformatics@gosh.nhs.uk', 'GELTeam@gosh.nhs.uk'
         msg = EmailMessage(subject, text_content, from_email, [to])
         try:
             msg.send()
@@ -238,25 +242,71 @@ def case_alert_email():
             pass
 
 @task
-def listupdate_email():
+def update_report_email():
     '''
-    Utility function which sends emails to admin about last nights update
+    Utility function which sends emails to GELTeam about last weeks updates
     :return:
     '''
-    most_recent_listupdates = ListUpdate.objects.order_by('-update_time')[0:2]
+    from datetime import date
+    from django.db.models import Sum
     text_content = ''
-    for update in most_recent_listupdates:
-        if update.update_time.day == timezone.now().day:
-                text_content = text_content + f'{update.id}\t{update.update_time}' \
-                                              f'\t{update.cases_added}\t{update.cases_updated}\t{update.error}\n'
-    if text_content:
-        subject, from_email, to = 'West London GeL2MDT ListUpdate', 'bioinformatics@gosh.nhs.uk', 'bioinformatics@gosh.nhs.uk'
+    today = date.today()
+    import datetime
+    week_ago = today - datetime.timedelta(days=7)
+    for i, sample_type in enumerate(['raredisease', 'cancer']):
+        listupdates = ListUpdate.objects.filter(update_time__gte=week_ago).filter(sample_type=sample_type)
+        total_added = listupdates.aggregate(Sum('cases_added'))['cases_added__sum']
+        if total_added > 0:
+            text_content += f'{sample_type.title()} Update Report:\n\nTotal number of cases added: {total_added}\n\n'
+            text_content += f'Summary of Cases Added:\n'
+            text_content += f'CIPID\tGELID\tForename\tSurname\tClinician\tCenter\n'
+            for update in listupdates:
+                reports_added = update.reports_added.all()
+                for report in reports_added:
+                    text_content += f'{report.ir_family.ir_family_id}\t' \
+                                    f'{report.ir_family.participant_family.proband.gel_id}\t' \
+                                    f'{report.ir_family.participant_family.proband.forename}\t' \
+                                    f'{report.ir_family.participant_family.proband.surname}\t' \
+                                    f'{report.ir_family.participant_family.clinician}\t' \
+                                    f'{report.ir_family.participant_family.proband.gmc}\n'
+        else:
+            text_content += f'No new cases were added for {sample_type.title()}\n'
+        text_content += '\n----------------------------------------------------------------------------------------\n\n'
+
+    listupdates = ListUpdate.objects.filter(update_time__gte=date.today())
+    if all(listupdates.values_list('success', flat=True)) and text_content:
+        subject, from_email, to = 'GeL2MDT Weekly Update Report', 'bioinformatics@gosh.nhs.uk', 'bioinformatics@gosh.nhs.uk'
         msg = EmailMessage(subject, text_content, from_email, [to])
         try:
             msg.send()
         except Exception as e:
             pass
 
+
+@task
+def listupdate_email():
+    '''
+    Utility function which sends emails to admin about last nights update
+    :return:
+    '''
+    from datetime import date
+    send = False
+    bioinfo_content = 'Sample Type\tUpdate Time\tNo. Cases Added\tNo. Cases Updated\tError\n'
+    for i, sample_type in enumerate(['raredisease', 'cancer']):
+        listupdates = ListUpdate.objects.filter(update_time__gte=date.today()).filter(sample_type=sample_type)
+        if listupdates:
+            send = True
+        for update in listupdates:
+            bioinfo_content += f'{update.sample_type}\t{update.update_time}' \
+                               f'\t{update.cases_added}\t{update.cases_updated}\t{update.error}\n'
+    if send:
+        subject, from_email, to = 'GeL2MDT ListUpdate', 'bioinformatics@gosh.nhs.uk', \
+                                  'bioinformatics@gosh.nhs.uk'
+        msg = EmailMessage(subject, bioinfo_content, from_email, [to])
+        try:
+            msg.send()
+        except Exception:
+            pass
 
 @task
 def update_cases():
@@ -589,28 +639,35 @@ class UpdateDemographics(object):
         else:
             return None
 
-class UpdaterFromStorage(object):
+
+class UpdaterFromStorage:
     '''
     Utility class to allow you to use the local jsons to insert something new into the database
     Done for gel_sequence_id but will obviously need to be edited for any other value
     '''
 
-    def __init__(self):
-        self.reports = GELInterpretationReport.objects.all().prefetch_related(
+    def __init__(self, sample_type):
+        self.reports = GELInterpretationReport.objects.latest_cases_by_sample_type(sample_type).prefetch_related(
             *[
                 'ir_family',
+                'ir_family__participant_family__proband'
             ]
         )
-        print(self.reports.count())
         config_dict = load_config.LoadConfig().load()
         self.cip_api_storage = config_dict['cip_api_storage']
         for report in self.reports:
             self.json = self.load_json_data(report)
             if self.json:
                 self.json_case_data = self.json["interpretation_request_data"]
-                self.proband = self.get_proband_json()
-                self.proband_sample = self.get_gel_sequence_id()
-                self.insert_into_db(report)
+                self.json_request_data = self.json_case_data["json_request"]
+                if sample_type == 'raredisease':
+                    self.ir_obj = InterpretationRequestRD.fromJsonDict(self.json_request_data)
+                elif sample_type == 'cancer':
+                    self.ir_obj = CancerInterpretationRequest.fromJsonDict(self.json_request_data)
+                if self.ir_obj.workspace:
+                    print(report, self.ir_obj.workspace)
+                    workspace = self.ir_obj.workspace[0]
+                    self.insert_into_db(report, workspace)
 
     def load_json_data(self, report):
         '''
@@ -621,7 +678,6 @@ class UpdaterFromStorage(object):
             with open(json_path, 'r') as f:
                 return json.load(f)
         else:
-            print('{}.json'.format(report.ir_family.ir_family_id +  "-" +  str(report.archived_version)))
             return None
 
     def get_proband_json(self):
@@ -630,7 +686,6 @@ class UpdaterFromStorage(object):
         """
         proband_json = None
         if self.json["sample_type"]=='raredisease':
-
             participant_jsons = \
                 self.json_case_data["json_request"]["pedigree"]["participants"]
             for participant in participant_jsons:
@@ -648,10 +703,14 @@ class UpdaterFromStorage(object):
             proband_sample = self.proband["matchedSamples"][0]['tumourSampleId']
         return proband_sample
 
-    def insert_into_db(self, report):
-        report.sample_id = self.proband_sample
-        print(self.proband_sample)
-        report.save(overwrite=True)
+    def insert_into_db(self, report, workspace):
+        try:
+            proband = report.ir_family.participant_family.proband
+            proband.gmc = workspace
+            proband.save()
+        except Proband.DoesNotExist:
+            pass
+
 
 
 def create_bokeh_barplot(names, values, title):

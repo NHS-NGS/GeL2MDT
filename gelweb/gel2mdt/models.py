@@ -260,19 +260,8 @@ class InterpretationReportFamilyPanel(models.Model):
 class GELInterpretationReportQuerySet(models.QuerySet):
     def latest_cases_by_sample_type(self, sample_type):
         qs = self.filter(sample_type=sample_type)
-        qs_df = pd.DataFrame(list(qs.values())).sort_values(
-            by=["ir_family_id", "archived_version"]
-        )
-        rm_dup_old = qs_df.drop_duplicates(
-            subset=["ir_family_id"],
-            keep="last"
-        )
-        ids_of_latest_cases = rm_dup_old["id"].tolist()
-        return self.filter(id__in=ids_of_latest_cases)
-
-    def latest_cases_by_user(self, username):
-        qs = self.filter(assigned_user__username=username)
         if qs:
+            # cases present
             qs_df = pd.DataFrame(list(qs.values())).sort_values(
                 by=["ir_family_id", "archived_version"]
             )
@@ -284,6 +273,19 @@ class GELInterpretationReportQuerySet(models.QuerySet):
             return self.filter(id__in=ids_of_latest_cases)
         else:
             return qs
+
+    def latest_cases_by_user(self, username):
+        qs = self.all()
+        qs_df = pd.DataFrame(list(qs.values())).sort_values(
+            by=["ir_family_id", "archived_version"]
+        )
+        rm_dup_old = qs_df.drop_duplicates(
+            subset=["ir_family_id"],
+            keep="last"
+        )
+        ids_of_latest_cases = rm_dup_old["id"].tolist()
+        return self.filter(id__in=ids_of_latest_cases, assigned_user__username=username)
+
 
 class GELInterpretationReport(models.Model):
     objects = GELInterpretationReportQuerySet.as_manager()

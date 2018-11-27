@@ -25,6 +25,9 @@
 {% block content %}
     {% load gel2mdt_extras %}
 
+    {% if report.status == 'blocked' %}
+        <div class="alert alert-danger" role="alert"><strong>Warning, the CIP-API status for this case has been changed to "Blocked"</strong></div>'
+    {% endif %}
     <ul class="nav nav-tabs" data-options="deep_linking: true">
         <li class="active"><a data-toggle="tab" href="#proband">Proband</a></li>
         <li><a data-toggle="tab" href="#variants">Variants</a></li>
@@ -160,7 +163,7 @@
                                             <a href="https://cipapi.genomicsengland.nhs.uk/interpretationportal/#/participant/{{report.ir_family.ir_family_id}}" target="_blank"><i class="fas fa-external-link-alt"></i> {{report.ir_family.ir_family_id}}</a>
                                         </div>
                                         </br>
-                                        {% bootstrap_label "CGU Number" %}
+                                        {% bootstrap_label "Local ID" %}
                                         <div class="block">
                                             {% if report.ir_family.participant_family.proband.local_id %}
                                                 {{ report.ir_family.participant_family.proband.local_id }}
@@ -180,7 +183,6 @@
                         </div>
 
                     </div>
-                </div>
                 {% if report.sample_type == 'cancer' %}
                 <div class=row>
                     <div class="col-md-12">
@@ -295,6 +297,7 @@
                                         {% else %}
                                         {% bootstrap_field gelir_form.mdt_status label='GTAB Status' %}
                                         {% endif %}
+                                        {% bootstrap_label "CIP-API status" %} &emsp; {{ report.status }}
                                     </div>
 
                                     <div class="col-md-2">
@@ -315,9 +318,16 @@
                                     <div class="col-md-3">
                                         {% bootstrap_field gelir_form.case_code label='Case Code' %}
                                     </div>
+                                    {% if sample_type == 'raredisease' %}
                                     {% if proband_mdt|length > 0 %}
                                         <div class="col-md-2">
                                             <a href="/export_mdt_outcome_form/{{report.id}}"><i class="fas fa-external-link-alt"></i> MDM Outcome</a>
+                                        </div>
+                                    {% endif %}
+                                    {% endif %}
+                                    {% if sample_type == 'cancer' %}
+                                    <div class="col-md-2">
+                                            <a href="/export_gtab_template/{{report.id}}"><i class="fas fa-external-link-alt"></i> GTAB Template</a>
                                         </div>
                                     {% endif %}
                                     <div class="col-md-12">
@@ -411,7 +421,7 @@
                         url=url+"&rdr="+$(this).val();
                     }
                 })
-                window.location=url;
+                window.open(url, '_blank');
            })
         })
     </script>
@@ -507,6 +517,7 @@
 
 
             </div>
+        </div>
 
         <div id="variants" class="tab-pane fade">
             <div class="container-fluid" >

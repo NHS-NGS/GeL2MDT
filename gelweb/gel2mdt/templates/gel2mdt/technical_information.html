@@ -90,17 +90,12 @@ SOFTWARE.
 				<tr>
 					<td class="tgd tg-lqy6">Sex:</td>
 <td></td>
-					<td class="tg-yw4l">{{report.ir_family.participant_family.proband.gender}}</td>
+					<td class="tg-yw4l">{{report.ir_family.participant_family.proband.sex|title}}</td>
 				</tr>
 				<tr>
 					<td class="tg-lqy6">NHS No.:</td>
 <td></td>
 					<td class="tg-yw4l">{{report.ir_family.participant_family.proband.nhs_number}}</td>
-				</tr>
-				<tr>
-					<td class="tg-lqy6">Hospital No.:</td>
-<td></td>
-					<td class="tg-yw4l">{{report.ir_family.participant_family.proband.cgu_number}}</td>
 				</tr>
 				<tr>
 					<td class="tg-lqy6">100,000 Genomes ID:</td>
@@ -113,7 +108,7 @@ SOFTWARE.
 
 
 <p style="font-size: 8pt">Our reference: {{report.ir_family.participant_family.proband.lab_number}}</p>
-<br><br><br><br>
+<br><br><br>
 <p style="margin: 0; padding:0"><strong>Recruiting Disease:</strong>
 {{report.ir_family.participant_family.proband.recruiting_disease}}<p>
 		</td>
@@ -129,11 +124,9 @@ SOFTWARE.
 </table>
 
 <hr style="margin: 0px; height: 0px; border: 1px solid black; color: black; background: black;">
+    {% if outcome == "positive" %}
     <p style="margin: 5px 0; font-size: 12pt;"><strong>Variant Details</strong></p>
 
-    {% if outcome != "positive" %}
-        <strong>No variants have been detected.</strong>
-    {% elif outcome == "positive" %}
         <small>
             <table style="margin: 5px;" class="table table-bordered table-condensed" style="font-size:10px;">
                 <thead>
@@ -180,13 +173,13 @@ SOFTWARE.
     <p style="margin: 5px 0; font-size: 12pt;"><strong>Test Methodology</strong></p>
 <h6 style="text-align:justify">
     Whole genome sequencing by the 100,000 Genomes Project with analysis of
-    selected gene panels (see below). Please note that the sensitivity of this test
+    selected gene panels (see below), processed by Genomics England. Please note that the sensitivity of this test
     is limited by the types of detectable pathogenic variants, regions of low read
     depth coverage and incomplete ascertainment of disease-gene associations. The analysis
 	does not currently reliably detect larger copy number variants or structural abnormalities.
     {% if outcome == "positive" %}
-        Variants are classified using the ACMG/AMP guidelines
-        (Richards et al 2015 Genet Med) and confirmed using in-house Sanger sequencing.
+        Variants are classified using the latest ACGS, ACMG/AMP, and supplementary guidelines
+        (Ellard et al 2018, ACGS and Richards et al 2015, Genet Med) and confirmed using in-house Sanger sequencing.
     {% endif %}
     </h6>
 
@@ -239,10 +232,10 @@ SOFTWARE.
 <div style="width: 100%">
 <table style="margin: auto; width: 86%">
 <tr>
-<td style="width:25%"><p style="font-size: 8pt; margin: 0; text-align: center">genetics.lab@bwnft.nhs.uk</p></td>
-<td style="width:25%"><p style="font-size: 8pt; margin: 0; text-align: center">http://www.bwnft.nhs.uk</p></td>
-<td style="width:25%"><p style="font-size: 8pt; margin: 0; text-align: center">Tel: 0121 627 2710</p></td>
-<td style="width:25%"><p style="font-size: 8pt; margin: 0; text-align: center">Fax: 0121 627 2711</p></td>
+<td style="width:25%"><p style="font-size: 8pt; margin: 0; text-align: center">bwc.genetics.lab@nhs.net</p></td>
+<td style="width:25%"><p style="font-size: 8pt; margin: 0; text-align: center">https://www.bwc.nhs.uk/</p></td>
+<td style="width:25%"><p style="font-size: 8pt; margin: 0; text-align: center">Tel: 0121 335 8036</p></td>
+<td style="width:25%"><p style="font-size: 8pt; margin: 0; text-align: center">Fax: 0121 335 8023</p></td>
 </tr>
 </table>
 </div>
