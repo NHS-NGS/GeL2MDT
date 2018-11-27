@@ -10,9 +10,7 @@ class InterpretationList(object):
     def __init__(self, sample_type, sample=None):
         self.sample_type = sample_type
         self.sample = sample
-        self.londonNW_codes = ['RYJ', 'RQM', 'RPY', 'RT3']
         self.londonNW_cases = []
-        self.get_genie_list()
         self.all_cases = self.get_all_cases()
         self.cases_to_poll = self.get_poll_cases()
 
@@ -51,23 +49,15 @@ class InterpretationList(object):
                 for result in request_list_results:
                     if result["sample_type"] == self.sample_type:
                         if result["last_status"] != "blocked":
-                            if result['proband'].startswith('12') or result['proband'] in self.londonNW_cases or result['proband'].startswith('22'):
                                 all_cases.append({
-                                    # add the ir_id, sample type, and latest status to dict
-                                    "interpretation_request_id":
-                                        result["interpretation_request_id"],
-                                    "sample_type":
-                                        result["sample_type"],
-                                    "last_status":
-                                        result["last_status"]})
-                    # for result in request_list_results
-                    # if result["sample_type"] == self.sample_type
-                    # and result["last_status"] != "blocked"
-                    # and result['proband'].startswith('12')
-                    # or result['proband'] in self.londonNW_cases]
-                    # #or result['proband'].startswith('22')]
-
-            if request_list_poll.response_json["next"]:
+                                # add the ir_id, sample type, and latest status to dict
+                                "interpretation_request_id":
+                                    result["interpretation_request_id"],
+                                "sample_type":
+                                    result["sample_type"],
+                                "last_status":
+                                    result["last_status"]})
+          if request_list_poll.response_json["next"]:
                 page += 1
             else:
                 last_page = True
@@ -86,11 +76,3 @@ class InterpretationList(object):
             case for case in self.all_cases if case["last_status"] in status_lookup[self.sample_type]]
 
         return cases_to_poll
-
-    def get_genie_list(self):
-        with open('/home/genseqservadmin/WL_GEL2MDT/GeL2MDT/gelweb/gel2mdt/api_utils/GENIE_Extract_20180731.csv') as f:
-            filedata = csv.DictReader(f, dialect='excel')
-            for row in filedata:
-                if row['\ufeffOrgCode'] in self.londonNW_codes:
-                    self.londonNW_cases.append(row['ParticipantID'])
-        print(self.londonNW_cases)
