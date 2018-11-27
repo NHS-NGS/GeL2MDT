@@ -385,44 +385,66 @@ class UpdateDemographics(object):
     Repolls labkey for a case. Should not be visible to all users due to labkey issues
     '''
     def __init__(self, report_id):
+
         self.report = GELInterpretationReport.objects.get(id=report_id)
         self.clinician = None
+        print(self.report.sample_type)
         config_dict = load_config.LoadConfig().load()
-        # poll labkey
+        # poll labkey, split nt and wl gmcs based on pid range
         if self.report.sample_type == 'raredisease':
-            labkey_server_request = config_dict['labkey_server_request']
-            self.server_context = lk.utils.create_server_context(
+            self.labkey_server_request_ntgmc = config_dict['labkey_server_request_ntgmc']
+            self.labkey_server_request_wlgmc = config_dict['labkey_server_request_wlgmc']
+            self.server_context_ntgmc = lk.utils.create_server_context(
                 'gmc.genomicsengland.nhs.uk',
-                labkey_server_request,
+                self.labkey_server_request_ntgmc,
                 '/labkey', use_ssl=True)
+            self.server_context_wlgmc = lk.utils.create_server_context(
+                'gmc.genomicsengland.nhs.uk',
+                self.labkey_server_request_wlgmc,
+                '/labkey', use_ssl=True)
+
         elif self.report.sample_type == 'cancer':
-            labkey_server_request = config_dict['labkey_cancer_server_request']
-            self.server_context = lk.utils.create_server_context(
+            self.labkey_server_request_ntgmc = config_dict['labkey_cancer_server_request_ntgmc']
+            self.labkey_server_request_wlgmc = config_dict['labkey_cancer_server_request_wlgmc']            
+            self.server_context_ntgmc = lk.utils.create_server_context(
                 'gmc.genomicsengland.nhs.uk',
-                labkey_server_request,
+                self.labkey_server_request_ntgmc,
                 '/labkey', use_ssl=True)
+            self.server_context_wlgmc = lk.utils.create_server_context(
+                'gmc.genomicsengland.nhs.uk',
+                self.labkey_server_request_wlgmc,
+                '/labkey', use_ssl=True)            
 
     def update_clinician(self):
         clinician_details = {}
-        if self.report.sample_type=='raredisease':
+        print(self.report.ir_family.participant_family.proband.gel_id)
+
+        if self.report.sample_type == 'cancer':
+            schema = 'gel_cancer'
+            query_name = 'cancer_registration'
+        elif self.report.sample_type == 'raredisease':
+            schema = 'gel_rare_diseases'
+            query_name = 'rare_diseases_registration'
+
+        if self.report.ir_family.participant_family.proband.gel_id.startswith("115") or self.report.ir_family.participant_family.proband.gel_id.startswith("215"):
             search_results = lk.query.select_rows(
-                server_context=self.server_context,
-                schema_name='gel_rare_diseases',
-                query_name='rare_diseases_registration',
+                server_context=self.server_context_ntgmc,
+                schema_name=schema,
+                query_name=query_name,
                 filter_array=[
                     lk.query.QueryFilter('family_id',
                                          self.report.ir_family.participant_family.gel_family_id,
                                          'contains')
                 ]
             )
-        elif self.report.sample_type=='cancer':
+        elif self.report.ir_family.participant_family.proband.gel_id.startswith("120") or self.report.ir_family.participant_family.proband.gel_id.startswith("220"):
             search_results = lk.query.select_rows(
-                server_context=self.server_context,
-                schema_name='gel_cancer',
-                query_name='cancer_registration',
+                server_context=self.server_context_wlgmc,
+                schema_name=schema,
+                query_name=query_name,
                 filter_array=[
-                    lk.query.QueryFilter('participant_identifiers_id',
-                                         self.report.ir_family.participant_family.proband.gel_id,
+                    lk.query.QueryFilter('family_id',
+                                         self.report.ir_family.participant_family.gel_family_id,
                                          'contains')
                 ]
             )
@@ -437,8 +459,11 @@ class UpdateDemographics(object):
         except IndexError as e:
             pass
 
+
+
         if 'name' in clinician_details and 'hospital' in clinician_details:
             print(clinician_details)
+
             clinician, saved = Clinician.objects.get_or_create(
                 name=clinician_details['name'],
                 hospital = clinician_details['hospital']
@@ -463,15 +488,28 @@ class UpdateDemographics(object):
             schema = 'gel_cancer'
         elif self.report.sample_type == 'raredisease':
             schema = 'gel_rare_diseases'
-        search_results = lk.query.select_rows(
-            server_context=self.server_context,
-            schema_name=schema,
-            query_name='participant_identifier',
-            filter_array=[
-                lk.query.QueryFilter(
-                    'participant_id', self.report.ir_family.participant_family.proband.gel_id, 'contains')
+
+
+        if self.report.ir_family.participant_family.proband.gel_id.startswith("115") or self.report.ir_family.participant_family.proband.gel_id.startswith("215"):
+            search_results = lk.query.select_rows(
+                server_context=self.server_context_ntgmc,
+                schema_name=schema,
+                query_name='participant_identifier',
+                filter_array=[
+                    lk.query.QueryFilter(
+                        'participant_id', self.report.ir_family.participant_family.proband.gel_id, 'in')
             ]
         )
+        elif self.report.ir_family.participant_family.proband.gel_id.startswith("120") or self.report.ir_family.participant_family.proband.gel_id.startswith("220"):
+            search_results = lk.query.select_rows(
+                server_context=self.server_context_wlgmc,
+                schema_name=schema,
+                query_name='participant_identifier',
+                filter_array=[
+                    lk.query.QueryFilter(
+                        'participant_id', self.report.ir_family.participant_family.proband.gel_id, 'contains')
+                ]
+            )
         try:
             participant_demographics["surname"] = search_results['rows'][0].get(
                 'surname')
@@ -506,15 +544,27 @@ class UpdateDemographics(object):
         elif self.report.sample_type == 'cancer':
             schema_name = 'gel_cancer',
             query_name = 'cancer_diagnosis'
-        search_results = lk.query.select_rows(
-            server_context=self.server_context,
-            schema_name=schema_name,
-            query_name=query_name,
-            filter_array=[
-                lk.query.QueryFilter('participant_identifiers_id',
-                                     self.report.ir_family.participant_family.proband.gel_id, 'eq')
-            ]
-        )
+
+        if self.report.ir_family.participant_family.proband.gel_id.startswith("115") or self.report.ir_family.participant_family.proband.gel_id.startswith("215"):
+            search_results = lk.query.select_rows(
+                server_context=self.server_context_ntgmc,
+                schema_name=schema_name,
+                query_name=query_name,
+                filter_array=[
+                    lk.query.QueryFilter('participant_identifiers_id',
+                                         self.report.ir_family.participant_family.proband.gel_id, 'eq')
+                ]
+            )
+        elif self.report.ir_family.participant_family.proband.gel_id.startswith("120") or self.report.ir_family.participant_family.proband.gel_id.startswith("220"):
+            search_results = lk.query.select_rows(
+                server_context=self.server_context_wlgmc,
+                schema_name=schema_name,
+                query_name=query_name,
+                filter_array=[
+                    lk.query.QueryFilter('participant_identifiers_id',
+                                         self.report.ir_family.participant_family.proband.gel_id, 'eq')
+                ]
+            )
         try:
             if self.report.sample_type == 'raredisease':
                 recruiting_disease = search_results['rows'][0].get('gel_disease_information_specific_disease', None)
@@ -522,6 +572,8 @@ class UpdateDemographics(object):
                 recruiting_disease = search_results['rows'][0].get('diagnosis_icd_code', None)
         except IndexError as e:
             pass
+
+        print(participant_demographics)
 
         if participant_demographics['surname'] != 'unknown' and participant_demographics['nhs_num'] != 'unknown':
             proband = self.report.ir_family.participant_family.proband
