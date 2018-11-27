@@ -69,7 +69,8 @@ class InterpretationList(object):
                     download = False
                     if result["sample_type"] == self.sample_type:
                         if len(result['sites']) > 1:
-                            download = True
+                            if not all([f in west_london_codes for f in result['sites']]):
+                                download = True
                         elif result['sites'][0] not in west_london_codes:
                             download = True
                         if download:
