@@ -1,0 +1,27 @@
+VERSION_NUMBER=v0.4.5
+vep=/root/ensembl-vep/vep
+cache=/root/.vep
+
+cache_version=91
+hg19_fasta_loc=/root/.vep/Homo_sapiens.GRCh37.dna.primary_assembly.fa
+hg38_fasta_loc=/root/.vep/Homo_sapiens.GRCh38.dna.primary_assembly.fa
+labkey_server_request=Genomics England Portal/North Thames/MeRCURy/Rare Diseases/Core
+labkey_cancer_server_request=Genomics England Portal/North Thames/MeRCURy/Cancer/Core
+cip_api_storage=/root/gel2mdt_cache/cip_api_storage
+panelapp_storage=/root/gel2mdt_cache/panelapp_storage
+gene_storage=/root/gel2mdt_cache/gene_storage
+GMC=None
+pull_T3=False
+cip_as_id=True
+mergedVEP=True
+
+#These we anticipate would be rarely used options
+bypass_VEP=False
+remoteVEP=False
+remote_ip=127.0.0.1
+remote_username=xxx
+remote_password=xxx
+remote_directory=/home/xxx/vep_output/
+show_clinical_report=True
+email_address=patrick.lombard@gosh.nhs.uk
+plot_pilot_and_main_status_breakdown=True
