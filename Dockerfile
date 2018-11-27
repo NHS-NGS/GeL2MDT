@@ -34,6 +34,7 @@ RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
 RUN apt-get install -y nodejs
 RUN apt-get install -y npm
 RUN npm install avrodoc -g
+
 # Install VEP Perl dependencies
 RUN cpanm DBI
 
@@ -55,7 +56,6 @@ WORKDIR /gel/GelReportModels
 RUN pip install --upgrade pip==18.0
 ENV GEL_REPORT_MODELS_PYTHON_VERSION 3
 RUN pip3 install .
-
 # Install Gel2MDT
 RUN mkdir /root/gel2mdt
 COPY . /root/gel2mdt

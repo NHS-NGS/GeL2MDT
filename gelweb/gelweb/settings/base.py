@@ -17,7 +17,7 @@ from datetime import datetime
 
 # Check that the expected local_settings values are present
 try:
-    from .local_settings import SECRET_KEY, DEBUG, ALLOWED_HOSTS, DATABASES
+    from .local_settings import *
 except ImportError:
     print('Check the following settings are present in local_settings.py:\n'
           'SECRET_KEY, DEBUG, ALLOWED_HOSTS, DATABASES')
