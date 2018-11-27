@@ -14,7 +14,7 @@ services:
       - /etc/gel2mdt/credentials
     volumes:
       - .:/root/gel2mdt/
-      - ~/.vep:/root/.vep
+      - /home/genseqservadmin/.vep/:/root/.vep
       - ~/gel2mdt_resources:/root/gel2mdt_cache
     depends_on:
       - db
@@ -38,6 +38,7 @@ services:
     command: bash -c ". /root/gel2mdt/Docker/startup_script.sh && jupyter notebook --generate-config -y && cd /root/gel2mdt/gelweb && python manage.py shell_plus --notebook"
     volumes:
       - .:/root/gel2mdt/
+      - ~/gel2mdt_resources:/root/gel2mdt_cache
     env_file:
       - /etc/gel2mdt/credentials
     ports:
