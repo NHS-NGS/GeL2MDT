@@ -73,7 +73,10 @@ class InterpretationList(object):
                     "last_status":
                         result["last_status"]}
                     for result in request_list_results
-                    if result["sample_type"] == self.sample_type]
+                    if result["sample_type"] == self.sample_type 
+		    and not result['proband'].startswith('12')
+                    and not result['proband'].startswith('22')
+                    and not result['proband'].startswith('212')]
 
             if request_list_poll.response_json["next"]:
                 page += 1

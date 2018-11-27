@@ -3,7 +3,8 @@ FROM python:3.6
 
 # Maintainer
 MAINTAINER Patrick Lombard<patrick.lombard@gosh.nhs.uk>
-
+ENV http_proxy=http://10.101.112.70:8080
+ENV https_proxy=http://10.101.112.70:8080
 # Install prequisites (last four entries added by me - PD)
 RUN apt-get update && apt-get -y install \
     libpq-dev \
@@ -19,7 +20,8 @@ RUN apt-get update && apt-get -y install \
     vim \
     mysql-server \
     default-libmysqlclient-dev \
-    software-properties-common
+    software-properties-common \
+    screen
 
 # RUN add-apt-repository ppa:webupd8team/java
 RUN add-apt-repository "deb http://ppa.launchpad.net/webupd8team/java/ubuntu xenial main"
@@ -42,7 +44,8 @@ RUN cpanm DBI
 WORKDIR /root
 RUN git clone https://github.com/Ensembl/ensembl-vep.git
 WORKDIR /root/ensembl-vep
-RUN perl INSTALL.pl --VERSION 92 --AUTO a -n
+RUN git checkout release/91
+RUN perl INSTALL.pl --VERSION 91 --AUTO ap -n --PLUGINS all
 
 # Install GelReportModels
 RUN mkdir /gel
