@@ -313,7 +313,7 @@ def update_cases():
     the database with new cases
     :return:
     '''
-    MultipleCaseAdder(sample_type='raredisease', pullt3=False, skip_demographics=False)
+    MultipleCaseAdder(sample_type='raredisease', bins=300, pullt3=False, skip_demographics=False)
     MultipleCaseAdder(sample_type='cancer', pullt3=False, skip_demographics=False)
 
 
