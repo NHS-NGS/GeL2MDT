@@ -66,13 +66,13 @@ class InterpretationList(object):
                     and result['proband'] == self.sample]
             else:
                 for result in request_list_results:
-                    download = False
+                    download = True
                     if result["sample_type"] == self.sample_type:
                         if len(result['sites']) > 1:
-                            if not all([f in west_london_codes for f in result['sites']]):
-                                download = True
-                        elif result['sites'][0] not in west_london_codes:
-                            download = True
+                            if all([f in west_london_codes for f in result['sites']]):
+                                download = False
+                        elif result['sites'][0] in west_london_codes:
+                            download = False
                         if download:
                             all_cases.append({
                                 # add the ir_id, sample type, and latest status to dict
