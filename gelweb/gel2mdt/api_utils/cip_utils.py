@@ -41,6 +41,7 @@ class InterpretationList(object):
         given user.
         """
         all_cases = []
+        west_london_codes = ['RYJ', 'RQM', 'RPY', 'RT3', 'RYJ99', 'TRX']
         last_page = False
         page = 1
         while not last_page:
@@ -64,19 +65,22 @@ class InterpretationList(object):
                     if result["sample_type"] == self.sample_type
                     and result['proband'] == self.sample]
             else:
-                all_cases += [{
-                    # add the ir_id, sample type, and latest status to dict
-                    "interpretation_request_id":
-                        result["interpretation_request_id"],
-                    "sample_type":
-                        result["sample_type"],
-                    "last_status":
-                        result["last_status"]}
-                    for result in request_list_results
-                    if result["sample_type"] == self.sample_type 
-		    and not result['proband'].startswith('12')
-                    and not result['proband'].startswith('22')
-                    and not result['proband'].startswith('212')]
+                for result in request_list_results:
+                    download = False
+                    if result["sample_type"] == self.sample_type:
+                        if len(result['sites']) > 1:
+                            download = True
+                        elif result['sites'][0] not in west_london_codes:
+                            download = True
+                        if download:
+                            all_cases.append({
+                                # add the ir_id, sample type, and latest status to dict
+                                "interpretation_request_id":
+                                    result["interpretation_request_id"],
+                                "sample_type":
+                                    result["sample_type"],
+                                "last_status":
+                                    result["last_status"]})
 
             if request_list_poll.response_json["next"]:
                 page += 1
