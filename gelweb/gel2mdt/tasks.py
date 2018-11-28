@@ -234,7 +234,7 @@ def case_alert_email():
                     if matching_cases[s_type][case]:
                         text_content += f'Case {case_alert.gel_id} with CIP-ID of {matching_cases[s_type][case][0][1]} ' \
                                         f'has been added to the database. CaseAlert comment: {case_alert.comment}\n'
-        subject, from_email, to = f'GeL2MDT CaseAlert', 'bioinformatics@gosh.nhs.uk', 'GELTeam@gosh.nhs.uk'
+        subject, from_email, to = f'GeL2MDT West London CaseAlert', 'bioinformatics@gosh.nhs.uk', 'GELTeam@gosh.nhs.uk'
         msg = EmailMessage(subject, text_content, from_email, [to])
         try:
             msg.send()
@@ -275,7 +275,7 @@ def update_report_email():
 
     listupdates = ListUpdate.objects.filter(update_time__gte=date.today())
     if all(listupdates.values_list('success', flat=True)) and text_content:
-        subject, from_email, to = 'GeL2MDT Weekly Update Report', 'bioinformatics@gosh.nhs.uk', 'bioinformatics@gosh.nhs.uk'
+        subject, from_email, to = 'GeL2MDT West London Weekly Update Report', 'bioinformatics@gosh.nhs.uk', 'bioinformatics@gosh.nhs.uk'
         msg = EmailMessage(subject, text_content, from_email, [to])
         try:
             msg.send()
@@ -300,7 +300,7 @@ def listupdate_email():
             bioinfo_content += f'{update.sample_type}\t{update.update_time}' \
                                f'\t{update.cases_added}\t{update.cases_updated}\t{update.error}\n'
     if send:
-        subject, from_email, to = 'GeL2MDT ListUpdate', 'bioinformatics@gosh.nhs.uk', \
+        subject, from_email, to = 'GeL2MDT West London ListUpdate', 'bioinformatics@gosh.nhs.uk', \
                                   'bioinformatics@gosh.nhs.uk'
         msg = EmailMessage(subject, bioinfo_content, from_email, [to])
         try:
