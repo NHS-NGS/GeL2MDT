@@ -41,7 +41,7 @@ class InterpretationList(object):
         given user.
         """
         all_cases = []
-        west_london_codes = ['RYJ', 'RQM', 'RPY', 'RT3', 'RYJ99', 'TRX']
+        west_london_codes = ['RYJ', 'RQM', 'RPY', 'RT3', 'RYJ99', 'TRX', 'CW', 'FPNE', 'WM']
         last_page = False
         page = 1
         while not last_page:
@@ -68,8 +68,13 @@ class InterpretationList(object):
                 for result in request_list_results:
                     download = True
                     if result["sample_type"] == self.sample_type:
-                        if len(result['sites']) > 1:
-                            if all([f in west_london_codes for f in result['sites']]):
+                        if not result['sites']:
+                            pass  # Download just in case
+                        elif len(result['sites']) > 1:
+                            part_of_west_london = []
+                            for site in result['sites']:
+                                part_of_west_london.append(any([f.startswith(site) for f in west_london_codes]))
+                            if all(part_of_west_london):
                                 download = False
                         elif any([f.startswith(result['sites'][0]) for f in west_london_codes]):
                             download = False
