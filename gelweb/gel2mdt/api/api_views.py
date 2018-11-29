@@ -61,12 +61,12 @@ class RareDiseaseCases(generics.ListAPIView):
         """
 
         sample_type = self.kwargs['sample_type']
-        queryset = GELInterpretationReport.objects.latest_cases_by_sample_type(
-            sample_type=sample_type
+        queryset = GELInterpretationReport.objects.latest_cases_by_sample_type_and_user(
+            sample_type=sample_type,
+            user=self.request.user
         ).prefetch_related(*['ir_family',
                              'ir_family__participant_family__proband',
                              'ir_family__participant_family__clinician'])
-
         return queryset
 
     serializer_class = GELInterpretationReportSerializer

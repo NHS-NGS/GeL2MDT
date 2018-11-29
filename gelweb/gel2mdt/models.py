@@ -22,11 +22,31 @@ SOFTWARE.
 from django.db import models
 from django.utils import timezone
 from django.conf import settings
-
+from django.contrib.auth.models import User
 import pandas as pd
-
 from .model_utils.choices import ChoiceEnum
 from .config import load_config
+
+
+class CIPUser(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    last_polled = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        managed = True
+        db_table = 'CIPUser'
+        app_label = 'gel2mdt'
+
+
+class ReportPermissions(models.Model):
+    cip_user = models.ForeignKey(CIPUser, on_delete=models.CASCADE)
+    report = models.ForeignKey('GELInterpretationReport', on_delete=models.CASCADE)
+
+    class Meta:
+        managed = True
+        db_table = 'ReportPermissions'
+        app_label = 'gel2mdt'
+        unique_together = (('cip_user', 'report'),)
 
 
 class ListUpdate(models.Model):
@@ -285,6 +305,27 @@ class GELInterpretationReportQuerySet(models.QuerySet):
         )
         ids_of_latest_cases = rm_dup_old["id"].tolist()
         return self.filter(id__in=ids_of_latest_cases, assigned_user__username=username)
+
+    def latest_cases_by_sample_type_and_user(self, sample_type, user):
+        qs = self.filter(sample_type=sample_type)
+        if not hasattr(user, 'cipuser'):
+            cip_user = CIPUser.objects.create(user=user)
+            cip_user.save()
+        user_cases = ReportPermissions.objects.filter(cip_user__user=user).values_list('report', flat=True)
+        if qs:
+            # cases present
+            qs_df = pd.DataFrame(list(qs.values())).sort_values(
+                by=["ir_family_id", "archived_version"]
+            )
+            rm_dup_old = qs_df.drop_duplicates(
+                subset=["ir_family_id"],
+                keep="last"
+            )
+            ids_of_latest_cases = rm_dup_old["id"].tolist()
+            ids_of_user_cases = [f if f in user_cases else None for f in ids_of_latest_cases]
+            return self.filter(id__in=ids_of_user_cases)
+        else:
+            return qs
 
 
 class GELInterpretationReport(models.Model):

@@ -26,12 +26,66 @@ SOFTWARE.
 
 <div class='container-fluid'>
     <h1> Hello, {{user.first_name}}</h1>
+    <ul class="nav nav-tabs" data-options="deep_linking: true">
+        <li class="active"><a data-toggle="tab" href="#profile">Profile</a></li>
+        <li><a data-toggle="tab" href="#assigned_cases">Assigned Cases</a></li>
+    </ul>
 
     <div class="row">
+        <div class="tab-content">
+        <div id="profile" class="tab-pane fade in active">
+            <div class="col-md-3">
 
-        <div class="col-md-9">
+        <div class="panel panel-default">
+            <div class="panel-heading"><i class="fas fa-user"></i> Profile Information</div>
+            <div class="panel-body">
+                <div class="col-md-12">
+                    {% bootstrap_label "Username" %}
+                    <div class="block">
+                        {{user.username}}
+                    </div>
+                    </br>
+                    {% bootstrap_label "Email" %}
+                    <div class="block">
+                        {{user.email}}
+                    </div>
+                    </br>
+                    {% bootstrap_label "Role" %}
+                    <div class="block">
+                        {{rolename}}
+                    </div>
+                    </br>
+                    <form role="form" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {% if request.user.is_staff %}
+                            {% bootstrap_field form.role %}
+                        {% endif %}
+                        {% bootstrap_field form.hospital %}
+                        <button type="submit" name="Submit" style="float: right" class="btn btn-info">Update</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+                </div>
+            <div class="col-md-3">
+
+        <div class="panel panel-default">
+            <div class="panel-heading"><i class="fas fa-user"></i> Update Case List</div>
+            <div class="panel-body">
+                    <form role="form" action="{% url 'post-credentials' %}" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                            {% bootstrap_form credentials_form %}
+                        <button type="submit" name="Submit" style="float: right" class="btn btn-info">Update</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        </div>
+    <div id="assigned_cases" class="tab-pane fade">
+
+        <div class="col-md-12">
             <div class="panel panel-default">
-                <div class="panel-heading"><i class="fas fa-clipboard-list"></i> My Cases</div>
+                <div class="panel-heading"><i class="fas fa-clipboard-list"></i> Assigned Cases</div>
                 <div class="panel-body">
                     <div class="col-md-12">
 
@@ -67,41 +121,11 @@ SOFTWARE.
                 </div>
             </div>
         </div>
-
-    <div class="col-md-3">
-
-        <div class="panel panel-default">
-            <div class="panel-heading"><i class="fas fa-user"></i> Profile Information</div>
-            <div class="panel-body">
-                <div class="col-md-12">
-                    {% bootstrap_label "Username" %}
-                    <div class="block">
-                        {{user.username}}
-                    </div>
-                    </br>
-                    {% bootstrap_label "Email" %}
-                    <div class="block">
-                        {{user.email}}
-                    </div>
-                    </br>
-                    {% bootstrap_label "Role" %}
-                    <div class="block">
-                        {{rolename}}
-                    </div>
-                    </br>
-                    <form role="form" method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        {% if request.user.is_staff %}
-                            {% bootstrap_field form.role %}
-                        {% endif %}
-                        {% bootstrap_field form.hospital %}
-                        <button type="submit" name="Submit" style="float: right" class="btn btn-info">Update</button>
-                    </form>
-                </div>
+    </div>
 
 
-            </div>
-        </div>
     </div>
 </div>
+</div>
+
 {% endblock %}

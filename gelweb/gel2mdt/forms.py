@@ -29,6 +29,17 @@ from django.forms import BaseFormSet
 from .models import *
 
 
+class CredentialsForm(forms.Form):
+    '''
+    Allows users to enter credentials to update case list
+    '''
+    username = forms.CharField()
+    password = forms.CharField(widget=forms.PasswordInput())
+    sample_type_choices = (('raredisease', 'raredisease'),
+                           ('cancer', 'cancer'))
+    sample_type = forms.ChoiceField(choices=sample_type_choices)
+
+
 class UserForm(forms.ModelForm):
     """
     User registration form
@@ -48,6 +59,7 @@ class UserForm(forms.ModelForm):
         hospital = forms.ChoiceField(choices=gmc_choices)
     else:
         hospital = forms.CharField()
+
 
     class Meta:
         model = User

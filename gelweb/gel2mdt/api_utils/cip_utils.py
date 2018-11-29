@@ -20,6 +20,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 from .poll_api import PollAPI
+from ..models import GELInterpretationReport, ReportPermissions, CIPUser
+from django.utils import timezone
 
 
 class InterpretationList(object):
@@ -28,9 +30,12 @@ class InterpretationList(object):
     a list of case numbers by status along with the hash of the current case
     data.
     """
-    def __init__(self, sample_type, sample=None):
+    def __init__(self, sample_type, sample=None, cip_username=None, cip_password=None, user=None):
         self.sample_type = sample_type
         self.sample = sample
+        self.user = user
+        self.cip_username = cip_username
+        self.cip_password = cip_password
         self.all_cases = self.get_all_cases()
         self.cases_to_poll = self.get_poll_cases()
         self.blocked_cases = self.get_blocked_cases()
@@ -46,7 +51,9 @@ class InterpretationList(object):
         while not last_page:
             request_list_poll = PollAPI(
                 "cip_api",
-                "interpretation-request?page={page}".format(page=page)
+                "interpretation-request?page={page}".format(page=page),
+                username=self.cip_username,
+                password=self.cip_password
             )
             request_list_poll.get_json_response()
             request_list_results = request_list_poll.response_json["results"]
@@ -101,3 +108,16 @@ class InterpretationList(object):
         """
         blocked_cases = [case for case in self.all_cases if case["last_status"] == 'blocked']
         return blocked_cases
+
+    def update_case_permissions(self):
+        """
+        Finds all cases for a particular user and allows the user to view them
+        :return:
+        """
+        reports = GELInterpretationReport.objects.latest_cases_by_sample_type(sample_type=self.sample_type)
+        report_lookup = {report.ir_family.ir_family_id: report for report in reports}
+        for case in self.cases_to_poll:
+            if case['interpretation_request_id'] in report_lookup:
+                ReportPermissions.objects.get_or_create(cip_user=self.user.cipuser,
+                                                        report=report_lookup[case['interpretation_request_id']])
+

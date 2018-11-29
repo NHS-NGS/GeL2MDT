@@ -74,7 +74,7 @@ class PollAPI(object):
             but will cause issues in case we introduce another API which
             requires authentication.
     """
-    def __init__(self, api, endpoint):
+    def __init__(self, api, endpoint, username=None, password=None):
         """
         Initialises a PollAPI instance with an api and endpoint.
 
@@ -84,6 +84,8 @@ class PollAPI(object):
         """
         self.api = api
         self.endpoint = endpoint
+        self.username = username
+        self.password = password
 
         self.server_list = {
             "cip_api": (
@@ -199,15 +201,15 @@ class PollAPI(object):
         token_endpoint = token_endpoint_list[self.api]
 
         self.token_url = self.server.format(endpoint=token_endpoint)
-        self.get_credentials()
+        if not self.username:
+            self.get_credentials()
         token_response = requests.post(
             url=self.token_url,
             json=dict(
-                username=os.environ["cip_api_username"],
-                password=os.environ["cip_api_password"]
+                username=self.username,
+                password=self.password
             ),
         )
-
         token_json = token_response.json()
 
         self.headers = {
@@ -249,7 +251,8 @@ class PollAPI(object):
             None
         """
         try:
-            user = os.environ["cip_api_username"]
+            self.username = os.environ["cip_api_username"]
+            self.password = os.environ["cip_api_username"]
         except KeyError as e:
-            os.environ["cip_api_username"] = input("Enter username: ")
-            os.environ["cip_api_password"] = getpass.getpass("Enter password: ")
+            self.username = input("Enter username: ")
+            self.password = getpass.getpass("Enter password: ")

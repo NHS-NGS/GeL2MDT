@@ -36,7 +36,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.forms import modelformset_factory
 
 from easy_pdf.rendering import render_to_pdf_response
-
+from .api_utils.cip_utils import InterpretationList
 from .config import load_config
 from .forms import *
 from .models import *
@@ -129,7 +129,10 @@ def profile(request):
     '''
     role = None
     rolename = None
-
+    if not hasattr(request.user, 'cipuser'):
+        cip_user = CIPUser.objects.create(user=request.user)
+        cip_user.save()
+    credentials_form = CredentialsForm()
     cs = ClinicalScientist.objects.filter(email=request.user.email).first()
     other = OtherStaff.objects.filter(email=request.user.email).first()
     clinician = Clinician.objects.filter(email=request.user.email).first()
@@ -169,20 +172,36 @@ def profile(request):
                 other, created = OtherStaff.objects.update_or_create(
                     name=request.user.first_name + ' ' + request.user.last_name,
                     email=request.user.email,
-                    defaults={'hospital':form.cleaned_data['hospital']})
+                    defaults={'hospital': form.cleaned_data['hospital']})
             messages.add_message(request, 25, 'Profile Updated')
             return HttpResponseRedirect('/profile')
-        else:
-            print(form.errors)
     else:
         if role:
             form = ProfileForm(initial={'role': rolename, 'hospital': role.hospital})
         else:
             form = ProfileForm(initial={'role': 'Unknown', 'hospital': 'Unknown'})
     return render(request, 'gel2mdt/profile.html', {'form': form,
-                                                    'role':role,
+                                                    'role': role,
                                                     'my_cases': my_cases,
-                                                    'rolename':rolename})
+                                                    'rolename': rolename,
+                                                    'credentials_form': credentials_form})
+
+
+@login_required
+def post_credentials(request):
+    if request.method == 'POST':
+        credentials_form = CredentialsForm(request.POST)
+        if credentials_form.is_valid():
+            interpretation_list_poll = InterpretationList(sample_type=credentials_form.cleaned_data['sample_type'],
+                                                          cip_username=credentials_form.cleaned_data['username'],
+                                                          cip_password=credentials_form.cleaned_data['password'],
+                                                          user=request.user)
+            interpretation_list_poll.update_case_permissions()
+            cip_user = request.user.cipuser
+            cip_user.last_polled = timezone.now()
+            cip_user.save()
+            messages.add_message(request, 25, 'You have updated your Cases')
+            return HttpResponseRedirect('/profile')
 
 
 @login_required
