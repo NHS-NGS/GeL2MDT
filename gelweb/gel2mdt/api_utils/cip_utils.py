@@ -71,7 +71,7 @@ class InterpretationList(object):
                         if len(result['sites']) > 1:
                             if all([f in west_london_codes for f in result['sites']]):
                                 download = False
-                        elif result['sites'][0] in west_london_codes:
+                        elif any([f.startswith(result['sites'][0]) for f in west_london_codes]):
                             download = False
                         if download:
                             all_cases.append({
