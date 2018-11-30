@@ -39,7 +39,9 @@ from bokeh.plotting import figure
 from django.core.mail import EmailMessage
 from reversion.models import Version, Revision
 from protocols.reports_6_0_0 import InterpretedGenome, InterpretationRequestRD, CancerInterpretationRequest, ClinicalReport
-
+import datetime
+from django.utils import timezone
+import csv
 
 def get_gel_content(ir, ir_version):
     '''
@@ -238,6 +240,41 @@ def case_alert_email():
             msg.send()
         except Exception as e:
             pass
+
+@task
+def cases_not_completed_email():
+    all_mdts = MDT.objects.all()
+    reports_for_email = []
+    for mdt in all_mdts:
+        if mdt.date_of_mdt < timezone.now() - datetime.timedelta(weeks=16):
+            for report in mdt.mdtreport_set.all():
+                if report.interpretation_report.case_status != 'C':
+                    reports_for_email.append(report)
+    with open('case_status_update.csv', 'w') as csvfile:
+        csvwriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+        csvwriter.writerow(
+            ['SampleType', 'Participant ID', 'CIP ID', 'MDT Link', 'MDT name', 'Date of MDT', 'Case Status'])
+        for report in reports_for_email:
+            try:
+                csvwriter.writerow(
+                    [report.MDT.sample_type, report.interpretation_report.ir_family.participant_family.proband.gel_id,
+                     report.interpretation_report.ir_family.ir_family_id,
+                     f'http://10.101.87.72:8000/mdt_view/{report.MDT.id}', report.MDT.description,
+                     report.MDT.date_of_mdt.date(), report.interpretation_report.get_case_status_display()])
+            except Proband.DoesNotExist:
+                pass
+    subject, from_email, to = f'GeL2MDT Not Closed Case Alert', 'bioinformatics@gosh.nhs.uk', \
+                              'GELTeam@gosh.nhs.uk'
+    text_content = f'Please see attached report'
+    try:
+        msg = EmailMessage(subject, text_content, from_email, [to])
+        msg.attach_file("case_status_update.csv")
+        msg.send()
+        os.remove('case_status_update.csv')
+    except Exception as e:
+        print(e)
+
+
 
 @task
 def update_report_email():
