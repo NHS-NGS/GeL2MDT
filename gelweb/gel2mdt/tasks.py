@@ -39,7 +39,6 @@ from bokeh.plotting import figure
 from django.core.mail import EmailMessage
 from reversion.models import Version, Revision
 from protocols.reports_6_0_0 import InterpretedGenome, InterpretationRequestRD, CancerInterpretationRequest, ClinicalReport
-import datetime
 from django.utils import timezone
 import csv
 
@@ -52,7 +51,6 @@ def get_gel_content(ir, ir_version):
     :return: Beatitful soup version of the report
     '''
     # otherwise get uname and password from a file
-
     interpretation_reponse = PollAPI(
         "cip_api", f'interpretation-request/{ir}/{ir_version}')
     interp_json = interpretation_reponse.get_json_response()
@@ -243,6 +241,7 @@ def case_alert_email():
 
 @task
 def cases_not_completed_email():
+    import datetime
     all_mdts = MDT.objects.all()
     reports_for_email = []
     for mdt in all_mdts:
@@ -284,9 +283,9 @@ def update_report_email():
     '''
     from datetime import date
     from django.db.models import Sum
+    import datetime
     text_content = ''
     today = date.today()
-    import datetime
     week_ago = today - datetime.timedelta(days=7)
     for i, sample_type in enumerate(['raredisease', 'cancer']):
         listupdates = ListUpdate.objects.filter(update_time__gte=week_ago).filter(sample_type=sample_type)
