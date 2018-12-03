@@ -220,7 +220,7 @@ def case_alert_email():
                     if report.ir_family.participant_family.proband.gel_id == str(case.gel_id):
                         matching_cases[s_type][case.id].append((report.id,
                                                                 report.ir_family.ir_family_id))
-                    sample_types[s_type] = True
+                        sample_types[s_type] = True
                 except Proband.DoesNotExist:
                     pass
 
@@ -310,7 +310,7 @@ def update_report_email():
 
     listupdates = ListUpdate.objects.filter(update_time__gte=date.today())
     if all(listupdates.values_list('success', flat=True)) and text_content:
-        subject, from_email, to = 'GeL2MDT Weekly Update Report', 'bioinformatics@gosh.nhs.uk', 'bioinformatics@gosh.nhs.uk'
+        subject, from_email, to = 'GeL2MDT Weekly Update Report', 'bioinformatics@gosh.nhs.uk', 'GELTeam@gosh.nhs.uk'
         msg = EmailMessage(subject, text_content, from_email, [to])
         try:
             msg.send()
