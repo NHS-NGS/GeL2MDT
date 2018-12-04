@@ -241,35 +241,51 @@ def case_alert_email():
 
 @task
 def cases_not_completed_email():
-    import datetime
+    import xlsxwriter
     all_mdts = MDT.objects.all()
-    reports_for_email = []
-    for mdt in all_mdts:
-        if mdt.date_of_mdt < timezone.now() - datetime.timedelta(weeks=16):
-            for report in mdt.mdtreport_set.all():
-                if report.interpretation_report.case_status != 'C':
-                    reports_for_email.append(report)
-    with open('case_status_update.csv', 'w') as csvfile:
-        csvwriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-        csvwriter.writerow(
-            ['SampleType', 'Participant ID', 'CIP ID', 'MDT Link', 'MDT name', 'Date of MDT', 'Case Status'])
-        for report in reports_for_email:
-            try:
-                csvwriter.writerow(
-                    [report.MDT.sample_type, report.interpretation_report.ir_family.participant_family.proband.gel_id,
-                     report.interpretation_report.ir_family.ir_family_id,
-                     f'http://10.101.87.72:8000/mdt_view/{report.MDT.id}', report.MDT.description,
-                     report.MDT.date_of_mdt.date(), report.interpretation_report.get_case_status_display()])
-            except Proband.DoesNotExist:
-                pass
-    subject, from_email, to = f'GeL2MDT Not Closed Case Alert', 'bioinformatics@gosh.nhs.uk', \
-                              'GELTeam@gosh.nhs.uk'
+    workbook = xlsxwriter.Workbook("monthly_results.xlsx")
+    worksheet = workbook.add_worksheet('Summary')
+    months = {1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'June', 7: 'July', 8: 'Aug', 9: 'Sep', 10: 'Oct',
+              11: 'Nov', 12: 'Dec'}
+    years = ['2017', '2018', '2019']
+    month_count = 0
+    for year in years:
+        for month in months:
+            completed_cases = []
+            notcompleted_cases = []
+            worksheet.write(0, month_count, f"{year}_{months[month]}")
+            month_mdts = all_mdts.filter(date_of_mdt__year=year, date_of_mdt__month=month)
+            for mdt in month_mdts:
+                for report in mdt.mdtreport_set.all():
+                    if report.interpretation_report.case_status != 'C':
+                        notcompleted_cases.append(report)
+                    else:
+                        completed_cases.append(report)
+            worksheet.write(1, month_count, f"Completed Count: ")
+            worksheet.write(2, month_count, len(completed_cases))
+            worksheet.write(1, month_count + 1, f"Not Completed Count: ")
+            worksheet.write(2, month_count + 1, len(notcompleted_cases))
+            if notcompleted_cases:
+                worksheet.write(4, month_count + 1, 'Participant IDs')
+            row = 5
+            for case in notcompleted_cases:
+                try:
+                    worksheet.write(row, month_count + 1,
+                                    case.interpretation_report.ir_family.participant_family.proband.gel_id)
+                    row += 1
+                except Proband.DoesNotExist:
+                    pass
+            month_count += 2
+
+    workbook.close()
+    subject, from_email, to = f'GeL2MDT Monthly Closed Case Alert', 'bioinformatics@gosh.nhs.uk', \
+                              'bioinformatics@gosh.nhs.uk'
     text_content = f'Please see attached report'
     try:
         msg = EmailMessage(subject, text_content, from_email, [to])
-        msg.attach_file("case_status_update.csv")
+        msg.attach_file("monthly_results.xlsx")
         msg.send()
-        os.remove('case_status_update.csv')
+        os.remove('monthly_results.xlsx')
     except Exception as e:
         print(e)
 
