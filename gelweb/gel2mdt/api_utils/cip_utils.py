@@ -41,7 +41,7 @@ class InterpretationList(object):
         given user.
         """
         all_cases = []
-        west_london_codes = ['RYJ', 'RQM', 'RPY', 'RT3', 'RYJ99', 'TRX', 'CW', 'FPNE', 'WM']
+        west_london_codes = ['RYJ', 'RQM', 'RPY', 'RT3', 'RYJ99', 'TRX', 'CW', 'FPNE', 'WM', 'WLGMC']
         last_page = False
         page = 1
         while not last_page:
