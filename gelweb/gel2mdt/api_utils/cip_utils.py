@@ -67,7 +67,7 @@ class InterpretationList(object):
             else:
                 for result in request_list_results:
                     download = True
-                    if result["sample_type"] == self.sample_type:
+                    if result["sample_type"] == self.sample_type and not result['proband'].startswith('12000'):
                         if not result['sites']:
                             pass  # Download just in case
                         elif len(result['sites']) > 1:
