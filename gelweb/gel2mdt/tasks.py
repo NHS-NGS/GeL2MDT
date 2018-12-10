@@ -439,6 +439,7 @@ class UpdateDemographics(object):
         self.report = GELInterpretationReport.objects.get(id=report_id)
         self.clinician = None
         print(self.report.sample_type)
+
         config_dict = load_config.LoadConfig().load()
         # poll labkey, split nt and wl gmcs based on pid range
         if self.report.sample_type == 'raredisease':
@@ -463,11 +464,17 @@ class UpdateDemographics(object):
             self.server_context_wlgmc = lk.utils.create_server_context(
                 'gmc.genomicsengland.nhs.uk',
                 self.labkey_server_request_wlgmc,
-                '/labkey', use_ssl=True)            
+                '/labkey', use_ssl=True)          
 
     def update_clinician(self):
         clinician_details = {}
-        print(self.report.ir_family.participant_family.proband.gel_id)
+        '''clinician_details = {
+            'name': 'unknown',
+            'hospital': 'unknown' # workaround for object has no attribute error
+        }'''
+
+        print("pid", self.report.ir_family.participant_family.proband.gel_id)
+        print("family_id", self.report.ir_family.participant_family.gel_family_id)
 
         if self.report.sample_type == 'cancer':
             schema = 'gel_cancer'
@@ -476,9 +483,14 @@ class UpdateDemographics(object):
             schema = 'gel_rare_diseases'
             query_name = 'rare_diseases_registration'
 
-        if self.report.ir_family.participant_family.proband.gel_id.startswith("115") or self.report.ir_family.participant_family.proband.gel_id.startswith("215"):
+        labkey_url_attempt = 0
+        all_gmc_labkeys_attempted = False
+        server_context_list = [self.server_context_ntgmc, self.server_context_wlgmc]
+        #search_results = None
+        while not all_gmc_labkeys_attempted:
+            # try most probable labkey url first
             search_results = lk.query.select_rows(
-                server_context=self.server_context_ntgmc,
+                server_context=server_context_list[labkey_url_attempt],
                 schema_name=schema,
                 query_name=query_name,
                 filter_array=[
@@ -487,44 +499,40 @@ class UpdateDemographics(object):
                                          'contains')
                 ]
             )
-        elif self.report.ir_family.participant_family.proband.gel_id.startswith("120") or self.report.ir_family.participant_family.proband.gel_id.startswith("220"):
-            search_results = lk.query.select_rows(
-                server_context=self.server_context_wlgmc,
-                schema_name=schema,
-                query_name=query_name,
-                filter_array=[
-                    lk.query.QueryFilter('family_id',
-                                         self.report.ir_family.participant_family.gel_family_id,
-                                         'contains')
-                ]
-            )
-        try:
-            clinician_details['name'] = search_results['rows'][0].get(
-                'consultant_details_full_name_of_responsible_consultant')
-        except IndexError as e:
-            pass
-        try:
-            clinician_details['hospital'] = search_results['rows'][0].get(
-                'consultant_details_hospital_of_responsible_consultant')
-        except IndexError as e:
-            pass
+            try:
+                clinician_details['name'] = search_results['rows'][0].get(
+                    'consultant_details_full_name_of_responsible_consultant')
+            except IndexError as e:
+                pass
+            try:
+                clinician_details['hospital'] = search_results['rows'][0].get(
+                    'consultant_details_hospital_of_responsible_consultant')
+            except IndexError as e:
+                pass
 
+            if 'name' in clinician_details and 'hospital' in clinician_details:
+                print("Found details for", self.report.ir_family.participant_family.proband.gel_id , clinician_details)
 
+                clinician, saved = Clinician.objects.get_or_create(
+                    name=clinician_details['name'],
+                    hospital = clinician_details['hospital']
+                )
+                self.clinician = clinician
+                family = self.report.ir_family.participant_family
+                family.clinician = clinician
+                family.save()
+                tried_all_gmc_labkeys = True # skip as other labkey url not required now
+                return clinician
+            else:
+                if labkey_url_attempt != 1:
+                    labkey_url_attempt = 1
+                    print("Clinician not found in ntgmc labkey")
+                    print("Looking within alternative labkey, index ", labkey_url_attempt.context_path)
+                else:
+                    print("Cannot find case in any labkey url")
+                    tried_all_gmc_labkeys = True
+                    return None
 
-        if 'name' in clinician_details and 'hospital' in clinician_details:
-            print(clinician_details)
-
-            clinician, saved = Clinician.objects.get_or_create(
-                name=clinician_details['name'],
-                hospital = clinician_details['hospital']
-            )
-            self.clinician = clinician
-            family = self.report.ir_family.participant_family
-            family.clinician = clinician
-            family.save()
-            return clinician
-        else:
-            return None
 
     def update_demographics(self):
         participant_demographics = {
@@ -536,68 +544,66 @@ class UpdateDemographics(object):
 
         if self.report.sample_type == 'cancer':
             schema = 'gel_cancer'
+            query_name = 'cancer_registration'
         elif self.report.sample_type == 'raredisease':
             schema = 'gel_rare_diseases'
+            query_name = 'rare_diseases_registration'
 
+        labkey_url_attempt = 0
+        tried_all_gmc_labkeys = False
+        server_context_list = [self.server_context_ntgmc, self.server_context_wlgmc]
 
-        if self.report.ir_family.participant_family.proband.gel_id.startswith("115") or self.report.ir_family.participant_family.proband.gel_id.startswith("215"):
+        while not tried_all_gmc_labkeys:
+            # try most probable labkey url first
             search_results = lk.query.select_rows(
-                server_context=self.server_context_ntgmc,
+                server_context=server_context_list[labkey_url_attempt],
                 schema_name=schema,
                 query_name='participant_identifier',
                 filter_array=[
                     lk.query.QueryFilter(
                         'participant_id', self.report.ir_family.participant_family.proband.gel_id, 'in')
-            ]
-        )
-        elif self.report.ir_family.participant_family.proband.gel_id.startswith("120") or self.report.ir_family.participant_family.proband.gel_id.startswith("220"):
-            search_results = lk.query.select_rows(
-                server_context=self.server_context_wlgmc,
-                schema_name=schema,
-                query_name='participant_identifier',
-                filter_array=[
-                    lk.query.QueryFilter(
-                        'participant_id', self.report.ir_family.participant_family.proband.gel_id, 'contains')
                 ]
             )
-        try:
-            participant_demographics["surname"] = search_results['rows'][0].get(
-                'surname')
-        except IndexError as e:
-            pass
-        try:
-            participant_demographics["forename"] = search_results['rows'][0].get(
-                'forenames')
-        except IndexError as e:
-            pass
-        try:
-            participant_demographics["date_of_birth"] = search_results['rows'][0].get(
-                'date_of_birth').split(' ')[0]
-        except IndexError as e:
-            pass
+            try:
+                try:
+                    participant_demographics["surname"] = search_results['rows'][0].get(
+                        'surname')
+                except IndexError as e:
+                    raise
+                try:
+                    participant_demographics["forename"] = search_results['rows'][0].get(
+                        'forenames')
+                except IndexError as e:
+                    raise
+                try:
+                    participant_demographics["date_of_birth"] = search_results['rows'][0].get(
+                        'date_of_birth').split(' ')[0]
+                except IndexError as e:
+                    raise
 
-        try:
+                try:
+                    if self.report.sample_type == 'raredisease':
+                        if search_results['rows'][0].get('person_identifier_type').upper() == "NHSNUMBER":
+                            participant_demographics["nhs_num"] = search_results['rows'][0].get(
+                                'person_identifier')
+                    elif self.report.sample_type == 'cancer':
+                        participant_demographics["nhs_num"] = search_results['rows'][0].get(
+                            'person_identifier')
+                except IndexError as e:
+                    raise
+            except Exception:
+                pass
+
+            recruiting_disease = None
             if self.report.sample_type == 'raredisease':
-                if search_results['rows'][0].get('person_identifier_type').upper() == "NHSNUMBER":
-                    participant_demographics["nhs_num"] = search_results['rows'][0].get(
-                        'person_identifier')
+                schema_name = 'gel_rare_diseases',
+                query_name = 'rare_diseases_diagnosis'
             elif self.report.sample_type == 'cancer':
-                participant_demographics["nhs_num"] = search_results['rows'][0].get(
-                    'person_identifier')
-        except IndexError as e:
-            pass
+                schema_name = 'gel_cancer',
+                query_name = 'cancer_diagnosis'
 
-        recruiting_disease = None
-        if self.report.sample_type == 'raredisease':
-            schema_name = 'gel_rare_diseases',
-            query_name = 'rare_diseases_diagnosis'
-        elif self.report.sample_type == 'cancer':
-            schema_name = 'gel_cancer',
-            query_name = 'cancer_diagnosis'
-
-        if self.report.ir_family.participant_family.proband.gel_id.startswith("115") or self.report.ir_family.participant_family.proband.gel_id.startswith("215"):
             search_results = lk.query.select_rows(
-                server_context=self.server_context_ntgmc,
+                server_context=server_context_list[labkey_url_attempt],
                 schema_name=schema_name,
                 query_name=query_name,
                 filter_array=[
@@ -605,39 +611,38 @@ class UpdateDemographics(object):
                                          self.report.ir_family.participant_family.proband.gel_id, 'eq')
                 ]
             )
-        elif self.report.ir_family.participant_family.proband.gel_id.startswith("120") or self.report.ir_family.participant_family.proband.gel_id.startswith("220"):
-            search_results = lk.query.select_rows(
-                server_context=self.server_context_wlgmc,
-                schema_name=schema_name,
-                query_name=query_name,
-                filter_array=[
-                    lk.query.QueryFilter('participant_identifiers_id',
-                                         self.report.ir_family.participant_family.proband.gel_id, 'eq')
-                ]
-            )
-        try:
-            if self.report.sample_type == 'raredisease':
-                recruiting_disease = search_results['rows'][0].get('gel_disease_information_specific_disease', None)
-            elif self.report.sample_type == 'cancer':
-                recruiting_disease = search_results['rows'][0].get('diagnosis_icd_code', None)
-        except IndexError as e:
-            pass
+            try:
+                if self.report.sample_type == 'raredisease':
+                    recruiting_disease = search_results['rows'][0].get('gel_disease_information_specific_disease', None)
+                elif self.report.sample_type == 'cancer':
+                    recruiting_disease = search_results['rows'][0].get('diagnosis_icd_code', None)
+            except IndexError as e:
+                pass
 
-        print(participant_demographics)
+            if participant_demographics['surname'] != 'unknown' and participant_demographics['nhs_num'] != 'unknown':
+                proband = self.report.ir_family.participant_family.proband
+                proband.nhs_number = participant_demographics['nhs_num']
+                proband.surname = participant_demographics['surname']
+                proband.forename = participant_demographics['forename']
+                proband.date_of_birth = datetime.strptime(participant_demographics["date_of_birth"],
+                                                                   "%Y/%m/%d").date()
+                proband.recruiting_disease = recruiting_disease
+                proband.gmc = self.clinician.hospital
+                proband.save()
+                print(participant_demographics)
+                tried_all_gmc_labkeys = True # skip as other labkey url not required now
+                return proband
+            else:
+                if labkey_url_attempt != 1:
+                    labkey_url_attempt = 1
+                    print("Demographics not found in ntgmc labkey")
+                    print("Looking within alternative labkey, index ", labkey_url_attempt)
+                else:
+                    print("Cannot find case in any labkey url")
+                    tried_all_gmc_labkeys = True
+                    return None
 
-        if participant_demographics['surname'] != 'unknown' and participant_demographics['nhs_num'] != 'unknown':
-            proband = self.report.ir_family.participant_family.proband
-            proband.nhs_number = participant_demographics['nhs_num']
-            proband.surname = participant_demographics['surname']
-            proband.forename = participant_demographics['forename']
-            proband.date_of_birth = datetime.strptime(participant_demographics["date_of_birth"],
-                                                               "%Y/%m/%d").date()
-            proband.recruiting_disease = recruiting_disease
-            proband.gmc = self.clinician.hospital
-            proband.save()
-            return proband
-        else:
-            return None
+            
 
 
 class UpdaterFromStorage:
