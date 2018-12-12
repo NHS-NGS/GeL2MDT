@@ -483,14 +483,14 @@ class UpdateDemographics(object):
             schema = 'gel_rare_diseases'
             query_name = 'rare_diseases_registration'
 
-        labkey_url_attempt = 0
+        labkey_url_index = 0
         all_gmc_labkeys_attempted = False
         server_context_list = [self.server_context_ntgmc, self.server_context_wlgmc]
-        #search_results = None
+        
         while not all_gmc_labkeys_attempted:
             # try most probable labkey url first
             search_results = lk.query.select_rows(
-                server_context=server_context_list[labkey_url_attempt],
+                server_context=server_context_list[labkey_url_index],
                 schema_name=schema,
                 query_name=query_name,
                 filter_array=[
@@ -511,12 +511,23 @@ class UpdateDemographics(object):
                 pass
 
             if 'name' in clinician_details and 'hospital' in clinician_details:
-                print("Found details for", self.report.ir_family.participant_family.proband.gel_id , clinician_details)
+                print("Found details for", self.report.ir_family.participant_family.proband.gel_id, clinician_details)
 
-                clinician, saved = Clinician.objects.get_or_create(
-                    name=clinician_details['name'],
-                    hospital = clinician_details['hospital']
-                )
+                # found several cases of null values within labkey 'consultant_details_hospital_of_responsible_consultant'
+                if clinician_details['hospital'] == None:
+                    print("Labkey clinician 'consultant_details_hospital_of_responsible_consultant' value is null, changing to 'Not provided'")
+                    clinician_details['hospital'] = "Not provided"
+
+                    clinician, saved = Clinician.objects.get_or_create(
+                        name=clinician_details['name'],
+                        hospital = clinician_details['hospital']
+                    )
+                    print(clinician_details)
+                else:
+                    clinician, saved = Clinician.objects.get_or_create(
+                        name=clinician_details['name'],
+                        hospital = clinician_details['hospital']
+                    )
                 self.clinician = clinician
                 family = self.report.ir_family.participant_family
                 family.clinician = clinician
@@ -524,12 +535,12 @@ class UpdateDemographics(object):
                 tried_all_gmc_labkeys = True # skip as other labkey url not required now
                 return clinician
             else:
-                if labkey_url_attempt != 1:
-                    labkey_url_attempt = 1
-                    print("Clinician not found in ntgmc labkey")
-                    print("Looking within alternative labkey, index ", labkey_url_attempt.context_path)
+                if labkey_url_index == 0:
+                    print("Clinician not found in labkey url index ", labkey_url_index.context_path)
+                    labkey_url_index += 1
+                    print("Looking within alternative labkey url index ", labkey_url_index.context_path)
                 else:
-                    print("Cannot find case in any labkey url")
+                    print("Cannot find case in any labkey url index")
                     tried_all_gmc_labkeys = True
                     return None
 
@@ -549,14 +560,14 @@ class UpdateDemographics(object):
             schema = 'gel_rare_diseases'
             query_name = 'rare_diseases_registration'
 
-        labkey_url_attempt = 0
+        labkey_url_index = 0
         tried_all_gmc_labkeys = False
         server_context_list = [self.server_context_ntgmc, self.server_context_wlgmc]
 
         while not tried_all_gmc_labkeys:
             # try most probable labkey url first
             search_results = lk.query.select_rows(
-                server_context=server_context_list[labkey_url_attempt],
+                server_context=server_context_list[labkey_url_index],
                 schema_name=schema,
                 query_name='participant_identifier',
                 filter_array=[
@@ -603,7 +614,7 @@ class UpdateDemographics(object):
                 query_name = 'cancer_diagnosis'
 
             search_results = lk.query.select_rows(
-                server_context=server_context_list[labkey_url_attempt],
+                server_context=server_context_list[labkey_url_index],
                 schema_name=schema_name,
                 query_name=query_name,
                 filter_array=[
@@ -633,10 +644,10 @@ class UpdateDemographics(object):
                 tried_all_gmc_labkeys = True # skip as other labkey url not required now
                 return proband
             else:
-                if labkey_url_attempt != 1:
-                    labkey_url_attempt = 1
+                if labkey_url_index != 1:
+                    labkey_url_index = 1
                     print("Demographics not found in ntgmc labkey")
-                    print("Looking within alternative labkey, index ", labkey_url_attempt)
+                    print("Looking within alternative labkey, index ", labkey_url_index)
                 else:
                     print("Cannot find case in any labkey url")
                     tried_all_gmc_labkeys = True
