@@ -437,6 +437,7 @@ class UpdateDemographics(object):
     def __init__(self, report_id):
 
         self.report = GELInterpretationReport.objects.get(id=report_id)
+        print(self.report.ir_family.participant_family.proband.gel_id)
         self.clinician = None
         print(self.report.sample_type)
 
@@ -479,12 +480,14 @@ class UpdateDemographics(object):
         if self.report.sample_type == 'cancer':
             schema = 'gel_cancer'
             query_name = 'cancer_registration'
+            query_filter_id = 'participant_identifiers_id' # this is same as family id in rarediease
         elif self.report.sample_type == 'raredisease':
             schema = 'gel_rare_diseases'
             query_name = 'rare_diseases_registration'
+            query_filter_id = 'family_id' # rare disease specific id
 
-        labkey_url_index = 0
         all_gmc_labkeys_attempted = False
+        labkey_url_index = 0
         server_context_list = [self.server_context_ntgmc, self.server_context_wlgmc]
         
         while not all_gmc_labkeys_attempted:
@@ -494,7 +497,7 @@ class UpdateDemographics(object):
                 schema_name=schema,
                 query_name=query_name,
                 filter_array=[
-                    lk.query.QueryFilter('family_id',
+                    lk.query.QueryFilter(query_filter_id,
                                          self.report.ir_family.participant_family.gel_family_id,
                                          'contains')
                 ]
@@ -515,7 +518,7 @@ class UpdateDemographics(object):
 
                 # several cases of null value within labkey 'consultant_details_hospital_of_responsible_consultant'
                 if clinician_details['hospital'] == None:
-                    print("Labkey clinician 'consultant_details_hospital_of_responsible_consultant' value is null, changing to 'Not provided'")
+                    print("Labkey clinician hospital value is null, changing to 'Not provided'")
                     clinician_details['hospital'] = "Not provided"
 
                     clinician, saved = Clinician.objects.get_or_create(
@@ -536,11 +539,11 @@ class UpdateDemographics(object):
                 return clinician
             else:
                 if labkey_url_index == 0:
-                    print("Clinician not found in labkey url index ", labkey_url_index.context_path)
+                    print("Clinician not found in labkey url index ", labkey_url_index, "(ntgmc)")
                     labkey_url_index += 1
-                    print("Looking within alternative labkey url index ", labkey_url_index.context_path)
+                    print("Looking within alternative labkey url index ", labkey_url_index, "(wlgmc)")
                 else:
-                    print("Cannot find case in any labkey url index")
+                    print("Cannot find case in labkey")
                     tried_all_gmc_labkeys = True
                     return None
 
