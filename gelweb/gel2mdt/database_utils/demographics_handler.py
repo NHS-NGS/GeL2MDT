@@ -51,6 +51,7 @@ class DemographicsHandler:
                     pass
 
                 if 'surname' in participant_demographics:
+                    print("Found particiant", participant_id)
                     all_results.append(results['rows'])
                     all_gmc_labkeys_attempted = True # skip as other labkey url not required now
                 else:
@@ -59,7 +60,7 @@ class DemographicsHandler:
                         labkey_url_index += 1
                         print("Searching within alternate labkey path:", server_context_list[labkey_url_index]._container_path)
                     else:
-                        print("Cannot find case demographics in labkey")
+                        print("Cannot find", participant_id, "case demographics in labkey")
                         all_gmc_labkeys_attempted = True
                         pass
 
@@ -107,11 +108,11 @@ class DemographicsHandler:
                     all_gmc_labkeys_attempted = True # skip as other labkey url not required now
                 else:
                     if labkey_url_index == 0:
-                        print("Clinician not found in labkey path:", server_context_list[labkey_url_index]._container_path)
+                        print("Participant", family_id, "clinician not found in labkey path:", server_context_list[labkey_url_index]._container_path)
                         labkey_url_index += 1
                         print("Searching within alternate labkey path:", server_context_list[labkey_url_index]._container_path)
                     else:
-                        print("Cannot find case clinician in labkey")
+                        print("Cannot find", family_id, "clinician in labkey")
                         all_gmc_labkeys_attempted = True
                         pass
         return all_results
@@ -122,13 +123,15 @@ class DemographicsHandler:
         server_context_list = [self.server_context_ntgmc, self.server_context_wlgmc]
         all_results = []
 
-        if self.sample_type == 'raredisease':
-            for participant_id in participant_ids:
-                recruiting_disease = None
-                labkey_url_index = 0
-                all_gmc_labkeys_attempted = False
+        for participant_id in participant_ids:
+            print(participant_id)
+            labkey_url_index = 0
+            all_gmc_labkeys_attempted = False
+            diagnosis = {}
 
+            if self.sample_type == 'raredisease':
                 while not all_gmc_labkeys_attempted:
+                    print(labkey_url_index)
                     query = participant_id
                     results = lk.query.select_rows(
                         server_context=server_context_list[labkey_url_index],
@@ -138,22 +141,23 @@ class DemographicsHandler:
                             lk.query.QueryFilter('participant_identifiers_id', query, 'in')
                         ]
                     )
-                try:
-                    recruiting_disease = results['rows'][0].get('gel_disease_information_specific_disease', None)
-                except IndexError as e:
-                    pass
+                    try:
+                        diagnosis['pid'] = results['rows'][0].get('participant_identifiers_id')
+                    except IndexError as e:
+                        pass
 
-            if 'gel_disease_information_specific_disease' in recruiting_disease:
-                all_results.append(results['rows'])
-                all_gmc_labkeys_attempted = True # skip as other labkey url not required now
-            else:
-                if labkey_url_index == 0:
-                    print("Diagnosis not found in labkey path:", server_context_list[labkey_url_index]._container_path)
-                    labkey_url_index += 1
-                    print("Searching within alternate labkey path:", server_context_list[labkey_url_index]._container_path)
-                else:
-                    print("Cannot find case diagnosis in any labkey")
-                    all_gmc_labkeys_attempted = True
-                    pass
+                    if 'pid' in diagnosis:
+                        print("Found", participant_id)
+                        all_results.append(results['rows'])
+                        all_gmc_labkeys_attempted = True # skip as other labkey url not required now
+                    else:
+                        if labkey_url_index == 0:
+                            print("Participant", participant_id, "diagnosis not found in labkey path:", server_context_list[labkey_url_index]._container_path)
+                            labkey_url_index += 1
+                            print("Searching within alternate labkey path:", server_context_list[labkey_url_index]._container_path)
+                        else:
+                            print("Cannot find", participant_id, "case diagnosis in any labkey")
+                            all_gmc_labkeys_attempted = True
+                            pass
         return all_results
 
