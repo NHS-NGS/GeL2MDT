@@ -437,12 +437,12 @@ class UpdateDemographics(object):
     def __init__(self, report_id):
 
         self.report = GELInterpretationReport.objects.get(id=report_id)
-        print(self.report.ir_family.participant_family.proband.gel_id)
+        print("{}{}".format("Proband gel_id:", self.report.ir_family.participant_family.proband.gel_id))
         self.clinician = None
-        print(self.report.sample_type)
+        print("{}{}".format("Case sample_type:", self.report.sample_type))
 
         config_dict = load_config.LoadConfig().load()
-        # poll labkey, split nt and wl gmcs based on pid range
+
         if self.report.sample_type == 'raredisease':
             self.labkey_server_request_ntgmc = config_dict['labkey_server_request_ntgmc']
             self.labkey_server_request_wlgmc = config_dict['labkey_server_request_wlgmc']
@@ -469,18 +469,11 @@ class UpdateDemographics(object):
 
     def update_clinician(self):
         clinician_details = {}
-        '''clinician_details = {
-            'name': 'unknown',
-            'hospital': 'unknown' # workaround for object has no attribute error
-        }'''
-
-        print("pid", self.report.ir_family.participant_family.proband.gel_id)
-        print("family_id", self.report.ir_family.participant_family.gel_family_id)
 
         if self.report.sample_type == 'cancer':
             schema = 'gel_cancer'
             query_name = 'cancer_registration'
-            query_filter_id = 'participant_identifiers_id' # this is same as family id in rarediease
+            query_filter_id = 'participant_identifiers_id' # participant_identifiers_id is the same as family_id in rarediease
         elif self.report.sample_type == 'raredisease':
             schema = 'gel_rare_diseases'
             query_name = 'rare_diseases_registration'
@@ -492,7 +485,7 @@ class UpdateDemographics(object):
         
         while not all_gmc_labkeys_attempted:
             # try most probable labkey url first
-            search_results = lk.query.select_rows(
+            results = lk.query.select_rows(
                 server_context=server_context_list[labkey_url_index],
                 schema_name=schema,
                 query_name=query_name,
@@ -503,12 +496,12 @@ class UpdateDemographics(object):
                 ]
             )
             try:
-                clinician_details['name'] = search_results['rows'][0].get(
+                clinician_details['name'] = results['rows'][0].get(
                     'consultant_details_full_name_of_responsible_consultant')
             except IndexError as e:
                 pass
             try:
-                clinician_details['hospital'] = search_results['rows'][0].get(
+                clinician_details['hospital'] = results['rows'][0].get(
                     'consultant_details_hospital_of_responsible_consultant')
             except IndexError as e:
                 pass
@@ -539,11 +532,11 @@ class UpdateDemographics(object):
                 return clinician
             else:
                 if labkey_url_index == 0:
-                    print("Clinician not found in labkey url index ", labkey_url_index, "(ntgmc)")
+                    print("Clinician not found in labkey path", server_context_list[labkey_url_index]._container_path)
                     labkey_url_index += 1
-                    print("Looking within alternative labkey url index ", labkey_url_index, "(wlgmc)")
+                    print("Searching within alternate labkey path", server_context_list[labkey_url_index]._container_path)
                 else:
-                    print("Cannot find case in labkey")
+                    print("Cannot find case clinician in labkey")
                     tried_all_gmc_labkeys = True
                     return None
 
@@ -569,7 +562,7 @@ class UpdateDemographics(object):
 
         while not tried_all_gmc_labkeys:
             # try most probable labkey url first
-            search_results = lk.query.select_rows(
+            results = lk.query.select_rows(
                 server_context=server_context_list[labkey_url_index],
                 schema_name=schema,
                 query_name='participant_identifier',
@@ -580,28 +573,28 @@ class UpdateDemographics(object):
             )
             try:
                 try:
-                    participant_demographics["surname"] = search_results['rows'][0].get(
+                    participant_demographics["surname"] = results['rows'][0].get(
                         'surname')
                 except IndexError as e:
                     raise
                 try:
-                    participant_demographics["forename"] = search_results['rows'][0].get(
+                    participant_demographics["forename"] = results['rows'][0].get(
                         'forenames')
                 except IndexError as e:
                     raise
                 try:
-                    participant_demographics["date_of_birth"] = search_results['rows'][0].get(
+                    participant_demographics["date_of_birth"] = results['rows'][0].get(
                         'date_of_birth').split(' ')[0]
                 except IndexError as e:
                     raise
 
                 try:
                     if self.report.sample_type == 'raredisease':
-                        if search_results['rows'][0].get('person_identifier_type').upper() == "NHSNUMBER":
-                            participant_demographics["nhs_num"] = search_results['rows'][0].get(
+                        if results['rows'][0].get('person_identifier_type').upper() == "NHSNUMBER":
+                            participant_demographics["nhs_num"] = results['rows'][0].get(
                                 'person_identifier')
                     elif self.report.sample_type == 'cancer':
-                        participant_demographics["nhs_num"] = search_results['rows'][0].get(
+                        participant_demographics["nhs_num"] = results['rows'][0].get(
                             'person_identifier')
                 except IndexError as e:
                     raise
@@ -616,7 +609,7 @@ class UpdateDemographics(object):
                 schema_name = 'gel_cancer',
                 query_name = 'cancer_diagnosis'
 
-            search_results = lk.query.select_rows(
+            results = lk.query.select_rows(
                 server_context=server_context_list[labkey_url_index],
                 schema_name=schema_name,
                 query_name=query_name,
@@ -627,9 +620,9 @@ class UpdateDemographics(object):
             )
             try:
                 if self.report.sample_type == 'raredisease':
-                    recruiting_disease = search_results['rows'][0].get('gel_disease_information_specific_disease', None)
+                    recruiting_disease = results['rows'][0].get('gel_disease_information_specific_disease', None)
                 elif self.report.sample_type == 'cancer':
-                    recruiting_disease = search_results['rows'][0].get('diagnosis_icd_code', None)
+                    recruiting_disease = results['rows'][0].get('diagnosis_icd_code', None)
             except IndexError as e:
                 pass
 
@@ -648,11 +641,12 @@ class UpdateDemographics(object):
                 return proband
             else:
                 if labkey_url_index != 1:
-                    labkey_url_index = 1
-                    print("Demographics not found in ntgmc labkey")
-                    print("Looking within alternative labkey, index ", labkey_url_index)
+                    print("Demographics not found in labkey path", server_context_list[labkey_url_index]._container_path)
+                    labkey_url_index += 1
+                    print("Searching within alternate labkey path", server_context_list[labkey_url_index]._container_path)
+
                 else:
-                    print("Cannot find case in any labkey url")
+                    print("Cannot find case demographics in labkey")
                     tried_all_gmc_labkeys = True
                     return None
 
