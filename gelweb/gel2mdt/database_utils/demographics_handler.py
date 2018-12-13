@@ -51,8 +51,8 @@ class DemographicsHandler:
                     pass
 
                 if 'surname' in participant_demographics:
-                    print("Found particiant", participant_id)
-                    all_results.append(results['rows'])
+                    print("Found participant:", participant_id)
+                    all_results.append(results['rows'][0])
                     all_gmc_labkeys_attempted = True # skip as other labkey url not required now
                 else:
                     if labkey_url_index == 0:
@@ -104,7 +104,7 @@ class DemographicsHandler:
 
                 if 'name' in clinician_details:
                     print("Found clinician details for family_id:", family_id)
-                    all_results.append(results['rows'])
+                    all_results.append(results['rows'][0])
                     all_gmc_labkeys_attempted = True # skip as other labkey url not required now
                 else:
                     if labkey_url_index == 0:
@@ -148,7 +148,7 @@ class DemographicsHandler:
 
                     if 'pid' in diagnosis:
                         print("Found", participant_id)
-                        all_results.append(results['rows'])
+                        all_results.append(results['rows'][0])
                         all_gmc_labkeys_attempted = True # skip as other labkey url not required now
                     else:
                         if labkey_url_index == 0:
