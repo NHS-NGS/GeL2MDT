@@ -22,7 +22,7 @@ SOFTWARE.
 from django.db import models
 from django.utils import timezone
 from django.conf import settings
-
+from django.contrib.auth.models import User, Group
 import pandas as pd
 
 from .model_utils.choices import ChoiceEnum
@@ -926,4 +926,16 @@ class CaseAlert(models.Model):
     class Meta:
         managed = True
         db_table = 'GELAlert'
+        app_label = 'gel2mdt'
+
+
+class CaseComment(models.Model):
+    report = models.ForeignKey(GELInterpretationReport, on_delete=models.CASCADE)
+    comment = models.TextField()
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    time = models.DateTimeField()
+
+    class Meta:
+        managed = True
+        db_table = 'CaseComment'
         app_label = 'gel2mdt'
