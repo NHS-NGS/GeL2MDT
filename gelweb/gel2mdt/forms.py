@@ -82,7 +82,7 @@ class ProbandForm(forms.ModelForm):
     '''
     class Meta:
         model = Proband
-        fields = ['outcome', 'comment']
+        fields = ['outcome']
 
 
 class VariantValidationForm(forms.ModelForm):
