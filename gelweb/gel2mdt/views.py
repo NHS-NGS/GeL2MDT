@@ -1342,8 +1342,8 @@ def delete_case_alert(request, case_alert_id):
 
 @login_required
 def edit_preferred_transcript(request, geneid, genome_build_id):
-    gene = Gene.objects.filter(id=geneid)
-    genome_assembly = ToolOrAssemblyVersion.objects.filter(id=genome_build_id)
+    gene = Gene.objects.get(id=geneid)
+    genome_assembly = ToolOrAssemblyVersion.objects.filter(id=genome_build_id).first()
     transcripts = Transcript.objects.filter(gene=gene, genome_assembly=genome_assembly)
     return render(request, 'gel2mdt/select_preferred_transcript.html', {'transcripts': transcripts,
                                                                         'gene': gene,
@@ -1359,10 +1359,10 @@ def update_preferred_transcript(request, geneid, genome_build_id, transcript_id)
     :return: Select Transcript view
     '''
     transcript = Transcript.objects.get(id=transcript_id)
-    gene = Gene.objects.filter(id=geneid)
-    genome_build = ToolOrAssemblyVersion.objects.filter(id=genome_build_id)
-    PreferredTranscript.objects.get_or_create(gene=gene,
-                                              genome_assembly=genome_build,
-                                              defaults={'transcript': transcript})
+    gene = Gene.objects.get(id=geneid)
+    genome_build = ToolOrAssemblyVersion.objects.get(id=genome_build_id)
+    PreferredTranscript.objects.update_or_create(gene=gene,
+                                                 genome_assembly=genome_build,
+                                                 defaults={'transcript': transcript})
     messages.add_message(request, 25, 'Preferred Transcript Updated')
-    return HttpResponseRedirect(f'/select_transcript/{geneid}/{genome_build_id}')
+    return HttpResponseRedirect(f'/edit_preferred_transcript/{geneid}/{genome_build_id}')

@@ -381,6 +381,11 @@ class GELInterpretationReport(models.Model):
                     for pv in proband_variants:
                         pv.interpretation_report = self
                         pv.save()
+                case_comments = CaseComment.objects.filter(interpretation_report=latest_report)
+                if case_comments:
+                    for comment in case_comments:
+                        comment.interpretation_report = self
+                        comment.save()
 
         else:
             self.archived_version = 1
@@ -523,7 +528,7 @@ class Transcript(models.Model):
         preferred_transcripts = PreferredTranscript.objects.filter(gene=self.gene,
                                                                    genome_assembly=self.genome_assembly,
                                                                    transcript=self)
-        return preferred_transcripts
+        return preferred_transcripts.first()
 
     class Meta:
         managed = True
@@ -930,7 +935,7 @@ class CaseAlert(models.Model):
 
 
 class CaseComment(models.Model):
-    report = models.ForeignKey(GELInterpretationReport, on_delete=models.CASCADE)
+    interpretation_report = models.ForeignKey(GELInterpretationReport, on_delete=models.CASCADE)
     comment = models.TextField()
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     time = models.DateTimeField()
