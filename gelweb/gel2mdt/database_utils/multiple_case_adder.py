@@ -433,7 +433,7 @@ class MultipleCaseAdder(object):
                             participant_ids.append(family_member['gel_id'])
 
                     # rd pids 115* (nt) and 120* (wl) & ca 215* (nt) 220* (wl). Few exceptions.
-                    # fyi, format of participant_id if no result recorded in LabKey=NR_120000299_1233951
+                    # fyi, format of participant_id if no result recorded in LabKey=NR_XXXXXXXXX_1234567
                     for participant_id in participant_ids:
                         if participant_id.startswith("NR_"):
                             pass # ignore
@@ -457,7 +457,7 @@ class MultipleCaseAdder(object):
                         for family_member in case.family_members:  # Shouldn't be any but just for futureproofing!
                             participant_ids.append(family_member['gel_id'])
 
-                    # fyi, format of participant_id if no result recorded in LabKey=NR_120000299_1233951
+                    # format of participant_id if no result recorded in LabKey=NR_XXXXXXXXX_1234567
                     for participant_id in participant_ids:
                         if participant_id.startswith("NR_"):
                             pass # ignore
