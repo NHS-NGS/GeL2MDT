@@ -942,5 +942,6 @@ class CaseComment(models.Model):
 
     class Meta:
         managed = True
+        ordering = ['-time']
         db_table = 'CaseComment'
         app_label = 'gel2mdt'
