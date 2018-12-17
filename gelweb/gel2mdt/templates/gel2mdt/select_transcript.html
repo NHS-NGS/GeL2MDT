@@ -36,6 +36,7 @@ SOFTWARE.
                     <tr>
                         <th>Select</th>
                         <th>Canonical</th>
+                        <th>Preferred Transcript</th>
                         <th>Gene</th>
                         <th>Transcript</th>
                         <th>Strand</th>
@@ -61,7 +62,8 @@ SOFTWARE.
                              {% endif %}
                         </td>
                             <td>{{ptv.transcript.canonical_transcript}}</td>
-                            <td>{{ptv.transcript.gene}}</td>
+                            <td>{{ptv.transcript.is_preferred_transcript}}</td>
+                            <td><a href="/edit_preferred_transcript/{{ptv.transcript.gene_id}}/{{ptv.transcript.genome_assembly_id}}">{{ptv.transcript.gene}}</a></td>
                             <td>{{ptv.transcript.name}}</td>
                             <td>{{ptv.transcript.strand}}</td>
                             <td style="word-wrap: break-word; min-width: 220px;max-width: 220px;">{{ptv.effect}}</td>

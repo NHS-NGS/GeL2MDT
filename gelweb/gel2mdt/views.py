@@ -1338,3 +1338,31 @@ def delete_case_alert(request, case_alert_id):
     case_alert_instance.delete()
     messages.add_message(request, 25, 'Alert Deleted')
     return redirect('case-alert', sample_type=sample_type)
+
+
+@login_required
+def edit_preferred_transcript(request, geneid, genome_build_id):
+    gene = Gene.objects.filter(id=geneid)
+    genome_assembly = ToolOrAssemblyVersion.objects.filter(id=genome_build_id)
+    transcripts = Transcript.objects.filter(gene=gene, genome_assembly=genome_assembly)
+    return render(request, 'gel2mdt/select_preferred_transcript.html', {'transcripts': transcripts,
+                                                                        'gene': gene,
+                                                                        'genome_assembly': genome_assembly})
+
+
+@login_required
+def update_preferred_transcript(request, geneid, genome_build_id, transcript_id):
+    '''
+    Updates the selected transcript
+    :param request:
+    :param transcript_id: Transcript id of the selected transcript
+    :return: Select Transcript view
+    '''
+    transcript = Transcript.objects.get(id=transcript_id)
+    gene = Gene.objects.filter(id=geneid)
+    genome_build = ToolOrAssemblyVersion.objects.filter(id=genome_build_id)
+    PreferredTranscript.objects.get_or_create(gene=gene,
+                                              genome_assembly=genome_build,
+                                              defaults={'transcript': transcript})
+    messages.add_message(request, 25, 'Preferred Transcript Updated')
+    return HttpResponseRedirect(f'/select_transcript/{geneid}/{genome_build_id}')

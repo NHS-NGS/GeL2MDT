@@ -52,7 +52,10 @@ urlpatterns = [
     path('select_transcript/<int:report_id>/<int:pv_id>', views.select_transcript, name='select-transcript'),
     path('update_transcript/<int:report_id>/<int:pv_id>/<int:transcript_id>', views.update_transcript,
          name='update-transcript'),
-
+    path('edit_preferred_transcript/<int:geneid>/<int:genome_build_id>', views.edit_preferred_transcript,
+         name='edit-preferred-transcript'),
+    path('update_preferred_transcript/<int:geneid>/<int:genome_build_id>/<int:transcript_id>',
+         views.update_preferred_transcript, name='update-preferred-transcript'),
     path('<str:sample_type>/start_mdt/', views.start_mdt_view, name='start-mdt'),
     path('<str:sample_type>/edit_mdt/<int:mdt_id>', views.edit_mdt, name='edit-mdt'),
     path('mdt_view/<int:mdt_id>', views.mdt_view, name='mdt-view'),

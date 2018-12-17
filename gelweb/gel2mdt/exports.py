@@ -36,7 +36,7 @@ def write_mdt_export(writer, mdt_instance, mdt_reports):
     :param mdt_reports: List of reports which are present in MDT
     :return: CSV file Writer
     '''
-    writer.writerow(['Forename', 'Surname', 'DOB', 'NHS no.', 'GELID', 'CIPID',
+    writer.writerow(['Forename', 'Surname', 'Gender', 'DOB', 'NHS no.', 'GELID', 'CIPID',
                      'Clinician', 'Panel', 'Variant&Zygosity'])
 
     for report in mdt_reports:
@@ -65,6 +65,7 @@ def write_mdt_export(writer, mdt_instance, mdt_reports):
                                f'{panel.panel.version_number}')
         writer.writerow([report.interpretation_report.ir_family.participant_family.proband.forename,
                          report.interpretation_report.ir_family.participant_family.proband.surname,
+                         report.interpretation_report.ir_family.participant_family.proband.sex,
                          report.interpretation_report.ir_family.participant_family.proband.date_of_birth.date(),
                          report.interpretation_report.ir_family.participant_family.proband.nhs_number,
                          report.interpretation_report.ir_family.participant_family.proband.gel_id,
