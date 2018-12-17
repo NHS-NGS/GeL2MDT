@@ -291,6 +291,7 @@ def proband_view(request, report_id):
         clinician_form = ClinicianForm(request.POST)
         add_clinician_form = AddClinicianForm(request.POST)
         add_variant_form = AddVariantForm(request.POST)
+        add_comment_form = AddCommentForm(request.POST)
         variant_validation_form = VariantValidationForm(request.POST)
 
         if variant_validation_form.is_valid():
@@ -306,6 +307,12 @@ def proband_view(request, report_id):
             messages.add_message(request, 25, 'Proband Updated')
         if case_assign_form.is_valid():
             case_assign_form.save()
+        if add_comment_form.is_valid():
+            CaseComment.objects.create(interpretation_report=report,
+                                       comment=add_comment_form.cleaned_data['comment'],
+                                       user=request.user,
+                                       time=timezone.now())
+            messages.add_message(request, 25, 'Comment Added')
         if panel_form.is_valid():
             irfp, created = InterpretationReportFamilyPanel.objects.get_or_create(panel=panel_form.cleaned_data['panel'],
                                                                                   ir_family=report.ir_family,
@@ -359,6 +366,7 @@ def proband_view(request, report_id):
     clinician_form = ClinicianForm()
     add_clinician_form = AddClinicianForm()
     add_variant_form = AddVariantForm()
+    add_comment_form = AddCommentForm()
 
     variants_for_reporting = RareDiseaseReport.objects.filter(
         proband_variant__interpretation_report__id=report.id,
@@ -395,7 +403,8 @@ def proband_view(request, report_id):
                                                     'proband_history': proband_history,
                                                     'report_fields': report_history_formatter.report_interesting_fields,
                                                     'proband_fields': report_history_formatter.proband_interesting_fields,
-                                                    'other_cases': other_cases})
+                                                    'other_cases': other_cases,
+                                                    'add_comment_form': add_comment_form})
 
 
 @login_required
@@ -1366,3 +1375,11 @@ def update_preferred_transcript(request, geneid, genome_build_id, transcript_id)
                                                  defaults={'transcript': transcript})
     messages.add_message(request, 25, 'Preferred Transcript Updated')
     return HttpResponseRedirect(f'/edit_preferred_transcript/{geneid}/{genome_build_id}')
+
+
+@login_required
+def delete_comment(request, comment_id):
+    comment = CaseComment.objects.get(id=comment_id)
+    report = comment.interpretation_report
+    comment.delete()
+    return HttpResponseRedirect(f'/proband/{report.id}')
