@@ -532,10 +532,10 @@ class UpdateDemographics(object):
                 return clinician
             else:
                 if labkey_url_index == 0:
-                    print("Clinician not found in labkey path", server_context_list[labkey_url_index]._container_path)
+                    print("Clinician not found in labkey path:", server_context_list[labkey_url_index]._container_path)
                     labkey_url_index += 1
-                    print("Searching within alternate labkey path", server_context_list[labkey_url_index]._container_path)
                 else:
+                    print("Clinician not found in labkey path:", server_context_list[labkey_url_index]._container_path)
                     print("Cannot find case clinician in labkey")
                     tried_all_gmc_labkeys = True
                     return None
@@ -641,11 +641,10 @@ class UpdateDemographics(object):
                 return proband
             else:
                 if labkey_url_index != 1:
-                    print("Demographics not found in labkey path", server_context_list[labkey_url_index]._container_path)
+                    print("Demographics not found in labkey path:", server_context_list[labkey_url_index]._container_path)
                     labkey_url_index += 1
-                    print("Searching within alternate labkey path", server_context_list[labkey_url_index]._container_path)
-
                 else:
+                    print("Demographics not found in labkey path:", server_context_list[labkey_url_index]._container_path)
                     print("Cannot find case demographics in labkey")
                     tried_all_gmc_labkeys = True
                     return None
