@@ -287,14 +287,16 @@
                                       <h5 class="media-heading">{{comment.user.first_name}} {{comment.user.last_name}}
                                           <span style="float: right; margin: 0px 5px 0px 5px">
                                               <small><i>Posted on {{comment.time}}</i></small></span></h5>
-                                      <p>{{comment.comment}}
+                                      <p>{{comment.comment}}</p>
+                                        <p>
                                         {% if comment.user == request.user %}
-                                        <span style="float: right; margin: 0px 5px 0px 5px">
-                                            <button type="button" class="btn btn-xs btn-primary js-edit-comment" data-url="/edit_comment/{{ comment.id }}">Edit
-                                                        </button>
-                                            <a href="/delete_comment/{{comment.id }}"><i class="fas fa-times"  style="font-size:20px;color:red;"></i></a>
+                                        <span style="float: left; margin: 0px 0px 0px 0px">
+                                            <a class="js-edit-comment" data-url="/edit_comment/{{ comment.id }}" style="font-size: 13px;">Edit
+                                                        </a>
+                                            <a href="/delete_comment/{{comment.id }}" style="font-size: 13px;" onclick="return confirm('Are you sure?')">Delete</a>
                                         </span>
-                                          </p>
+                                            </p>
+
 
                                         {% endif %}
 
