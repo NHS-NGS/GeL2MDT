@@ -367,6 +367,7 @@ def proband_view(request, report_id):
     add_clinician_form = AddClinicianForm()
     add_variant_form = AddVariantForm()
     add_comment_form = AddCommentForm()
+    edit_comment_form = AddCommentForm()
 
     variants_for_reporting = RareDiseaseReport.objects.filter(
         proband_variant__interpretation_report__id=report.id,
@@ -1400,3 +1401,31 @@ def delete_comment(request, comment_id):
     report = comment.interpretation_report
     comment.delete()
     return HttpResponseRedirect(f'/proband/{report.id}')
+
+
+
+@login_required
+def edit_comment(request):
+    if request.method == 'POST':
+        case_alert_form = AddCaseAlert(request.POST, instance=case_alert_instance)
+        if case_alert_form.is_valid():
+            case_alert_form.save()
+            data['form_is_valid'] = True
+    return HttpResponseRedirect(f'/proband/{report.id}')
+
+
+@login_required
+def edit_comment(request, comment_id):
+    data = {}
+    comment_instance = CaseComment.objects.get(id=comment_id)
+    edit_comment_form = AddCommentForm(instance=comment_instance)
+    if request.method == 'POST':
+        edit_comment_form = AddCommentForm(request.POST, instance=comment_instance)
+        if edit_comment_form.is_valid():
+            edit_comment_form.save()
+            data['form_is_valid'] = True
+        return redirect('proband-view', report_id=comment_instance.interpretation_report.id)
+    context = {'edit_comment_form': edit_comment_form, 'comment_instance': comment_instance}
+    html_form = render_to_string('gel2mdt/modals/comment_modal.html', context, request=request)
+    data['html_form'] = html_form
+    return JsonResponse(data)
