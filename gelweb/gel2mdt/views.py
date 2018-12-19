@@ -22,7 +22,7 @@ SOFTWARE.
 import os
 import json
 import csv
-from datetime import datetime
+from datetime import date
 from io import BytesIO, StringIO
 
 from django.db import IntegrityError
@@ -49,7 +49,7 @@ from .api.api_views import *
 
 from .database_utils.multiple_case_adder import MultipleCaseAdder
 from .vep_utils.run_vep_batch import CaseVariant
-
+import datetime
 from bokeh.resources import CDN
 from bokeh.embed import components
 from bokeh.layouts import gridplot, row
@@ -642,7 +642,7 @@ def start_mdt_view(request, sample_type):
     :param sample_type: Either raredisease or Cancer MDT will be created
     :return: View allowing users choose cases
     '''
-    mdt_instance = MDT(creator=request.user, date_of_mdt=datetime.now(), sample_type=sample_type)
+    mdt_instance = MDT(creator=request.user, date_of_mdt=datetime.datetime.now(), sample_type=sample_type)
     mdt_instance.save()
 
     return HttpResponseRedirect(f'/{sample_type}/edit_mdt/{mdt_instance.id}')
@@ -930,7 +930,16 @@ def recent_mdts(request, sample_type):
     clinicians_emails = Clinician.objects.all().values_list('email', flat=True)
     if request.user.email in clinicians_emails:
         clinician = True
-    recent_mdt = list(MDT.objects.filter(sample_type=sample_type).order_by('-date_of_mdt'))
+    recent_mdt = MDT.objects.filter(sample_type=sample_type).order_by('-date_of_mdt')
+    excluded_mdts = []
+    if clinician:
+        for mdt in recent_mdt:
+            if mdt.status == 'C':
+                if mdt.date_of_mdt < timezone.now() - datetime.timedelta(weeks=4):
+                    excluded_mdts.append(mdt.id)
+    recent_mdt = recent_mdt.exclude(id__in=excluded_mdts)
+    recent_mdt = list(recent_mdt)
+
     config_dict = load_config.LoadConfig().load()
     # Need to get which probands were in MDT
     probands_in_mdt = {}
