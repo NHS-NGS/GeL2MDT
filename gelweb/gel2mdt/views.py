@@ -731,10 +731,13 @@ def mdt_view(request, mdt_id):
         t3_proband_variant_count[report.id] = 0
         pvs = ProbandVariant.objects.filter(interpretation_report=report)
         for pv in pvs:
-            if pv.pvflag_set.all() or pv.max_tier < 3:
+            if pv.pvflag_set.all() and pv.max_tier == None:
                 proband_variant_count[report.id] += 1
-            else:
-                t3_proband_variant_count[report.id] += 1
+            if pv.max_tier:
+                if pv.pvflag_set.all() or pv.max_tier < 3:
+                    proband_variant_count[report.id] += 1
+                else:
+                    t3_proband_variant_count[report.id] += 1
 
     mdt_form = MdtForm(instance=mdt_instance)
     clinicians = Clinician.objects.filter(mdt=mdt_id).values_list('name', flat=True)
