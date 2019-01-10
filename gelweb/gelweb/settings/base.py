@@ -17,7 +17,7 @@ from datetime import datetime
 
 # Check that the expected local_settings values are present
 try:
-    from .local_settings import SECRET_KEY, DEBUG, ALLOWED_HOSTS, DATABASES
+    from .local_settings import SECRET_KEY, DEBUG, ALLOWED_HOSTS, DATABASES, ADDITIONAL_APPS
 except ImportError:
     print('Check the following settings are present in local_settings.py:\n'
           'SECRET_KEY, DEBUG, ALLOWED_HOSTS, DATABASES')
@@ -31,6 +31,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static_files')
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
@@ -50,7 +51,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'rest_framework',
     'easy_pdf'
-]
+] + ADDITIONAL_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
