@@ -17,7 +17,7 @@ Likewise, in order to maintain a persistent database the Postgres/MySQL containe
 machine, as are the cached JSON files from GEL.
 
 ### Clone the Repo
-    git clone -b docker https://github.com/NHS-NGS/GeL2MDT.git
+    git clone https://github.com/NHS-NGS/GeL2MDT.git
 ### Edit site-specific details
 From the 'Docker' directory, edit the following files:
 
