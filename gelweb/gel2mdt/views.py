@@ -804,8 +804,11 @@ def mdt_proband_view(request, mdt_id, pk, important):
     proband_variants_all = ProbandVariant.objects.filter(interpretation_report=report)
     for pv in proband_variants_all:
         if important ==1:
-            if pv.pvflag_set.all() or pv.max_tier < 3:
+            if pv.pvflag_set.all() and pv.max_tier == None:
                 proband_variants.append(pv)
+            if pv.max_tier:
+                if pv.pvflag_set.all() or pv.max_tier < 3:
+                    proband_variants.append(pv)
         else:
             if not pv.pvflag_set.all():
                 proband_variants.append(pv)
