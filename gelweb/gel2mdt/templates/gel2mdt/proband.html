@@ -658,7 +658,7 @@
                             </thead>
                             <tbody style='font-size: 75%'>
 
-                                {% for pv, pv_form in pv_forms_dict.items %}
+                                {% for pv, pv_items in pv_dict.items %}
                                     <tr >
                                         <td>
                                             <a href="/variant/{{pv.variant.id }}">
@@ -671,6 +671,7 @@
                                             </a>
                                         </td>
 
+                                        {% if report.sample_type == 'raredisease' %}
                                         <div id="pvModal{{forloop.counter}}" class="modal fade" role="dialog">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
@@ -681,46 +682,87 @@
                                                     <div class="modal-body">
                                                         <label>Variant Classification</label>
                                                         <br>
-                                                        {{ pv.rarediseasereport.get_classification_display }}
+                                                        {{ pv_items.raredisease_report.get_classification_display }}
                                                         <hr>
                                                         <label>Contribution to Phenotype</label>
                                                         <br>
-                                                        {{ pv.rarediseasereport.contribution_to_phenotype }}
+                                                        {{ pv_items.raredisease_report.contribution_to_phenotype }}
                                                         <hr>
                                                         <label>Action from MDT</label>
                                                         <br>
-                                                        {{ pv.rarediseasereport.action }}
+                                                        {{ pv_items.raredisease_report.action }}
                                                         <hr>
                                                         <label>MDT Discussion</label>
                                                         <br>
-                                                        {{ pv.rarediseasereport.discussion }}
+                                                        {{ pv_items.raredisease_report.discussion }}
                                                         <hr>
                                                         <label>Change Medication?</label>
                                                         <br>
-                                                        {{ pv.rarediseasereport.change_med }}
+                                                        {{ pv_items.raredisease_report.change_med }}
                                                         <hr>
                                                         <label>Surgical Option?</label>
                                                         <br>
-                                                        {{ pv.rarediseasereport.surgical_option }}
+                                                        {{ pv_items.raredisease_report.surgical_option }}
                                                         <hr>
                                                         <label>Add Relative Surveillance?</label>
                                                         <br>
-                                                        {{ pv.rarediseasereport.add_surveillance_for_relatives }}
+                                                        {{ pv_items.raredisease_report.add_surveillance_for_relatives }}
                                                         <hr>
                                                         <label>Add Clinical Trial?</label>
                                                         <br>
-                                                        {{ pv.rarediseasereport.clinical_trial }}
+                                                        {{ pv_items.raredisease_report.clinical_trial }}
                                                         <hr>
                                                         <label>Inform Reproductive Choice?</label>
                                                         <br>
-                                                        {{ pv.rarediseasereport.inform_reproductive_choice }}
+                                                        {{ pv_items.raredisease_report.inform_reproductive_choice }}
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
+                                        {% else %}
+                                        <div id="pvModal{{forloop.counter}}" class="modal fade" role="dialog">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
+                                                        <h4 class="modal-title">MDT Results</h4>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <label>Variant Classification</label>
+                                                        <br>
+                                                        {{ pv_items.cancer_report.get_classification_display }}
+                                                        <hr>
+                                                        <label>Action from MDT</label>
+                                                        <br>
+                                                        {{ pv_items.cancer_report.action }}
+                                                        <hr>
+                                                        <label>MDT Discussion</label>
+                                                        <br>
+                                                        {{ pv_items.cancer_report.discussion }}
+                                                        <hr>
+                                                        <label>Action Type</label>
+                                                        <br>
+                                                        {{ pv_items.cacncer_report.action_type }}
+                                                        <hr>
+                                                        <label>Validated?</label>
+                                                        <br>
+                                                        {{ pv_items.cancer_report.validated }}
+                                                        <hr>
+                                                        <label>Validated Assay Type</label>
+                                                        <br>
+                                                        {{ pv_items.cancer_report.validated_assay_type }}
+                                                        <hr>
+                                                        <label>Variant Use</label>
+                                                        <br>
+                                                        {{ pv_items.cancer_report.variant_use }}
+                                                        <hr>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
 
-
-                                        <td>{{ pv.get_transcript.gene }}</td>
+                                        <td>{{ pv_items.transcript.gene }}</td>
                                         <td>{{ pv.max_tier }}</td>
 
                                         <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{% for flag in pv.pvflag_set.all %}
@@ -729,14 +771,14 @@
 
                                         <td>
                                             {% if gelir_form.case_status.value != "C" %}
-                                                <a href="/select_transcript/{{report.id}}/{{pv.id }}"><i class="fas fa-pencil-alt"></i></a></span> {{pv.get_transcript.name }}
+                                                <a href="/select_transcript/{{report.id}}/{{pv.id }}"><i class="fas fa-pencil-alt"></i></a></span> {{pv_items.transcript.name }}
                                         {% else%}
-                                            {{pv.get_transcript.name }}
+                                            {{pv_items.transcript.name }}
                                         {% endif %}
                                         </td>
 
-                                        <td style="word-wrap: break-word; min-width: 100px;max-width: 100px;">{{pv.get_transcript_variant.hgvs_c}}</td>
-                                        <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv.get_transcript_variant.hgvs_p}}</td>
+                                        <td style="word-wrap: break-word; min-width: 100px;max-width: 100px;">{{pv_items.transcript_variant.hgvs_c}}</td>
+                                        <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv_items.transcript_variant.hgvs_p}}</td>
                                         <td>{{pv.zygosity}}</td>
                                         {% if report.sample_type == 'cancer' %}
                                         <td>{{pv.somatic}}</td>
@@ -752,13 +794,13 @@
                                             <div class="modal-content">
                                                 <div class="modal-header">
                                                     <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
-                                                    <h4 class="modal-title">{{pv.get_transcript_variant.hgvs_c}}</h4>
+                                                    <h4 class="modal-title">{{pv_items.transcript_variant.hgvs_c}}</h4>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <h5>Validation for variant {{pv.get_transcript_variant.hgvs_c}}.</h5>
+                                                    <h5>Validation for variant {{pv_items.transcript_variant.hgvs_c}}.</h5>
                                                     <form id="validationForm{{forloop.counter}}" action="#" method="POST">
                                                         {% csrf_token %}
-                                                        {% bootstrap_form pv_form %}
+                                                        {% bootstrap_form pv_items.form %}
                                                         {% buttons %}
                                                         <input value="Update" type="button" onclick="updateValidation(validationModal{{forloop.counter}});" class="btn btn-primary">
                                                         </input>

@@ -375,9 +375,13 @@ def proband_view(request, report_id):
         proband_variant__validation_status="P"
     )
 
-    pv_forms_dict = {}
+    pv_dict = {}
     for pv in proband_variants:
-        pv_forms_dict[pv] = VariantValidationForm(instance=pv)
+        pv_dict[pv] = {'form' : VariantValidationForm(instance=pv),
+                        'raredisease_report' : RareDiseaseReport.objects.filter(proband_variant=pv).first(),
+                        'cancer_report' : CancerReport.objects.filter(proband_variant=pv).first(),
+                        'transcript' : pv.get_transcript(),
+                        'transcript_variant' : pv.get_transcript_variant()}
 
     if not request.user.is_staff:
         if report.case_status == "C":
@@ -390,7 +394,7 @@ def proband_view(request, report_id):
                                                     'proband_form': proband_form,
                                                     'demogs_form': demogs_form,
                                                     'case_assign_form': case_assign_form,
-                                                    'pv_forms_dict': pv_forms_dict,
+                                                    'pv_dict': pv_dict,
                                                     'proband_mdt': proband_mdt,
                                                     'panels': panels,
                                                     'panel_form': panel_form,
