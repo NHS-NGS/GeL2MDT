@@ -55,10 +55,14 @@ def write_mdt_export(mdt_instance, mdt_reports):
     worksheet.write('F1', 'Family ID', header_format)
     worksheet.write('G1', 'Clinician', header_format)
     worksheet.write('H1', 'Panel(s)', header_format)
-    worksheet.write('I1', 'Variant, zygosity and inheritance', header_format)
-    worksheet.write('J1', 'Phenotypic fit', header_format)
-    worksheet.write('K1', 'Discussion required', header_format)
-    worksheet.write('L1', 'Comments', header_format)
+    worksheet.write('I1', 'Variant', header_format)
+    worksheet.write('J1', 'Inheritance', header_format)
+    worksheet.write('K1', 'Proband zygosity', header_format)
+    worksheet.write('L1', 'Maternal zygosity', header_format)
+    worksheet.write('M1', 'Paternal zygosity', header_format)
+    worksheet.write('N1', 'Phenotypic fit', header_format)
+    worksheet.write('O1', 'Discussion required', header_format)
+    worksheet.write('P1', 'Comments', header_format)
     # set column widths
     worksheet.set_column('A:A',10)
     worksheet.set_column('B:B',15)
@@ -66,10 +70,12 @@ def write_mdt_export(mdt_instance, mdt_reports):
     worksheet.set_column('D:F',11)
     worksheet.set_column('G:G',15)
     worksheet.set_column('H:H',40)
-    worksheet.set_column('I:I',50)
-    worksheet.set_column('J:J',12)
-    worksheet.set_column('K:K',18)
-    worksheet.set_column('L:L',30)
+    worksheet.set_column('I:I',40)
+    worksheet.set_column('J:J',10)
+    worksheet.set_column('K:M',18)
+    worksheet.set_column('N:N',12)
+    worksheet.set_column('O:O',18)
+    worksheet.set_column('P:P',30)
 
     row_count = 2
 
@@ -89,10 +95,13 @@ def write_mdt_export(mdt_instance, mdt_reports):
                     hgvs_c = hgvs_c_split[1]
                 if len(hgvs_p_split) > 1:
                     hgvs_p = hgvs_p_split[1]
-                pv_output.append(f'{transcript.gene}, '
+                pv_output.append({'variant': f'{transcript.gene}, '
                                  f'{hgvs_c}, '
-                                 f'{hgvs_p}, '
-                                 f'{proband_variant.zygosity}')
+                                 f'{hgvs_p}, ',
+                                 'inheritance': f'{proband_variant.inheritance}',
+                                 'proband_zygosity': f'{proband_variant.zygosity}',
+                                 'mat_zygosity': f'{proband_variant.maternal_zygosity}',
+                                 'pat_zygosity': f'{proband_variant.paternal_zygosity}',})
         panel_names = []
         for panel in panels:
             panel_names.append(f'{panel.panel.panel.panel_name}_'
@@ -100,10 +109,14 @@ def write_mdt_export(mdt_instance, mdt_reports):
         
         v_rows = row_count
         for variant in pv_output:
-            worksheet.write('I' + str(v_rows), variant)
-            worksheet.data_validation('J' + str(v_rows), 
+            worksheet.write('I' + str(v_rows), variant['variant'])
+            worksheet.write('J' + str(v_rows), variant['inheritance'])
+            worksheet.write('K' + str(v_rows), variant['proband_zygosity'])
+            worksheet.write('L' + str(v_rows), variant['mat_zygosity'])
+            worksheet.write('M' + str(v_rows), variant['pat_zygosity'])
+            worksheet.data_validation('N' + str(v_rows), 
                 {'validate': 'list', 'source': ['Yes', 'No', 'Maybe']})
-            worksheet.data_validation('K' + str(v_rows), 
+            worksheet.data_validation('O' + str(v_rows), 
                 {'validate': 'list', 'source': ['Yes', 'No']})
             v_rows += 1
 

@@ -783,7 +783,30 @@
                                         {% if report.sample_type == 'cancer' %}
                                         <td>{{pv.somatic}}</td>
                                         {% else %}
-                                        <td>{{pv.inheritance}}</td>
+                                        <td> 
+                                            <a href=# data-toggle="modal" data-target="#pvModalInheritance{{forloop.counter}}">
+                                                {{pv.inheritance}}
+                                            </a>
+                                        </td>
+                                        <div id="pvModalInheritance{{forloop.counter}}" class="modal fade" role="dialog">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
+                                                        <h4 class="modal-title">Inheritance information</h4>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <label>Maternal zygosity</label>
+                                                        <br>
+                                                        {{ pv.maternal_zygosity }}
+                                                        <hr>
+                                                        <label>Paternal zygosity</label>
+                                                        <br>
+                                                        {{ pv.paternal_zygosity }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                         {% endif %}
                                         <td><a onclick="$('#validationModal{{forloop.counter}}').modal('show')"><i class="fas fa-pencil-alt"></i></a></span> {{pv.get_validation_status_display}}</td>
                                     </tr>
