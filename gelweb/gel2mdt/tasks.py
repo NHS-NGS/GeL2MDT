@@ -167,6 +167,7 @@ def get_gel_content(ir, ir_version):
     gel_content = gel_content.prettify()
     return gel_content
 
+
 def panel_app(gene_panel, gp_version):
     '''
     Returns the list of genes associated with a panel in a dictionary which are then placed in the GEL clinical report
@@ -196,115 +197,6 @@ def update_for_t3(report_id):
     MultipleCaseAdder(sample_type=report.sample_type,
                       pullt3=True,
                       sample=report.ir_family.participant_family.proband.gel_id)
-
-@task
-def case_alert_email():
-    '''
-    Utility function designed to be run with celery. Emails GELTeam nightly about CaseAlert cases
-    :param report_id: GEL InterpretationReport ID
-    :return: Nothing
-    '''
-    sample_types = {'raredisease': False, 'cancer': False}
-    matching_cases = {}
-    for s_type in sample_types:
-        case_alerts = CaseAlert.objects.filter(sample_type=s_type)
-        gel_reports = GELInterpretationReport.objects.latest_cases_by_sample_type(
-            sample_type=s_type).prefetch_related('ir_family__participant_family__proband')
-        matching_cases[s_type] = {}
-        for case in case_alerts:
-            matching_cases[s_type][case.id] = []
-            for report in gel_reports:
-                try:
-                    if report.ir_family.participant_family.proband.gel_id == str(case.gel_id):
-                        matching_cases[s_type][case.id].append((report.id,
-                                                                report.ir_family.ir_family_id))
-                    sample_types[s_type] = True
-                except Proband.DoesNotExist:
-                    pass
-
-    text_content = ''
-    if sample_types['cancer'] or sample_types['raredisease']:
-        for s_type in sample_types:
-            if matching_cases[s_type]:
-                text_content += f'{s_type.title()} Case Alert:\n'
-                for case in matching_cases[s_type]:
-                    case_alert = CaseAlert.objects.get(id=case)
-                    if matching_cases[s_type][case]:
-                        text_content += f'Case {case_alert.gel_id} with CIP-ID of {matching_cases[s_type][case][0][1]} ' \
-                                        f'has been added to the database. CaseAlert comment: {case_alert.comment}\n'
-        subject, from_email, to = f'GeL2MDT CaseAlert', 'bioinformatics@gosh.nhs.uk', 'GELTeam@gosh.nhs.uk'
-        msg = EmailMessage(subject, text_content, from_email, [to])
-        try:
-            msg.send()
-        except Exception as e:
-            pass
-
-@task
-def update_report_email():
-    '''
-    Utility function which sends emails to GELTeam about last weeks updates
-    :return:
-    '''
-    from datetime import date
-    from django.db.models import Sum
-    text_content = ''
-    today = date.today()
-    import datetime
-    week_ago = today - datetime.timedelta(days=7)
-    for i, sample_type in enumerate(['raredisease', 'cancer']):
-        listupdates = ListUpdate.objects.filter(update_time__gte=week_ago).filter(sample_type=sample_type)
-        total_added = listupdates.aggregate(Sum('cases_added'))['cases_added__sum']
-        if total_added > 0:
-            text_content += f'{sample_type.title()} Update Report:\n\nTotal number of cases added: {total_added}\n\n'
-            text_content += f'Summary of Cases Added:\n'
-            text_content += f'CIPID\tGELID\tForename\tSurname\tClinician\tCenter\n'
-            for update in listupdates:
-                reports_added = update.reports_added.all()
-                for report in reports_added:
-                    text_content += f'{report.ir_family.ir_family_id}\t' \
-                                    f'{report.ir_family.participant_family.proband.gel_id}\t' \
-                                    f'{report.ir_family.participant_family.proband.forename}\t' \
-                                    f'{report.ir_family.participant_family.proband.surname}\t' \
-                                    f'{report.ir_family.participant_family.clinician}\t' \
-                                    f'{report.ir_family.participant_family.proband.gmc}\n'
-        else:
-            text_content += f'No new cases were added for {sample_type.title()}\n'
-        text_content += '\n----------------------------------------------------------------------------------------\n\n'
-
-    listupdates = ListUpdate.objects.filter(update_time__gte=date.today())
-    if all(listupdates.values_list('success', flat=True)) and text_content:
-        subject, from_email, to = 'GeL2MDT Weekly Update Report', 'bioinformatics@gosh.nhs.uk', 'bioinformatics@gosh.nhs.uk'
-        msg = EmailMessage(subject, text_content, from_email, [to])
-        try:
-            msg.send()
-        except Exception as e:
-            pass
-
-
-@task
-def listupdate_email():
-    '''
-    Utility function which sends emails to admin about last nights update
-    :return:
-    '''
-    from datetime import date
-    send = False
-    bioinfo_content = 'Sample Type\tUpdate Time\tNo. Cases Added\tNo. Cases Updated\tError\n'
-    for i, sample_type in enumerate(['raredisease', 'cancer']):
-        listupdates = ListUpdate.objects.filter(update_time__gte=date.today()).filter(sample_type=sample_type)
-        if listupdates:
-            send = True
-        for update in listupdates:
-            bioinfo_content += f'{update.sample_type}\t{update.update_time}' \
-                               f'\t{update.cases_added}\t{update.cases_updated}\t{update.error}\n'
-    if send:
-        subject, from_email, to = 'GeL2MDT ListUpdate', 'bioinformatics@gosh.nhs.uk', \
-                                  'bioinformatics@gosh.nhs.uk'
-        msg = EmailMessage(subject, bioinfo_content, from_email, [to])
-        try:
-            msg.send()
-        except Exception:
-            pass
 
 @task
 def update_cases():

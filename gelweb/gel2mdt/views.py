@@ -1134,22 +1134,6 @@ def export_mdt(request, mdt_id):
         response['Content-Disposition'] = 'attachment; filename=MDT_{}.xlsx'.format(mdt_id)
         return response
 
-# def export_mdt(request, mdt_id):
-#     '''
-#     Returns MDT information in CSV format
-#     :param request:
-#     :param mdt_id: MDT instance
-#     :return: CSV file
-#     '''
-#     if request.method == "POST":
-#         mdt_instance = MDT.objects.get(id=mdt_id)
-#         mdt_reports = MDTReport.objects.filter(MDT=mdt_instance)
-#         response = HttpResponse(content_type='text/csv')
-#         response['Content-Disposition'] = 'attachment; filename=MDT_{}.csv'.format(mdt_id)
-#         writer = csv.writer(response)
-#         writer = write_mdt_export(writer, mdt_instance, mdt_reports)
-#         return response
-
 
 @login_required
 def export_mdt_outcome_form(request, report_id):
