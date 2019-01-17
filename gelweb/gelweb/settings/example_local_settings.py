@@ -10,6 +10,9 @@ DEBUG = True
 ALLOWED_HOSTS = ['localhost',
                  '127.0.0.1']
 
+# Any addtional installed Django apps for inclusion in settings (e.g. 'mod_wsgi.server')
+ADDITIONAL_APPS = []
+
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
