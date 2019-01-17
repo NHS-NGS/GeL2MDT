@@ -381,7 +381,8 @@ def proband_view(request, report_id):
                         'raredisease_report' : RareDiseaseReport.objects.filter(proband_variant=pv).first(),
                         'cancer_report' : CancerReport.objects.filter(proband_variant=pv).first(),
                         'transcript' : pv.get_transcript(),
-                        'transcript_variant' : pv.get_transcript_variant()}
+                        'transcript_variant' : pv.get_transcript_variant(),
+                       'preferred_transcript': pv.get_preferred_transcript()}
 
     if not request.user.is_staff:
         if report.case_status == "C":

@@ -20,7 +20,7 @@ try:
     from .local_settings import SECRET_KEY, DEBUG, ALLOWED_HOSTS, DATABASES, ADDITIONAL_APPS
 except ImportError:
     print('Check the following settings are present in local_settings.py:\n'
-          'SECRET_KEY, DEBUG, ALLOWED_HOSTS, DATABASES')
+          'SECRET_KEY, DEBUG, ALLOWED_HOSTS, DATABASES, ADDITIONAL_APPS')
     sys.exit()
 
 
