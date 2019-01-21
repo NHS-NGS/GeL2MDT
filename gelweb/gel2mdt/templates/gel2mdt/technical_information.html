@@ -130,7 +130,11 @@ SOFTWARE.
                                 <tr>
                                     <td>{{variant.proband_variant.get_transcript.gene}}</td>
                                     <td>{{variant.proband_variant.zygosity}}</td>
-                                    <td>{{variant.proband_variant.inheritance}}</td>
+                                    <td>
+                                        {{variant.proband_variant.inheritance}} <br>
+                                        (mat: {{variant.proband_variant.maternal_zygosity}}, <br>
+                                        pat: {{variant.proband_variant.paternal_zygosity}})
+                                    </td>
                                     <td>
                                         {{variant.proband_variant.get_transcript_variant.hgvs_c}}
                                         {% if variant.proband_variant.get_transcript_variant.hgvs_p %}
