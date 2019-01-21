@@ -381,7 +381,8 @@ def proband_view(request, report_id):
                         'raredisease_report' : RareDiseaseReport.objects.filter(proband_variant=pv).first(),
                         'cancer_report' : CancerReport.objects.filter(proband_variant=pv).first(),
                         'transcript' : pv.get_transcript(),
-                        'transcript_variant' : pv.get_transcript_variant()}
+                        'transcript_variant' : pv.get_transcript_variant(),
+                       'preferred_transcript': pv.get_preferred_transcript()}
 
     if not request.user.is_staff:
         if report.case_status == "C":
@@ -664,7 +665,7 @@ def edit_mdt(request, sample_type, mdt_id):
 
     gel_ir_list = GELInterpretationReport.objects.latest_cases_by_sample_type(
         sample_type=sample_type
-    )
+    ).prefetch_related(*['ir_family', 'ir_family__participant_family__proband'])
     mdt_instance = MDT.objects.get(id=mdt_id)
     mdt_reports = MDTReport.objects.filter(MDT=mdt_instance)
     reports_in_mdt = mdt_reports.values_list('interpretation_report', flat=True)
@@ -1133,22 +1134,6 @@ def export_mdt(request, mdt_id):
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename=MDT_{}.xlsx'.format(mdt_id)
         return response
-
-# def export_mdt(request, mdt_id):
-#     '''
-#     Returns MDT information in CSV format
-#     :param request:
-#     :param mdt_id: MDT instance
-#     :return: CSV file
-#     '''
-#     if request.method == "POST":
-#         mdt_instance = MDT.objects.get(id=mdt_id)
-#         mdt_reports = MDTReport.objects.filter(MDT=mdt_instance)
-#         response = HttpResponse(content_type='text/csv')
-#         response['Content-Disposition'] = 'attachment; filename=MDT_{}.csv'.format(mdt_id)
-#         writer = csv.writer(response)
-#         writer = write_mdt_export(writer, mdt_instance, mdt_reports)
-#         return response
 
 
 @login_required

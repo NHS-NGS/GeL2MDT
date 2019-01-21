@@ -637,14 +637,15 @@
                                 <tr>
                                     <th>Variant</th>
                                     <th>Interpretation</th>
-                                    <th>Gene</th>
+                                    <th>Gene <a href="#" data-toggle="tooltip" title="Click to set PreferredTranscript"><i class="fas fa-info-circle"></i></a></th>
                                 {% if report.sample_type == 'cancer' %}
                                     <th>Domain</th>
                                 {% else %}
                                     <th>Tier</th>
                                 {% endif %}
                                     <th>Flag</th>
-                                    <th>Transcript</th>
+                                    <th>Preferred Transcript </th>
+                                    <th>Selected Transcript</th>
                                     <th>HGVSc</th>
                                     <th>HGVSp</th>
                                     <th>Genotype</th>
@@ -761,13 +762,17 @@
                                             </div>
                                         </div>
                                         {% endif %}
-
-                                        <td>{{ pv_items.transcript.gene }}</td>
+                                        {% if pv_items.transcript %}
+                                        <td><a href="/edit_preferred_transcript/{{pv_items.transcript.gene_id}}/{{pv_items.transcript.genome_assembly.id}}" target="_blank"><i class="fas fa-external-link-alt"></i> {{pv_items.transcript.gene}}</a></td>
+                                        {% else %}
+                                        <td></td>
+                                        {% endif %}
                                         <td>{{ pv.max_tier }}</td>
 
                                         <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{% for flag in pv.pvflag_set.all %}
                                         {{flag}};
                                         {% endfor %}</td>
+                                        <td>{{pv_items.preferred_transcript.transcript.name}}</td>
 
                                         <td>
                                             {% if gelir_form.case_status.value != "C" %}

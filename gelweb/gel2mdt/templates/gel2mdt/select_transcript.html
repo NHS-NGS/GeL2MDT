@@ -35,8 +35,8 @@ SOFTWARE.
                 <thead>
                     <tr>
                         <th>Select</th>
-                        <th>Canonical</th>
                         <th>Preferred Transcript</th>
+                        <th>Canonical</th>
                         <th>Gene</th>
                         <th>Transcript</th>
                         <th>Strand</th>
@@ -58,13 +58,13 @@ SOFTWARE.
                                 </form>
                              {% endif %}
                         </td>
-                            <td>{{ptv.transcript.canonical_transcript}}</td>
-                            <td>{% if ptv.transcript.is_preferred_transcript %}
+                        <td>{% if ptv.transcript.is_preferred_transcript %}
                                 <p>True</p>
                                 {% else %}
                                 <p>False</p>
                                 {% endif %}
                             </td>
+                            <td>{{ptv.transcript.canonical_transcript}}</td>
                             <td><a href="/edit_preferred_transcript/{{ptv.transcript.gene_id}}/{{ptv.transcript.genome_assembly_id}}" target="_blank">{{ptv.transcript.gene}}</a></td>
                             <td>{{ptv.transcript.name}}</td>
                             <td>{{ptv.transcript.strand}}</td>

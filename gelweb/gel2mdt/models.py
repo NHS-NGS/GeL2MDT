@@ -541,6 +541,7 @@ class PreferredTranscript(models.Model):
     transcript = models.ForeignKey(Transcript, on_delete=models.CASCADE)
     gene = models.ForeignKey(Gene, on_delete=models.CASCADE)
     genome_assembly = models.ForeignKey(ToolOrAssemblyVersion, on_delete=models.CASCADE)
+
     class Meta:
         managed = True
         db_table = 'PreferredTranscript'
@@ -643,25 +644,30 @@ class ProbandVariant(models.Model):
         ProbandTranscriptVariant.objects.filter(proband_variant=self.id,
                                                 transcript=selected_transcript).update(selected=True)
 
-    def get_ptv(self):
-        # Gets first corresponding PTV - needs assessing!
-        ptv = ProbandTranscriptVariant.objects.filter(selected=True, proband_variant=self.id)[0]
-        return ptv
-
     def get_transcript_variant(self):
-        ptv = ProbandTranscriptVariant.objects.filter(selected=True, proband_variant=self.id).first()
-        if ptv:
-            transcript_variant = TranscriptVariant.objects.get(transcript=ptv.transcript,
-                                                            variant=self.variant)
+        ptv = ProbandTranscriptVariant.objects.filter(selected=True, proband_variant=self.id)
+        if len(ptv) == 1:
+            transcript_variant = TranscriptVariant.objects.get(transcript=ptv[0].transcript,
+                                                               variant=self.variant)
             return transcript_variant
-
-    def get_transcript(self):
-        ptv = ProbandTranscriptVariant.objects.filter(selected=True, proband_variant=self.id).first()
-        if ptv:
-            return ptv.transcript
         else:
             return None
 
+    def get_transcript(self):
+        ptv = ProbandTranscriptVariant.objects.filter(selected=True, proband_variant=self.id)
+        if len(ptv) == 1:
+            return ptv.first().transcript
+        else:
+            return None
+
+    def get_preferred_transcript(self):
+        ptvs = ProbandTranscriptVariant.objects.filter(proband_variant=self.id, selected=True)
+        if len(ptvs) > 1 or len(ptvs) == 0:
+            return None
+        else:
+            preferred_transcript = PreferredTranscript.objects.filter(genome_assembly=self.variant.genome_assembly,
+                                                                      gene=ptvs.first().transcript.gene).first()
+            return preferred_transcript
 
     def get_selected_count(self):
         ptv = ProbandTranscriptVariant.objects.filter(selected=True, proband_variant=self.id).count()

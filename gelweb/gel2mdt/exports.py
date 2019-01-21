@@ -170,54 +170,6 @@ def write_mdt_export(mdt_instance, mdt_reports):
     output.seek(0)
     return output
 
-# def write_mdt_export(writer, mdt_instance, mdt_reports):
-#     '''
-#     Writes a summary of the cases which are being brought to MDT
-#     :param writer: CSV file writer
-#     :param mdt_instance:  MDT instance
-#     :param mdt_reports: List of reports which are present in MDT
-#     :return: CSV file Writer
-#     '''
-    # writer.writerow(['Forename', 'Surname', 'Gender', 'DOB', 'NHS no.', 'GELID', 'CIPID',
-    #                  'Clinician', 'Panel', 'Variant&Zygosity'])
-
-    # for report in mdt_reports:
-    #     proband_variants = ProbandVariant.objects.filter(interpretation_report=report.interpretation_report)
-    #     panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.interpretation_report.ir_family)
-    #     pv_output = []
-    #     for proband_variant in proband_variants:
-    #         transcript = proband_variant.get_transcript()
-    #         transcript_variant = proband_variant.get_transcript_variant()
-    #         if transcript and transcript_variant:
-    #             hgvs_c = None
-    #             hgvs_p = None
-    #             hgvs_c_split = transcript_variant.hgvs_c.split(':')
-    #             hgvs_p_split = transcript_variant.hgvs_p.split(':')
-    #             if len(hgvs_c_split) > 1:
-    #                 hgvs_c = hgvs_c_split[1]
-    #             if len(hgvs_p_split) > 1:
-    #                 hgvs_p = hgvs_p_split[1]
-    #             pv_output.append(f'{transcript.gene}, '
-    #                              f'{hgvs_c}, '
-    #                              f'{hgvs_p}, '
-    #                              f'{proband_variant.zygosity}')
-    #     panel_names = []
-    #     for panel in panels:
-    #         panel_names.append(f'{panel.panel.panel.panel_name}_'
-    #                            f'{panel.panel.version_number}')
-    #     writer.writerow([report.interpretation_report.ir_family.participant_family.proband.forename,
-    #                      report.interpretation_report.ir_family.participant_family.proband.surname,
-    #                      report.interpretation_report.ir_family.participant_family.proband.sex,
-    #                      report.interpretation_report.ir_family.participant_family.proband.date_of_birth.date(),
-    #                      report.interpretation_report.ir_family.participant_family.proband.nhs_number,
-    #                      report.interpretation_report.ir_family.participant_family.proband.gel_id,
-    #                      report.interpretation_report.ir_family.ir_family_id,
-    #                      report.interpretation_report.ir_family.participant_family.clinician.name,
-    #                      '\n'.join(panel_names),
-    #                      '\n'.join(pv_output)])
-    # return writer
-
-
 def write_mdt_outcome_template(report):
     """
     :param pk: GEL Interpretationreport instance
@@ -229,6 +181,23 @@ def write_mdt_outcome_template(report):
     header_image.alignment = WD_ALIGN_PARAGRAPH.RIGHT 
  
     document.add_heading('Genomics MDM record', 0)
+
+    table = document.add_table(rows=1, cols=1, style='Table Grid')
+    table.rows[0].cells[0].paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run = table.rows[0].cells[0].paragraphs[0].add_run(
+        'THIS IS NOT A DIAGNOSTIC REPORT. UNVALIDATED FINDINGS SHOULD NOT BE USED TO INFORM CLINICAL '
+        'MANAGEMENT DECISIONS.\n')
+    run.font.color.rgb = RGBColor(255, 0, 0)
+    run = table.rows[0].cells[0].paragraphs[0].add_run(
+        'This is a record of unvalidated variants identified through the 100,000 genome project. '
+        'Class 3 variants are of uncertain clinical significance, future review and diagnostic confirmation '
+        'may be appropriate if further evidence becomes available.\n')
+    run.font.color.rgb = RGBColor(255, 0, 0)
+
+    table.rows[0].cells[0].paragraphs[0].paragraph_format.space_before = Cm(0.3)
+    # table.rows[0].cells[0].paragraphs[0].paragraph_format.space_after = Cm(0.1)
+    paragraph = document.add_paragraph()
+    paragraph.add_run()
 
     table = document.add_table(rows=2, cols=4, style='Table Grid')
     heading_cells = table.rows[0].cells
