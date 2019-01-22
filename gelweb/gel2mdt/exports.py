@@ -94,7 +94,7 @@ def write_mdt_export(mdt_instance, mdt_reports):
                 if len(hgvs_c_split) > 1:
                     hgvs_c = hgvs_c_split[1]
                 if len(hgvs_p_split) > 1:
-                    hgvs_p = hgvs_p_split[1]
+                    hgvs_p = hgvs_p_split[1].replace('%3D', '=')
                 pv_output.append({'variant': f'{transcript.gene}, '
                                  f'{hgvs_c}, '
                                  f'{hgvs_p}, ',
