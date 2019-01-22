@@ -644,7 +644,9 @@
                                     <th>Tier</th>
                                 {% endif %}
                                     <th>Flag</th>
+                                    {% if report.sample_type == 'raredisease' %}
                                     <th>Preferred Transcript </th>
+                                    {% endif %}
                                     <th>Selected Transcript</th>
                                     <th>HGVSc</th>
                                     <th>HGVSp</th>
@@ -763,7 +765,11 @@
                                         </div>
                                         {% endif %}
                                         {% if pv_items.transcript %}
-                                        <td><a href="/edit_preferred_transcript/{{pv_items.transcript.gene_id}}/{{pv_items.transcript.genome_assembly.id}}" target="_blank"><i class="fas fa-external-link-alt"></i> {{pv_items.transcript.gene}}</a></td>
+                                            {% if report.sample_type == 'raredisease' %}
+                                            <td><a href="/edit_preferred_transcript/{{pv_items.transcript.gene_id}}/{{pv_items.transcript.genome_assembly.id}}" target="_blank"><i class="fas fa-external-link-alt"></i> {{pv_items.transcript.gene}}</a></td>
+                                            {% else %}
+                                            <td>{{pv_items.transcript.gene}}</td>
+                                            {% endif %}
                                         {% else %}
                                         <td></td>
                                         {% endif %}
@@ -772,8 +778,9 @@
                                         <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{% for flag in pv.pvflag_set.all %}
                                         {{flag}};
                                         {% endfor %}</td>
+                                        {% if report.sample_type == 'raredisease' %}
                                         <td>{{pv_items.preferred_transcript.transcript.name}}</td>
-
+                                        {% endif %}
                                         <td>
                                             {% if gelir_form.case_status.value != "C" %}
                                                 <a href="/select_transcript/{{report.id}}/{{pv.id }}"><i class="fas fa-pencil-alt"></i></a></span> {{pv_items.transcript.name }}

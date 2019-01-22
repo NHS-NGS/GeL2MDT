@@ -35,7 +35,9 @@ SOFTWARE.
                 <thead>
                     <tr>
                         <th>Select</th>
+                        {% if report.sample_type == 'raredisease' %}
                         <th>Preferred Transcript</th>
+                        {% endif %}
                         <th>Canonical</th>
                         <th>Gene</th>
                         <th>Transcript</th>
@@ -58,14 +60,20 @@ SOFTWARE.
                                 </form>
                              {% endif %}
                         </td>
+                        {% if report.sample_type == 'raredisease' %}
                         <td>{% if ptv.transcript.is_preferred_transcript %}
                                 <p>True</p>
                                 {% else %}
                                 <p>False</p>
                                 {% endif %}
                             </td>
+                        {% endif %}
                             <td>{{ptv.transcript.canonical_transcript}}</td>
+                        {% if report.sample_type == 'raredisease' %}
                             <td><a href="/edit_preferred_transcript/{{ptv.transcript.gene_id}}/{{ptv.transcript.genome_assembly_id}}" target="_blank">{{ptv.transcript.gene}}</a></td>
+                        {% else %}
+                        <td>{{ptv.transcript.gene}}</td>
+                        {% endif %}
                             <td>{{ptv.transcript.name}}</td>
                             <td>{{ptv.transcript.strand}}</td>
                             <td style="word-wrap: break-word; min-width: 220px;max-width: 220px;">{{ptv.effect}}</td>
