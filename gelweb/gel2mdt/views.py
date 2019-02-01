@@ -287,6 +287,8 @@ def proband_view(request, report_id):
     if request.method == "POST":
         demogs_form = DemogsForm(request.POST, instance=report.ir_family.participant_family.proband)
         case_assign_form = CaseAssignForm(request.POST, instance=report)
+        first_check_form = FirstCheckAssignForm(request.POST, instance=report)
+        second_check_form = SecondCheckAssignForm(request.POST, instance=report)
         panel_form = PanelForm(request.POST)
         clinician_form = ClinicianForm(request.POST)
         add_clinician_form = AddClinicianForm(request.POST)
@@ -306,6 +308,10 @@ def proband_view(request, report_id):
             messages.add_message(request, 25, 'Proband Updated')
         if case_assign_form.is_valid():
             case_assign_form.save()
+        if first_check_form.is_valid():
+            first_check_form.save()
+        if second_check_form.is_valid():
+            second_check_form.save() 
         if panel_form.is_valid():
             irfp, created = InterpretationReportFamilyPanel.objects.get_or_create(panel=panel_form.cleaned_data['panel'],
                                                                                   ir_family=report.ir_family,
@@ -356,6 +362,8 @@ def proband_view(request, report_id):
     panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.ir_family)
     panel_form = PanelForm()
     case_assign_form = CaseAssignForm(instance=report)
+    first_check_form = FirstCheckAssignForm(instance=report)
+    second_check_form = SecondCheckAssignForm(instance=report)
     clinician_form = ClinicianForm()
     add_clinician_form = AddClinicianForm()
     add_variant_form = AddVariantForm()
@@ -381,6 +389,8 @@ def proband_view(request, report_id):
                                                     'proband_form': proband_form,
                                                     'demogs_form': demogs_form,
                                                     'case_assign_form': case_assign_form,
+                                                    'first_check_form': first_check_form,
+                                                    'second_check_form': second_check_form,
                                                     'pv_forms_dict': pv_forms_dict,
                                                     'proband_mdt': proband_mdt,
                                                     'panels': panels,
@@ -726,6 +736,8 @@ def mdt_view(request, mdt_id):
     proband_variants = ProbandVariant.objects.filter(interpretation_report__in=report_list)
     proband_variant_count = {}
     t3_proband_variant_count = {}
+    first_check_count = 0
+    second_check_count = 0
     for report in reports:
         proband_variant_count[report.id] = 0
         t3_proband_variant_count[report.id] = 0
@@ -738,8 +750,16 @@ def mdt_view(request, mdt_id):
                     proband_variant_count[report.id] += 1
                 else:
                     t3_proband_variant_count[report.id] += 1
+        if report.second_check:
+            second_check_count += 1
+        elif report.first_check:
+            first_check_count += 1
+
+    first_check_percent = (first_check_count/len(reports)) * 100
+    second_check_percent = (second_check_count/len(reports)) * 100
 
     mdt_form = MdtForm(instance=mdt_instance)
+    sent_to_clinican_form = MdtSentToClinicianForm(instance=mdt_instance)
     clinicians = Clinician.objects.filter(mdt=mdt_id).values_list('name', flat=True)
     clinical_scientists = ClinicalScientist.objects.filter(mdt=mdt_id).values_list('name', flat=True)
     other_staff = OtherStaff.objects.filter(mdt=mdt_id).values_list('name', flat=True)
@@ -757,13 +777,20 @@ def mdt_view(request, mdt_id):
             mdt_form.save()
             messages.add_message(request, 25, 'MDT Updated')
 
+        sent_to_clinican_form = MdtSentToClinicianForm(request.POST, instance=mdt_instance)
+        if sent_to_clinican_form.is_valid():
+            sent_to_clinican_form.save()
+
         return HttpResponseRedirect(f'/mdt_view/{mdt_id}')
     request.session['mdt_id'] = mdt_id
     return render(request, 'gel2mdt/mdt_view.html', {'proband_variants': proband_variants,
                                                       'proband_variant_count': proband_variant_count,
                                                      't3_proband_variant_count': t3_proband_variant_count,
+                                                     'first_check_percent': first_check_percent,
+                                                     'second_check_percent': second_check_percent,
                                                       'reports': reports,
                                                       'mdt_form': mdt_form,
+                                                      'sent_to_clinican_form' : sent_to_clinican_form,
                                                       'mdt_id': mdt_id,
                                                       'attendees': attendees,
                                                      'sample_type': mdt_instance.sample_type,
