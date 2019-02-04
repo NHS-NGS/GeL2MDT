@@ -830,6 +830,7 @@ def mdt_proband_view(request, mdt_id, pk, important):
 
     proband_form = ProbandMDTForm(instance=report.ir_family.participant_family.proband)
     gelir_form = GELIRMDTForm(instance=report)
+    add_comment_form = AddCommentForm()
     panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.ir_family)
 
     if mdt_instance.status == "C":
@@ -842,19 +843,23 @@ def mdt_proband_view(request, mdt_id, pk, important):
             proband_form.fields[field].widget.attrs['disabled'] = True
 
     if request.method == 'POST':
+        add_comment_form = AddCommentForm(request.POST)
         variant_formset = VariantForm(request.POST)
         proband_form = ProbandMDTForm(request.POST, instance=report.ir_family.participant_family.proband)
         gelir_form = GELIRMDTForm(request.POST, instance=report)
-        if variant_formset.is_valid() and proband_form.is_valid() and gelir_form.is_valid():
+        if variant_formset.is_valid():
             variant_formset.save()
             for form in variant_formset:
                 pv = form.instance.proband_variant
                 pv.validation_status = form.cleaned_data['requires_validation']
                 pv.save()
+            messages.add_message(request, 25, 'Proband Updated')
+        if proband_form.is_valid():
             proband_form.save()
+            messages.add_message(request, 25, 'Proband Updated')
+        if gelir_form.is_valid():
             gelir_form.save()
             messages.add_message(request, 25, 'Proband Updated')
-
         return HttpResponseRedirect(f'/mdt_proband_view/{mdt_id}/{pk}/{important}')
 
     for form in variant_formset:
@@ -868,10 +873,28 @@ def mdt_proband_view(request, mdt_id, pk, important):
         'proband_form': proband_form,
         'variant_formset': variant_formset,
         'panels': panels,
-        'sample_type':report.sample_type,
-        'gelir_form':gelir_form,
-        'clinician': clinician
+        'sample_type': report.sample_type,
+        'gelir_form': gelir_form,
+        'clinician': clinician,
+        'add_comment_form': add_comment_form,
+        'important': important
     })
+
+@login_required
+def add_comment(request, mdt_id, important):
+    if request.method == 'POST':
+        add_comment_form = AddCommentForm(request.POST)
+        if add_comment_form.is_valid():
+            CaseComment.objects.create(interpretation_report=report,
+                                       comment=add_comment_form.cleaned_data['comment'],
+                                       user=request.user,
+                                       time=timezone.now())
+            messages.add_message(request, 25, 'Comment Added')
+            return HttpResponseRedirect(f'/mdt_proband_view/{mdt_id}/{pk}/{important}')
+        else:
+            messages.add_message(request, 40, 'Add Comment Failed')
+            return HttpResponseRedirect(f'/mdt_proband_view/{mdt_id}/{pk}/{important}')
+
 
 
 @login_required
@@ -1404,17 +1427,6 @@ def delete_comment(request, comment_id):
     comment = CaseComment.objects.get(id=comment_id)
     report = comment.interpretation_report
     comment.delete()
-    return HttpResponseRedirect(f'/proband/{report.id}')
-
-
-
-@login_required
-def edit_comment(request):
-    if request.method == 'POST':
-        case_alert_form = AddCaseAlert(request.POST, instance=case_alert_instance)
-        if case_alert_form.is_valid():
-            case_alert_form.save()
-            data['form_is_valid'] = True
     return HttpResponseRedirect(f'/proband/{report.id}')
 
 

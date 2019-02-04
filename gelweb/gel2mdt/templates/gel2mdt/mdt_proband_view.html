@@ -65,12 +65,12 @@ SOFTWARE.
 
             <div class="row">
 
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="panel panel-default">
                         <div class="panel-heading">Participant Information</div>
                         <div class="panel-body">
 
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 {% bootstrap_label "CIP ID" %}
                                 <div class="block">
                                     <a class=" btn-link" href="/proband/{{report.id}}">
@@ -81,29 +81,8 @@ SOFTWARE.
                                 <div class="block">
                                     {{report.ir_family.participant_family.proband.date_of_birth|date}}
                                 </div>
-
-                            </div>
-
-                            <div class="col-md-4">
-                                {% bootstrap_label "Forename" %}
-                                <div class="block">
-                                    {{report.ir_family.participant_family.proband.forename}}
-                                </div>
                                 </br>
-                                {% bootstrap_label "Surname" %}
-                                <div class="block">
-                                    {{report.ir_family.participant_family.proband.surname}}
-                                </div>
 
-                            </div>
-
-
-                            <div class="col-md-4">
-                                {% bootstrap_label "NHS Number" %}
-                                <div class="block">
-                                    {{report.ir_family.participant_family.proband.nhs_number}}
-                                </div>
-                                </br>
                                 {% bootstrap_label "Panels" %}
                                 <div class="block">
                                      {% for panel in panels %}
@@ -115,12 +94,34 @@ SOFTWARE.
                                     </p>
                                     {% endfor %}
                                 </div>
+
                             </div>
+
+                            <div class="col-md-6">
+                                {% bootstrap_label "Forename" %}
+                                <div class="block">
+                                    {{report.ir_family.participant_family.proband.forename}}
+                                </div>
+                                </br>
+                                {% bootstrap_label "Surname" %}
+                                <div class="block">
+                                    {{report.ir_family.participant_family.proband.surname}}
+                                </div>
+                                </br>
+                                {% bootstrap_label "NHS Number" %}
+                                <div class="block">
+                                    {{report.ir_family.participant_family.proband.nhs_number}}
+                                </div>
+                                </br>
+
+                            </div>
+
+
                         </div>
                     </div>
                 </div>
 
-            <div class="col-md-6">
+            <div class="col-md-8">
                     <div class="panel panel-danger">
                         <div class="panel-heading">Patient Discussion/Action</div>
                         <div class="panel-body">
@@ -130,7 +131,35 @@ SOFTWARE.
                                         <tr>
                                             <td> {% bootstrap_field proband_form.discussion %} </td>
                                             <td> {% bootstrap_field proband_form.action %} </td>
-                                            <td> {% bootstrap_field gelir_form.case_status %} </td>
+                                            <td style="word-wrap: break-word; min-width: 350px;max-width: 350px;">
+                                                {% bootstrap_label "Case Comments" %}
+                                        <a href=# data-toggle="modal" data-target="#addCommentModal"><i class="fas fa-plus"></i></a>
+                                                <div class="media"  id="comment-table">
+                                            {% for comment in report.casecomment_set.all %}
+                                            <div class="panel">
+                                    <div class="media-body">
+                                      <h5 class="media-heading">{{comment.user.first_name}} {{comment.user.last_name}}
+                                          <span style="float: right; margin: 0px 5px 0px 5px">
+                                              <small><i>Posted on {{comment.time}}</i></small></span></h5>
+                                      <p>{{comment.comment}}</p>
+                                        <p>
+                                        {% if comment.user == request.user %}
+                                        <span style="float: left; margin: 0px 0px 0px 0px">
+                                            <a class="js-edit-comment" data-url="/edit_comment/{{ comment.id }}" style="font-size: 13px;">Edit
+                                                        </a>
+                                            <a href="/delete_comment/{{comment.id }}" style="font-size: 13px;" onclick="return confirm('Are you sure?')">Delete</a>
+                                            </span>
+                                            </p>
+
+
+                                        {% endif %}
+
+                                    </div>
+                                            </div>
+                                            {% endfor %}
+                                            </div>
+                                            </td>
+                                             <td> {% bootstrap_field gelir_form.case_status %} </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -257,4 +286,73 @@ SOFTWARE.
 </div>
     </form>
 </div>
+
+<script>
+      var runloadForm = function () {
+    var btn = $(this);
+    $.ajax({
+      url: btn.attr("data-url"),
+      type: 'get',
+      dataType: 'json',
+      beforeSend: function () {
+        $("#modal-commenthistory .modal-content").html("");
+        $("#modal-commenthistory").modal("show");
+      },
+      success: function (data) {
+        $("#modal-commenthistory .modal-content").html(data.html_form);
+      }
+    });
+  };
+
+   var runsaveForm = function () {
+    var form = $(this);
+    $.ajax({
+      url: form.attr("action"),
+      data: form.serialize(),
+      type: form.attr("method"),
+      dataType: 'json',
+      success: function (data) {
+        if (data.form_is_valid) {
+          window.location.reload();
+          $("#modal-commenthistory").modal("hide");
+
+        }
+        else {
+          $("#modal-commenthistory .modal-content").html(data.html_form);
+        }
+      }
+    });
+    return false;
+  };
+   $("#comment-table").on("click", ".js-edit-comment", runloadForm);
+  $("#modal-run").on("submit", ".js-save-comment", runsaveForm);
+    </script>
+    <div class="modal fade" id="modal-commenthistory">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            </div>
+        </div>
+    </div>
+<div id="addCommentModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
+                    <h4 class="modal-title">Add New Comment</h4>
+                </div>
+                <div class="modal-body">
+                    <form action="/mdt_proband_view/{{ mdt_id }}/{{report.id}}/{{important}}" method="POST">
+                        {% csrf_token %}
+                        {% bootstrap_form add_comment_form %}
+                        {% buttons %}
+                        <button type="submit" class="btn btn-primary">
+                            Add New Comment
+                        </button>
+                        {% endbuttons %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {% endblock %}
