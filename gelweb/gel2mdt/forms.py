@@ -243,6 +243,12 @@ class MdtSentToClinicianForm(forms.ModelForm):
     class Meta:
         model = MDT
         fields = ['sent_to_clinician']
+        labels = {
+            'sent_to_clinician' : 'List sent',
+        }
+        widgets = {
+            'sent_to_clinician': CheckboxInput(attrs={'onclick':'this.form.submit();'})
+        }
 
 class ProbandMDTForm(forms.ModelForm):
     '''

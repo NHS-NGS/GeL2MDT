@@ -954,9 +954,14 @@ def recent_mdts(request, sample_type):
     config_dict = load_config.LoadConfig().load()
     # Need to get which probands were in MDT
     probands_in_mdt = {}
+    first_check_in_mdt = {}
+    second_check_in_mdt = {}
+    mdt_sent_to_clinician_form = {}
     for mdt in recent_mdt:
         probands_in_mdt[mdt.id] = []
         report_list = MDTReport.objects.filter(MDT=mdt.id)
+        first_check_count = 0
+        second_check_count = 0
         for report in report_list:
             if config_dict['cip_as_id'] == 'True':
                 probands_in_mdt[mdt.id].append((report.interpretation_report.id,
@@ -964,9 +969,32 @@ def recent_mdts(request, sample_type):
             else:
                 probands_in_mdt[mdt.id].append((report.interpretation_report.id,
                                             report.interpretation_report.ir_family.participant_family.proband.gel_id))
+            if report.interpretation_report.second_check:
+                second_check_count += 1
+            elif report.interpretation_report.first_check:
+                first_check_count += 1
+        if len(report_list) > 0:
+            first_check_percent = (first_check_count/len(report_list)) * 100
+            second_check_percent = (second_check_count/len(report_list)) * 100
+        else:
+            first_check_percent = 0
+            second_check_percent = 0
+        first_check_in_mdt[mdt.id] = first_check_percent
+        second_check_in_mdt[mdt.id] = second_check_percent
+        mdt_sent_to_clinician_form[mdt.id] = MdtSentToClinicianForm(instance=mdt) 
+    if request.method == 'POST':
+        sent_to_clinician_form = MdtSentToClinicianForm(request.POST, instance=mdt)
+        if sent_to_clinician_form.is_valid():
+            sent_to_clinician_form.save()
+    # MDTForm = modelformset_factory(MDT, form=MdtSentToClinicianForm, extra=0)
+    # mdt_formset = MDTForm(queryset=recent_mdt)
 
     return render(request, 'gel2mdt/recent_mdts.html', {'recent_mdt': recent_mdt,
                                                         'probands_in_mdt': probands_in_mdt,
+                                                        'first_check_in_mdt': first_check_in_mdt,
+                                                        'second_check_in_mdt': second_check_in_mdt,
+                                                        #'mdt_formset': mdt_formset,
+                                                        'mdt_sent_to_clinician_form': mdt_sent_to_clinician_form,
                                                         'sample_type': sample_type,
                                                         'clinician': clinician})
 

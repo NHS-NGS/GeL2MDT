@@ -89,8 +89,10 @@ SOFTWARE.
                             <th>Description</th>
                             <th>Date</th>
                             <th>Patients Discussed</th>
-                            <th>Status</th>
+                            <th>Checked Status</th>
+                            <th>MDT Status</th>
                             <th>Creator</th>
+                            <th>Sent to clinician</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -107,8 +109,25 @@ SOFTWARE.
                                     <a href="/proband/{{report_list.0}}"> {{ report_list.1}}</a>
                                 {% endfor %}
                             </td>
+                            <td>
+                                <div class="progress">
+                                    <div class="progress-bar progress-bar-warning" style="width: {{ first_check_in_mdt|get_item:mdt.id }}%">
+                                        <strong>{{ first_check_in_mdt|get_item:mdt.id }}%</strong>
+                                    </div>
+                                    <div class="progress-bar progress-bar-success progress-bar-striped" style="width: {{ second_check_in_mdt|get_item:mdt.id }}%">
+                                        <strong>{{ second_check_in_mdt|get_item:mdt.id }}%</strong>
+                                    </div>
+                                </div>
+                            </td>
                             <td>{{mdt.get_status_display}}</td>
                             <td>{{mdt.creator}}</td>
+                            <td>
+                            <form role="form" method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                {% bootstrap_form mdt_sent_to_clinician_form|get_item:mdt.id %}
+                                <button type="submit" name="sent_to_clinician_update" class="btn btn-default btn-xs">Save</button>
+                            </form>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
