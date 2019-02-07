@@ -26,14 +26,6 @@ SOFTWARE.
 <tr>
     <td><a href="/proband/{{report.id}}">{{report.ir_family.participant_family.proband.gel_id}}</a></td>
     <td>{{report.ir_family.ir_family_id}}</td>
-    <td>
-        {% if report.second_check %}
-            <i class="far fa-check-circle" style="color:orange"></i><i class="far fa-check-circle" style="color:green"></i>
-        {% elif report.first_check %}
-            <i class="far fa-check-circle" style="color:orange"></i>
-        {% endif %}
-
-    </td>
     <td>{{report.ir_family.participant_family.proband.forename}}</td>
     <td>{{report.ir_family.participant_family.proband.surname}}</td>
     <td>{{report.ir_family.participant_family.proband.nhs_number}}
@@ -63,5 +55,13 @@ SOFTWARE.
     {% else %}
     <td><a href="/export_gtab_template/{{report.id}}"><i class="fas fa-external-link-alt"></i></a></td>
     {% endif %}
+    <td>
+        {% if report.second_check %}
+            <i class="far fa-check-circle" style="color:orange"></i><i class="far fa-check-circle" style="color:green"></i>
+        {% elif report.first_check %}
+            <i class="far fa-check-circle" style="color:orange"></i>
+        {% endif %}
+
+    </td>
 </tr>
 {% endfor %}

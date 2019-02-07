@@ -236,19 +236,6 @@ class MdtForm(forms.ModelForm):
         model = MDT
         fields = ['description', 'date_of_mdt', 'status', 'sent_to_clinician']
 
-class MdtSentToClinicianForm(forms.ModelForm):
-    '''
-    Form for recording the whether the MDT list has been sent to the clinician
-    '''
-    class Meta:
-        model = MDT
-        fields = ['sent_to_clinician']
-        labels = {
-            'sent_to_clinician' : 'List sent',
-        }
-        widgets = {
-            'sent_to_clinician': CheckboxInput(attrs={'onclick':'this.form.submit();'})
-        }
 
 class ProbandMDTForm(forms.ModelForm):
     '''

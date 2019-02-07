@@ -122,11 +122,10 @@ SOFTWARE.
                             <td>{{mdt.get_status_display}}</td>
                             <td>{{mdt.creator}}</td>
                             <td>
-                            <form role="form" method="post" enctype="multipart/form-data">
-                                {% csrf_token %}
-                                {% bootstrap_form mdt_sent_to_clinician_form|get_item:mdt.id %}
-                                <button type="submit" name="sent_to_clinician_update" class="btn btn-default btn-xs">Save</button>
-                            </form>
+                                {% if mdt_sent_to_clinician|get_item:mdt.id %}
+                                    </i><i class="far fa-check-circle" style="color:green"></i>
+                                {% endif %}
+
                             </td>
                         </tr>
                         {% endfor %}
