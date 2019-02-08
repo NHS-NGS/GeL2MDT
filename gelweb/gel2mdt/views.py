@@ -754,9 +754,12 @@ def mdt_view(request, mdt_id):
             second_check_count += 1
         elif report.first_check:
             first_check_count += 1
-
-    first_check_percent = (first_check_count/len(reports)) * 100
-    second_check_percent = (second_check_count/len(reports)) * 100
+    try:
+        first_check_percent = (first_check_count/len(reports)) * 100
+        second_check_percent = (second_check_count/len(reports)) * 100
+    except ZeroDivisionError:
+        first_check_percent = 0
+        second_check_percent = 0
 
     mdt_form = MdtForm(instance=mdt_instance)
     clinicians = Clinician.objects.filter(mdt=mdt_id).values_list('name', flat=True)
