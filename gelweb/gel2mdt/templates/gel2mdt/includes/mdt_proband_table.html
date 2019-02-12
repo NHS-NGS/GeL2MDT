@@ -55,5 +55,13 @@ SOFTWARE.
     {% else %}
     <td><a href="/export_gtab_template/{{report.id}}"><i class="fas fa-external-link-alt"></i></a></td>
     {% endif %}
+    <td>
+        {% if report.second_check %}
+            <i class="far fa-check-circle" style="color:orange"></i><i class="far fa-check-circle" style="color:green"></i>
+        {% elif report.first_check %}
+            <i class="far fa-check-circle" style="color:orange"></i>
+        {% endif %}
+
+    </td>
 </tr>
 {% endfor %}

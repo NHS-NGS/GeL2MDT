@@ -287,6 +287,8 @@ def proband_view(request, report_id):
     if request.method == "POST":
         demogs_form = DemogsForm(request.POST, instance=report.ir_family.participant_family.proband)
         case_assign_form = CaseAssignForm(request.POST, instance=report)
+        first_check_form = FirstCheckAssignForm(request.POST, instance=report)
+        second_check_form = SecondCheckAssignForm(request.POST, instance=report)
         panel_form = PanelForm(request.POST)
         clinician_form = ClinicianForm(request.POST)
         add_clinician_form = AddClinicianForm(request.POST)
@@ -307,12 +309,17 @@ def proband_view(request, report_id):
             messages.add_message(request, 25, 'Proband Updated')
         if case_assign_form.is_valid():
             case_assign_form.save()
+        if first_check_form.is_valid():
+            first_check_form.save()
+        if second_check_form.is_valid():
+            second_check_form.save() 
         if add_comment_form.is_valid():
             CaseComment.objects.create(interpretation_report=report,
                                        comment=add_comment_form.cleaned_data['comment'],
                                        user=request.user,
                                        time=timezone.now())
             messages.add_message(request, 25, 'Comment Added')
+
         if panel_form.is_valid():
             irfp, created = InterpretationReportFamilyPanel.objects.get_or_create(panel=panel_form.cleaned_data['panel'],
                                                                                   ir_family=report.ir_family,
@@ -363,6 +370,8 @@ def proband_view(request, report_id):
     panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.ir_family)
     panel_form = PanelForm()
     case_assign_form = CaseAssignForm(instance=report)
+    first_check_form = FirstCheckAssignForm(instance=report)
+    second_check_form = SecondCheckAssignForm(instance=report)
     clinician_form = ClinicianForm()
     add_clinician_form = AddClinicianForm()
     add_variant_form = AddVariantForm()
@@ -395,6 +404,8 @@ def proband_view(request, report_id):
                                                     'proband_form': proband_form,
                                                     'demogs_form': demogs_form,
                                                     'case_assign_form': case_assign_form,
+                                                    'first_check_form': first_check_form,
+                                                    'second_check_form': second_check_form,
                                                     'pv_dict': pv_dict,
                                                     'proband_mdt': proband_mdt,
                                                     'panels': panels,
@@ -741,6 +752,8 @@ def mdt_view(request, mdt_id):
     proband_variants = ProbandVariant.objects.filter(interpretation_report__in=report_list)
     proband_variant_count = {}
     t3_proband_variant_count = {}
+    first_check_count = 0
+    second_check_count = 0
     for report in reports:
         proband_variant_count[report.id] = 0
         t3_proband_variant_count[report.id] = 0
@@ -753,8 +766,19 @@ def mdt_view(request, mdt_id):
                     proband_variant_count[report.id] += 1
                 else:
                     t3_proband_variant_count[report.id] += 1
+        if report.second_check:
+            second_check_count += 1
+        elif report.first_check:
+            first_check_count += 1
+    try:
+        first_check_percent = (first_check_count/len(reports)) * 100
+        second_check_percent = (second_check_count/len(reports)) * 100
+    except ZeroDivisionError:
+        first_check_percent = 0
+        second_check_percent = 0
 
     mdt_form = MdtForm(instance=mdt_instance)
+    sent_to_clinican_form = MdtSentToClinicianForm(instance=mdt_instance)
     clinicians = Clinician.objects.filter(mdt=mdt_id).values_list('name', flat=True)
     clinical_scientists = ClinicalScientist.objects.filter(mdt=mdt_id).values_list('name', flat=True)
     other_staff = OtherStaff.objects.filter(mdt=mdt_id).values_list('name', flat=True)
@@ -767,18 +791,25 @@ def mdt_view(request, mdt_id):
 
     if request.method == 'POST':
         mdt_form = MdtForm(request.POST, instance=mdt_instance)
-
         if mdt_form.is_valid():
             mdt_form.save()
             messages.add_message(request, 25, 'MDT Updated')
+
+        sent_to_clinican_form = MdtSentToClinicianForm(request.POST, instance=mdt_instance)
+        if sent_to_clinican_form.is_valid():
+            sent_to_clinican_form.save()
+
 
         return HttpResponseRedirect(f'/mdt_view/{mdt_id}')
     request.session['mdt_id'] = mdt_id
     return render(request, 'gel2mdt/mdt_view.html', {'proband_variants': proband_variants,
                                                       'proband_variant_count': proband_variant_count,
                                                      't3_proband_variant_count': t3_proband_variant_count,
+                                                     'first_check_percent': first_check_percent,
+                                                     'second_check_percent': second_check_percent,
                                                       'reports': reports,
                                                       'mdt_form': mdt_form,
+                                                      'sent_to_clinican_form' : sent_to_clinican_form,
                                                       'mdt_id': mdt_id,
                                                       'attendees': attendees,
                                                      'sample_type': mdt_instance.sample_type,
@@ -954,9 +985,14 @@ def recent_mdts(request, sample_type):
     config_dict = load_config.LoadConfig().load()
     # Need to get which probands were in MDT
     probands_in_mdt = {}
+    first_check_in_mdt = {}
+    second_check_in_mdt = {}
+    mdt_sent_to_clinician = {}
     for mdt in recent_mdt:
         probands_in_mdt[mdt.id] = []
         report_list = MDTReport.objects.filter(MDT=mdt.id)
+        first_check_count = 0
+        second_check_count = 0
         for report in report_list:
             if config_dict['cip_as_id'] == 'True':
                 probands_in_mdt[mdt.id].append((report.interpretation_report.id,
@@ -964,9 +1000,25 @@ def recent_mdts(request, sample_type):
             else:
                 probands_in_mdt[mdt.id].append((report.interpretation_report.id,
                                             report.interpretation_report.ir_family.participant_family.proband.gel_id))
+            if report.interpretation_report.second_check:
+                second_check_count += 1
+            elif report.interpretation_report.first_check:
+                first_check_count += 1
+        try:
+            first_check_percent = (first_check_count/len(report_list)) * 100
+            second_check_percent = (second_check_count/len(report_list)) * 100
+        except ZeroDivisionError:
+            first_check_percent = 0
+            second_check_percent = 0
+        first_check_in_mdt[mdt.id] = first_check_percent
+        second_check_in_mdt[mdt.id] = second_check_percent
+        mdt_sent_to_clinician[mdt.id] = mdt.sent_to_clinician
 
     return render(request, 'gel2mdt/recent_mdts.html', {'recent_mdt': recent_mdt,
                                                         'probands_in_mdt': probands_in_mdt,
+                                                        'first_check_in_mdt': first_check_in_mdt,
+                                                        'second_check_in_mdt': second_check_in_mdt,
+                                                        'mdt_sent_to_clinician': mdt_sent_to_clinician,
                                                         'sample_type': sample_type,
                                                         'clinician': clinician})
 

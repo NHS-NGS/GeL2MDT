@@ -308,7 +308,7 @@ class GELInterpretationReport(models.Model):
     assembly = models.ForeignKey(ToolOrAssemblyVersion, on_delete=models.CASCADE)
 
     user = models.CharField(max_length=200)
-    assigned_user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
+    assigned_user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name='assigned_user')
 
     # sha hash to allow quick determination of differences each update
     sha_hash = models.CharField(max_length=200)
@@ -327,6 +327,22 @@ class GELInterpretationReport(models.Model):
     no_primary_findings = models.BooleanField(default=False)
     case_code = models.CharField(max_length=20, null=True, blank=True, choices=(
         ('REANALYSE', 'REANALYSE'), ('URGENT', 'URGENT')), )
+    first_check = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        default=None,
+        related_name='first_check_user'
+    )
+    second_check = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        default=None,
+        related_name='second_check_user'
+    )
 
     def save(self, overwrite=False, *args, **kwargs):
         """
@@ -346,6 +362,8 @@ class GELInterpretationReport(models.Model):
                 latest_report.assembly = self.assembly
                 latest_report.sha_hash = self.sha_hash
                 latest_report.assigned_user = self.assigned_user
+                latest_report.first_check = self.first_check
+                latest_report.second_check = self.second_check
                 latest_report.mdt_status = self.mdt_status
                 latest_report.case_sent = self.case_sent
                 latest_report.case_status = self.case_status
@@ -360,6 +378,8 @@ class GELInterpretationReport(models.Model):
                 super(GELInterpretationReport, latest_report).save(*args, **kwargs)
             else:
                 self.assigned_user = latest_report.assigned_user
+                self.first_check = latest_report.first_check
+                self.second_check = latest_report.second_check
                 self.mdt_status = latest_report.mdt_status
                 self.case_sent = latest_report.case_sent
                 self.case_status = latest_report.case_status
@@ -917,6 +937,7 @@ class MDT(models.Model):
     status = models.CharField(db_column='Status', max_length=50, choices=(
         ('A', 'Active'), ('C', 'Completed')), default='A')
     gatb = models.NullBooleanField()
+    sent_to_clinician = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.date_of_mdt)
