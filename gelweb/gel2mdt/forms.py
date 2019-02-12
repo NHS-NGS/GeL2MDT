@@ -236,6 +236,13 @@ class MdtForm(forms.ModelForm):
         model = MDT
         fields = ['description', 'date_of_mdt', 'status', 'sent_to_clinician']
 
+class MdtSentToClinicianForm(forms.ModelForm):
+    '''
+    Form for recording the whether the MDT list has been sent to the clinician
+    '''
+    class Meta:
+        model = MDT
+        fields = ['sent_to_clinician']
 
 class ProbandMDTForm(forms.ModelForm):
     '''

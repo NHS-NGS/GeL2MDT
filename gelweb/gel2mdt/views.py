@@ -762,6 +762,7 @@ def mdt_view(request, mdt_id):
         second_check_percent = 0
 
     mdt_form = MdtForm(instance=mdt_instance)
+    sent_to_clinican_form = MdtSentToClinicianForm(instance=mdt_instance)
     clinicians = Clinician.objects.filter(mdt=mdt_id).values_list('name', flat=True)
     clinical_scientists = ClinicalScientist.objects.filter(mdt=mdt_id).values_list('name', flat=True)
     other_staff = OtherStaff.objects.filter(mdt=mdt_id).values_list('name', flat=True)
@@ -778,6 +779,10 @@ def mdt_view(request, mdt_id):
             mdt_form.save()
             messages.add_message(request, 25, 'MDT Updated')
 
+        sent_to_clinican_form = MdtSentToClinicianForm(request.POST, instance=mdt_instance)
+        if sent_to_clinican_form.is_valid():
+            sent_to_clinican_form.save()
+
 
         return HttpResponseRedirect(f'/mdt_view/{mdt_id}')
     request.session['mdt_id'] = mdt_id
@@ -788,6 +793,7 @@ def mdt_view(request, mdt_id):
                                                      'second_check_percent': second_check_percent,
                                                       'reports': reports,
                                                       'mdt_form': mdt_form,
+                                                      'sent_to_clinican_form' : sent_to_clinican_form,
                                                       'mdt_id': mdt_id,
                                                       'attendees': attendees,
                                                      'sample_type': mdt_instance.sample_type,
@@ -970,10 +976,10 @@ def recent_mdts(request, sample_type):
                 second_check_count += 1
             elif report.interpretation_report.first_check:
                 first_check_count += 1
-        if len(report_list) > 0:
+        try:
             first_check_percent = (first_check_count/len(report_list)) * 100
             second_check_percent = (second_check_count/len(report_list)) * 100
-        else:
+        except ZeroDivisionError:
             first_check_percent = 0
             second_check_percent = 0
         first_check_in_mdt[mdt.id] = first_check_percent
