@@ -22,7 +22,7 @@ SOFTWARE.
 from django.db import models
 from django.utils import timezone
 from django.conf import settings
-
+from django.contrib.auth.models import User, Group
 import pandas as pd
 
 from .model_utils.choices import ChoiceEnum
@@ -401,6 +401,11 @@ class GELInterpretationReport(models.Model):
                     for pv in proband_variants:
                         pv.interpretation_report = self
                         pv.save()
+                case_comments = CaseComment.objects.filter(interpretation_report=latest_report)
+                if case_comments:
+                    for comment in case_comments:
+                        comment.interpretation_report = self
+                        comment.save()
 
         else:
             self.archived_version = 1
@@ -463,6 +468,7 @@ class Proband(models.Model):
     comment = models.TextField(blank=True)
     discussion = models.TextField(blank=True)
     action = models.TextField(blank=True)
+    total_samples = models.IntegerField(null=True, blank=True)
     if config_dict['GMC'] != 'None':
         gmc = models.CharField(max_length=255, choices=gmc_choices, default='Unknown', null=True, blank=True)
     else:
@@ -538,6 +544,12 @@ class Transcript(models.Model):
     gene = models.ForeignKey(Gene, on_delete=models.CASCADE, null=True)
     genome_assembly = models.ForeignKey(ToolOrAssemblyVersion, on_delete=models.CASCADE)
 
+    def is_preferred_transcript(self):
+        preferred_transcripts = PreferredTranscript.objects.filter(gene=self.gene,
+                                                                   genome_assembly=self.genome_assembly,
+                                                                   transcript=self)
+        return preferred_transcripts.first()
+
     class Meta:
         managed = True
         db_table = 'Transcript'
@@ -545,6 +557,18 @@ class Transcript(models.Model):
         app_label= 'gel2mdt'
 
 
+class PreferredTranscript(models.Model):
+    transcript = models.ForeignKey(Transcript, on_delete=models.CASCADE)
+    gene = models.ForeignKey(Gene, on_delete=models.CASCADE)
+    genome_assembly = models.ForeignKey(ToolOrAssemblyVersion, on_delete=models.CASCADE)
+
+    class Meta:
+        managed = True
+        db_table = 'PreferredTranscript'
+        unique_together = (('gene', 'genome_assembly'),)
+        app_label= 'gel2mdt'
+
+        
 class TranscriptVariant(models.Model):
     transcript = models.ForeignKey(Transcript, on_delete=models.CASCADE)
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
@@ -639,26 +663,40 @@ class ProbandVariant(models.Model):
         ProbandTranscriptVariant.objects.filter(proband_variant=self.id, selected=True).update(selected=False)
         ProbandTranscriptVariant.objects.filter(proband_variant=self.id,
                                                 transcript=selected_transcript).update(selected=True)
-
-    def get_ptv(self):
-        # Gets first corresponding PTV - needs assessing!
-        ptv = ProbandTranscriptVariant.objects.filter(selected=True, proband_variant=self.id)[0]
-        return ptv
+        pvs = ProbandVariant.objects.filter(interpretation_report=self.interpretation_report)
+        # Update the selected transcript for all PVs that have that transcript
+        for pv in pvs:
+            ptv_transcripts = ProbandTranscriptVariant.objects.filter(proband_variant=pv).values_list('transcript__name',
+                                                                                                      flat=True)
+            if selected_transcript.name in ptv_transcripts:
+                ProbandTranscriptVariant.objects.filter(proband_variant=pv, selected=True).update(selected=False)
+                ProbandTranscriptVariant.objects.filter(proband_variant=pv,
+                                                        transcript=selected_transcript).update(selected=True)
 
     def get_transcript_variant(self):
-        ptv = ProbandTranscriptVariant.objects.filter(selected=True, proband_variant=self.id).first()
-        if ptv:
-            transcript_variant = TranscriptVariant.objects.get(transcript=ptv.transcript,
-                                                            variant=self.variant)
+        ptv = ProbandTranscriptVariant.objects.filter(selected=True, proband_variant=self.id)
+        if len(ptv) == 1:
+            transcript_variant = TranscriptVariant.objects.get(transcript=ptv[0].transcript,
+                                                               variant=self.variant)
             return transcript_variant
-
-    def get_transcript(self):
-        ptv = ProbandTranscriptVariant.objects.filter(selected=True, proband_variant=self.id).first()
-        if ptv:
-            return ptv.transcript
         else:
             return None
 
+    def get_transcript(self):
+        ptv = ProbandTranscriptVariant.objects.filter(selected=True, proband_variant=self.id)
+        if len(ptv) == 1:
+            return ptv.first().transcript
+        else:
+            return None
+
+    def get_preferred_transcript(self):
+        ptvs = ProbandTranscriptVariant.objects.filter(proband_variant=self.id, selected=True)
+        if len(ptvs) > 1 or len(ptvs) == 0:
+            return None
+        else:
+            preferred_transcript = PreferredTranscript.objects.filter(genome_assembly=self.variant.genome_assembly,
+                                                                      gene=ptvs.first().transcript.gene).first()
+            return preferred_transcript
 
     def get_selected_count(self):
         ptv = ProbandTranscriptVariant.objects.filter(selected=True, proband_variant=self.id).count()
@@ -929,4 +967,17 @@ class CaseAlert(models.Model):
     class Meta:
         managed = True
         db_table = 'GELAlert'
+        app_label = 'gel2mdt'
+
+
+class CaseComment(models.Model):
+    interpretation_report = models.ForeignKey(GELInterpretationReport, on_delete=models.CASCADE)
+    comment = models.TextField()
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    time = models.DateTimeField()
+
+    class Meta:
+        managed = True
+        ordering = ['-time']
+        db_table = 'CaseComment'
         app_label = 'gel2mdt'

@@ -844,7 +844,8 @@ class CaseAttributeManager(object):
         for transcript in case_transcripts:
             # convert canonical to bools:
             transcript.canonical = transcript.transcript_canonical == "YES"
-            transcript.selected = transcript.transcript_canonical == "YES"
+            if self.case.json['sample_type'] == 'cancer':
+                transcript.selected = transcript.transcript_canonical == "YES"
             if not transcript.gene_hgnc_id:
                 # if the transcript has no recognised gene associated
                 continue  # don't bother checking genes
@@ -852,6 +853,15 @@ class CaseAttributeManager(object):
             for gene in genes:
                 if gene.entry.hgnc_id == transcript.gene_hgnc_id:
                     transcript.gene_model = gene.entry
+                    if self.case.json['sample_type'] == 'raredisease':
+                        preferred_transcript = PreferredTranscript.objects.filter(gene=gene.entry,
+                                                                                  genome_assembly=genome_assembly)
+                        if preferred_transcript:
+                            preferred_transcript = preferred_transcript.first()
+                            if preferred_transcript.transcript.name == transcript.transcript_name:
+                                transcript.selected = True
+                        else:
+                            transcript.selected = transcript.transcript_canonical == "YES"
 
         transcripts = ManyCaseModel(Transcript, [{
             "gene": transcript.gene_model,

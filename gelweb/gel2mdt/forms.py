@@ -83,6 +83,10 @@ class ProbandForm(forms.ModelForm):
     class Meta:
         model = Proband
         fields = ['outcome', 'comment']
+        widgets = {
+            'outcome': Textarea(attrs={'rows': '3'}),
+            'comment': Textarea(attrs={'rows': '3'}),
+        }
 
 
 class VariantValidationForm(forms.ModelForm):
@@ -99,6 +103,15 @@ class VariantValidationForm(forms.ModelForm):
             'validation_status',
             'validation_responsible_user',
         ]
+
+
+class AddCommentForm(forms.ModelForm):
+    '''
+    Adds a new CaseComment in the Proband page
+    '''
+    class Meta:
+        model = CaseComment
+        fields = ['comment']
 
 
 class GELIRForm(forms.ModelForm):

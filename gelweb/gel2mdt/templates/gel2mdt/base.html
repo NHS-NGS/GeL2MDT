@@ -182,7 +182,16 @@ SOFTWARE.
 <script>
     $(document).ready(function() {
         $('#dataTables-validationlist').DataTable({
-            "order": [[ 6, "desc" ]]
+            "order": [[ 6, "desc" ]],
+            dom: 'lBfrtip',
+            buttons: [ {
+                extend: 'excelHtml5',
+                title: "ValidationListExport"
+            },
+            {
+                extend: 'csvHtml5',
+                title: "ValidationListExport"
+            }],
         });
     });
 </script>

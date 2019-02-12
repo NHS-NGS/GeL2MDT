@@ -26,7 +26,7 @@
     {% load gel2mdt_extras %}
 
     {% if report.status == 'blocked' %}
-        <div class="alert alert-danger" role="alert"><strong>Warning, the CIP-API status for this case has been changed to "Blocked"</strong></div>'
+        <div class="alert alert-danger" role="alert"><strong>Warning, the CIP-API status for this case has been changed to "Blocked"</strong></div>
     {% endif %}
     <ul class="nav nav-tabs" data-options="deep_linking: true">
         <li class="active"><a data-toggle="tab" href="#proband">Proband</a></li>
@@ -266,13 +266,8 @@
                                 <div class="panel-heading">Proband Tracking</div>
                                 <div class="panel-body">
                                     <div class="col-md-6">
-
-                                        {% bootstrap_field proband_form.outcome %}
-
-                                    </div>
-                                    <div class="col-md-6">
-                                        {% bootstrap_field proband_form.comment %}
-                                    </div>
+                                        {% bootstrap_field proband_form.outcome label='Proband Outcome'%}
+                                        {% bootstrap_field proband_form.comment label='Proband Comment'%}
                                     <div class="col-md-12">
                                         <div class="col-md-6">
                                             {% bootstrap_label "Assigned User" %}
@@ -301,8 +296,37 @@
                                             </div>
                                         {% endif %}
                                     </div>
+                                    <div class="col-md-6" style="height: 250px; overflow-y:scroll;">
+                                        {% bootstrap_label "Case Comments" %}
+                                        <a href=# data-toggle="modal" data-target="#addCommentModal"><i class="fas fa-plus"></i></a>
+
+                                        <div class="media"  id="comment-table">
+                                            {% for comment in report.casecomment_set.all %}
+                                            <div class="panel ">
+                                    <div class="media-body">
+                                      <h5 class="media-heading">{{comment.user.first_name}} {{comment.user.last_name}}
+                                          <span style="float: right; margin: 0px 5px 0px 5px">
+                                              <small><i>Posted on {{comment.time}}</i></small></span></h5>
+                                      <p>{{comment.comment}}</p>
+                                        <p>
+                                        {% if comment.user == request.user %}
+                                        <span style="float: left; margin: 0px 0px 0px 0px">
+                                            <a class="js-edit-comment" data-url="/edit_comment/{{ comment.id }}" style="font-size: 13px;">Edit
+                                                        </a>
+                                            <a href="/delete_comment/{{comment.id }}" style="font-size: 13px;" onclick="return confirm('Are you sure?')">Delete</a>
+                                        </span>
+                                            </p>
+
+
+                                        {% endif %}
+
+                                    </div>
+                                            </div>
+                                            {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
 
                         </div>
 
@@ -633,14 +657,17 @@
                                 <tr>
                                     <th>Variant</th>
                                     <th>Interpretation</th>
-                                    <th>Gene</th>
+                                    <th>Gene <a href="#" data-toggle="tooltip" title="Click to set PreferredTranscript"><i class="fas fa-info-circle"></i></a></th>
                                 {% if report.sample_type == 'cancer' %}
                                     <th>Domain</th>
                                 {% else %}
                                     <th>Tier</th>
                                 {% endif %}
                                     <th>Flag</th>
-                                    <th>Transcript</th>
+                                    {% if report.sample_type == 'raredisease' %}
+                                    <th>Preferred Transcript </th>
+                                    {% endif %}
+                                    <th>Selected Transcript</th>
                                     <th>HGVSc</th>
                                     <th>HGVSp</th>
                                     <th>Genotype</th>
@@ -654,7 +681,7 @@
                             </thead>
                             <tbody style='font-size: 75%'>
 
-                                {% for pv, pv_form in pv_forms_dict.items %}
+                                {% for pv, pv_items in pv_dict.items %}
                                     <tr >
                                         <td>
                                             <a href="/variant/{{pv.variant.id }}">
@@ -667,6 +694,7 @@
                                             </a>
                                         </td>
 
+                                        {% if report.sample_type == 'raredisease' %}
                                         <div id="pvModal{{forloop.counter}}" class="modal fade" role="dialog">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
@@ -677,67 +705,140 @@
                                                     <div class="modal-body">
                                                         <label>Variant Classification</label>
                                                         <br>
-                                                        {{ pv.rarediseasereport.get_classification_display }}
+                                                        {{ pv_items.raredisease_report.get_classification_display }}
                                                         <hr>
                                                         <label>Contribution to Phenotype</label>
                                                         <br>
-                                                        {{ pv.rarediseasereport.contribution_to_phenotype }}
+                                                        {{ pv_items.raredisease_report.contribution_to_phenotype }}
                                                         <hr>
                                                         <label>Action from MDT</label>
                                                         <br>
-                                                        {{ pv.rarediseasereport.action }}
+                                                        {{ pv_items.raredisease_report.action }}
                                                         <hr>
                                                         <label>MDT Discussion</label>
                                                         <br>
-                                                        {{ pv.rarediseasereport.discussion }}
+                                                        {{ pv_items.raredisease_report.discussion }}
                                                         <hr>
                                                         <label>Change Medication?</label>
                                                         <br>
-                                                        {{ pv.rarediseasereport.change_med }}
+                                                        {{ pv_items.raredisease_report.change_med }}
                                                         <hr>
                                                         <label>Surgical Option?</label>
                                                         <br>
-                                                        {{ pv.rarediseasereport.surgical_option }}
+                                                        {{ pv_items.raredisease_report.surgical_option }}
                                                         <hr>
                                                         <label>Add Relative Surveillance?</label>
                                                         <br>
-                                                        {{ pv.rarediseasereport.add_surveillance_for_relatives }}
+                                                        {{ pv_items.raredisease_report.add_surveillance_for_relatives }}
                                                         <hr>
                                                         <label>Add Clinical Trial?</label>
                                                         <br>
-                                                        {{ pv.rarediseasereport.clinical_trial }}
+                                                        {{ pv_items.raredisease_report.clinical_trial }}
                                                         <hr>
                                                         <label>Inform Reproductive Choice?</label>
                                                         <br>
-                                                        {{ pv.rarediseasereport.inform_reproductive_choice }}
+                                                        {{ pv_items.raredisease_report.inform_reproductive_choice }}
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-
-
-                                        <td>{{ pv.get_transcript.gene }}</td>
+                                        {% else %}
+                                        <div id="pvModal{{forloop.counter}}" class="modal fade" role="dialog">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
+                                                        <h4 class="modal-title">MDT Results</h4>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <label>Variant Classification</label>
+                                                        <br>
+                                                        {{ pv_items.cancer_report.get_classification_display }}
+                                                        <hr>
+                                                        <label>Action from MDT</label>
+                                                        <br>
+                                                        {{ pv_items.cancer_report.action }}
+                                                        <hr>
+                                                        <label>MDT Discussion</label>
+                                                        <br>
+                                                        {{ pv_items.cancer_report.discussion }}
+                                                        <hr>
+                                                        <label>Action Type</label>
+                                                        <br>
+                                                        {{ pv_items.cacncer_report.action_type }}
+                                                        <hr>
+                                                        <label>Validated?</label>
+                                                        <br>
+                                                        {{ pv_items.cancer_report.validated }}
+                                                        <hr>
+                                                        <label>Validated Assay Type</label>
+                                                        <br>
+                                                        {{ pv_items.cancer_report.validated_assay_type }}
+                                                        <hr>
+                                                        <label>Variant Use</label>
+                                                        <br>
+                                                        {{ pv_items.cancer_report.variant_use }}
+                                                        <hr>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if pv_items.transcript %}
+                                            {% if report.sample_type == 'raredisease' %}
+                                            <td><a href="/edit_preferred_transcript/{{pv_items.transcript.gene_id}}/{{pv_items.transcript.genome_assembly.id}}" target="_blank"><i class="fas fa-external-link-alt"></i> {{pv_items.transcript.gene}}</a></td>
+                                            {% else %}
+                                            <td>{{pv_items.transcript.gene}}</td>
+                                            {% endif %}
+                                        {% else %}
+                                        <td></td>
+                                        {% endif %}
                                         <td>{{ pv.max_tier }}</td>
 
                                         <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{% for flag in pv.pvflag_set.all %}
                                         {{flag}};
                                         {% endfor %}</td>
-
+                                        {% if report.sample_type == 'raredisease' %}
+                                        <td>{{pv_items.preferred_transcript.transcript.name}}</td>
+                                        {% endif %}
                                         <td>
                                             {% if gelir_form.case_status.value != "C" %}
-                                                <a href="/select_transcript/{{report.id}}/{{pv.id }}"><i class="fas fa-pencil-alt"></i></a></span> {{pv.get_transcript.name }}
+                                                <a href="/select_transcript/{{report.id}}/{{pv.id }}"><i class="fas fa-pencil-alt"></i></a></span> {{pv_items.transcript.name }}
                                         {% else%}
-                                            {{pv.get_transcript.name }}
+                                            {{pv_items.transcript.name }}
                                         {% endif %}
                                         </td>
 
-                                        <td style="word-wrap: break-word; min-width: 100px;max-width: 100px;">{{pv.get_transcript_variant.hgvs_c}}</td>
-                                        <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv.get_transcript_variant.hgvs_p}}</td>
+                                        <td style="word-wrap: break-word; min-width: 100px;max-width: 100px;">{{pv_items.transcript_variant.hgvs_c}}</td>
+                                        <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{{pv_items.transcript_variant.hgvs_p}}</td>
                                         <td>{{pv.zygosity}}</td>
                                         {% if report.sample_type == 'cancer' %}
                                         <td>{{pv.somatic}}</td>
                                         {% else %}
-                                        <td>{{pv.inheritance}}</td>
+                                        <td> 
+                                            <a href=# data-toggle="modal" data-target="#pvModalInheritance{{forloop.counter}}">
+                                                {{pv.inheritance}}
+                                            </a>
+                                        </td>
+                                        <div id="pvModalInheritance{{forloop.counter}}" class="modal fade" role="dialog">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
+                                                        <h4 class="modal-title">Inheritance information</h4>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <label>Maternal zygosity</label>
+                                                        <br>
+                                                        {{ pv.maternal_zygosity }}
+                                                        <hr>
+                                                        <label>Paternal zygosity</label>
+                                                        <br>
+                                                        {{ pv.paternal_zygosity }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                         {% endif %}
                                         <td><a onclick="$('#validationModal{{forloop.counter}}').modal('show')"><i class="fas fa-pencil-alt"></i></a></span> {{pv.get_validation_status_display}}</td>
                                     </tr>
@@ -748,13 +849,13 @@
                                             <div class="modal-content">
                                                 <div class="modal-header">
                                                     <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
-                                                    <h4 class="modal-title">{{pv.get_transcript_variant.hgvs_c}}</h4>
+                                                    <h4 class="modal-title">{{pv_items.transcript_variant.hgvs_c}}</h4>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <h5>Validation for variant {{pv.get_transcript_variant.hgvs_c}}.</h5>
+                                                    <h5>Validation for variant {{pv_items.transcript_variant.hgvs_c}}.</h5>
                                                     <form id="validationForm{{forloop.counter}}" action="#" method="POST">
                                                         {% csrf_token %}
-                                                        {% bootstrap_form pv_form %}
+                                                        {% bootstrap_form pv_items.form %}
                                                         {% buttons %}
                                                         <input value="Update" type="button" onclick="updateValidation(validationModal{{forloop.counter}});" class="btn btn-primary">
                                                         </input>
@@ -1128,6 +1229,27 @@
         </div>
     </div>
 
+<div id="addCommentModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
+                    <h4 class="modal-title">Add New Comment</h4>
+                </div>
+                <div class="modal-body">
+                    <form action="/proband/{{ report.id }}" method="POST">
+                        {% csrf_token %}
+                        {% bootstrap_form add_comment_form %}
+                        {% buttons %}
+                        <button type="submit" class="btn btn-primary">
+                            Add New Comment
+                        </button>
+                        {% endbuttons %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="modal fade" id="modal-relative">
         <div class="modal-dialog">
@@ -1136,4 +1258,52 @@
         </div>
     </div>
 
+    <script>
+
+
+      var runloadForm = function () {
+    var btn = $(this);
+    $.ajax({
+      url: btn.attr("data-url"),
+      type: 'get',
+      dataType: 'json',
+      beforeSend: function () {
+        $("#modal-commenthistory .modal-content").html("");
+        $("#modal-commenthistory").modal("show");
+      },
+      success: function (data) {
+        $("#modal-commenthistory .modal-content").html(data.html_form);
+      }
+    });
+  };
+
+   var runsaveForm = function () {
+    var form = $(this);
+    $.ajax({
+      url: form.attr("action"),
+      data: form.serialize(),
+      type: form.attr("method"),
+      dataType: 'json',
+      success: function (data) {
+        if (data.form_is_valid) {
+          window.location.reload();
+          $("#modal-commenthistory").modal("hide");
+
+        }
+        else {
+          $("#modal-commenthistory .modal-content").html(data.html_form);
+        }
+      }
+    });
+    return false;
+  };
+   $("#comment-table").on("click", ".js-edit-comment", runloadForm);
+  $("#modal-run").on("submit", ".js-save-comment", runsaveForm);
+    </script>
+    <div class="modal fade" id="modal-commenthistory">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            </div>
+        </div>
+    </div>
 {% endblock %}

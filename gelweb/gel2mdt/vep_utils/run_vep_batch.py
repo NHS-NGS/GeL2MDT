@@ -256,7 +256,7 @@ def parse_vep_annotations(infile=None):
                 variant_polyphen = variant['transcript_data'][transcript]['PolyPhen']
                 variant_sift = variant['transcript_data'][transcript]['SIFT']
                 transcript_variant_hgvs_c = variant['transcript_data'][transcript]['HGVSc']
-                transcript_variant_hgvs_p = variant['transcript_data'][transcript]['HGVSp']
+                transcript_variant_hgvs_p = variant['transcript_data'][transcript]['HGVSp'].replace('%3D', '=')
                 transcript_variant_hgvs_g = variant['transcript_data'][transcript]['HGVSg']
                 case_transcript = CaseTranscript(case_id, variant_count, gene_id, gene_name, hgnc_id, transcript_name, canonical,
                                                  transcript_strand, proband_transcript_variant_effect,
