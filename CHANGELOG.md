@@ -1,3 +1,14 @@
+## [0.6.1]- 2019-02-26
+### Added
+- Preferred transcript selection
+- Case comments
+- 1st and 2nd check assignment
+- Additional MDT tracking features
+- Option to allow for 'ADDITIONAL_APPS' to be imported in settings file. Requires `ADDITIONAL_APPS = []` to be added to `local_settings.py` 
+
+### Changed
+- Format of MDT export
+
 ## [0.6.0]- 2018-11-22
 ### Added
 - GTAB template export
