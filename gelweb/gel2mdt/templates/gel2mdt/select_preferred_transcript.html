@@ -26,59 +26,36 @@ SOFTWARE.
 {% load gel2mdt_extras %}
 
 <div style="text-align:center">
-    <form action="/proband/{{ report.id }}" role="form" method="post">
-        {% csrf_token %} {% bootstrap_button "Return to Proband" button_type="submit" button_class="btn-primary btn-lg" %}
-    </form>
+    <h1>Choose Preferred Transcript for {{gene}}</h1>
 </div>
              <div class="table">
             <table width="100%" class="table table-striped table-bordered table-hover" id="dataTables-generic4" >
                 <thead>
                     <tr>
-                        <th>Select</th>
-                        {% if report.sample_type == 'raredisease' %}
-                        <th>Preferred Transcript</th>
-                        {% endif %}
+                        <th>Is Preferred Transcript</th>
                         <th>Canonical</th>
                         <th>Gene</th>
                         <th>Transcript</th>
                         <th>Strand</th>
-                        <th>Effect</th>
-                        <th>HGVSc</th>
-                        <th>HGVSp</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for ptv in proband_transcript_variants|sort_by:'-selected' %}
+                    {% for transcript in transcripts %}
                     <tr >
                         <td  align="center">
-                        {% if ptv.selected %}
-                                 <p>Currently Selected</p>
+                        {% if transcript.is_preferred_transcript %}
+                                 <p>True</p>
                             {% else %}
-                                <form action="/update_transcript/{{report.id}}/{{ptv.proband_variant.id}}/{{ptv.transcript.id}}" role="form" method="post">
+                                <form action="/update_preferred_transcript/{{gene.id}}/{{transcript.genome_assembly_id}}/{{transcript.id}}" role="form" method="post">
                                  {% csrf_token %}
                                  {% bootstrap_button "Select" button_type="submit" button_class="btn-primary btn-info"%}
                                 </form>
                              {% endif %}
                         </td>
-                        {% if report.sample_type == 'raredisease' %}
-                        <td>{% if ptv.transcript.is_preferred_transcript %}
-                                <p>True</p>
-                                {% else %}
-                                <p>False</p>
-                                {% endif %}
-                            </td>
-                        {% endif %}
-                            <td>{{ptv.transcript.canonical_transcript}}</td>
-                        {% if report.sample_type == 'raredisease' %}
-                            <td><a href="/edit_preferred_transcript/{{ptv.transcript.gene_id}}/{{ptv.transcript.genome_assembly_id}}" target="_blank">{{ptv.transcript.gene}}</a></td>
-                        {% else %}
-                        <td>{{ptv.transcript.gene}}</td>
-                        {% endif %}
-                            <td>{{ptv.transcript.name}}</td>
-                            <td>{{ptv.transcript.strand}}</td>
-                            <td style="word-wrap: break-word; min-width: 220px;max-width: 220px;">{{ptv.effect}}</td>
-                            <td>{{ptv.get_transcript_variant.hgvs_c}}</td>
-                            <td>{{ptv.get_transcript_variant.hgvs_p}}</td>
+                            <td>{{transcript.canonical_transcript}}</td>
+                            <td>{{transcript.gene}}</td>
+                            <td>{{transcript.name}}</td>
+                            <td>{{transcript.strand}}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

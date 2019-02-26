@@ -70,15 +70,87 @@ SOFTWARE.
 </div>
 
 <br>
-<div  class="container-fluid">
 
+
+<div  class="container-fluid">
+    <div class=row>
+        <div class="col-md-12">
+            <div class="col-md-3">
+                <div id="tracking" class="tab-pane fade in active">
+                    <div class="panel panel-default" >
+                        <div class="panel-heading">MDT Tracking</div>
+                        <div class="panel-body">
+                            <div class="col-md-12">
+                                {% bootstrap_label "First check / Second check" %}
+                                <div class="progress">
+                                    <div class="progress-bar progress-bar-warning" style="width: {{first_check_percent}}%">
+                                        <strong>{{first_check_percent}}</strong>
+                                    </div>
+                                    <div class="progress-bar progress-bar-success progress-bar-striped" style="width: {{second_check_percent}}%">
+                                        <strong>{{second_check_percent}}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <form role="form" method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+
+                                 <div class="col-md-9">
+                                    {{sent_to_clinican_form.as_p}}
+                                </div>
+                                <div class="col-md-3">
+                                {% if mdt_form.status.value != "C" %}
+                                    <button type="submit" name="sent_to_clinician_update" class="btn btn-default btn-xs">Save</button>
+                                {% endif %}
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                <form role="form" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="col-md-9">
+
+                         <div class="panel panel-default">
+                            <div class="panel-heading">MDT Information</div>
+                            <div class="panel-body" style="text-align:center">
+
+                                     <div class="col-md-4">
+                                        {% bootstrap_field mdt_form.description %}
+                                    </div>
+                                    <div class="col-md-2">
+                                        {% bootstrap_field mdt_form.date_of_mdt label="Date of MDT"%}
+                                    </div>
+                                    <div class="col-md-2">
+                                        {% bootstrap_field mdt_form.status %}
+                                    </div>
+                                    <div class="col-md-3">
+                                        {% bootstrap_label "Current Attendees" %}
+                                        {% for attendee in attendees %}
+                                            {{attendee}}
+                                        {% endfor %}
+                                    </div>
+                                    <div class="col-md-1">
+                                    {% if mdt_form.status.value != "C" %}
+                                        <br>            
+                                        <button type="submit" name="mdt_update" class="btn btn-default">Save</button>
+                                    {% endif %}
+                                    </div>
+
+                             </div>
+
+                     </div>
+                    </div>
+                </form>
+        </div>
+    </div>
 
     <div class=row>
         <div class="col-md-12">
 
                     <div id="proband" class="tab-pane fade in active">
                         <div class="panel panel-default" >
-                            <div class="panel-heading">Proband</div>
+                            <div class="panel-heading">Cases</div>
                             <div class="panel-body">
 
                                 <div class="table-responsive"  >
@@ -102,6 +174,7 @@ SOFTWARE.
                                                 {% else %}
                                                 <th>MDT Outcome Form</tH>
                                                 {% endif %}
+                                                <th>Check status</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -121,46 +194,7 @@ SOFTWARE.
                     </div>
                 </div>
     </div>
-
-
-    <form role="form" method="post" enctype="multipart/form-data">
-     {% csrf_token %}
-         <div class=row style="text-align:center">
-        <div class="col-md-10" style="text-align:center" >
-
-            <div class="panel panel-default">
-                <div class="panel-heading">MDT Information</div>
-                <div class="panel-body">
-                <div class="row">
-                    <div class="col-md-4">
-                        {% bootstrap_field mdt_form.description %}
-                    </div>
-                    <div class="col-md-2">
-                        {% bootstrap_field mdt_form.date_of_mdt %}
-                    </div>
-                    <div class="col-md-2">
-                        {% bootstrap_field mdt_form.status %}
-                    </div>
-                    <div class="col-md-2">
-                        <h5>Current Attendees</h5>
-                        {% for attendee in attendees %}
-                            {{attendee}}
-                        {% endfor %}
-                    </div>
-                    </div>
-                    {% if mdt_form.status.value != "C" %}
-                    <div class="row" >
-                        <div class="col-md-1">
-                        <button type="submit" name="mdt_update" class="btn btn-default">Save</button>
-                        </div>
-                    </div>
-                    {% endif %}
-                </div>
-
-        </div>
-        </div>
-        </div>
-    </form>
+</div>
 </div>
 
      <script>

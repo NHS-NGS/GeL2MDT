@@ -83,6 +83,10 @@ class ProbandForm(forms.ModelForm):
     class Meta:
         model = Proband
         fields = ['outcome', 'comment']
+        widgets = {
+            'outcome': Textarea(attrs={'rows': '3'}),
+            'comment': Textarea(attrs={'rows': '3'}),
+        }
 
 
 class VariantValidationForm(forms.ModelForm):
@@ -99,6 +103,15 @@ class VariantValidationForm(forms.ModelForm):
             'validation_status',
             'validation_responsible_user',
         ]
+
+
+class AddCommentForm(forms.ModelForm):
+    '''
+    Adds a new CaseComment in the Proband page
+    '''
+    class Meta:
+        model = CaseComment
+        fields = ['comment']
 
 
 class GELIRForm(forms.ModelForm):
@@ -195,6 +208,38 @@ class CaseAssignForm(forms.ModelForm):
         gelir.assigned_user = data['assigned_user']
         gelir.save(overwrite=True)
 
+class FirstCheckAssignForm(forms.ModelForm):
+    '''
+    Form for specifying which user performed the first check
+    '''
+    first_check = UserChoiceField(queryset=User.objects.all().order_by('first_name'))
+
+    class Meta:
+        model = GELInterpretationReport
+        fields = ["first_check"]
+
+    def save(self):
+        gelir = self.instance
+        data = self.cleaned_data
+        gelir.first_check = data['first_check']
+        gelir.save(overwrite=True)
+
+class SecondCheckAssignForm(forms.ModelForm):
+    '''
+    Form for specifying which user performed the second check
+    '''
+    second_check = UserChoiceField(queryset=User.objects.all().order_by('first_name'))
+
+    class Meta:
+        model = GELInterpretationReport
+        fields = ["second_check"]
+
+    def save(self):
+        gelir = self.instance
+        data = self.cleaned_data
+        gelir.second_check = data['second_check']
+        gelir.save(overwrite=True)
+
 
 class MdtForm(forms.ModelForm):
     '''
@@ -202,8 +247,15 @@ class MdtForm(forms.ModelForm):
     '''
     class Meta:
         model = MDT
-        fields = ['description', 'date_of_mdt', 'status']
+        fields = ['description', 'date_of_mdt', 'status', 'sent_to_clinician']
 
+class MdtSentToClinicianForm(forms.ModelForm):
+    '''
+    Form for recording the whether the MDT list has been sent to the clinician
+    '''
+    class Meta:
+        model = MDT
+        fields = ['sent_to_clinician']
 
 class ProbandMDTForm(forms.ModelForm):
     '''

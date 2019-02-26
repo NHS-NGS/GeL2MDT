@@ -21,6 +21,8 @@ SOFTWARE.
 """
 from .models import *
 import csv
+import xlsxwriter
+import io
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from django.conf import settings
@@ -28,7 +30,7 @@ import os
 from docx.shared import Pt, Inches, RGBColor, Cm
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
-def write_mdt_export(writer, mdt_instance, mdt_reports):
+def write_mdt_export(mdt_instance, mdt_reports):
     '''
     Writes a summary of the cases which are being brought to MDT
     :param writer: CSV file writer
@@ -36,8 +38,46 @@ def write_mdt_export(writer, mdt_instance, mdt_reports):
     :param mdt_reports: List of reports which are present in MDT
     :return: CSV file Writer
     '''
-    writer.writerow(['Forename', 'Surname', 'DOB', 'NHS no.', 'GELID', 'CIPID',
-                     'Clinician', 'Panel', 'Variant&Zygosity'])
+    # create in-memory output file
+    output = io.BytesIO()
+    workbook = xlsxwriter.Workbook(output)
+    worksheet = workbook.add_worksheet()
+    # set formatting
+    header_format = workbook.add_format({'bold': 1})
+    vcenter_format = workbook.add_format({'valign': 'vcenter'})
+    vcenter_date_format = workbook.add_format({'valign': 'vcenter', 'num_format': 'mm/dd/yyyy'})
+    # write headings
+    worksheet.write('A1', 'Forename', header_format)
+    worksheet.write('B1', 'Surname', header_format)
+    worksheet.write('C1', 'Sex', header_format)
+    worksheet.write('D1', 'DOB', header_format)
+    worksheet.write('E1', 'NHS number', header_format)
+    worksheet.write('F1', 'Family ID', header_format)
+    worksheet.write('G1', 'Clinician', header_format)
+    worksheet.write('H1', 'Panel(s)', header_format)
+    worksheet.write('I1', 'Variant', header_format)
+    worksheet.write('J1', 'Inheritance', header_format)
+    worksheet.write('K1', 'Proband zygosity', header_format)
+    worksheet.write('L1', 'Maternal zygosity', header_format)
+    worksheet.write('M1', 'Paternal zygosity', header_format)
+    worksheet.write('N1', 'Phenotypic fit', header_format)
+    worksheet.write('O1', 'Discussion required', header_format)
+    worksheet.write('P1', 'Comments', header_format)
+    # set column widths
+    worksheet.set_column('A:A',10)
+    worksheet.set_column('B:B',15)
+    worksheet.set_column('C:C',6)
+    worksheet.set_column('D:F',11)
+    worksheet.set_column('G:G',15)
+    worksheet.set_column('H:H',40)
+    worksheet.set_column('I:I',40)
+    worksheet.set_column('J:J',10)
+    worksheet.set_column('K:M',18)
+    worksheet.set_column('N:N',12)
+    worksheet.set_column('O:O',18)
+    worksheet.set_column('P:P',30)
+
+    row_count = 2
 
     for report in mdt_reports:
         proband_variants = ProbandVariant.objects.filter(interpretation_report=report.interpretation_report)
@@ -54,26 +94,81 @@ def write_mdt_export(writer, mdt_instance, mdt_reports):
                 if len(hgvs_c_split) > 1:
                     hgvs_c = hgvs_c_split[1]
                 if len(hgvs_p_split) > 1:
-                    hgvs_p = hgvs_p_split[1]
-                pv_output.append(f'{transcript.gene}, '
+                    hgvs_p = hgvs_p_split[1].replace('%3D', '=')
+                pv_output.append({'variant': f'{transcript.gene}, '
                                  f'{hgvs_c}, '
-                                 f'{hgvs_p}, '
-                                 f'{proband_variant.zygosity}')
+                                 f'{hgvs_p}, ',
+                                 'inheritance': f'{proband_variant.inheritance}',
+                                 'proband_zygosity': f'{proband_variant.zygosity}',
+                                 'mat_zygosity': f'{proband_variant.maternal_zygosity}',
+                                 'pat_zygosity': f'{proband_variant.paternal_zygosity}',})
         panel_names = []
         for panel in panels:
             panel_names.append(f'{panel.panel.panel.panel_name}_'
                                f'{panel.panel.version_number}')
-        writer.writerow([report.interpretation_report.ir_family.participant_family.proband.forename,
-                         report.interpretation_report.ir_family.participant_family.proband.surname,
-                         report.interpretation_report.ir_family.participant_family.proband.date_of_birth.date(),
-                         report.interpretation_report.ir_family.participant_family.proband.nhs_number,
-                         report.interpretation_report.ir_family.participant_family.proband.gel_id,
-                         report.interpretation_report.ir_family.ir_family_id,
-                         report.interpretation_report.ir_family.participant_family.clinician.name,
-                         '\n'.join(panel_names),
-                         '\n'.join(pv_output)])
-    return writer
+        
+        v_rows = row_count
+        for variant in pv_output:
+            worksheet.write('I' + str(v_rows), variant['variant'])
+            worksheet.write('J' + str(v_rows), variant['inheritance'])
+            worksheet.write('K' + str(v_rows), variant['proband_zygosity'])
+            worksheet.write('L' + str(v_rows), variant['mat_zygosity'])
+            worksheet.write('M' + str(v_rows), variant['pat_zygosity'])
+            worksheet.data_validation('N' + str(v_rows), 
+                {'validate': 'list', 'source': ['Yes', 'No', 'Maybe']})
+            worksheet.data_validation('O' + str(v_rows), 
+                {'validate': 'list', 'source': ['Yes', 'No']})
+            v_rows += 1
 
+        if row_count == v_rows - 1:
+            worksheet.write('A' + str(row_count), 
+                report.interpretation_report.ir_family.participant_family.proband.forename, vcenter_format)
+            worksheet.write('B' + str(row_count), 
+                report.interpretation_report.ir_family.participant_family.proband.surname, vcenter_format)
+            worksheet.write('C' + str(row_count), 
+                report.interpretation_report.ir_family.participant_family.proband.sex, vcenter_format)
+            worksheet.write('D' + str(row_count), 
+                report.interpretation_report.ir_family.participant_family.proband.date_of_birth.date(), vcenter_date_format)
+            worksheet.write('E' + str(row_count), 
+                report.interpretation_report.ir_family.participant_family.proband.nhs_number, vcenter_format)
+            worksheet.write('F' + str(row_count), 
+                report.interpretation_report.ir_family.ir_family_id, vcenter_format)
+            worksheet.write('G' + str(row_count), 
+                report.interpretation_report.ir_family.participant_family.clinician.name, vcenter_format)
+            worksheet.write('H' + str(row_count), 
+                '\n'.join(panel_names), vcenter_format)
+        else:
+            worksheet.merge_range('A' + str(row_count) + ':A' + str(v_rows-1), 
+                report.interpretation_report.ir_family.participant_family.proband.forename,
+                vcenter_format)
+            worksheet.merge_range('B' + str(row_count) + ':B' + str(v_rows-1), 
+                report.interpretation_report.ir_family.participant_family.proband.surname,
+                vcenter_format)
+            worksheet.merge_range('C' + str(row_count) + ':C' + str(v_rows-1), 
+                report.interpretation_report.ir_family.participant_family.proband.sex,
+                vcenter_format)
+            worksheet.merge_range('D' + str(row_count) + ':D' + str(v_rows-1), 
+                report.interpretation_report.ir_family.participant_family.proband.date_of_birth.date(),
+                vcenter_date_format)
+            worksheet.merge_range('E' + str(row_count) + ':E' + str(v_rows-1), 
+                report.interpretation_report.ir_family.participant_family.proband.nhs_number,
+                vcenter_format)
+            worksheet.merge_range('F' + str(row_count) + ':F' + str(v_rows-1), 
+                report.interpretation_report.ir_family.ir_family_id,
+                vcenter_format)
+            worksheet.merge_range('G' + str(row_count) + ':G' + str(v_rows-1), 
+                report.interpretation_report.ir_family.participant_family.clinician.name,
+                vcenter_format)
+            worksheet.merge_range('H' + str(row_count) + ':H' + str(v_rows-1), 
+                '\n'.join(panel_names),
+                vcenter_format)
+        
+        row_count = v_rows
+
+    workbook.close()
+    # rewind the buffer
+    output.seek(0)
+    return output
 
 def write_mdt_outcome_template(report):
     """
@@ -86,6 +181,23 @@ def write_mdt_outcome_template(report):
     header_image.alignment = WD_ALIGN_PARAGRAPH.RIGHT 
  
     document.add_heading('Genomics MDM record', 0)
+
+    table = document.add_table(rows=1, cols=1, style='Table Grid')
+    table.rows[0].cells[0].paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run = table.rows[0].cells[0].paragraphs[0].add_run(
+        'THIS IS NOT A DIAGNOSTIC REPORT. UNVALIDATED FINDINGS SHOULD NOT BE USED TO INFORM CLINICAL '
+        'MANAGEMENT DECISIONS.\n')
+    run.font.color.rgb = RGBColor(255, 0, 0)
+    run = table.rows[0].cells[0].paragraphs[0].add_run(
+        'This is a record of unvalidated variants identified through the 100,000 genome project. '
+        'Class 3 variants are of uncertain clinical significance, future review and diagnostic confirmation '
+        'may be appropriate if further evidence becomes available.\n')
+    run.font.color.rgb = RGBColor(255, 0, 0)
+
+    table.rows[0].cells[0].paragraphs[0].paragraph_format.space_before = Cm(0.3)
+    # table.rows[0].cells[0].paragraphs[0].paragraph_format.space_after = Cm(0.1)
+    paragraph = document.add_paragraph()
+    paragraph.add_run()
 
     table = document.add_table(rows=2, cols=4, style='Table Grid')
     heading_cells = table.rows[0].cells

@@ -1,5 +1,5 @@
 <!--Copyright (c) 2018 Great Ormond Street Hospital for Children NHS Foundation
- 1.1cmTrust & Birmingham Women's and Children's NHS Foundation Trust
+Trust & Birmingham Women's and Children's NHS Foundation Trust
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -21,228 +21,214 @@ SOFTWARE.
 -->
 
 <html>
-<head>
-<title>Technical Report</title>
-<!--This is the meta information which is good for SEO-->
-<!-- Bootstrap -->
-<!--Add keywords that describe your project between the quotation marks. This helps search engines find and index your content-->
+    <head>
+        <title>Technical Report</title>
+        <!--This is the meta information which is good for SEO-->
+        <!-- Bootstrap -->
+        <!--Add keywords that describe your project between the quotation marks. This helps search engines find and index your content-->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    </head>
 
+    <style type="text/css">
+        @page {
+            size: {{ pagesize|default:"A4" }};
+            margin: 1.1cm 1.5cm;
+            margin-bottom: 75px;
+    </style>
 
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <body style="font-size: 10pt;">
 
-</head>
+        <div id="page-content">
+            <table style="width: 100%">
+                <tr>
+                    <td>
+                        <strong>
+                        <p style="font-size: 9pt; margin-bottom: 0">West Midlands Regional Genetics Laboratory</p>
+                        <p style="font-size: 9pt; margin-bottom: 0">Birmingham Women's and Children's Hospital</p>
+                        <p style="font-size: 9pt; margin-bottom: 0">NHS Foundation Trust</p>
+                        <p style="font-size: 9pt; margin-bottom: 0">Mindelsohn Way</p>
+                        <p style="font-size: 9pt; margin-bottom: 10">B15 2TG</p>
+                        </strong>
+                    </td>
+                    <td>
+                        <img style="float:right; margin: 5px 0; width: 90%;" src="file:///home/theo/Documents/gel2mdt/gelweb/gelweb/static_files/figures/bwh-logo.png" />
+                    </td>
+                </tr>
+            </table>
 
+            <hr style="margin: 0px; height: 0px; border: 1px solid black; color: black; background: black;">
+            <p style="margin: auto; font-size: 12pt; text-align: center;"><strong>TECHNICAL REPORT</strong></p>
+            <hr style="margin: 0px; height: 0px; border: 1px solid black; color: black; background: black;">
 
-<body style="font-size: 10pt;">
+            <table style="margin: auto; width: 100%">
+                <tr>
+                    <td style="vertical-align: top; width: 50%;">
+                        <style type="text/css">
+                            .tg  {border-collapse:collapse;border-spacing:0;}
+                            .tg .tg-0ord{text-align:right}
+                            .tg .tg-lqy6{text-align:right;vertical-align:top}
+                            .tg .tg-yw4l{vertical-align:top}
+                            .tgd{padding-left:5px}
+                        </style>
+                        <table class="tg">
+                            <tr>
+                                <td class="tgd tg-0ord"><strong>Patient Name:</strong></td>
+                                <td></td>
+                                <td class="tgd tg-031e">{{report.ir_family.participant_family.proband.forename}} {{report.ir_family.participant_family.proband.surname}}</td>
+                            </tr>
+                            <tr>
+                                <td class="tgd tg-0ord">Date of Birth:</td>
+                                <td>&nbsp;&nbsp;&nbsp;</td>
+                                <td class="tgd tg-031e">{{report.ir_family.participant_family.proband.date_of_birth|date:"d/m/Y"}}</td>
+                            </tr>
+                            <tr>
+                                <td class="tgd tg-lqy6">Sex:</td>
+                                <td></td>
+                                <td class="tg-yw4l">{{report.ir_family.participant_family.proband.sex|title}}</td>
+                            </tr>
+                            <tr>
+                                <td class="tg-lqy6">NHS No.:</td>
+                                <td></td>
+                                <td class="tg-yw4l">{{report.ir_family.participant_family.proband.nhs_number}}</td>
+                            </tr>
+                            <tr>
+                                <td class="tg-lqy6">100,000 Genomes ID:</td>
+                                <td></td>
+                                <td class="tg-yw4l">{{report.ir_family.participant_family.proband.gel_id}}</td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td style="vertical-align: top; width: 50%;">
+                        <p style="font-size: 8pt">Our reference: {{report.ir_family.participant_family.proband.lab_number}}</p>
+                        <br>
+                        <br>
+                        <br>
+                        <p style="margin: 0; padding:0"><strong>Recruiting Disease:</strong>
+                        {{report.ir_family.participant_family.proband.recruiting_disease}}<p>
+                    </td>
+                </tr>
+            </table>
 
-	<style type="text/css">
-@page {
-	size: {{ pagesize|default:"A4" }};
-	margin: 1.1cm 1.5cm;
-	</style>
+            <hr style="margin: 0px; height: 0px; border: 1px solid black; color: black; background: black;">
 
-<table style="width: 100%">
-<tr>
-<td>
-            <strong>
-            <p style="font-size: 9pt; margin-bottom: 0">West Midlands Regional Genetics Laboratory</p>
-            <p style="font-size: 9pt; margin-bottom: 0">Birmingham Women's and Children's Hospital</p>
-            <p style="font-size: 9pt; margin-bottom: 0">NHS Foundation Trust</p>
-            <p style="font-size: 9pt; margin-bottom: 0">Mindelsohn Way</p>
-            <p style="font-size: 9pt; margin-bottom: 10">B15 2TG</p>
-            </strong>
-</td>
-<td>
-<img style="float:right; margin: 5px 0; width: 90%;" src="file:///home/theo/Documents/gel2mdt/gelweb/gelweb/static_files/figures/bwh-logo.png" />
-</td>
-</tr>
-</table>
+            {% if outcome == "positive" %}
+                <p style="margin: 5px 0; font-size: 12pt;"><strong>Variant Details</strong></p>
+                <small>
+                    <table style="margin: 5px;" class="table table-bordered table-condensed" style="font-size:10px;">
+                        <thead>
+                            <tr>
+                                <th>Gene</th>
+                                <th>Zygosity</th>
+                                <th>Inheritance</th>
+                                <th>HGVS description</th>
+                                <th>Position ({{build}})</th>
+                                <th>Classification</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for variant in reported_variants %}
+                                <tr>
+                                    <td>{{variant.proband_variant.get_transcript.gene}}</td>
+                                    <td>{{variant.proband_variant.zygosity}}</td>
+                                    <td>
+                                        {{variant.proband_variant.inheritance}} <br>
+                                        (mat: {{variant.proband_variant.maternal_zygosity}}, <br>
+                                        pat: {{variant.proband_variant.paternal_zygosity}})
+                                    </td>
+                                    <td>
+                                        {{variant.proband_variant.get_transcript_variant.hgvs_c}}
+                                        {% if variant.proband_variant.get_transcript_variant.hgvs_p %}
+                                            <br>
+                                            {{variant.proband_variant.get_transcript_variant.hgvs_p}}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {{variant.proband_variant.get_transcript_variant.variant.chromosome}}:{{variant.proband_variant.get_transcript_variant.variant.position}}
+                                    </td>
+                                    <td>
+                                        {% if variant.classification == "5" %}
+                                            Pathogenic
+                                        {% elif variant.classification == "4" %}
+                                            Likely Pathogenic
+                                        {% elif variant.classification == "3" %}
+                                            Variant of Uncertain Significance
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </small>
+            {% endif %}
 
+            <p style="margin: 5px 0; font-size: 12pt;"><strong>Test Methodology</strong></p>
+            <h6 style="text-align:justify">
+                Whole genome sequencing by the 100,000 Genomes Project with analysis of
+                selected gene panels (see below), processed by Genomics England. Please note that the sensitivity of this test
+                is limited by the types of detectable pathogenic variants, regions of low read
+                depth coverage and incomplete ascertainment of disease-gene associations. The analysis
+                does not currently reliably detect larger copy number variants or structural abnormalities.
+                {% if outcome == "positive" %}
+                    Variants are classified using the latest ACGS, ACMG/AMP, and supplementary guidelines
+                    (Ellard et al 2018, ACGS and Richards et al 2015, Genet Med) and confirmed using in-house Sanger sequencing.
+                {% endif %}
+            </h6>
 
-<hr style="margin: 0px; height: 0px; border: 1px solid black; color: black; background: black;">
-<p style="margin: auto; font-size: 12pt; text-align: center;"><strong>TECHNICAL REPORT</strong></p>
-<hr style="margin: 0px; height: 0px; border: 1px solid black; color: black; background: black;">
+            <p style="margin: 0px 0; font-size: 12pt;"><strong>Gene Panels and Read Depth Coverage</strong></p>
 
-
-
-<table style="margin: auto; width: 100%">
-	<tr>
-
-		<td style="vertical-align: top; width: 50%;">
-			<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg .tg-0ord{text-align:right}
-.tg .tg-lqy6{text-align:right;vertical-align:top}
-.tg .tg-yw4l{vertical-align:top}
-.tgd{padding-left:5px}
-			</style>
-			<table class="tg">
-				<tr>
-					<td class="tgd tg-0ord"><strong>Patient Name:</strong></td>
-<td></td>
-					<td class="tgd tg-031e">{{report.ir_family.participant_family.proband.forename}} {{report.ir_family.participant_family.proband.surname}}</td>
-				</tr>
-				<tr>
-					<td class="tgd tg-0ord">Date of Birth:</td>
-<td>&nbsp;&nbsp;&nbsp;</td>
-					<td class="tgd tg-031e">{{report.ir_family.participant_family.proband.date_of_birth|date:"d/m/Y"}}</td>
-				</tr>
-				<tr>
-					<td class="tgd tg-lqy6">Sex:</td>
-<td></td>
-					<td class="tg-yw4l">{{report.ir_family.participant_family.proband.sex|title}}</td>
-				</tr>
-				<tr>
-					<td class="tg-lqy6">NHS No.:</td>
-<td></td>
-					<td class="tg-yw4l">{{report.ir_family.participant_family.proband.nhs_number}}</td>
-				</tr>
-				<tr>
-					<td class="tg-lqy6">100,000 Genomes ID:</td>
-<td></td>
-					<td class="tg-yw4l">{{report.ir_family.participant_family.proband.gel_id}}</td>
-				</tr>
-			</table>
-		</td>
-		<td style="vertical-align: top; width: 50%;">
-
-
-<p style="font-size: 8pt">Our reference: {{report.ir_family.participant_family.proband.lab_number}}</p>
-<br><br><br>
-<p style="margin: 0; padding:0"><strong>Recruiting Disease:</strong>
-{{report.ir_family.participant_family.proband.recruiting_disease}}<p>
-		</td>
-
-	</tr>
-<tr>
-<td></td>
-<td>
-
-
-</td>
-</tr>
-</table>
-
-<hr style="margin: 0px; height: 0px; border: 1px solid black; color: black; background: black;">
-    {% if outcome == "positive" %}
-    <p style="margin: 5px 0; font-size: 12pt;"><strong>Variant Details</strong></p>
-
-        <small>
-            <table style="margin: 5px;" class="table table-bordered table-condensed" style="font-size:10px;">
-                <thead>
-                    <tr>
-                        <th>Gene</th>
-                        <th>Zygosity</th>
-                        <th>Inheritance</th>
-                        <th>HGVS description</th>
-                        <th>Position ({{build}})</th>
-                        <th>Classification</th>
-</tr>
-                </thead>
-                <tbody>
-                    {% for variant in reported_variants %}
+            <table style="margin: 0px; font-size: 9pt" class="table table-condensed">
+                <small>
+                    <thead>
                         <tr>
-                            <td>{{variant.proband_variant.get_transcript.gene}}</td>
-                            <td>{{variant.proband_variant.zygosity}}</td>
-                            <td>{{variant.proband_variant.inheritance}}</td>
-                            <td>
-                                {{variant.proband_variant.get_transcript_variant.hgvs_c}}
-                                {% if variant.proband_variant.get_transcript_variant.hgvs_p %}
-                                    <br>
-                                    {{variant.proband_variant.get_transcript_variant.hgvs_p}}
-                                {% endif %}
-                            </td>
-                            <td>{{variant.proband_variant.get_transcript_variant.variant.chromosome}}:{{variant.proband_variant.get_transcript_variant.variant.position}}</td>
-                            <td>
-								{% if variant.classification == "5" %}
-									Pathogenic
-								{% elif variant.classification == "4" %}
-									Likely Pathogenic
-								{% elif variant.classification == "3" %}
-									Variant of Unkown Significance
-							{% endif %}
-							</td>
+                            <td>Panel <em>(https://panelapp.genomicsengland.co.uk/panels/)</em></td>
+                            <td style="text-align:right">No. Genes</td>
+                            <td style="text-align:right">Avg. Panel Coverage</td>
+                            <td style="text-align:right">% >15x</td>
                         </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-        </small>
-    {% endif %}
+                    </thead>
+                    <tbody>
+                        {% for panel, num_genes in panels.items %}
+                            <tr>
+                                <td>{{panel.panel}}</td>
+                                <td style="text-align: right">{{num_genes}}</td>
+                                <td style="text-align: right">{{ panel.average_coverage }}x</td>
+                                <td style="text-align: right">{% widthratio panel.proportion_above_15x 1 100 %}%</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </small>
+            </table>
 
+            <p style="margin: 5px 0; font-size: 12pt;"><strong>Genes with low coverage*:</strong></p>
+            {% for panel, num_genes in panels.items %}
+                {% if forloop.first %}
+                    <p style="text-align:justify">
+                        <small>
+                            {{ panel.genes_failing_coverage }}
+                        </small>
+                    </p>
+                {% endif %}
+            {% endfor %}
+            <h6>
+                * Low coverage = less than 95% of the gene has a minimum read depth coverage of 15x. More detailed information regarding read depth coverage is available on request.
+            </h6>
 
-    <p style="margin: 5px 0; font-size: 12pt;"><strong>Test Methodology</strong></p>
-<h6 style="text-align:justify">
-    Whole genome sequencing by the 100,000 Genomes Project with analysis of
-    selected gene panels (see below), processed by Genomics England. Please note that the sensitivity of this test
-    is limited by the types of detectable pathogenic variants, regions of low read
-    depth coverage and incomplete ascertainment of disease-gene associations. The analysis
-	does not currently reliably detect larger copy number variants or structural abnormalities.
-    {% if outcome == "positive" %}
-        Variants are classified using the latest ACGS, ACMG/AMP, and supplementary guidelines
-        (Ellard et al 2018, ACGS and Richards et al 2015, Genet Med) and confirmed using in-house Sanger sequencing.
-    {% endif %}
-    </h6>
+        </div>
 
-    <p style="margin: 0px 0; font-size: 12pt;"><strong>Gene Panels and Read Depth Coverage</strong></p>
-
-    <table style="margin: 0px; font-size: 9pt" class="table table-condensed">
-<small>
-        <thead>
-            <tr>
-                <td>Panel <em>(https://panelapp.genomicsengland.co.uk/panels/)</em></td>
-                <td style="text-align:right">No. Genes</td>
-                <td style="text-align:right">Avg. Panel Coverage</td>
-                <td style="text-align:right">% >15x</td>
-            </tr>
-        </thead>
-        <tbody>
-
-        {% for panel, num_genes in panels.items %}
-            <tr>
-            <td>{{panel.panel}}</td>
-            <td style="text-align: right">{{num_genes}}</td>
-            <td style="text-align: right">{{ panel.average_coverage }}x</td>
-            <td style="text-align: right">{% widthratio panel.proportion_above_15x 1 100 %}%</td>
-        </tr>
-    {% endfor %}
-        </tbody>
-</small>
-    </table>
-
-
-    <p style="margin: 5px 0; font-size: 12pt;"><strong>Genes with low coverage*:</strong></p>
-        {% for panel, num_genes in panels.items %}
-        {% if forloop.first %}
-
-        <p style="text-align:justify">
-        <small>
-        {{ panel.genes_failing_coverage }}
-    </small>
-        </p>
-
-        {% endif %}
-        {% endfor %}
-    <h6>* Low coverage = less than 95% of the gene has a minimum read depth coverage of 15x. More
-    detailed information regarding read depth coverage is available on request.</h6>
-
-<div style="width: 100%; position: fixed; bottom: 0;" id="page-footer">
-<hr style="margin: 0px; height: 0px; border: 1px solid black; color: black; background: black;">
-<p style="font-size: 8pt; margin: 0; text-align: center"><strong>Consultant Clinical Scientists: M Griffiths (Director), J Bell (Deputy Director), S Allen, T Antoniadi, J Mason, D McMullan, Y Wallis</strong></p>
-<p style="font-size: 8pt; margin: 0; text-align: center">West Midlands Regional Genetics Laboratory, BWC NHS Foundation Trust, Mindelsohn Way, Birmingham B15 2TG</p>
-<div style="width: 100%">
-<table style="margin: auto; width: 86%">
-<tr>
-<td style="width:25%"><p style="font-size: 8pt; margin: 0; text-align: center">bwc.genetics.lab@nhs.net</p></td>
-<td style="width:25%"><p style="font-size: 8pt; margin: 0; text-align: center">https://www.bwc.nhs.uk/</p></td>
-<td style="width:25%"><p style="font-size: 8pt; margin: 0; text-align: center">Tel: 0121 335 8036</p></td>
-<td style="width:25%"><p style="font-size: 8pt; margin: 0; text-align: center">Fax: 0121 335 8023</p></td>
-</tr>
-</table>
-</div>
-    </div>
-
-</page>
-
-</body>
-
+        <div style="width: 100%; position: fixed; bottom: -50px;" id="page-footer">
+            <hr style="margin: 0px; height: 0px; border: 1px solid black; color: black; background: black;">
+            <p style="font-size: 8pt; margin: 0; text-align: center"><strong>Consultant Clinical Scientists: M Griffiths (Director), J Bell (Deputy Director), S Allen, T Antoniadi, J Mason, D McMullan, Y Wallis</strong></p>
+            <p style="font-size: 8pt; margin: 0; text-align: center">West Midlands Regional Genetics Laboratory, BWC NHS Foundation Trust, Mindelsohn Way, Birmingham B15 2TG</p>
+            <div style="width: 100%">
+                <table style="margin: auto; width: 86%">
+                    <tr>
+                        <td style="width:25%"><p style="font-size: 8pt; margin: 0; text-align: center">bwc.genetics.lab@nhs.net</p></td>
+                        <td style="width:25%"><p style="font-size: 8pt; margin: 0; text-align: center">https://www.bwc.nhs.uk/</p></td>
+                        <td style="width:25%"><p style="font-size: 8pt; margin: 0; text-align: center">Tel: 0121 335 8036</p></td>
+                        <td style="width:25%"><p style="font-size: 8pt; margin: 0; text-align: center">Fax: 0121 335 8023</p></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </body>
 </html>

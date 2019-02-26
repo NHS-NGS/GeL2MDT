@@ -52,7 +52,10 @@ urlpatterns = [
     path('select_transcript/<int:report_id>/<int:pv_id>', views.select_transcript, name='select-transcript'),
     path('update_transcript/<int:report_id>/<int:pv_id>/<int:transcript_id>', views.update_transcript,
          name='update-transcript'),
-
+    path('edit_preferred_transcript/<int:geneid>/<int:genome_build_id>', views.edit_preferred_transcript,
+         name='edit-preferred-transcript'),
+    path('update_preferred_transcript/<int:geneid>/<int:genome_build_id>/<int:transcript_id>',
+         views.update_preferred_transcript, name='update-preferred-transcript'),
     path('<str:sample_type>/start_mdt/', views.start_mdt_view, name='start-mdt'),
     path('<str:sample_type>/edit_mdt/<int:mdt_id>', views.edit_mdt, name='edit-mdt'),
     path('mdt_view/<int:mdt_id>', views.mdt_view, name='mdt-view'),
@@ -83,6 +86,8 @@ urlpatterns = [
     path('<str:sample_type>/case_alert/', views.case_alert, name='case-alert'),
     path('edit_case_alert/<int:case_alert_id>', views.edit_case_alert, name='edit-case-alert'),
     path('add_case_alert/', views.add_case_alert, name='add-case-alert'),
+    path('delete_comment/<int:comment_id>', views.delete_comment, name='delete-comment'),
+    path('edit_comment/<int:comment_id>', views.edit_comment, name='edit-comment'),
     path('delete_case_alert/<int:case_alert_id>', views.delete_case_alert, name='delete-case-alert'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_DIR)
 
