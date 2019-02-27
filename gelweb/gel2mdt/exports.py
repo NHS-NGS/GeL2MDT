@@ -86,6 +86,9 @@ def write_mdt_export(mdt_instance, mdt_reports):
         for proband_variant in proband_variants:
             transcript = proband_variant.get_transcript()
             transcript_variant = proband_variant.get_transcript_variant()
+            if transcript_variant is None:
+                raise ValueError(f'Transcripts have not been selected for Report: '
+                                 f'{report.interpretation_report.ir_family.ir_family_id}')
             if transcript and transcript_variant:
                 hgvs_c = None
                 hgvs_p = None

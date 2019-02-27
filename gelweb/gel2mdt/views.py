@@ -1180,12 +1180,16 @@ def export_mdt(request, mdt_id):
     if request.method == "POST":
         mdt_instance = MDT.objects.get(id=mdt_id)
         mdt_reports = MDTReport.objects.filter(MDT=mdt_instance)
-        xlsx = write_mdt_export(mdt_instance, mdt_reports)
-        response = HttpResponse(
-            xlsx,
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename=MDT_{}.xlsx'.format(mdt_id)
-        return response
+        try:
+            xlsx = write_mdt_export(mdt_instance, mdt_reports)
+            response = HttpResponse(
+                xlsx,
+                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = 'attachment; filename=MDT_{}.xlsx'.format(mdt_id)
+            return response
+        except ValueError as error:
+            messages.add_message(request, 40, error)
+            return HttpResponseRedirect(f'/mdt_view/{mdt_id}')
 
 
 @login_required

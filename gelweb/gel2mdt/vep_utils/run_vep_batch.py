@@ -113,7 +113,7 @@ def run_vep(infile, config_dict):
         )
         if config_dict["mergedVEP"] == 'True':
             cmd += ' --merged'
-        subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell=True).wait()
+            subprocess.run(cmd, stderr=subprocess.STDOUT, shell=True, check=True)
         annotated_variant_dict['hg19_vep'] = hg19_outfile.name
     # run VEP for hg38 variants
     if os.stat(hg38_vcf).st_size != 0:
@@ -129,7 +129,7 @@ def run_vep(infile, config_dict):
         )
         if config_dict["mergedVEP"] == 'True':
             cmd += ' --merged'
-        subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell=True).wait()
+        subprocess.run(cmd, stderr=subprocess.STDOUT, shell=True, check=True)
         annotated_variant_dict['hg38_vep'] = hg38_outfile.name
     return annotated_variant_dict
 
