@@ -39,6 +39,19 @@ def write_mdt_export(mdt_instance, mdt_reports):
     :return: CSV file Writer
     '''
     # create in-memory output file
+    # Checks to see if there are any samples without selected transcripts
+    failed_reports = []
+    for report in mdt_reports:
+        proband_variants = ProbandVariant.objects.filter(interpretation_report=report.interpretation_report)
+        for proband_variant in proband_variants:
+            transcript_variant = proband_variant.get_transcript_variant()
+            if transcript_variant is None:
+                failed_reports.append(report.interpretation_report.ir_family.ir_family_id)
+
+    if failed_reports:
+        failed_reports_formatted = ' '.join(failed_reports)
+        raise ValueError(f"Transcripts have not been selected for the following reports: {failed_reports_formatted}")
+
     output = io.BytesIO()
     workbook = xlsxwriter.Workbook(output)
     worksheet = workbook.add_worksheet()
@@ -86,9 +99,6 @@ def write_mdt_export(mdt_instance, mdt_reports):
         for proband_variant in proband_variants:
             transcript = proband_variant.get_transcript()
             transcript_variant = proband_variant.get_transcript_variant()
-            if transcript_variant is None:
-                raise ValueError(f'Transcripts have not been selected for Report: '
-                                 f'{report.interpretation_report.ir_family.ir_family_id}')
             if transcript and transcript_variant:
                 hgvs_c = None
                 hgvs_p = None
