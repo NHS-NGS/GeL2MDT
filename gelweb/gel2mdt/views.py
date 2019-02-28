@@ -974,11 +974,12 @@ def recent_mdts(request, sample_type):
         clinician = True
     recent_mdt = MDT.objects.filter(sample_type=sample_type).order_by('-date_of_mdt')
     excluded_mdts = []
-    if clinician:
-        for mdt in recent_mdt:
-            if mdt.status == 'C':
-                if mdt.date_of_mdt < timezone.now() - datetime.timedelta(weeks=4):
-                    excluded_mdts.append(mdt.id)
+    if not request.user.is_staff:
+        if clinician:
+            for mdt in recent_mdt:
+                if mdt.status == 'C':
+                    if mdt.date_of_mdt < timezone.now() - datetime.timedelta(weeks=4):
+                        excluded_mdts.append(mdt.id)
     recent_mdt = recent_mdt.exclude(id__in=excluded_mdts)
     recent_mdt = list(recent_mdt)
 
