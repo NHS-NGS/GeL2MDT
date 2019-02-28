@@ -49,7 +49,7 @@ def write_mdt_export(mdt_instance, mdt_reports):
                 failed_reports.append(report.interpretation_report.ir_family.ir_family_id)
 
     if failed_reports:
-        failed_reports_formatted = ' '.join(failed_reports)
+        failed_reports_formatted = ' '.join(list(set(failed_reports)))
         raise ValueError(f"Transcripts have not been selected for the following reports: {failed_reports_formatted}")
 
     output = io.BytesIO()
