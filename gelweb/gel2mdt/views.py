@@ -1201,23 +1201,28 @@ def export_mdt_outcome_form(request, report_id):
     :return: DOCX format file
     '''
     report = GELInterpretationReport.objects.get(id=report_id)
-    document, mdt = write_mdt_outcome_template(report)
-    f = BytesIO()
-    document.save(f)
-    length = f.tell()
-    f.seek(0)
-    response = HttpResponse(
-        f.getvalue(),
-        content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    )
+    try:
+        document, mdt = write_mdt_outcome_template(report)
+        f = BytesIO()
+        document.save(f)
+        length = f.tell()
+        f.seek(0)
+        response = HttpResponse(
+            f.getvalue(),
+            content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        )
 
-    filename = '{}_{}_{}_{}.docx'.format(report.ir_family.participant_family.proband.surname,
-                                         report.ir_family.participant_family.proband.forename,
-                                         report.ir_family.ir_family_id,
-                                         mdt.date_of_mdt.date())
-    response['Content-Disposition'] = 'attachment; filename=' + filename
-    response['Content-Length'] = length
-    return response
+        filename = '{}_{}_{}_{}.docx'.format(report.ir_family.participant_family.proband.surname,
+                                             report.ir_family.participant_family.proband.forename,
+                                             report.ir_family.ir_family_id,
+                                             mdt.date_of_mdt.date())
+        response['Content-Disposition'] = 'attachment; filename=' + filename
+        response['Content-Length'] = length
+        return response
+    except ValueError as error:
+        messages.add_message(request, 40, error)
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
 
 @login_required
 def export_gtab_template(request, report_id):

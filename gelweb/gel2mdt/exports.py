@@ -291,6 +291,8 @@ def write_mdt_outcome_template(report):
         cells = table.add_row().cells
         transcript = proband_variant.get_transcript()
         transcript_variant = proband_variant.get_transcript_variant()
+        if transcript is None or transcript_variant is None:
+            raise ValueError(f"Please select transcripts for all variants before exporting\n")
         rdr = proband_variant.create_rare_disease_report()
         run = cells[0].paragraphs[0].add_run(str(transcript.gene))
         run.font.size = Pt(7)
