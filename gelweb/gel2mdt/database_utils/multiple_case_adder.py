@@ -378,6 +378,9 @@ class MultipleCaseAdder(object):
             (PVFlag, True),
             (TranscriptVariant, True),
             (ProbandTranscriptVariant, True),
+            (SVRegion, True),
+            (SV, True),
+            (ProbandSV, True),
             #(ReportEvent, True)
         )
 
@@ -600,6 +603,9 @@ class MultipleCaseAdder(object):
             PVFlag: ['id', "proband_variant", "flag_name"],
             ProbandTranscriptVariant: ['id',"transcript", "proband_variant"],
             ReportEvent: ['id',"proband_variant", "re_id"],
+            SVRegion: ['id', 'chromosome', 'sv_start', 'sv_end', "genome_assembly"],
+            SV: ['id', 'sv_region1', 'sv_region2', 'variant_type'],
+            ProbandSV: ['id', "sv", "interpretation_report"],
         }
         return lookup_dict[model_type]
 

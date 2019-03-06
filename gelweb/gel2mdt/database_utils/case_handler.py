@@ -28,7 +28,7 @@ from django.utils.dateparse import parse_date
 import time
 from ..models import *
 from ..api_utils.poll_api import PollAPI
-from ..vep_utils.run_vep_batch import CaseVariant, CaseTranscript
+from ..vep_utils.run_vep_batch import CaseVariant, CaseCNV
 from ..config import load_config
 import re
 import copy
@@ -150,7 +150,7 @@ class Case(object):
 
         self.ig_objs = []  # List of interpreteted genome objects
         self.clinical_report_objs = []  # ClinicalReport objects
-        self.variants = self.get_case_variants()
+        self.variants, self.svs = self.get_case_variants()
         self.transcripts = []  # set by MCM with a call to vep_utils
         self.demographics = None
         self.clinicians = None
@@ -242,66 +242,98 @@ class Case(object):
             analysis_panels = self.ir_obj.pedigree.analysisPanels
         return analysis_panels
 
+    def parse_ig_variants(self, ig_obj, genome_build, variant_object_count, case_variant_list):
+        for variant in ig_obj.variants:
+            # Sort out tiers first
+            variant_min_tier = None
+            tier = None
+            for report_event in variant.reportEvents:
+                if self.json['sample_type'] == 'raredisease':
+                    if report_event.tier:
+                        tier = int(report_event.tier[-1])
+                elif self.json['sample_type'] == 'cancer':
+                    if report_event.domain:
+                        tier = int(report_event.domain[-1])
+                if variant_min_tier is None:
+                    variant_min_tier = tier
+                elif tier < variant_min_tier:
+                    variant_min_tier = tier
+            variant.max_tier = variant_min_tier
+
+            interesting_variant = False
+            if ig_obj.interpretationService == 'Exomiser':
+                for report_event in variant.reportEvents:
+                    if report_event.score >= 0.95:
+                        interesting_variant = False
+            elif ig_obj.interpretationService == 'genomics_england_tiering':
+                if not self.pullt3:
+                    if variant.max_tier < 3:
+                        interesting_variant = True
+                else:
+                    interesting_variant = True
+            else:
+                interesting_variant = True  # CIP variants all get pulled
+
+            if interesting_variant:
+                variant_object_count += 1
+                case_variant = CaseVariant(
+                    chromosome=variant.variantCoordinates.chromosome,
+                    position=variant.variantCoordinates.position,
+                    ref=variant.variantCoordinates.reference,
+                    alt=variant.variantCoordinates.alternate,
+                    case_id=self.request_id,
+                    variant_count=str(variant_object_count),
+                    genome_build=genome_build
+                )
+                case_variant_list.append(case_variant)
+                variant.case_variant = case_variant
+            else:
+                variant.case_variant = False
+        return ig_obj, case_variant_list, variant_object_count
+
+    def parse_ig_svs(self, ig_obj, genome_build, case_sv_list):
+        for variant in ig_obj.structuralVariants:
+            interesting_variant = False
+            for report_event in variant.reportEvents:
+                if report_event.tier:
+                    interesting_variant = True
+            if interesting_variant:
+                case_variant = CaseCNV(
+                    chromosome=variant.coordinates.chromosome,
+                    sv_start=variant.coordinates.start,
+                    sv_end=variant.coordinates.reference,
+                    sv_type=variant.variantType,
+                    case_id=self.request_id,
+                    genome_build=genome_build
+                )
+                case_sv_list.append(case_variant)
+                variant.case_variant = case_variant
+            else:
+                variant.case_variant = False
+        return ig_obj, case_sv_list
+
     def get_case_variants(self):
         """
         Create CaseVariant objects for each variant listed in the json,
         then return a list of all CaseVariants for construction of
         CaseTranscripts using VEP.
         """
-        json_variants = []
         case_variant_list = []
+        case_sv_list = []
         # go through each variant in the json
         variant_object_count = 0
         genome_build = self.json['assembly']
         for ig in self.json['interpreted_genome']:
             ig_obj = InterpretedGenome.fromJsonDict(ig['interpreted_genome_data'])
             if ig_obj.variants:
-                for variant in ig_obj.variants:
-                    # Sort out tiers first
-                    variant_min_tier = None
-                    tier = None
-                    for report_event in variant.reportEvents:
-                        if self.json['sample_type'] == 'raredisease':
-                            if report_event.tier:
-                                tier = int(report_event.tier[-1])
-                        elif self.json['sample_type'] == 'cancer':
-                            if report_event.domain:
-                                tier = int(report_event.domain[-1])
-                        if variant_min_tier is None:
-                            variant_min_tier = tier
-                        elif tier < variant_min_tier:
-                            variant_min_tier = tier
-                    variant.max_tier = variant_min_tier
-
-                    interesting_variant = False
-                    if ig_obj.interpretationService == 'Exomiser':
-                        for report_event in variant.reportEvents:
-                            if report_event.score >= 0.95:
-                                interesting_variant = False
-                    elif ig_obj.interpretationService == 'genomics_england_tiering':
-                        if not self.pullt3:
-                            if variant.max_tier < 3:
-                                interesting_variant = True
-                        else:
-                            interesting_variant = True
-                    else:
-                        interesting_variant = True  # CIP variants all get pulled
-
-                    if interesting_variant:
-                        variant_object_count += 1
-                        case_variant = CaseVariant(
-                            chromosome=variant.variantCoordinates.chromosome,
-                            position=variant.variantCoordinates.position,
-                            ref=variant.variantCoordinates.reference,
-                            alt=variant.variantCoordinates.alternate,
-                            case_id=self.request_id,
-                            variant_count=str(variant_object_count),
-                            genome_build=genome_build
-                        )
-                        case_variant_list.append(case_variant)
-                        variant.case_variant = case_variant
-                    else:
-                        variant.case_variant = False
+                ig_obj, case_variant_list, variant_object_count = self.parse_ig_variants(ig_obj,
+                                                                                         genome_build,
+                                                                                         variant_object_count,
+                                                                                         case_variant_list)
+            if ig_obj.structuralVariants:
+                ig_obj, case_sv_list = self.parse_ig_svs(ig_obj,
+                                                         genome_build,
+                                                         case_sv_list)
             self.ig_objs.append(ig_obj)
         for clinical_report in self.json['clinical_report']:
             cr_obj = ClinicalReport.fromJsonDict(clinical_report['clinical_report_data'])
@@ -335,7 +367,7 @@ class Case(object):
                     variant.case_variant = case_variant
             self.clinical_report_objs.append(cr_obj)
 
-        return case_variant_list
+        return case_variant_list, case_sv_list
 
 
 class CaseAttributeManager(object):
@@ -402,6 +434,12 @@ class CaseAttributeManager(object):
             case_model = self.get_report_events()
         elif self.model_type == ToolOrAssemblyVersion:
             case_model = self.get_tool_and_assembly_versions()
+        elif self.model_type == SVRegion:
+            case_model = self.get_sv_regions()
+        elif self.model_type == SV:
+            case_model = self.get_svs()
+        elif self.model_type == ProbandSV:
+            case_model = self.get_proband_svs()
 
         return case_model
 
@@ -764,6 +802,14 @@ class CaseAttributeManager(object):
                     gene['EnsembleGeneIds'] = gene['EnsembleGeneIds']
                 else:
                     gene['EnsembleGeneIds'] = gene['EnsembleGeneIds'][0]
+
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.structuralVariants:
+                for variant in ig_obj.structuralVariants:
+                    for report_event in variant.reportEvents:
+                        for gene in report_event.genomicEntities:
+                            if gene.type == 'gene':
+                                gene_list.append({'EnsembleGeneIds': gene.ensemblId})
 
         self.case.gene_manager.load_genes()
 
@@ -1351,6 +1397,104 @@ class CaseAttributeManager(object):
 
         return tools_and_assemblies
 
+    def get_sv_regions(self):
+        '''
+        Loop over all CNVs and lump in all the regions
+        :return:
+        '''
+        sv_region_list = []
+        genome_assembly = None
+        tool_models = [
+            case_model.entry
+            for case_model in self.case.attribute_managers[ToolOrAssemblyVersion].case_model.case_models]
+        for tool in tool_models:
+            if tool.tool_name == 'genome_build':
+                genome_assembly = tool
+
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.structuralVariants:
+                for variant in ig_obj.structuralVariants:
+                    if variant.case_variant:
+                        tiered_variant = {
+                            "genome_assembly": genome_assembly,
+                            "chromosome": variant.case_variant.chromosome,
+                            "sv_start": variant.case_variant.sv_start,
+                            "sv_end": variant.case_variant.sv_end,
+                            "sv_type": variant.case_variant.sv_type,
+                        }
+                        sv_region_list.append(tiered_variant)
+
+        sv_regions = ManyCaseModel(SVRegion, sv_region_list, self.model_objects)
+        return sv_regions
+
+    def get_svs(self):
+        '''
+        Loop again over the SVs and match up the SVRegions,
+        Then loop again and add them to a MVM list
+        :return:
+        '''
+        sv_region_entries = [sv_region.entry for sv_region in
+                             self.case.attribute_managers[SVRegion].case_model.case_models]
+        sv_list = []
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.structuralVariants:
+                for variant in ig_obj.structuralVariants:
+                    if variant.case_variant:
+                        for sv_region_entry in sv_region_entries:
+                            if (variant.case_variant.chromosome == sv_region_entry.chromosome and
+                                int(variant.case_variant.sv_start) == sv_region_entry.sv_start and
+                                    int(variant.case_variant.sv_end) == sv_region_entry.sv_end):
+                                variant.sv_region1_entry = sv_region_entry
+                                variant.sv_region2_entry = None
+                                break  # Stop, found what you need
+
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.structuralVariants:
+                for variant in ig_obj.structuralVariants:
+                    if variant.case_variant:
+                        if variant.sv_region1_entry:
+                            sv_list.append({
+                                'sv_region1': variant.sv_region1_entry,
+                                'sv_region2': variant.sv_region2_entry,
+                                'variant_type': variant.variantType
+                            })
+        svs = ManyCaseModel(SV, sv_list, self.model_objects)
+        return svs
+
+    def get_proband_svs(self):
+        '''
+        Loop over CNVs to get SV entry, then loop again to get SampleSVs
+        :return:
+        '''
+        sv_entries = [sv.entry for sv in
+                      self.case.attribute_managers[SV].case_model.case_models]
+
+        ir_manager = self.case.attribute_managers[GELInterpretationReport]
+
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.structuralVariants:
+                for variant in ig_obj.structuralVariants:
+                    if variant.case_variant:
+                        for sv_entry in sv_entries:
+                            if (variant.sv_region1_entry == sv_entry.sv_region1 and
+                                    variant.sv_region2_entry == sv_entry.sv_region2 and
+                                    variant.variantType == sv_entry.variant_type):
+                                variant.sv_entry = sv_entry
+                                break
+
+        proband_sv_list = []
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.structuralVariants:
+                for variant in ig_obj.structuralVariants:
+                    if variant.case_variant:
+                        if variant.sv_entry:
+                            proband_sv_list.append({
+                                'interpretation_report': ir_manager.case_model.entry,
+                                'sv': variant.sv_entry,
+                            })
+        sample_svs = ManyCaseModel(ProbandSV, proband_sv_list, self.model_objects)
+        return sample_svs
+
 
 class CaseModel(object):
     """
@@ -1609,6 +1753,41 @@ class CaseModel(object):
                 tool_name=self.escaped_model_attributes["tool_name"],
                 version_number=self.escaped_model_attributes["version_number"]
             )
+        elif self.model_type == SVRegion:
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM SVRegion'
+            else:
+                table = 'SELECT * FROM "SVRegion"'
+            cmd = ''.join([
+                f" WHERE chromosome = '{self.escaped_model_attributes['chromosome']}'",
+                f" AND sv_start = {self.escaped_model_attributes['sv_start']}"
+                f" AND sv_end = '{self.escaped_model_attributes['sv_end']}'"
+                f" AND genome_assembly_id = {self.escaped_model_attributes['genome_assembly'].id}"])
+        elif self.model_type == SV:
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM SV'
+            else:
+                table = 'SELECT * FROM "SV"'
+            if self.escaped_model_attributes['region2'] is None:
+                cmd = ''.join([
+                    f" WHERE sv_region1_id = {self.escaped_model_attributes['sv_region1'].id}",
+                    f" AND variant_type = '{self.escaped_model_attributes['variant_type']}'"
+                ])
+            else:
+                cmd = ''.join([
+                    f" WHERE sv_region1_id = {self.escaped_model_attributes['sv_region1'].id}",
+                    f" WHERE sv_region2_id = {self.escaped_model_attributes['sv_region2'].id}",
+                    f" AND variant_type = '{self.escaped_model_attributes['variant_type']}'"
+                ])
+        elif self.model_type == ProbandSV:
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM ProbandSV'
+            else:
+                table = 'SELECT * FROM "ProbandSV"'
+            cmd = ''.join([
+                f" WHERE interpretation_report_id = {self.escaped_model_attributes['interpretation_report'].id}",
+                f" AND sv_id = {self.escaped_model_attributes['sv'].id}",
+            ])
 
         sql =  ''.join([
             table,

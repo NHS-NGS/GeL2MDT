@@ -992,6 +992,7 @@ class SVRegion(models.Model):
     sv_start = models.IntegerField()
     sv_end = models.IntegerField()
     genome_assembly = models.ForeignKey(ToolOrAssemblyVersion, on_delete=models.PROTECT)
+    gene = models.ManyToManyField(Gene)
 
     class Meta:
         managed = True
@@ -1014,12 +1015,12 @@ class SV(models.Model):
 
     class Meta:
         managed = True
-        unique_together = (('region1', 'region2', 'variant_type'),)
+        unique_together = (('sv_region1', 'sv_region2', 'variant_type'),)
         db_table = 'SV'
         app_label = 'gel2mdt'
 
 
-class SampleSV(models.Model):
+class ProbandSV(models.Model):
     """
     Unique structural variants
     """
@@ -1038,10 +1039,9 @@ class SampleSV(models.Model):
                                                     ('A', 'Microarray'),
                                                     ('O', 'Other'),), max_length=2, null=True, blank=True)
     confirmation_status = models.CharField(choices=CONFIRMATION_CHOICES, max_length=4, default='U')
-    gene = models.ManyToManyField(Gene)
 
     class Meta:
         managed = True
         unique_together = (('sv', 'interpretation_report',),)
-        db_table = 'SampleSV'
+        db_table = 'ProbandSV'
         app_label = 'gel2mdt'
