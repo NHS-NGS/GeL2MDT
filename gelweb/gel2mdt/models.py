@@ -938,6 +938,10 @@ class MDT(models.Model):
         ('A', 'Active'), ('C', 'Completed')), default='A')
     gatb = models.NullBooleanField()
     sent_to_clinician = models.BooleanField(default=False)
+    gtab_made = models.BooleanField(default=False)
+    data_request_sent = models.BooleanField(default=False)
+    gtab_sent = models.BooleanField(default=False)
+    actions_sent = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.date_of_mdt)
@@ -980,4 +984,64 @@ class CaseComment(models.Model):
         managed = True
         ordering = ['-time']
         db_table = 'CaseComment'
+        app_label = 'gel2mdt'
+
+
+class SVRegion(models.Model):
+    chromosome = models.CharField(max_length=5)
+    sv_start = models.IntegerField()
+    sv_end = models.IntegerField()
+    genome_assembly = models.ForeignKey(ToolOrAssemblyVersion, on_delete=models.PROTECT)
+
+    class Meta:
+        managed = True
+        unique_together = (('chromosome', 'sv_start', 'sv_end', 'genome_assembly'),)
+        db_table = 'SVRegion'
+        app_label = 'gel2mdt'
+
+
+class SV(models.Model):
+    sv_region1 = models.ForeignKey(SVRegion, on_delete=models.CASCADE, related_name='region1')
+    sv_region2 = models.ForeignKey(SVRegion, on_delete=models.CASCADE, null=True, related_name='region2')
+    variant_type = models.CharField(max_length=40, choices=(('i', 'insertion'),
+                                                            ('p', 'duplication'),
+                                                            ('v', 'inversion'),
+                                                            ('a', 'amplification'),
+                                                            ('d', 'deletion'),
+                                                            ('t', 'tandem_duplication'),
+                                                            ('dm', 'deletion_mobile_element'),
+                                                            ('im', 'insertion_mobile_element'),))
+
+    class Meta:
+        managed = True
+        unique_together = (('region1', 'region2', 'variant_type'),)
+        db_table = 'SV'
+        app_label = 'gel2mdt'
+
+
+class SampleSV(models.Model):
+    """
+    Unique structural variants
+    """
+
+    interpretation_report = models.ForeignKey('GELInterpretationReport', on_delete=models.CASCADE)
+    sv = models.ForeignKey(SV, on_delete=models.CASCADE)
+    CONFIRMATION_CHOICES = (('U', 'Unknown'),
+                            ('A', 'Awaiting Confirmation'),
+                            ('K', 'Urgent Confirmation Required'),
+                            ('I', 'In Progress'),
+                            ('P', 'Passed Confirmation'),
+                            ('F', 'Failed Confirmation'),
+                            ('N', 'Not Required'),)
+    confirmation_method = models.CharField(choices=(('M', 'MLPA'),
+                                                    ('Q', 'qPCR'),
+                                                    ('A', 'Microarray'),
+                                                    ('O', 'Other'),), max_length=2, null=True, blank=True)
+    confirmation_status = models.CharField(choices=CONFIRMATION_CHOICES, max_length=4, default='U')
+    gene = models.ManyToManyField(Gene)
+
+    class Meta:
+        managed = True
+        unique_together = (('sv', 'interpretation_report',),)
+        db_table = 'SampleSV'
         app_label = 'gel2mdt'
