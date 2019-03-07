@@ -974,11 +974,12 @@ def recent_mdts(request, sample_type):
         clinician = True
     recent_mdt = MDT.objects.filter(sample_type=sample_type).order_by('-date_of_mdt')
     excluded_mdts = []
-    if clinician:
-        for mdt in recent_mdt:
-            if mdt.status == 'C':
-                if mdt.date_of_mdt < timezone.now() - datetime.timedelta(weeks=4):
-                    excluded_mdts.append(mdt.id)
+    if not request.user.is_staff:
+        if clinician:
+            for mdt in recent_mdt:
+                if mdt.status == 'C':
+                    if mdt.date_of_mdt < timezone.now() - datetime.timedelta(weeks=4):
+                        excluded_mdts.append(mdt.id)
     recent_mdt = recent_mdt.exclude(id__in=excluded_mdts)
     recent_mdt = list(recent_mdt)
 
@@ -1180,12 +1181,16 @@ def export_mdt(request, mdt_id):
     if request.method == "POST":
         mdt_instance = MDT.objects.get(id=mdt_id)
         mdt_reports = MDTReport.objects.filter(MDT=mdt_instance)
-        xlsx = write_mdt_export(mdt_instance, mdt_reports)
-        response = HttpResponse(
-            xlsx,
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename=MDT_{}.xlsx'.format(mdt_id)
-        return response
+        try:
+            xlsx = write_mdt_export(mdt_instance, mdt_reports)
+            response = HttpResponse(
+                xlsx,
+                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = 'attachment; filename=MDT_{}.xlsx'.format(mdt_id)
+            return response
+        except ValueError as error:
+            messages.add_message(request, 40, error)
+            return HttpResponseRedirect(f'/mdt_view/{mdt_id}')
 
 
 @login_required
@@ -1197,23 +1202,28 @@ def export_mdt_outcome_form(request, report_id):
     :return: DOCX format file
     '''
     report = GELInterpretationReport.objects.get(id=report_id)
-    document, mdt = write_mdt_outcome_template(report)
-    f = BytesIO()
-    document.save(f)
-    length = f.tell()
-    f.seek(0)
-    response = HttpResponse(
-        f.getvalue(),
-        content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    )
+    try:
+        document, mdt = write_mdt_outcome_template(report)
+        f = BytesIO()
+        document.save(f)
+        length = f.tell()
+        f.seek(0)
+        response = HttpResponse(
+            f.getvalue(),
+            content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        )
 
-    filename = '{}_{}_{}_{}.docx'.format(report.ir_family.participant_family.proband.surname,
-                                         report.ir_family.participant_family.proband.forename,
-                                         report.ir_family.ir_family_id,
-                                         mdt.date_of_mdt.date())
-    response['Content-Disposition'] = 'attachment; filename=' + filename
-    response['Content-Length'] = length
-    return response
+        filename = '{}_{}_{}_{}.docx'.format(report.ir_family.participant_family.proband.surname,
+                                             report.ir_family.participant_family.proband.forename,
+                                             report.ir_family.ir_family_id,
+                                             mdt.date_of_mdt.date())
+        response['Content-Disposition'] = 'attachment; filename=' + filename
+        response['Content-Length'] = length
+        return response
+    except ValueError as error:
+        messages.add_message(request, 40, error)
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
 
 @login_required
 def export_gtab_template(request, report_id):
