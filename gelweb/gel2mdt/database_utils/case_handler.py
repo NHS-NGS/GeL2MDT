@@ -811,8 +811,10 @@ class CaseAttributeManager(object):
                     for report_event in variant.reportEvents:
                         for gene in report_event.genomicEntities:
                             if gene.type == 'gene':
-                                gene_list.append({'EnsembleGeneIds': gene.ensemblId,
-                                                  'GeneSymbol': gene.geneSymbol})
+                                if gene.ensemblId != "NO_GENE_ASSOCIATED":
+                                    print(gene.ensemblId, gene.geneSymbol)
+                                    gene_list.append({'EnsembleGeneIds': gene.ensemblId,
+                                                      'GeneSymbol': gene.geneSymbol})
 
         self.case.gene_manager.load_genes()
 
