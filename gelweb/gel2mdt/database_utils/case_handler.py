@@ -857,7 +857,7 @@ class CaseAttributeManager(object):
 
         genes = ManyCaseModel(Gene, [{
             "ensembl_id": gene["EnsembleGeneIds"],  # TODO: which ID to use?
-            "hgnc_name": gene.get("GeneSymbol", None),
+            "hgnc_name": gene["GeneSymbol"],
             "hgnc_id": gene['HGNC_ID']
         } for gene in cleaned_gene_list if gene["HGNC_ID"]], self.model_objects)
         return genes
