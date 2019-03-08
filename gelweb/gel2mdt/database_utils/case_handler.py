@@ -301,7 +301,7 @@ class Case(object):
                 case_variant = CaseCNV(
                     chromosome=variant.coordinates.chromosome,
                     sv_start=variant.coordinates.start,
-                    sv_end=variant.coordinates.reference,
+                    sv_end=variant.coordinates.end,
                     sv_type=variant.variantType,
                     case_id=self.request_id,
                     genome_build=genome_build
@@ -436,6 +436,8 @@ class CaseAttributeManager(object):
             case_model = self.get_tool_and_assembly_versions()
         elif self.model_type == SVRegion:
             case_model = self.get_sv_regions()
+        elif self.model_type == SVRegionGene:
+            case_model = self.get_sv_region_genes()
         elif self.model_type == SV:
             case_model = self.get_svs()
         elif self.model_type == ProbandSV:
@@ -809,7 +811,8 @@ class CaseAttributeManager(object):
                     for report_event in variant.reportEvents:
                         for gene in report_event.genomicEntities:
                             if gene.type == 'gene':
-                                gene_list.append({'EnsembleGeneIds': gene.ensemblId})
+                                gene_list.append({'EnsembleGeneIds': gene.ensemblId,
+                                                  'GeneSymbol': gene.geneSymbol})
 
         self.case.gene_manager.load_genes()
 
@@ -825,7 +828,6 @@ class CaseAttributeManager(object):
         for gene in tqdm(gene_list, desc=self.case.request_id):
             gene['HGNC_ID'] = None
             if gene['EnsembleGeneIds']:
-                # tqdm.write(gene["EnsembleGeneIds"])
                 polled = self.case.gene_manager.fetch_searched(gene['EnsembleGeneIds'])
                 if polled == 'Not_found':
                     gene['HGNC_ID'] = None
@@ -855,7 +857,7 @@ class CaseAttributeManager(object):
 
         genes = ManyCaseModel(Gene, [{
             "ensembl_id": gene["EnsembleGeneIds"],  # TODO: which ID to use?
-            "hgnc_name": gene["GeneSymbol"],
+            "hgnc_name": gene.get("GeneSymbol", None),
             "hgnc_id": gene['HGNC_ID']
         } for gene in cleaned_gene_list if gene["HGNC_ID"]], self.model_objects)
         return genes
@@ -1420,22 +1422,18 @@ class CaseAttributeManager(object):
                             "chromosome": variant.case_variant.chromosome,
                             "sv_start": variant.case_variant.sv_start,
                             "sv_end": variant.case_variant.sv_end,
-                            "sv_type": variant.case_variant.sv_type,
                         }
                         sv_region_list.append(tiered_variant)
 
         sv_regions = ManyCaseModel(SVRegion, sv_region_list, self.model_objects)
         return sv_regions
 
-    def get_svs(self):
-        '''
-        Loop again over the SVs and match up the SVRegions,
-        Then loop again and add them to a MVM list
-        :return:
-        '''
+    def get_sv_region_genes(self):
         sv_region_entries = [sv_region.entry for sv_region in
                              self.case.attribute_managers[SVRegion].case_model.case_models]
-        sv_list = []
+        gene_entries = [gene.entry for gene in
+                             self.case.attribute_managers[Gene].case_model.case_models]
+
         for ig_obj in self.case.ig_objs:
             if ig_obj.structuralVariants:
                 for variant in ig_obj.structuralVariants:
@@ -1447,7 +1445,41 @@ class CaseAttributeManager(object):
                                 variant.sv_region1_entry = sv_region_entry
                                 variant.sv_region2_entry = None
                                 break  # Stop, found what you need
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.structuralVariants:
+                for variant in ig_obj.structuralVariants:
+                    if variant.case_variant:
+                        for report_event in variant.reportEvents:
+                            for gene in report_event.genomicEntities:
+                                if gene.type == 'gene':
+                                    gene.gene_entry = None
+                                    for gene_entry in gene_entries:
+                                        if gene_entry.ensembl_id == gene.ensemblId:
+                                            gene.gene_entry = gene_entry
+                                            break
+        sv_gene_list = []
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.structuralVariants:
+                for variant in ig_obj.structuralVariants:
+                    if variant.case_variant:
+                        for report_event in variant.reportEvents:
+                            for gene in report_event.genomicEntities:
+                                if gene.type == 'gene':
+                                    if gene.gene_entry:
+                                        sv_gene_list.append({
+                                            'gene': gene.gene_entry,
+                                            'svregion': variant.sv_region1_entry
+                                        })
+        sv_region_genes = ManyCaseModel(SVRegionGene, sv_gene_list, self.model_objects)
+        return sv_region_genes
 
+    def get_svs(self):
+        '''
+        Loop again over the SVs and match up the SVRegions,
+        Then loop again and add them to a MVM list
+        :return:
+        '''
+        sv_list = []
         for ig_obj in self.case.ig_objs:
             if ig_obj.structuralVariants:
                 for variant in ig_obj.structuralVariants:
@@ -1763,12 +1795,21 @@ class CaseModel(object):
                 f" AND sv_start = {self.escaped_model_attributes['sv_start']}"
                 f" AND sv_end = '{self.escaped_model_attributes['sv_end']}'"
                 f" AND genome_assembly_id = {self.escaped_model_attributes['genome_assembly'].id}"])
+        elif self.model_type == SVRegionGene:
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM SVRegionGene'
+            else:
+                table = 'SELECT * FROM "SVRegionGene"'
+            cmd = ''.join([
+                f" WHERE svregion_id = {self.escaped_model_attributes['svregion'].id}",
+                f" AND gene_id = '{self.escaped_model_attributes['gene'].id}'"
+            ])
         elif self.model_type == SV:
             if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
                 table = 'SELECT * FROM SV'
             else:
                 table = 'SELECT * FROM "SV"'
-            if self.escaped_model_attributes['region2'] is None:
+            if self.escaped_model_attributes['sv_region2'] is None:
                 cmd = ''.join([
                     f" WHERE sv_region1_id = {self.escaped_model_attributes['sv_region1'].id}",
                     f" AND variant_type = '{self.escaped_model_attributes['variant_type']}'"

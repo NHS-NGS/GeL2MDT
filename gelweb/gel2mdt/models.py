@@ -992,12 +992,22 @@ class SVRegion(models.Model):
     sv_start = models.IntegerField()
     sv_end = models.IntegerField()
     genome_assembly = models.ForeignKey(ToolOrAssemblyVersion, on_delete=models.PROTECT)
-    gene = models.ManyToManyField(Gene)
 
     class Meta:
         managed = True
         unique_together = (('chromosome', 'sv_start', 'sv_end', 'genome_assembly'),)
         db_table = 'SVRegion'
+        app_label = 'gel2mdt'
+
+
+class SVRegionGene(models.Model):
+    svregion = models.ForeignKey(SVRegion, on_delete=models.CASCADE)
+    gene = models.ForeignKey(Gene, on_delete=models.CASCADE)
+
+    class Meta:
+        managed = True
+        unique_together = (('svregion', 'gene'),)
+        db_table = 'SVRegionGene'
         app_label = 'gel2mdt'
 
 
