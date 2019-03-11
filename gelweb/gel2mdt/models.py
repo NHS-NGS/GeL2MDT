@@ -1000,17 +1000,6 @@ class SVRegion(models.Model):
         app_label = 'gel2mdt'
 
 
-class SVRegionGene(models.Model):
-    svregion = models.ForeignKey(SVRegion, on_delete=models.CASCADE)
-    gene = models.ForeignKey(Gene, on_delete=models.CASCADE)
-
-    class Meta:
-        managed = True
-        unique_together = (('svregion', 'gene'),)
-        db_table = 'SVRegionGene'
-        app_label = 'gel2mdt'
-
-
 class SV(models.Model):
     sv_region1 = models.ForeignKey(SVRegion, on_delete=models.CASCADE, related_name='region1')
     sv_region2 = models.ForeignKey(SVRegion, on_delete=models.CASCADE, null=True, related_name='region2')

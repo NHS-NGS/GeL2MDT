@@ -1429,11 +1429,14 @@ class CaseAttributeManager(object):
         sv_regions = ManyCaseModel(SVRegion, sv_region_list, self.model_objects)
         return sv_regions
 
-    def get_sv_region_genes(self):
+    def get_svs(self):
+        '''
+        Loop again over the SVs and match up the SVRegions,
+        Then loop again and add them to a MVM list
+        :return:
+        '''
         sv_region_entries = [sv_region.entry for sv_region in
                              self.case.attribute_managers[SVRegion].case_model.case_models]
-        gene_entries = [gene.entry for gene in
-                             self.case.attribute_managers[Gene].case_model.case_models]
 
         for ig_obj in self.case.ig_objs:
             if ig_obj.structuralVariants:
@@ -1446,40 +1449,7 @@ class CaseAttributeManager(object):
                                 variant.sv_region1_entry = sv_region_entry
                                 variant.sv_region2_entry = None
                                 break  # Stop, found what you need
-        for ig_obj in self.case.ig_objs:
-            if ig_obj.structuralVariants:
-                for variant in ig_obj.structuralVariants:
-                    if variant.case_variant:
-                        for report_event in variant.reportEvents:
-                            for gene in report_event.genomicEntities:
-                                if gene.type == 'gene':
-                                    gene.gene_entry = None
-                                    for gene_entry in gene_entries:
-                                        if gene_entry.ensembl_id == gene.ensemblId:
-                                            gene.gene_entry = gene_entry
-                                            break
-        sv_gene_list = []
-        for ig_obj in self.case.ig_objs:
-            if ig_obj.structuralVariants:
-                for variant in ig_obj.structuralVariants:
-                    if variant.case_variant:
-                        for report_event in variant.reportEvents:
-                            for gene in report_event.genomicEntities:
-                                if gene.type == 'gene':
-                                    if gene.gene_entry:
-                                        sv_gene_list.append({
-                                            'gene': gene.gene_entry,
-                                            'svregion': variant.sv_region1_entry
-                                        })
-        sv_region_genes = ManyCaseModel(SVRegionGene, sv_gene_list, self.model_objects)
-        return sv_region_genes
 
-    def get_svs(self):
-        '''
-        Loop again over the SVs and match up the SVRegions,
-        Then loop again and add them to a MVM list
-        :return:
-        '''
         sv_list = []
         for ig_obj in self.case.ig_objs:
             if ig_obj.structuralVariants:
@@ -1512,6 +1482,11 @@ class CaseAttributeManager(object):
                             if (variant.sv_region1_entry == sv_entry.sv_region1 and
                                     variant.sv_region2_entry == sv_entry.sv_region2 and
                                     variant.variantType == sv_entry.variant_type):
+                                for allele_freq in variant.variantAttributes.alleleFrequencies:
+                                    if allele_freq.population == 'CNV_AF':
+                                        variant.cnv_af = allele_freq.alternateFrequency
+                                    elif allele_freq.population == 'CNV_AUC':
+                                        variant.cnv_auc = allele_freq.alternateFrequency
                                 variant.sv_entry = sv_entry
                                 break
 
@@ -1524,10 +1499,45 @@ class CaseAttributeManager(object):
                             proband_sv_list.append({
                                 'interpretation_report': ir_manager.case_model.entry,
                                 'sv': variant.sv_entry,
+                                'cnv_af': variant.cnv_af,
+                                'cnv_auc': variant.cnv_auc
                             })
         sample_svs = ManyCaseModel(ProbandSV, proband_sv_list, self.model_objects)
         return sample_svs
 
+    def get_proband_sv_genes(self):
+
+        gene_entries = [gene.entry for gene in
+                        self.case.attribute_managers[Gene].case_model.case_models]
+
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.structuralVariants:
+                for variant in ig_obj.structuralVariants:
+                    if variant.case_variant:
+                        for report_event in variant.reportEvents:
+                            for gene in report_event.genomicEntities:
+                                if gene.type == 'gene':
+                                    gene.gene_entry = None
+                                    for gene_entry in gene_entries:
+                                        if gene_entry.ensembl_id == gene.ensemblId:
+                                            gene.gene_entry = gene_entry
+                                            break
+        proband_sv_gene_list = []
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.structuralVariants:
+                for variant in ig_obj.structuralVariants:
+                    if variant.case_variant:
+                        for report_event in variant.reportEvents:
+                            for gene in report_event.genomicEntities:
+                                if gene.type == 'gene':
+                                    if gene.gene_entry:
+                                        proband_sv_gene_list.append({
+                                            'gene': gene.gene_entry,
+                                            'proband_sv': variant.sv_region1_entry
+                                            'selected':
+                                        })
+        sv_region_genes = ManyCaseModel(ProbandSVGene, proband_sv_gene_list, self.model_objects)
+        return sv_region_genes
 
 class CaseModel(object):
     """
@@ -1796,15 +1806,6 @@ class CaseModel(object):
                 f" AND sv_start = {self.escaped_model_attributes['sv_start']}"
                 f" AND sv_end = '{self.escaped_model_attributes['sv_end']}'"
                 f" AND genome_assembly_id = {self.escaped_model_attributes['genome_assembly'].id}"])
-        elif self.model_type == SVRegionGene:
-            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
-                table = 'SELECT * FROM SVRegionGene'
-            else:
-                table = 'SELECT * FROM "SVRegionGene"'
-            cmd = ''.join([
-                f" WHERE svregion_id = {self.escaped_model_attributes['svregion'].id}",
-                f" AND gene_id = '{self.escaped_model_attributes['gene'].id}'"
-            ])
         elif self.model_type == SV:
             if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
                 table = 'SELECT * FROM SV'
@@ -1829,6 +1830,15 @@ class CaseModel(object):
             cmd = ''.join([
                 f" WHERE interpretation_report_id = {self.escaped_model_attributes['interpretation_report'].id}",
                 f" AND sv_id = {self.escaped_model_attributes['sv'].id}",
+            ])
+        elif self.model_type == ProbandSVGene:
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM ProbandSVGene'
+            else:
+                table = 'SELECT * FROM "ProbandSVGene"'
+            cmd = ''.join([
+                f" WHERE proband_sv_id = {self.escaped_model_attributes['proband_sv'].id}",
+                f" AND gene_id = '{self.escaped_model_attributes['gene'].id}'"
             ])
 
         sql =  ''.join([

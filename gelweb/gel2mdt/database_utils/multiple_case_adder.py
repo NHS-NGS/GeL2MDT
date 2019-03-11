@@ -377,9 +377,9 @@ class MultipleCaseAdder(object):
             (TranscriptVariant, True),
             (ProbandTranscriptVariant, True),
             (SVRegion, True),
-            (SVRegionGene, True),
             (SV, True),
             (ProbandSV, True),
+            (ProbandSVGene, True),
             #(ReportEvent, True)
         )
 
@@ -603,9 +603,9 @@ class MultipleCaseAdder(object):
             ProbandTranscriptVariant: ['id',"transcript", "proband_variant"],
             ReportEvent: ['id',"proband_variant", "re_id"],
             SVRegion: ['id', 'chromosome', 'sv_start', 'sv_end', "genome_assembly"],
-            SVRegionGene: ['id', "svregion", 'gene'],
             SV: ['id', 'sv_region1', 'sv_region2', 'variant_type'],
             ProbandSV: ['id', "sv", "interpretation_report"],
+            ProbandSVGene: ['id', "proband_sv", 'gene'],
         }
         return lookup_dict[model_type]
 
