@@ -761,7 +761,7 @@ def mdt_view(request, mdt_id):
         for pv in pvs:
             if pv.pvflag_set.all() and pv.max_tier == None:
                 proband_variant_count[report.id] += 1
-            if pv.max_tier:
+            if pv.max_tier or pv.max_tier==0:
                 if pv.pvflag_set.all() or pv.max_tier < 3:
                     proband_variant_count[report.id] += 1
                 else:
@@ -838,7 +838,7 @@ def mdt_proband_view(request, mdt_id, pk, important):
         if important ==1:
             if pv.pvflag_set.all() and pv.max_tier == None:
                 proband_variants.append(pv)
-            if pv.max_tier:
+            if pv.max_tier or pv.max_tier==0:
                 if pv.pvflag_set.all() or pv.max_tier < 3:
                     proband_variants.append(pv)
         else:
