@@ -1012,11 +1012,15 @@ class SV(models.Model):
                                                             ('dm', 'deletion_mobile_element'),
                                                             ('im', 'insertion_mobile_element'),))
 
+    def __str__(self):
+        return f"{self.sv_region1.chromosome}:{self.sv_region1.sv_start}-{self.sv_region1.sv_end}"
+
     class Meta:
         managed = True
         unique_together = (('sv_region1', 'sv_region2', 'variant_type'),)
         db_table = 'SV'
         app_label = 'gel2mdt'
+
 
 
 class ProbandSV(models.Model):
@@ -1033,14 +1037,10 @@ class ProbandSV(models.Model):
                             ('P', 'Passed Confirmation'),
                             ('F', 'Failed Confirmation'),
                             ('N', 'Not Required'),)
-    confirmation_method = models.CharField(choices=(('M', 'MLPA'),
-                                                    ('Q', 'qPCR'),
-                                                    ('A', 'Microarray'),
-                                                    ('O', 'Other'),), max_length=2, null=True, blank=True)
     confirmation_status = models.CharField(choices=CONFIRMATION_CHOICES, max_length=4, default='U')
     max_tier = models.CharField(max_length=20, null=True)
-    cnv_af = models.FloatField()
-    cnv_auc = models.FloatField()
+    cnv_af = models.FloatField(null=True)
+    cnv_auc = models.FloatField(null=True)
 
     class Meta:
         managed = True

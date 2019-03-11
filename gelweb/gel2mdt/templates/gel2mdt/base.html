@@ -180,6 +180,16 @@ SOFTWARE.
     });
 </script>
 <script>
+$(document).ready(function() {
+$('#dataTables-psv').DataTable({
+    "columnDefs": [
+        { "orderable": false, "targets": [ 0, 1 ] }
+    ],
+    "order": [[ 3, "asc" ]]
+});
+});
+</script>
+<script>
     $(document).ready(function() {
         $('#dataTables-validationlist').DataTable({
             "order": [[ 6, "desc" ]],

@@ -366,6 +366,7 @@ def proband_view(request, report_id):
     gelir_form = GELIRForm(instance=report)
     demogs_form = DemogsForm(instance=report.ir_family.participant_family.proband)
     proband_variants = ProbandVariant.objects.filter(interpretation_report=report)
+    proband_svs = ProbandSV.objects.filter(interpretation_report=report)
     proband_mdt = MDTReport.objects.filter(interpretation_report=report)
     panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.ir_family)
     panel_form = PanelForm()
@@ -421,7 +422,8 @@ def proband_view(request, report_id):
                                                     'report_fields': report_history_formatter.report_interesting_fields,
                                                     'proband_fields': report_history_formatter.proband_interesting_fields,
                                                     'other_cases': other_cases,
-                                                    'add_comment_form': add_comment_form})
+                                                    'add_comment_form': add_comment_form,
+                                                    'proband_svs': proband_svs})
 
 
 @login_required
@@ -616,15 +618,13 @@ def select_transcript(request, report_id, pv_id):
     :return: View containing list of transcripts
     '''
     proband_transcript_variants = ProbandTranscriptVariant.objects.filter(proband_variant__id=pv_id)
+    proband_variant = ProbandVariant.objects.get(id=pv_id)
     # Just selecting first selected transcript
     selected_count = 0
     for ptv in proband_transcript_variants:
         if ptv.selected:
             if selected_count == 0:
-                pass
-            else:
-                ptv.selected = False
-                ptv.save()
+                proband_variant.select_transcript(ptv.transcript)
             selected_count += 1
     report = GELInterpretationReport.objects.get(id=report_id)
     return render(request, 'gel2mdt/select_transcript.html',

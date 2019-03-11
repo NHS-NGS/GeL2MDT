@@ -436,12 +436,12 @@ class CaseAttributeManager(object):
             case_model = self.get_tool_and_assembly_versions()
         elif self.model_type == SVRegion:
             case_model = self.get_sv_regions()
-        elif self.model_type == SVRegionGene:
-            case_model = self.get_sv_region_genes()
         elif self.model_type == SV:
             case_model = self.get_svs()
         elif self.model_type == ProbandSV:
             case_model = self.get_proband_svs()
+        elif self.model_type == ProbandSVGene:
+            case_model = self.get_proband_sv_genes()
 
         return case_model
 
@@ -1499,6 +1499,7 @@ class CaseAttributeManager(object):
                             proband_sv_list.append({
                                 'interpretation_report': ir_manager.case_model.entry,
                                 'sv': variant.sv_entry,
+                                'tier': variant.max_tier,
                                 'cnv_af': variant.cnv_af,
                                 'cnv_auc': variant.cnv_auc
                             })
@@ -1509,35 +1510,53 @@ class CaseAttributeManager(object):
 
         gene_entries = [gene.entry for gene in
                         self.case.attribute_managers[Gene].case_model.case_models]
+        proband_sv_entries = [gene.entry for gene in
+                              self.case.attribute_managers[ProbandSV].case_model.case_models]
+        ir_manager = self.case.attribute_managers[GELInterpretationReport]
 
         for ig_obj in self.case.ig_objs:
             if ig_obj.structuralVariants:
                 for variant in ig_obj.structuralVariants:
                     if variant.case_variant:
+                        for proband_sv_entry in proband_sv_entries:
+                            if (variant.sv_entry == proband_sv_entry.sv and
+                                    ir_manager.case_model.entry == proband_sv_entry.interpretation_report):
+                                variant.proband_sv_entry = proband_sv_entry
+                                break
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.structuralVariants:
+                for variant in ig_obj.structuralVariants:
+                    if variant.case_variant:
+                        variant.genes = {}
                         for report_event in variant.reportEvents:
+                            interesting_gene = False
+                            if report_event.tier == 'TIERA':
+                                interesting_gene = True
                             for gene in report_event.genomicEntities:
                                 if gene.type == 'gene':
                                     gene.gene_entry = None
                                     for gene_entry in gene_entries:
                                         if gene_entry.ensembl_id == gene.ensemblId:
-                                            gene.gene_entry = gene_entry
+                                            if gene_entry not in variant.genes:
+                                                variant.genes[gene_entry] = interesting_gene
+                                            if interesting_gene:
+                                                variant.genes[gene_entry] = interesting_gene
                                             break
+
         proband_sv_gene_list = []
         for ig_obj in self.case.ig_objs:
             if ig_obj.structuralVariants:
                 for variant in ig_obj.structuralVariants:
                     if variant.case_variant:
-                        for report_event in variant.reportEvents:
-                            for gene in report_event.genomicEntities:
-                                if gene.type == 'gene':
-                                    if gene.gene_entry:
-                                        proband_sv_gene_list.append({
-                                            'gene': gene.gene_entry,
-                                            'proband_sv': variant.sv_region1_entry
-                                            'selected':
-                                        })
-        sv_region_genes = ManyCaseModel(ProbandSVGene, proband_sv_gene_list, self.model_objects)
-        return sv_region_genes
+                        for gene_key in variant.genes:
+                            proband_sv_gene_list.append({
+                                'gene': gene_key,
+                                'proband_sv': variant.proband_sv_entry,
+                                'selected': variant.genes[gene_key]
+                            })
+        print(proband_sv_gene_list)
+        proband_sv_genes = ManyCaseModel(ProbandSVGene, proband_sv_gene_list, self.model_objects)
+        return proband_sv_genes
 
 class CaseModel(object):
     """
