@@ -938,10 +938,10 @@ class MDT(models.Model):
         ('A', 'Active'), ('C', 'Completed')), default='A')
     gatb = models.NullBooleanField()
     sent_to_clinician = models.BooleanField(default=False)
-    gtab_made = models.BooleanField(default=False)
-    data_request_sent = models.BooleanField(default=False)
-    gtab_sent = models.BooleanField(default=False)
-    actions_sent = models.BooleanField(default=False)
+    # gtab_made = models.BooleanField(default=False)
+    # data_request_sent = models.BooleanField(default=False)
+    # gtab_sent = models.BooleanField(default=False)
+    # actions_sent = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.date_of_mdt)
@@ -1032,7 +1032,7 @@ class SV(models.Model):
 
 class ProbandSV(models.Model):
     """
-    Unique structural variants
+    Proband structural variants
     """
 
     interpretation_report = models.ForeignKey('GELInterpretationReport', on_delete=models.CASCADE)
@@ -1049,9 +1049,27 @@ class ProbandSV(models.Model):
                                                     ('A', 'Microarray'),
                                                     ('O', 'Other'),), max_length=2, null=True, blank=True)
     confirmation_status = models.CharField(choices=CONFIRMATION_CHOICES, max_length=4, default='U')
+    max_tier = models.CharField(max_length=20, null=True)
+    cnv_af = models.FloatField()
+    cnv_auc = models.FloatField()
 
     class Meta:
         managed = True
         unique_together = (('sv', 'interpretation_report',),)
         db_table = 'ProbandSV'
+        app_label = 'gel2mdt'
+
+
+class ProbandSVGene(models.Model):
+    """
+    Selected gene for a Proband
+    """
+    proband_sv = models.ForeignKey('ProbandSV', on_delete=models.CASCADE)
+    gene = models.ForeignKey('Gene', on_delete=models.CASCADE)
+    selected = models.BooleanField(default=False)
+
+    class Meta:
+        managed = True
+        unique_together = (('proband_sv', 'gene',),)
+        db_table = 'ProbandSVGene'
         app_label = 'gel2mdt'
