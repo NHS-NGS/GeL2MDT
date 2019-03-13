@@ -222,6 +222,7 @@ class VariantAdder(object):
         self.gene_entries = []
         self.transcript_entries = []
         self.proband_variant = None
+        self.pv_flag = None
 
         self.run_vep()
         self.insert_genes()
@@ -229,6 +230,7 @@ class VariantAdder(object):
         self.insert_transcript_variants()
         self.insert_proband_variant()
         self.insert_proband_transcript_variant()
+        self.add_pv_flag()
 
     def run_vep(self):
         self.transcripts = run_vep_batch.generate_transcripts(self.variants)
@@ -319,6 +321,11 @@ class VariantAdder(object):
                                                                             proband_variant=transcript.proband_variant_entry,
                                                                      defaults={"selected": transcript.transcript_entry.canonical_transcript,
                                                                                 "effect": transcript.proband_transcript_variant_effect})
+
+    def add_pv_flag(self):
+        self.pv_flag, created = PVFlag.objects.get_or_create(proband_variant=self.proband_variant,
+                                                             flag_name='Manually Added')
+
 
 class UpdateDemographics(object):
     '''

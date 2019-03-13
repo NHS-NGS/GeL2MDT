@@ -257,6 +257,11 @@ class MdtSentToClinicianForm(forms.ModelForm):
         model = MDT
         fields = ['sent_to_clinician']
 
+    def __init__(self, *args, **kwargs):
+        super(MdtSentToClinicianForm, self).__init__(*args, **kwargs)
+        self.fields['sent_to_clinician'].required = False
+
+
 class ProbandMDTForm(forms.ModelForm):
     '''
     Form used in Proband View at MDT which allows users to fill in proband textfields
@@ -268,6 +273,7 @@ class ProbandMDTForm(forms.ModelForm):
             'discussion': Textarea(attrs={'rows': '3'}),
             'action': Textarea(attrs={'rows': '3'}),
         }
+
 
 class GELIRMDTForm(forms.ModelForm):
     '''
