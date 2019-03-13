@@ -616,16 +616,15 @@ def select_transcript(request, report_id, pv_id):
     :return: View containing list of transcripts
     '''
     proband_transcript_variants = ProbandTranscriptVariant.objects.filter(proband_variant__id=pv_id)
+    proband_variant = ProbandVariant.objects.get(id=pv_id)
     # Just selecting first selected transcript
     selected_count = 0
     for ptv in proband_transcript_variants:
         if ptv.selected:
             if selected_count == 0:
-                pass
-            else:
-                ptv.selected = False
-                ptv.save()
+                proband_variant.select_transcript(ptv.transcript)
             selected_count += 1
+
     report = GELInterpretationReport.objects.get(id=report_id)
     return render(request, 'gel2mdt/select_transcript.html',
                   {'proband_transcript_variants': proband_transcript_variants,
@@ -761,7 +760,7 @@ def mdt_view(request, mdt_id):
         for pv in pvs:
             if pv.pvflag_set.all() and pv.max_tier == None:
                 proband_variant_count[report.id] += 1
-            if pv.max_tier:
+            if pv.max_tier or pv.max_tier == 0:
                 if pv.pvflag_set.all() or pv.max_tier < 3:
                     proband_variant_count[report.id] += 1
                 else:
@@ -791,14 +790,12 @@ def mdt_view(request, mdt_id):
 
     if request.method == 'POST':
         mdt_form = MdtForm(request.POST, instance=mdt_instance)
+        sent_to_clinican_form = MdtSentToClinicianForm(request.POST, instance=mdt_instance)
         if mdt_form.is_valid():
             mdt_form.save()
-            messages.add_message(request, 25, 'MDT Updated')
-
-        sent_to_clinican_form = MdtSentToClinicianForm(request.POST, instance=mdt_instance)
         if sent_to_clinican_form.is_valid():
             sent_to_clinican_form.save()
-
+        messages.add_message(request, 25, 'MDT Updated')
 
         return HttpResponseRedirect(f'/mdt_view/{mdt_id}')
     request.session['mdt_id'] = mdt_id
@@ -838,7 +835,7 @@ def mdt_proband_view(request, mdt_id, pk, important):
         if important ==1:
             if pv.pvflag_set.all() and pv.max_tier == None:
                 proband_variants.append(pv)
-            if pv.max_tier:
+            if pv.max_tier or pv.max_tier == 0:
                 if pv.pvflag_set.all() or pv.max_tier < 3:
                     proband_variants.append(pv)
         else:

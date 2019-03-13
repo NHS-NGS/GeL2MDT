@@ -75,6 +75,8 @@ SOFTWARE.
 <div  class="container-fluid">
     <div class=row>
         <div class="col-md-12">
+            <form role="form" method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
             <div class="col-md-3">
                 <div id="tracking" class="tab-pane fade in active">
                     <div class="panel panel-default" >
@@ -91,24 +93,15 @@ SOFTWARE.
                                     </div>
                                 </div>
                             </div>
-                            <form role="form" method="post" enctype="multipart/form-data">
-                                {% csrf_token %}
+
 
                                  <div class="col-md-9">
                                     {{sent_to_clinican_form.as_p}}
                                 </div>
-                                <div class="col-md-3">
-                                {% if mdt_form.status.value != "C" %}
-                                    <button type="submit" name="sent_to_clinician_update" class="btn btn-default btn-xs">Save</button>
-                                {% endif %}
-                                </div>
-                            </form>
                         </div>
                     </div>
                 </div>
             </div>
-                <form role="form" method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
                     <div class="col-md-9">
 
                          <div class="panel panel-default">
@@ -194,7 +187,6 @@ SOFTWARE.
                     </div>
                 </div>
     </div>
-</div>
 </div>
 
      <script>
