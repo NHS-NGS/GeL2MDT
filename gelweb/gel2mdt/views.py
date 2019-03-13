@@ -621,8 +621,12 @@ def select_transcript(request, report_id, pv_id):
     selected_count = 0
     for ptv in proband_transcript_variants:
         if ptv.selected:
-            if selected_count == 0:
+            if ptv.transcript.is_preferred_transcript():
                 proband_variant.select_transcript(ptv.transcript)
+                break
+            else:
+                if selected_count == 0:
+                    proband_variant.select_transcript(ptv.transcript)
             selected_count += 1
 
     report = GELInterpretationReport.objects.get(id=report_id)
