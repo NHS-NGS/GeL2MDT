@@ -534,6 +534,7 @@ def ajax_sv_validation(request):
     Accepts a POST request to change the validation status of a particular
     ProbandVariant, the ID of which should be supplied in the JSON.
     """
+
     proband_sv_id = request.POST.get('probandSV')
     selected_validation_status = request.POST.get('selectedStatus')
     selected_validation_user = request.POST.get('selectedUser')
@@ -553,7 +554,6 @@ def ajax_sv_validation(request):
     }
     selected_validation_status = validation_status_key[selected_validation_status]
     proband_sv = ProbandSV.objects.get(id=proband_sv_id)
-    print(proband_sv)
 
     proband_sv.validation_status = selected_validation_status
     proband_sv.validation_responsible_user = user_instance

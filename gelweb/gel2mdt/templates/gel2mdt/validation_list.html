@@ -235,7 +235,7 @@ SOFTWARE.
                                             <i class="fas fa-external-link-alt fa-2x"></i>
                                         </a>
                                     </td>
-                                    <td>{% for psg in proband_sv.probandsvgene_set.all %}
+                                    <td>{% for psg in sv.probandsvgene_set.all %}
                                             {% if psg.selected %}
                                             {{psg.gene}}
                                             {% endif %}
@@ -299,7 +299,7 @@ SOFTWARE.
                                             type: 'POST',
                                             url: '/ajax_sv_validation',
                                             data: {
-                                                probandVariant: svID,
+                                                probandSV: svID,
                                                 selectedStatus: select_status_value,
                                                 selectedUser: select_user_value,
                                                 csrfmiddlewaretoken: CSRFToken

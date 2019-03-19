@@ -1047,11 +1047,11 @@ class ProbandSV(models.Model):
     interpretation_report = models.ForeignKey('GELInterpretationReport', on_delete=models.CASCADE)
     sv = models.ForeignKey(SV, on_delete=models.CASCADE)
     VALIDATION_CHOICES = (('U', 'Unknown'),
-                            ('A', 'Awaiting Confirmation'),
-                            ('K', 'Urgent Confirmation Required'),
+                            ('A', 'Awaiting Validation'),
+                            ('K', 'Urgent Validation'),
                             ('I', 'In Progress'),
-                            ('P', 'Passed Confirmation'),
-                            ('F', 'Failed Confirmation'),
+                            ('P', 'Passed Validation'),
+                            ('F', 'Failed Validation'),
                             ('N', 'Not Required'),)
     validation_status = models.CharField(choices=VALIDATION_CHOICES, max_length=4, default='U')
     validation_datetime_set = models.DateTimeField(null=True, default=None)
