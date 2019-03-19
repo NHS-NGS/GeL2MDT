@@ -296,6 +296,7 @@ class Case(object):
             interesting_variant = False
             for report_event in variant.reportEvents:
                 if report_event.tier:
+                    variant.max_tier = report_event.tier
                     interesting_variant = True
             if interesting_variant:
                 case_variant = CaseCNV(
@@ -1501,7 +1502,7 @@ class CaseAttributeManager(object):
                             proband_sv_list.append({
                                 'interpretation_report': ir_manager.case_model.entry,
                                 'sv': variant.sv_entry,
-                                'tier': variant.max_tier,
+                                'max_tier': variant.max_tier,
                                 'cnv_af': variant.cnv_af,
                                 'cnv_auc': variant.cnv_auc
                             })
@@ -1556,7 +1557,6 @@ class CaseAttributeManager(object):
                                 'proband_sv': variant.proband_sv_entry,
                                 'selected': variant.genes[gene_key]
                             })
-        print(proband_sv_gene_list)
         proband_sv_genes = ManyCaseModel(ProbandSVGene, proband_sv_gene_list, self.model_objects)
         return proband_sv_genes
 
