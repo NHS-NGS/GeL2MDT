@@ -1003,6 +1003,7 @@
                                     <th>Interpretation</th>
                                     <th>Tier</th>
                                     <th>TierA genes</th>
+                                    <th>All genes in CNV</th>
                                     <th>Variant Type</th>
                                     <th>CNV AF</th>
                                     <th>CNV AUC</th>
@@ -1011,19 +1012,72 @@
                             </thead>
                             <tbody style='font-size: 75%'>
 
-                                {% for proband_sv in proband_svs %}
+                                {% for proband_sv, sv_items in sv_dict.items %}
                                     <tr >
                                         <td>
-                                            <a href="/variant/{{proband_sv.sv.id }}">
+                                            <a href="/sv/{{proband_sv.sv.id }}">
                                                 <i class="fas fa-external-link-alt fa-2x"></i>
                                             </a>
-                                            <a href="https://decipher.sanger.ac.uk/browser#q/{{ proband_sv.sv }}/" target="_blank">
+                                            <a href="https://decipher.sanger.ac.uk/browser#q/{{ proband_sv.sv.sv_region1.liftover_grch }}/" target="_blank">
                                                 Decipher
                                             </a>
 
                                             {{ proband_sv.sv }}
                                         </td>
-                                        <td>Interpretation</td>
+                                        <td>
+                                            <a href=# data-toggle="modal" data-target="#svModal{{forloop.counter}}">
+                                                <i class="fas fa-info-circle fa-2x"></i>
+                                            </a>
+                                        </td>
+                                            {% if report.sample_type == 'raredisease' %}
+                                        <div id="svModal{{forloop.counter}}" class="modal fade" role="dialog">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
+                                                        <h4 class="modal-title">MDT Results</h4>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <label>Variant Classification</label>
+                                                        <br>
+                                                        {{ sv_items.raredisease_report.get_classification_display }}
+                                                        <hr>
+                                                        <label>Contribution to Phenotype</label>
+                                                        <br>
+                                                        {{ sv_items.raredisease_report.contribution_to_phenotype }}
+                                                        <hr>
+                                                        <label>Action from MDT</label>
+                                                        <br>
+                                                        {{ sv_items.raredisease_report.action }}
+                                                        <hr>
+                                                        <label>MDT Discussion</label>
+                                                        <br>
+                                                        {{ sv_items.raredisease_report.discussion }}
+                                                        <hr>
+                                                        <label>Change Medication?</label>
+                                                        <br>
+                                                        {{ sv_items.raredisease_report.change_med }}
+                                                        <hr>
+                                                        <label>Surgical Option?</label>
+                                                        <br>
+                                                        {{ sv_items.raredisease_report.surgical_option }}
+                                                        <hr>
+                                                        <label>Add Relative Surveillance?</label>
+                                                        <br>
+                                                        {{ sv_items.raredisease_report.add_surveillance_for_relatives }}
+                                                        <hr>
+                                                        <label>Add Clinical Trial?</label>
+                                                        <br>
+                                                        {{ sv_items.raredisease_report.clinical_trial }}
+                                                        <hr>
+                                                        <label>Inform Reproductive Choice?</label>
+                                                        <br>
+                                                        {{ sv_items.raredisease_report.inform_reproductive_choice }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
                                         <td>{{proband_sv.max_tier}}</td>
                                         <td>{% for psg in proband_sv.probandsvgene_set.all %}
                                             {% if psg.selected %}
@@ -1031,15 +1085,77 @@
                                             {% endif %}
                                             {% endfor %}
                                         </td>
+                                        <td>{% for psg in proband_sv.probandsvgene_set.all %}
+                                            {{psg.gene}}
+                                            {% endfor %}
+                                        </td>
                                         <td>{{proband_sv.sv.variant_type}}</td>
                                         <td>{{proband_sv.cnv_af}}</td>
                                         <td>{{proband_sv.cnv_auc}}</td>
-                                        <td>{{proband_sv.confirmation_status}}</td>
+                                        <td><a onclick="$('#validationSVModal{{forloop.counter}}').modal('show')"><i class="fas fa-pencil-alt"></i></a></span> {{proband_sv.get_validation_status_display}}</td>
+                                    </tr>
+
+                                    <div id="validationSVModal{{forloop.counter}}" class="modal fade validationSVModal" role="dialog">
+                                        <p class="proband_sv-id" hidden>{{proband_sv.id}}</p>
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
+                                                    <h4 class="modal-title">{{proband_sv.sv}}</h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <h5>Validation for variant {{proband_sv.sv}}.</h5>
+                                                    <form id="validationSVForm{{forloop.counter}}" action="#" method="POST">
+                                                        {% csrf_token %}
+                                                        {% bootstrap_form sv_items.form %}
+                                                        {% buttons %}
+                                                        <input value="Update" type="button" onclick="updateSVValidation(validationSVModal{{forloop.counter}});" class="btn btn-primary">
+                                                        </input>
+                                                        {% endbuttons %}
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 {% endfor %}
 
                             </tbody>
                         </table>
                     </div>
+                    <script>
+                                    function updateSVValidation(modalID) {
+                                        var modal = $(modalID);
+                                        var CSRFToken = modal.find('input[name=csrfmiddlewaretoken]').val();
+                                        var modalTitle = modal.find('.modal-title');
+                                        var svID = modal.find('.proband_sv-id').text();
+                                        console.log("Updating validation for " + modalTitle.text() + " (" + svID + ").");
+                                        var select_status = modal.find('#id_validation_status');
+                                        var select_status_value = select_status.find(":selected").text();
+                                        var select_user = modal.find('#id_validation_responsible_user');
+                                        var select_user_value = select_user.find(":selected").text();
+                                        console.log("Setting validation status as " + select_status_value);
+                                        console.log("Setting validation user as " + select_user_value);
+                                        $.ajax({
+                                            type: 'POST',
+                                            url: '/ajax_sv_validation',
+                                            data: {
+                                                probandSV: svID,
+                                                selectedStatus: select_status_value,
+                                                selectedUser: select_user_value,
+                                                csrfmiddlewaretoken: CSRFToken
+                                            },
+                                            success: function(response) {
+                                                console.log("POSTed validation change:");
+                                                console.log(response);
+                                                select_status.find(":selected").text(response.validationStatus);
+                                                select_user.find(":selected").text(response.validationUser);
+                                                location.reload();
+                                            }
+                                        })
+
+                                    }
+                                </script>
+
 
                 </div>
                 </div>

@@ -639,3 +639,5 @@ class ReportHistoryFormatter:
                 if new_subset[field] != old_subset[field]:
                     field_diff.append(field)
             return True, field_diff
+
+

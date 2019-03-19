@@ -105,6 +105,22 @@ class VariantValidationForm(forms.ModelForm):
         ]
 
 
+class SVValidationForm(forms.ModelForm):
+    """
+    Form used to change values used for variant validation tracking.
+    """
+    def __init__(self, *args, **kwargs):
+        super(SVValidationForm, self).__init__(*args, **kwargs)
+        self.fields['validation_responsible_user'].required=False
+
+    class Meta:
+        model = ProbandSV
+        fields = [
+            'validation_status',
+            'validation_responsible_user',
+        ]
+
+
 class AddCommentForm(forms.ModelForm):
     '''
     Adds a new CaseComment in the Proband page
@@ -276,7 +292,7 @@ class GELIRMDTForm(forms.ModelForm):
 
     class Meta:
         model = GELInterpretationReport
-        fields = ('case_status',)
+        fields = ('case_status', 'case_code',)
 
     def __init__(self, *args, **kwargs):
         super(GELIRMDTForm, self).__init__(*args, **kwargs)
@@ -328,7 +344,10 @@ class RareDiseaseMDTForm(forms.ModelForm):
 
     def save(self, commit=True):
         selected_validation_status = self.cleaned_data['requires_validation']
-        pv = self.instance.proband_variant
+        if self.instance.proband_variant:
+            pv = self.instance.proband_variant
+        elif self.instance.proband_sv:
+            pv = self.instance.proband_sv
 
         pv.validation_status = selected_validation_status
         if not pv.validation_datetime_set:

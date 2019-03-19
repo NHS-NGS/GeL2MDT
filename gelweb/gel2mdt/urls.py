@@ -43,9 +43,11 @@ urlpatterns = [
     path('update_proband/<int:report_id>', views.update_proband, name='update-proband'),
     path('update_demographics/<int:report_id>', views.update_demographics, name='update-demographics'),
     path('ajax_validation', views.ajax_variant_validation, name='ajax_validation'),
+    path('ajax_sv_validation', views.ajax_sv_validation, name='ajax_sv_validation'),
     path('<str:sample_type>/validation_list', views.validation_list, name='validation-list'),
 
     path('variant/<int:variant_id>', views.variant_view, name='variant-view'),
+    path('sv/<int:variant_id>', views.sv_view, name='sv-view'),
 
     path('panel/<int:panelversion_id>', views.panel_view, name='panel'),
 
@@ -60,6 +62,7 @@ urlpatterns = [
     path('<str:sample_type>/edit_mdt/<int:mdt_id>', views.edit_mdt, name='edit-mdt'),
     path('mdt_view/<int:mdt_id>', views.mdt_view, name='mdt-view'),
     path('mdt_proband_view/<int:mdt_id>/<int:pk>/<int:important>', views.mdt_proband_view, name='mdt-proband-view'),
+    path('mdt_cnv_view/<int:mdt_id>/<int:pk>/', views.mdt_cnv_view, name='mdt-cnv-view'),
 
     path('add_ir_to_mdt/<int:mdt_id>/<int:irreport_id>', views.add_ir_to_mdt, name='add-ir-to-mdt'),
     path('remove_ir_from_mdt/<int:mdt_id>/<int:irreport_id>', views.remove_ir_from_mdt, name='remove-ir-from-mdt'),
