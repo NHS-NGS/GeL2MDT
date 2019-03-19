@@ -234,6 +234,7 @@ SOFTWARE.
                                         <a href="/sv/{{sv.sv.id }}">
                                             <i class="fas fa-external-link-alt fa-2x"></i>
                                         </a>
+                                        {{sv.sv}}
                                     </td>
                                     <td>{% for psg in sv.probandsvgene_set.all %}
                                             {% if psg.selected %}
@@ -260,7 +261,7 @@ SOFTWARE.
                                 </tr>
 
                                 <div id="validationSVModal{{forloop.counter}}" class="modal fade validationSVModal" role="dialog">
-                                    <p class="proband_sv-id" hidden>{{proband_sv.id}}</p>
+                                    <p class="proband_sv-id" hidden>{{sv.id}}</p>
                                     <div class="modal-dialog">
                                         <div class="modal-content">
                                             <div class="modal-header">

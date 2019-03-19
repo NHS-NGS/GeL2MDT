@@ -590,12 +590,16 @@ def validation_list(request, sample_type):
 
     proband_variants = ProbandVariant.objects.filter(
         Q(validation_status="A") | Q(validation_status="K") | Q(validation_status="I"),
-        interpretation_report__sample_type=sample_type)
+        interpretation_report__sample_type=sample_type).prefetch_related(*['interpretation_report',
+                                                                           'interpretation_report__ir_family',
+                                                                           'variant'])
     pv_forms_dict = {proband_variant: VariantValidationForm(instance=proband_variant)
                      for proband_variant in proband_variants}
     proband_svs = ProbandSV.objects.filter(
         Q(validation_status="A") | Q(validation_status="K") | Q(validation_status="I"),
-        interpretation_report__sample_type=sample_type)
+        interpretation_report__sample_type=sample_type).prefetch_related(*['interpretation_report',
+                                                                           'interpretation_report__ir_family',
+                                                                           'sv'])
     sv_forms_dict = {proband_sv: SVValidationForm(instance=proband_sv)
                      for proband_sv in proband_svs}
     return render(request, 'gel2mdt/validation_list.html', {'pv_forms_dict': pv_forms_dict,
