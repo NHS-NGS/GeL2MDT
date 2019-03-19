@@ -334,6 +334,8 @@ class Case(object):
                 ig_obj, case_sv_list = self.parse_ig_svs(ig_obj,
                                                          genome_build,
                                                          case_sv_list)
+            if ig_obj.shortTandemRepeats:
+                pass
             self.ig_objs.append(ig_obj)
         for clinical_report in self.json['clinical_report']:
             cr_obj = ClinicalReport.fromJsonDict(clinical_report['clinical_report_data'])
