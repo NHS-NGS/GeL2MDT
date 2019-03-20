@@ -295,6 +295,7 @@ def proband_view(request, report_id):
         add_variant_form = AddVariantForm(request.POST)
         add_comment_form = AddCommentForm(request.POST)
         variant_validation_form = VariantValidationForm(request.POST)
+        sv_validation_form = SVValidationForm(request.POST)
 
         if variant_validation_form.is_valid():
             validation_status = variant_validation_form.cleaned_data['validation_status']
@@ -303,7 +304,13 @@ def proband_view(request, report_id):
             pv.validation_status = validation_status
             pv.validation_responsible_user = validation_user
             pv.save()
+        if sv_validation_form.is_valid():
+            validation_status = sv_validation_form.cleaned_data['validation_status']
+            validation_user = sv_validation_form.cleaned_data['validation_responsible_user']
 
+            sv.validation_status = validation_status
+            sv.validation_responsible_user = validation_user
+            sv.save()
         if demogs_form.is_valid():
             demogs_form.save()
             messages.add_message(request, 25, 'Proband Updated')
@@ -388,11 +395,16 @@ def proband_view(request, report_id):
     pv_dict = {}
     for pv in proband_variants:
         pv_dict[pv] = {'form' : VariantValidationForm(instance=pv),
-                        'raredisease_report' : RareDiseaseReport.objects.filter(proband_variant=pv).first(),
+                        'raredisease_report': RareDiseaseReport.objects.filter(proband_variant=pv).first(),
                         'cancer_report' : CancerReport.objects.filter(proband_variant=pv).first(),
                         'transcript' : pv.get_transcript(),
                         'transcript_variant' : pv.get_transcript_variant(),
                        'preferred_transcript': pv.get_preferred_transcript()}
+
+    sv_dict = {}
+    for sv in proband_svs:
+        sv_dict[sv] = {'form': SVValidationForm(instance=sv),
+                       'raredisease_report': RareDiseaseReport.objects.filter(proband_sv=sv).first()}
 
     if not request.user.is_staff:
         if report.case_status == "C":
@@ -423,7 +435,7 @@ def proband_view(request, report_id):
                                                     'proband_fields': report_history_formatter.proband_interesting_fields,
                                                     'other_cases': other_cases,
                                                     'add_comment_form': add_comment_form,
-                                                    'proband_svs': proband_svs})
+                                                    'sv_dict': sv_dict})
 
 
 @login_required
@@ -517,6 +529,56 @@ def ajax_variant_validation(request):
     return HttpResponse(response, content_type="application/json")
 
 
+def ajax_sv_validation(request):
+    """
+    Accepts a POST request to change the validation status of a particular
+    ProbandVariant, the ID of which should be supplied in the JSON.
+    """
+
+    proband_sv_id = request.POST.get('probandSV')
+    selected_validation_status = request.POST.get('selectedStatus')
+    selected_validation_user = request.POST.get('selectedUser')
+    if selected_validation_user == "---------":
+        user_instance = None
+    else:
+        user_instance = User.objects.get(username=selected_validation_user)
+
+    validation_status_key = {
+        'Unknown': 'U',
+        'Awaiting Validation':'A',
+        'Urgent Validation': 'K',
+        'In Progress': 'I',
+        'Passed Validation': 'P',
+        'Failed Validation': 'F',
+        'Not Required': 'N',
+    }
+    selected_validation_status = validation_status_key[selected_validation_status]
+    proband_sv = ProbandSV.objects.get(id=proband_sv_id)
+
+    proband_sv.validation_status = selected_validation_status
+    proband_sv.validation_responsible_user = user_instance
+
+    if not proband_sv.validation_datetime_set:
+        proband_sv.validation_datetime_set = timezone.now()
+
+    proband_sv.save()
+    proband_sv = ProbandSV.objects.get(id=proband_sv_id)
+
+    new_validation_status = proband_sv.validation_status
+    new_validation_user = proband_sv.validation_responsible_user
+    if new_validation_user:
+        new_validation_user = new_validation_user.username
+    else:
+        new_validation_user = None
+
+    response = json.dumps({
+        "success": True,
+        "validationStatus": new_validation_status,
+        "validationUser": new_validation_user
+    })
+
+    return HttpResponse(response, content_type="application/json")
+
 @login_required
 def validation_list(request, sample_type):
     '''
@@ -528,11 +590,21 @@ def validation_list(request, sample_type):
 
     proband_variants = ProbandVariant.objects.filter(
         Q(validation_status="A") | Q(validation_status="K") | Q(validation_status="I"),
-        interpretation_report__sample_type=sample_type)
+        interpretation_report__sample_type=sample_type).prefetch_related(*['interpretation_report',
+                                                                           'interpretation_report__ir_family',
+                                                                           'variant'])
     pv_forms_dict = {proband_variant: VariantValidationForm(instance=proband_variant)
                      for proband_variant in proband_variants}
+    proband_svs = ProbandSV.objects.filter(
+        Q(validation_status="A") | Q(validation_status="K") | Q(validation_status="I"),
+        interpretation_report__sample_type=sample_type).prefetch_related(*['interpretation_report',
+                                                                           'interpretation_report__ir_family',
+                                                                           'sv'])
+    sv_forms_dict = {proband_sv: SVValidationForm(instance=proband_sv)
+                     for proband_sv in proband_svs}
     return render(request, 'gel2mdt/validation_list.html', {'pv_forms_dict': pv_forms_dict,
-                                                            'sample_type': sample_type})
+                                                            'sample_type': sample_type,
+                                                            'sv_forms_dict': sv_forms_dict})
 
 
 @login_required
@@ -584,6 +656,19 @@ def variant_view(request, variant_id):
                                                     'transcript_variant': transcript_variant,
                                                     'proband_variants': proband_variants})
 
+@login_required
+def sv_view(request, variant_id):
+    '''
+    Shows details about a particular SV and also probands it is present in
+    :param request:
+    :param variant_id: Variant ID
+    :return:
+    '''
+    sv = SV.objects.get(id=variant_id)
+    proband_svs = ProbandSV.objects.filter(sv=sv)
+
+    return render(request, 'gel2mdt/sv.html', {'sv': sv,
+                                                    'proband_svs': proband_svs})
 
 @login_required
 @user_is_clinician(url='proband-view')
@@ -752,12 +837,15 @@ def mdt_view(request, mdt_id):
     proband_variants = ProbandVariant.objects.filter(interpretation_report__in=report_list)
     proband_variant_count = {}
     t3_proband_variant_count = {}
+    sv_count = {}
     first_check_count = 0
     second_check_count = 0
     for report in reports:
         proband_variant_count[report.id] = 0
         t3_proband_variant_count[report.id] = 0
         pvs = ProbandVariant.objects.filter(interpretation_report=report)
+        proband_sv_count = ProbandSV.objects.filter(interpretation_report=report).count()
+        sv_count[report.id] = proband_sv_count
         for pv in pvs:
             if pv.pvflag_set.all() and pv.max_tier == None:
                 proband_variant_count[report.id] += 1
@@ -804,6 +892,7 @@ def mdt_view(request, mdt_id):
     request.session['mdt_id'] = mdt_id
     return render(request, 'gel2mdt/mdt_view.html', {'proband_variants': proband_variants,
                                                       'proband_variant_count': proband_variant_count,
+                                                     'sv_count': sv_count,
                                                      't3_proband_variant_count': t3_proband_variant_count,
                                                      'first_check_percent': first_check_percent,
                                                      'second_check_percent': second_check_percent,
@@ -893,6 +982,77 @@ def mdt_proband_view(request, mdt_id, pk, important):
         form.initial["requires_validation"] = pv.validation_status
     return render(request, 'gel2mdt/mdt_proband_view.html', {
         'proband_variants': proband_variants,
+        'report': report,
+        'mdt_id': mdt_id,
+        'mdt_instance': mdt_instance,
+        'proband_form': proband_form,
+        'variant_formset': variant_formset,
+        'panels': panels,
+        'sample_type':report.sample_type,
+        'gelir_form':gelir_form,
+        'clinician': clinician
+    })
+
+@login_required
+def mdt_cnv_view(request, mdt_id, pk):
+    '''
+    MDT proband view where users can edit proband CNV specific questions at MDT
+    :param request:
+    :param mdt_id: MDT instance id
+    :param pk: GEL Interpretation report id
+    :return:
+    '''
+    clinician = False
+    clinicians_emails = Clinician.objects.all().values_list('email', flat=True)
+    if request.user.email in clinicians_emails:
+        clinician = True
+    mdt_instance = MDT.objects.get(id=mdt_id)
+    report = GELInterpretationReport.objects.get(id=pk)
+    proband_svs = ProbandSV.objects.filter(interpretation_report=report)
+
+    for pv in proband_svs:
+        if mdt_instance.sample_type == 'raredisease':
+            pv.create_rare_disease_report()
+
+    if mdt_instance.sample_type == 'raredisease':
+        proband_sv_reports = RareDiseaseReport.objects.filter(proband_sv__in=proband_svs)
+        VariantForm = modelformset_factory(RareDiseaseReport, form=RareDiseaseMDTForm, extra=0)
+    variant_formset = VariantForm(queryset=proband_sv_reports)
+
+    proband_form = ProbandMDTForm(instance=report.ir_family.participant_family.proband)
+    gelir_form = GELIRMDTForm(instance=report)
+    panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.ir_family)
+
+    if mdt_instance.status == "C":
+        for form in variant_formset.forms:
+            for field in form.__dict__["fields"]:
+                form.fields[field].widget.attrs['readonly'] = True
+                form.fields[field].widget.attrs['disabled'] = True
+        for field in proband_form.__dict__["fields"]:
+            proband_form.fields[field].widget.attrs['readonly'] = True
+            proband_form.fields[field].widget.attrs['disabled'] = True
+
+    if request.method == 'POST':
+        variant_formset = VariantForm(request.POST)
+        proband_form = ProbandMDTForm(request.POST, instance=report.ir_family.participant_family.proband)
+        gelir_form = GELIRMDTForm(request.POST, instance=report)
+        if variant_formset.is_valid() and proband_form.is_valid() and gelir_form.is_valid():
+            variant_formset.save()
+            for form in variant_formset:
+                pv = form.instance.proband_sv
+                pv.validation_status = form.cleaned_data['requires_validation']
+                pv.save()
+            proband_form.save()
+            gelir_form.save()
+            messages.add_message(request, 25, 'Proband Updated')
+
+        return HttpResponseRedirect(f'/mdt_cnv_view/{mdt_id}/{pk}/')
+
+    for form in variant_formset:
+        p_sv = form.instance.proband_sv
+        form.initial["requires_validation"] = p_sv.validation_status
+    return render(request, 'gel2mdt/mdt_cnv_view.html', {
+        'proband_svs': proband_svs,
         'report': report,
         'mdt_id': mdt_id,
         'mdt_instance': mdt_instance,

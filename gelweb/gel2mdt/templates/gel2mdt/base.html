@@ -205,6 +205,22 @@ $('#dataTables-psv').DataTable({
         });
     });
 </script>
+ <script>
+    $(document).ready(function() {
+        $('#dataTables-validationlist2').DataTable({
+            "order": [[ 3, "desc" ]],
+            dom: 'lBfrtip',
+            buttons: [ {
+                extend: 'excelHtml5',
+                title: "ValidationListExport"
+            },
+            {
+                extend: 'csvHtml5',
+                title: "ValidationListExport"
+            }],
+        });
+    });
+</script>
 <script>
     $(document).ready(function() {
         $('#myCases').DataTable({

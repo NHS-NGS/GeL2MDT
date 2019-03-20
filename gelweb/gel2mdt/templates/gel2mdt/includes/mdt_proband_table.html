@@ -45,10 +45,12 @@ SOFTWARE.
 
     </td>
     <td>
-        <a href="/mdt_proband_view/{{mdt_id}}/{{report.id }}/0" class="btn btn-danger">{{t3_proband_variant_count|get_item:report.id }} Variants</a>
-
-
+        <a href="/mdt_cnv_view/{{mdt_id}}/{{report.id }}/" class="btn btn-primary">{{sv_count|get_item:report.id }} CNVs</a>
     </td>
+    <td>
+        <a href="/mdt_proband_view/{{mdt_id}}/{{report.id }}/0" class="btn btn-danger">{{t3_proband_variant_count|get_item:report.id }} Variants</a>
+    </td>
+
     <td>{{report.ir_family.participant_family.proband.recruiting_disease}}
     {% if report.sample_type == 'raredisease' %}
     <td><a href="/export_mdt_outcome_form/{{report.id}}"><i class="fas fa-external-link-alt"></i></a></td>

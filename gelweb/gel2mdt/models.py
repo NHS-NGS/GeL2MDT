@@ -24,7 +24,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.contrib.auth.models import User, Group
 import pandas as pd
-
+from .api_utils.poll_api import PollAPI
 from .model_utils.choices import ChoiceEnum
 from .config import load_config
 
@@ -756,7 +756,8 @@ class RareDiseaseReport(models.Model):
     classification = models.CharField(db_column='classification', max_length=2, choices=(
         ('NA', 'NA'), ('1', '1'), ('2', '2'), ('3', '3'), ('4', '4'), ('5', '5'), ('A', 'Artefact')
     ), default='NA')
-    proband_variant = models.OneToOneField(ProbandVariant, on_delete=models.CASCADE)
+    proband_variant = models.OneToOneField(ProbandVariant, on_delete=models.CASCADE, null=True)
+    proband_sv = models.OneToOneField('ProbandSV', on_delete=models.CASCADE, null=True)
 
     class Meta:
         managed = True
@@ -999,6 +1000,22 @@ class SVRegion(models.Model):
         db_table = 'SVRegion'
         app_label = 'gel2mdt'
 
+    def liftover_grch(self):
+        if self.genome_assembly.version_number == 'GRCh38':
+            genome = 'GRCh37'
+        elif self.genome_assembly.version_number == 'GRCh37':
+            genome = 'GRCh38'
+        request_list_poll = PollAPI(
+            "ensembl",
+            f"map/human/{self.genome_assembly}/{self.chromosome}:{self.sv_start}..{self.sv_end}:1/{genome}?"
+        )
+        try:
+            request_list_poll.get_json_response()
+            result_json = request_list_poll.response_json["mappings"][0]["mapped"]
+            return f"{result_json['seq_region_name']}:{result_json['start']}-{result_json['end']}"
+        except:
+            return None
+
 
 class SV(models.Model):
     sv_region1 = models.ForeignKey(SVRegion, on_delete=models.CASCADE, related_name='region1')
@@ -1022,7 +1039,6 @@ class SV(models.Model):
         app_label = 'gel2mdt'
 
 
-
 class ProbandSV(models.Model):
     """
     Proband structural variants
@@ -1030,17 +1046,33 @@ class ProbandSV(models.Model):
 
     interpretation_report = models.ForeignKey('GELInterpretationReport', on_delete=models.CASCADE)
     sv = models.ForeignKey(SV, on_delete=models.CASCADE)
-    CONFIRMATION_CHOICES = (('U', 'Unknown'),
-                            ('A', 'Awaiting Confirmation'),
-                            ('K', 'Urgent Confirmation Required'),
+    VALIDATION_CHOICES = (('U', 'Unknown'),
+                            ('A', 'Awaiting Validation'),
+                            ('K', 'Urgent Validation'),
                             ('I', 'In Progress'),
-                            ('P', 'Passed Confirmation'),
-                            ('F', 'Failed Confirmation'),
+                            ('P', 'Passed Validation'),
+                            ('F', 'Failed Validation'),
                             ('N', 'Not Required'),)
-    confirmation_status = models.CharField(choices=CONFIRMATION_CHOICES, max_length=4, default='U')
+    validation_status = models.CharField(choices=VALIDATION_CHOICES, max_length=4, default='U')
+    validation_datetime_set = models.DateTimeField(null=True, default=None)
+    validation_responsible_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        default=None
+    )
     max_tier = models.CharField(max_length=20, null=True)
     cnv_af = models.FloatField(null=True)
     cnv_auc = models.FloatField(null=True)
+
+    def create_rare_disease_report(self):
+        if not hasattr(self, 'rarediseasereport'):
+            report = RareDiseaseReport(proband_sv=self)
+            report.save()
+            return report
+        else:
+            return self.rarediseasereport
 
     class Meta:
         managed = True
