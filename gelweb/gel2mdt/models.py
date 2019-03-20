@@ -1062,3 +1062,79 @@ class ProbandSVGene(models.Model):
         unique_together = (('proband_sv', 'gene',),)
         db_table = 'ProbandSVGene'
         app_label = 'gel2mdt'
+
+class STRVariant(models.Model):
+    """
+    Short tandem repeat variants
+    """
+    chromosome = models.CharField(max_length=5)
+    str_start = models.IntegerField()
+    str_end = models.IntegerField()
+    genome_assembly = models.ForeignKey(ToolOrAssemblyVersion, on_delete=models.PROTECT)
+    repeated_sequence = models.CharField(max_length=32)
+    normal_threshold = models.IntegerField()
+    pathogenic_threshold = models.IntegerField()
+
+    class Meta:
+        managed = True
+        unique_together = (('chromosome', 'str_start', 'str_end', 'genome_assembly', 
+            'repeated_sequence', 'normal_threshold', 'pathogenic_threshold'),)
+        db_table = 'STRVariant'
+        app_label = 'gel2mdt'
+
+class ProbandSTR(models.Model):
+    """
+    Proband short tandem repeat variants
+    """
+    interpretation_report = models.ForeignKey('GELInterpretationReport', on_delete=models.CASCADE)
+    str_variant = models.ForeignKey(STRVariant, on_delete=models.CASCADE)
+    max_tier = models.CharField(max_length=20, null=True)
+    proband_copies_a = models.IntegerField(null=True)
+    proband_copies_b = models.IntegerField(null=True)
+    maternal_copies_a = models.IntegerField(null=True)
+    maternal_copies_b = models.IntegerField(null=True)
+    paternal_copies_a = models.IntegerField(null=True)
+    paternal_copies_b = models.IntegerField(null=True)
+    inheritance = models.CharField(
+        max_length=20,
+        choices=Inheritance.choices(),
+        default=Inheritance.unknown)
+    mode_of_inheritance = models.CharField(max_length=128, null=True)
+    segregation_pattern = models.CharField(max_length=128, null=True)
+    requires_validation = models.BooleanField(db_column='Requires_Validation', default=False)
+    validation_status = models.CharField(max_length=50, choices=(
+        ('U', 'Unknown'),
+        ('A', 'Awaiting Validation'),
+        ('K', 'Urgent Validation'),
+        ('I', 'In Progress'),
+        ('P', 'Passed Validation'),
+        ('F', 'Failed Validation'),
+        ('N', 'Not Required'),), default='U')
+    validation_responsible_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        default=None
+    )
+    validation_datetime_set = models.DateTimeField(null=True, default=None)
+
+    class Meta:
+        managed = True
+        unique_together = (('str_variant', 'interpretation_report',),)
+        db_table = 'ProbandSTR'
+        app_label = 'gel2mdt'
+
+class ProbandSTRGene(models.Model):
+    """
+    Selected gene for a Proband
+    """
+    proband_str = models.ForeignKey('ProbandSTR', on_delete=models.CASCADE)
+    gene = models.ForeignKey('Gene', on_delete=models.CASCADE)
+    selected = models.BooleanField(default=False)
+
+    class Meta:
+        managed = True
+        unique_together = (('proband_str', 'gene',),)
+        db_table = 'ProbandSTRGene'
+        app_label = 'gel2mdt'

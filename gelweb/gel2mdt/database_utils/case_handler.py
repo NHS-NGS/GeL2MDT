@@ -28,7 +28,7 @@ from django.utils.dateparse import parse_date
 import time
 from ..models import *
 from ..api_utils.poll_api import PollAPI
-from ..vep_utils.run_vep_batch import CaseVariant, CaseCNV
+from ..vep_utils.run_vep_batch import CaseVariant, CaseCNV, CaseSTR
 from ..config import load_config
 import re
 import copy
@@ -150,7 +150,7 @@ class Case(object):
 
         self.ig_objs = []  # List of interpreteted genome objects
         self.clinical_report_objs = []  # ClinicalReport objects
-        self.variants, self.svs = self.get_case_variants()
+        self.variants, self.svs, self.strs = self.get_case_variants()
         self.transcripts = []  # set by MCM with a call to vep_utils
         self.demographics = None
         self.clinicians = None
@@ -313,6 +313,30 @@ class Case(object):
                 variant.case_variant = False
         return ig_obj, case_sv_list
 
+    def parse_ig_strs(self, ig_obj, genome_build, case_str_list):
+        for variant in ig_obj.shortTandemRepeats:
+            interesting_variant = False
+            for report_event in variant.reportEvents:
+                if report_event.tier:
+                    variant.max_tier = report_event.tier
+                    interesting_variant = True
+            if interesting_variant:
+                case_variant = CaseSTR(
+                    chromosome=variant.coordinates.chromosome,
+                    str_start=variant.coordinates.start,
+                    str_end=variant.coordinates.end,
+                    repeated_sequence=variant.shortTandemRepeatReferenceData.repeatedSequence,
+                    normal_threshold=variant.shortTandemRepeatReferenceData.normal_number_of_repeats_threshold,
+                    pathogenic_threshold=variant.shortTandemRepeatReferenceData.pathogenic_number_of_repeats_threshold,
+                    case_id=self.request_id,
+                    genome_build=genome_build
+                )
+                case_str_list.append(case_variant)
+                variant.case_variant = case_variant
+            else:
+                variant.case_variant = False
+        return ig_obj, case_str_list
+
     def get_case_variants(self):
         """
         Create CaseVariant objects for each variant listed in the json,
@@ -321,6 +345,7 @@ class Case(object):
         """
         case_variant_list = []
         case_sv_list = []
+        case_str_list = []
         # go through each variant in the json
         variant_object_count = 0
         genome_build = self.json['assembly']
@@ -336,7 +361,9 @@ class Case(object):
                                                          genome_build,
                                                          case_sv_list)
             if ig_obj.shortTandemRepeats:
-                pass
+                ig_obj, case_str_list = self.parse_ig_strs(ig_obj,
+                                                           genome_build,
+                                                           case_str_list)
             self.ig_objs.append(ig_obj)
         for clinical_report in self.json['clinical_report']:
             cr_obj = ClinicalReport.fromJsonDict(clinical_report['clinical_report_data'])
@@ -370,7 +397,7 @@ class Case(object):
                     variant.case_variant = case_variant
             self.clinical_report_objs.append(cr_obj)
 
-        return case_variant_list, case_sv_list
+        return case_variant_list, case_sv_list, case_str_list
 
 
 class CaseAttributeManager(object):
@@ -445,6 +472,12 @@ class CaseAttributeManager(object):
             case_model = self.get_proband_svs()
         elif self.model_type == ProbandSVGene:
             case_model = self.get_proband_sv_genes()
+        elif self.model_type == STRVariant:
+            case_model = self.get_str_variants()
+        elif self.model_type == ProbandSTR:
+            case_model = self.get_proband_strs()
+        elif self.model_type == ProbandSTRGene:
+            case_model = self.get_proband_str_genes()
 
         return case_model
 
@@ -811,6 +844,14 @@ class CaseAttributeManager(object):
         for ig_obj in self.case.ig_objs:
             if ig_obj.structuralVariants:
                 for variant in ig_obj.structuralVariants:
+                    for report_event in variant.reportEvents:
+                        for gene in report_event.genomicEntities:
+                            if gene.type == 'gene':
+                                if gene.ensemblId != "NO_GENE_ASSOCIATED":
+                                    gene_list.append({'EnsembleGeneIds': gene.ensemblId,
+                                                      'GeneSymbol': gene.geneSymbol})
+            if ig_obj.shortTandemRepeats:
+                for variant in ig_obj.shortTandemRepeats:
                     for report_event in variant.reportEvents:
                         for gene in report_event.genomicEntities:
                             if gene.type == 'gene':
@@ -1560,6 +1601,120 @@ class CaseAttributeManager(object):
         proband_sv_genes = ManyCaseModel(ProbandSVGene, proband_sv_gene_list, self.model_objects)
         return proband_sv_genes
 
+    def get_str_variants(self):
+        '''
+        Loop over all STRs and lump in all the STR Variants
+        :return:
+        '''
+        genome_assembly = None
+        str_variant_list = []
+        tool_models = [
+            case_model.entry
+            for case_model in self.case.attribute_managers[ToolOrAssemblyVersion].case_model.case_models]
+        for tool in tool_models:
+            if tool.tool_name == 'genome_build':
+                genome_assembly = tool
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.shortTandemRepeats:
+                for variant in ig_obj.shortTandemRepeats:
+                    if variant.case_variant:
+                        tiered_variant = {
+                            "genome_assembly": genome_assembly,
+                            "chromosome": variant.case_variant.chromosome,
+                            "str_start": variant.case_variant.str_start,
+                            "str_end": variant.case_variant.str_end,
+                            "repeated_sequence" : variant.case_variant.repeated_sequence,
+                            "normal_threshold": variant.case_variant.normal_threshold,
+                            "pathogenic_threshold": variant.case_variant.pathogenic_threshold,
+                        }
+                        str_variant_list.append(tiered_variant)
+
+        str_variants = ManyCaseModel(STRVariant, str_variant_list, self.model_objects)
+        return str_variants
+
+    def get_proband_strs(self):
+        '''
+        Loop over STRs to get ProbandSTRs
+        :return:
+        '''
+        str_variant_entries = [str_variant.entry for str_variant in
+                      self.case.attribute_managers[STRVariant].case_model.case_models]
+
+        ir_manager = self.case.attribute_managers[GELInterpretationReport]
+
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.shortTandemRepeats:
+                for variant in ig_obj.shortTandemRepeats:
+                    if variant.case_variant:
+                        for str_variant_entry in str_variant_entries:
+                            if (variant.case_variant.chromosome == str_variant_entry.chromosome and
+                                    int(variant.case_variant.str_start) == str_variant_entry.str_start and
+                                    int(variant.case_variant.str_end) == str_variant_entry.str_end and
+                                    variant.case_variant.repeated_sequence == str_variant_entry.repeated_sequence and
+                                    int(variant.case_variant.normal_threshold) == str_variant_entry.normal_threshold and
+                                    int(variant.case_variant.pathogenic_threshold ) == str_variant_entry.pathogenic_threshold):
+                                variant.str_variant_entry = str_variant_entry
+                                break
+
+        proband_str_list = []
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.shortTandemRepeats:
+                for variant in ig_obj.shortTandemRepeats:
+                    if variant.case_variant:
+                        if variant.str_variant_entry:
+                            proband_str_list.append({
+                                'interpretation_report': ir_manager.case_model.entry,
+                                'str_variant': variant.str_variant_entry,
+                                'max_tier': variant.max_tier,
+                            })
+        proband_strs = ManyCaseModel(ProbandSTR, proband_str_list, self.model_objects)
+        return proband_strs
+
+    def get_proband_str_genes(self):
+        gene_entries = [gene.entry for gene in
+                        self.case.attribute_managers[Gene].case_model.case_models]
+        proband_str_entries = [proband_str.entry for proband_str in
+                              self.case.attribute_managers[ProbandSTR].case_model.case_models]
+        ir_manager = self.case.attribute_managers[GELInterpretationReport]
+
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.shortTandemRepeats:
+                for variant in ig_obj.shortTandemRepeats:
+                    if variant.case_variant:
+                        for proband_str_entry in proband_str_entries:
+                            if (variant.str_variant_entry == proband_str_entry.str_variant and
+                                    ir_manager.case_model.entry == proband_str_entry.interpretation_report):
+                                variant.proband_str_entry = proband_str_entry
+                                break
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.shortTandemRepeats:
+                for variant in ig_obj.shortTandemRepeats:
+                    if variant.case_variant:
+                        variant.genes = {}
+                        for report_event in variant.reportEvents:
+                            for gene in report_event.genomicEntities:
+                                if gene.type == 'gene':
+                                    gene.gene_entry = None
+                                    for gene_entry in gene_entries:
+                                        if gene_entry.ensembl_id == gene.ensemblId:
+                                            if gene_entry not in variant.genes:
+                                                variant.genes[gene_entry] = True
+                                            break
+
+        proband_str_gene_list = []
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.shortTandemRepeats:
+                for variant in ig_obj.shortTandemRepeats:
+                    if variant.case_variant:
+                        for gene_key in variant.genes:
+                            proband_str_gene_list.append({
+                                'gene': gene_key,
+                                'proband_str': variant.proband_str_entry,
+                                'selected': variant.genes[gene_key]
+                            })
+        proband_str_genes = ManyCaseModel(ProbandSTRGene, proband_str_gene_list, self.model_objects)
+        return proband_str_genes
+
 class CaseModel(object):
     """
     A handler for an instance of a model that belongs to a case. Holds an
@@ -1859,6 +2014,37 @@ class CaseModel(object):
                 table = 'SELECT * FROM "ProbandSVGene"'
             cmd = ''.join([
                 f" WHERE proband_sv_id = {self.escaped_model_attributes['proband_sv'].id}",
+                f" AND gene_id = '{self.escaped_model_attributes['gene'].id}'"
+            ])
+        elif self.model_type == STRVariant:
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM STRVariant'
+            else:
+                table = 'SELECT * FROM "STRVariant"'
+            cmd = ''.join([
+                f" WHERE chromosome = '{self.escaped_model_attributes['chromosome']}'",
+                f" AND str_start = '{self.escaped_model_attributes['str_start']}'"
+                f" AND str_end = '{self.escaped_model_attributes['str_end']}'"
+                f" AND repeated_sequence = '{self.escaped_model_attributes['repeated_sequence']}'"
+                f" AND normal_threshold = '{self.escaped_model_attributes['normal_threshold']}'"
+                f" AND pathogenic_threshold = '{self.escaped_model_attributes['pathogenic_threshold']}'"
+                f" AND genome_assembly_id = {self.escaped_model_attributes['genome_assembly'].id}"])
+        elif self.model_type == ProbandSTR:
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM ProbandSTR'
+            else:
+                table = 'SELECT * FROM "ProbandSTR"'
+            cmd = ''.join([
+                f" WHERE interpretation_report_id = {self.escaped_model_attributes['interpretation_report'].id}",
+                f" AND str_variant_id = {self.escaped_model_attributes['str_variant'].id}",
+            ])
+        elif self.model_type == ProbandSTRGene:
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM ProbandSTRGene'
+            else:
+                table = 'SELECT * FROM "ProbandSTRGene"'
+            cmd = ''.join([
+                f" WHERE proband_str_id = {self.escaped_model_attributes['proband_str'].id}",
                 f" AND gene_id = '{self.escaped_model_attributes['gene'].id}'"
             ])
 
