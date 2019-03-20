@@ -36,23 +36,87 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.forms import modelformset_factory
 
 from easy_pdf.rendering import render_to_pdf_response
-
 from .config import load_config
 from .forms import *
-from .models import *
 from .filters import *
 from .tasks import *
 from .exports import write_mdt_outcome_template, write_mdt_export, write_gtab_template
-from .decorators import user_is_clinician
-
 from .api.api_views import *
-
 from .database_utils.multiple_case_adder import MultipleCaseAdder
 from .vep_utils.run_vep_batch import CaseVariant
 import datetime
 from bokeh.resources import CDN
 from bokeh.embed import components
 from bokeh.layouts import gridplot, row
+
+
+@login_required
+def user_admin(request):
+    '''
+    Gives a superuser the ability to change other users permissions levels
+    :param request:
+    :return:
+    '''
+    groups = Group.objects.all()
+    for group in groups:
+        if not hasattr(group, 'grouppermissions'):
+            group_permissions = GroupPermissions(group=group)
+            group_permissions.save()
+    users = User.objects.all()
+    return render(request, 'gel2mdt/user_admin.html',
+                  {'users': users, 'groups': groups})
+
+
+@login_required
+def add_group(request):
+    if request.method == 'POST':
+        add_group_form = AddNewGroupForm(request.POST)
+        if add_group_form.is_valid():
+            add_group_form.save()
+            messages.add_message(request, 25, 'Group Added!')
+        return redirect('user_admin')
+
+
+@login_required
+def delete_group(request, id):
+    group = Group.objects.get(id=id)
+    group.delete()
+    messages.add_message(request, 25, 'Group Deleted')
+    return redirect('user_admin')
+
+
+@login_required
+def edit_group(request, id):
+    data = {}
+    group = Group.objects.get(id=id)
+    group_form = GroupPermissionsForm(instance=group.grouppermissions)
+    if request.method == 'POST':
+        group_form = GroupPermissionsForm(request.POST, instance=group.grouppermissions)
+        if group_form.is_valid():
+            group_form.save()
+            data['form_is_valid'] = True
+        return redirect('user_admin')
+    context = {'group_form': group_form, 'group': group}
+    html_form = render_to_string('gel2mdt/modals/group_permissions_modal.html', context, request=request)
+    data['html_form'] = html_form
+    return JsonResponse(data)
+
+
+@login_required
+def edit_user(request, id):
+    data = {}
+    user = User.objects.get(id=id)
+    user_form = EditUserForm(instance=user)
+    if request.method == 'POST':
+        user_form = EditUserForm(request.POST, instance=user)
+        if user_form.is_valid():
+            user_form.save()
+            data['form_is_valid'] = True
+        return redirect('user_admin')
+    context = {'user_form': user_form, 'user': user}
+    html_form = render_to_string('gel2mdt/modals/user_permissions_modal.html', context, request=request)
+    data['html_form'] = html_form
+    return JsonResponse(data)
 
 
 def register(request):
@@ -193,13 +257,7 @@ def index(request):
     :param request:
     :return:
     '''
-    clinicians_emails = Clinician.objects.all().values_list('email', flat=True)
-    if request.user.is_staff:
-        return render(request, 'gel2mdt/index.html', {'sample_type': None})
-    elif request.user.email not in clinicians_emails:
-        return render(request, 'gel2mdt/index.html', {'sample_type': None})
-    else:
-        return redirect('gel2clin:index')
+    return render(request, 'gel2mdt/index.html', {'sample_type': None})
 
 
 @login_required
@@ -218,7 +276,6 @@ def remove_case(request, case_id):
 
 
 @login_required
-@user_is_clinician(url='cancer-main')
 def cancer_main(request):
     '''
     Shows all the Cancer cases the user has access to and allows easy searching of cases
@@ -232,7 +289,6 @@ def cancer_main(request):
 
 
 @login_required
-@user_is_clinician(url='rare-disease-main')
 def rare_disease_main(request):
     '''
     Shows all the RD cases the user has access to and allows easy searching of cases
@@ -268,7 +324,6 @@ def search_by_gene(request, sample_type):
 
 
 @login_required
-@user_is_clinician(url='proband-view')
 def proband_view(request, report_id):
     '''
     Shows details about a particular proband, some fields are editable by clinical scientists
@@ -425,7 +480,6 @@ def proband_view(request, report_id):
 
 
 @login_required
-@user_is_clinician(url='index')
 def edit_relatives(request, relative_id):
     """
     Allows users to edit relative demographic information
@@ -449,7 +503,6 @@ def edit_relatives(request, relative_id):
 
 
 @login_required
-@user_is_clinician(url='proband-view')
 def update_demographics(request, report_id):
     '''
     Allows staff users to redo labkey lookup
@@ -534,7 +587,6 @@ def validation_list(request, sample_type):
 
 
 @login_required
-@user_is_clinician(url='proband-view')
 def pull_t3_variants(request, report_id):
     '''
     Allows users to download T3 variants for a case
@@ -584,7 +636,6 @@ def variant_view(request, variant_id):
 
 
 @login_required
-@user_is_clinician(url='proband-view')
 def update_proband(request, report_id):
     '''
     Updates the Proband page for fields used by clinical scientists such as status and outcomes
@@ -606,7 +657,6 @@ def update_proband(request, report_id):
 
 
 @login_required
-@user_is_clinician(url='proband-view')
 def select_transcript(request, report_id, pv_id):
     '''
     Shows the transcript table and allows a user to select preferred transcript
@@ -636,7 +686,6 @@ def select_transcript(request, report_id, pv_id):
 
 
 @login_required
-@user_is_clinician(url='proband-view')
 def update_transcript(request, report_id, pv_id, transcript_id):
     '''
     Updates the selected transcript
@@ -1467,17 +1516,6 @@ def delete_comment(request, comment_id):
     comment = CaseComment.objects.get(id=comment_id)
     report = comment.interpretation_report
     comment.delete()
-    return HttpResponseRedirect(f'/proband/{report.id}')
-
-
-
-@login_required
-def edit_comment(request):
-    if request.method == 'POST':
-        case_alert_form = AddCaseAlert(request.POST, instance=case_alert_instance)
-        if case_alert_form.is_valid():
-            case_alert_form.save()
-            data['form_is_valid'] = True
     return HttpResponseRedirect(f'/proband/{report.id}')
 
 

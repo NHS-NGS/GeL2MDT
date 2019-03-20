@@ -566,7 +566,7 @@ class PreferredTranscript(models.Model):
         managed = True
         db_table = 'PreferredTranscript'
         unique_together = (('gene', 'genome_assembly'),)
-        app_label= 'gel2mdt'
+        app_label = 'gel2mdt'
 
         
 class TranscriptVariant(models.Model):
@@ -981,3 +981,58 @@ class CaseComment(models.Model):
         ordering = ['-time']
         db_table = 'CaseComment'
         app_label = 'gel2mdt'
+
+
+class GMC(models.Model):
+    name = models.CharField(max_length=255)
+
+    class Meta:
+        managed = True
+        db_table = 'GMC'
+        app_label = 'gel2mdt'
+
+    def __str__(self):
+        return str(self.name)
+
+
+class GroupPermissions(models.Model):
+    gmc = models.ManyToManyField(GMC)
+    group = models.OneToOneField(Group, on_delete=models.CASCADE)
+    cancer = models.BooleanField(default=False, help_text="Indicates whether the group can see RareDisease Cases")
+    raredisease = models.BooleanField(default=False, help_text="Indicates whether the group can see Cancer Cases")
+
+    view_pv = models.BooleanField(default=False)
+    can_select_transcript = models.BooleanField(default=False)
+    update_preferred_transcript = models.BooleanField(default=False)
+    pull_t3_variants = models.BooleanField(default=False)
+    can_edit_proband = models.BooleanField(default=False)
+    can_edit_gelir = models.BooleanField(default=False)
+    can_get_gel_report = models.BooleanField(default=False)
+    edit_relative = models.BooleanField(default=False)
+    can_see_clinical_questions = models.BooleanField(default=False)
+    start_mdt = models.BooleanField(default=False)
+    view_case_alert = models.BooleanField(default=False)
+    view_validation_list = models.BooleanField(default=False)
+
+    def __str__(self):
+        return str(self.group.name)
+
+    class Meta:
+        managed = True
+        db_table = 'GroupPermissions'
+        app_label = 'gel2mdt'
+        # permissions = (
+        #     ('view_pv', 'Can view PVs'),
+        #     ('view_validation_list', 'Can view validation list'),
+        #     ('pull_t3_variants', 'Can pull T3 variants'),
+        #     ('can_edit_proband', 'Can edit Proband information'),
+        #     ('can_see_clinical_questions', 'Can view and edit Clinical Questionaire'),
+        #     ('can_get_gel_report', 'Can pull GEL report'),
+        #     ('edit_relative', 'Can edit relatives'),
+        #     ('can_select_transcript', 'Can select transcripts'),
+        #     ('update_preferred_transcript', 'Can update a Preferred Transcript'),
+        #     ('can_edit_gelir', 'Can edit GELInterpretation'),
+        #     ('can_add_comment', 'Can add CaseComments'),
+        #     ('start_mdt', 'Can start an MDT'),
+        #     ('view_case_alert', 'Can view CaseAlerts'),
+        # )

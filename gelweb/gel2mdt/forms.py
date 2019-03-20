@@ -460,3 +460,32 @@ class AddCaseAlert(forms.ModelForm):
     class Meta:
         model = CaseAlert
         fields = ['gel_id', 'comment', 'sample_type']
+
+
+class EditUserForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(EditUserForm, self).__init__(*args, **kwargs)
+        self.fields['is_active'].required = False
+
+    class Meta:
+        model = User
+        fields = ['is_active', 'groups']
+
+
+class GroupPermissionsForm(forms.ModelForm):
+    class Meta:
+        model = GroupPermissions
+        exclude = ['group']
+
+
+class AddNewGroupForm(forms.ModelForm):
+    def save(self):
+        group = self.instance
+        group.save()
+        if not hasattr(group, 'grouppermissions'):
+            group_permissions = GroupPermissions(group=group)
+            group_permissions.save()
+
+    class Meta:
+        model = Group
+        fields = ['name']

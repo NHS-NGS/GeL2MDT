@@ -29,7 +29,11 @@ from .api.api_urls import *
 
 urlpatterns = [
     path('', views.index, name='index'),
-
+    path('user_admin/', views.user_admin, name='user_admin'),
+    path('add_group/', views.add_group, name='add_group'),
+    path('delete_group/<int:id>', views.delete_group, name='delete_group'),
+    path('edit_group/<int:id>', views.edit_group, name='edit_group'),
+    path('edit_user/<int:id>', views.edit_user, name='edit_user'),
     path('register/', views.register, name='register'),
     path('profile/', views.profile, name='profile'),
     path('profile/remove_case/<int:case_id>', views.remove_case, name='remove-case'),
