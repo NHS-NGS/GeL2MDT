@@ -59,9 +59,6 @@
                             <div class="panel panel-default">
                                 {% if gelir_form.case_status.value != "C" %}
                                     <div class="panel-heading">Participant Information <span style="float:right">
-                                            {% if request.user.is_staff %}
-                                                <a href="/update_demographics/{{report.id}}" class="btn btn-xs btn-info"> Update Demographics   </a>
-                                            {% endif %}
                                             <a href=# data-toggle="modal" data-target="#demogModal"><i class="fas fa-pencil-alt"></i></a></span></div>
                                 {% else %}
                                     <div class="panel-heading">Participant Information</div>
@@ -391,7 +388,7 @@
                                         {% if gelir_form.case_status.value != "C" %}
                                             </br>
                                             <button type="submit" name="variant_update" class="btn btn-primary btn">Save</button>
-                                        {% elif request.user.is_staff %}
+                                        {% elif user|has_group_permission:'can_edit_completed_proband' %}
                                             </br>
                                             <button type="submit" name="variant_update" class="btn btn-primary btn">Save</button>
                                         {% endif %}
@@ -626,12 +623,14 @@
                                             </div>
                                         {% endif %}
                                          {% endif %}
+                                        {% if user|has_group_permission:'can_edit_gelir' %}
                                         <div class="col-md-2">
                                             {% bootstrap_label "Add a new variant" %}
                                             <div class="block">
                                                 <a href=# data-toggle="modal" data-target="#addvariantModal"><i class="fas fa-plus"></i></a>
                                             </div>
                                         </div>
+                                        {% endif %}
                                     </div>
                                     <div class="row">
 
@@ -863,7 +862,11 @@
                                             </div>
                                         </div>
                                         {% endif %}
-                                        <td><a onclick="$('#validationModal{{forloop.counter}}').modal('show')"><i class="fas fa-pencil-alt"></i></a></span> {{pv.get_validation_status_display}}</td>
+                                        {% if user|has_group_permission:'can_edit_validation_list' %}
+                                            <td><a onclick="$('#validationModal{{forloop.counter}}').modal('show')"><i class="fas fa-pencil-alt"></i></a></span> {{pv.get_validation_status_display}}</td>
+                                        {% else %}
+                                        <td>{{pv.get_validation_status_display}}</td>
+                                        {% endif %}
                                     </tr>
 
                                     <div id="validationModal{{forloop.counter}}" class="modal fade validationModal" role="dialog">

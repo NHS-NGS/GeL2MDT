@@ -123,10 +123,13 @@ SOFTWARE.
 
 
                 {% endblock %}
+
                 <ul class="nav navbar-nav navbar-right">
+                    {% if user.is_staff %}
                     <ul class="nav navbar-nav">
                         <li><a href="{% url 'user_admin' %}" ><i class="fas fa-wrench"></i> User Admin</a></li>
                         </ul>
+                    {% endif %}
                     <li class="dropdown">
                         <a class="dropdown-toggle" 
                            data-toggle="dropdown"

@@ -87,8 +87,13 @@ class ProbandForm(forms.ModelForm):
         enable_form = False
         for group in self.user.groups.all():
             if hasattr(group, 'grouppermissions'):
-                if group.grouppermissions.can_edit_proband:
+                if group.grouppermissions.can_edit_completed_proband:
                     enable_form = True
+                else:
+                    if self.instance.case_status != 'C':
+                        if group.grouppermissions.can_edit_proband:
+                            enable_form = True
+
         if not enable_form:
             for field in self.fields:
                 self.fields[field].disabled = True
@@ -413,7 +418,6 @@ class ProbandMDTForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super(ProbandMDTForm, self).__init__(*args, **kwargs)
-        self.fields['sent_to_clinician'].required = False
         enable_form = False
         for group in self.user.groups.all():
             if hasattr(group, 'grouppermissions'):
@@ -643,8 +647,12 @@ class AddCaseAlert(forms.ModelForm):
 
 class EditUserForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
         super(EditUserForm, self).__init__(*args, **kwargs)
         self.fields['is_active'].required = False
+        if not self.user.is_staff:
+            for field in self.fields:
+                self.fields[field].disabled = True
 
     class Meta:
         model = User
@@ -652,12 +660,27 @@ class EditUserForm(forms.ModelForm):
 
 
 class GroupPermissionsForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(GroupPermissionsForm, self).__init__(*args, **kwargs)
+        if not self.user.is_staff:
+            for field in self.fields:
+                self.fields[field].disabled = True
+
     class Meta:
         model = GroupPermissions
         exclude = ['group']
 
 
 class AddNewGroupForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(AddNewGroupForm, self).__init__(*args, **kwargs)
+        if not self.user.is_staff:
+            for field in self.fields:
+                self.fields[field].disabled = True
+
     def save(self):
         group = self.instance
         group.save()

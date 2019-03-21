@@ -21,10 +21,6 @@ from django.conf import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('gel2mdt.urls')),
-    path('clinician/', include(('gel2clin.urls', 'gel2clin'), namespace='gel2clin')),
     path('login/', views.login, name='login'),
     path('logout/', views.logout, name='logout', kwargs={'next_page': '/'}),
-
-
-
 ]

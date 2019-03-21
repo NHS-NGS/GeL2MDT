@@ -37,6 +37,9 @@ SOFTWARE.
         <div class="panel panel-default">
             <div class="panel-heading">
                 Group Management
+               <a class="btn btn-primary" href="#" data-toggle="modal" data-target="#addGroupModal"><i></i>Create Group</a>
+
+
             </div>
             <!-- /.panel-heading -->
             <div class="panel-body">
@@ -52,6 +55,7 @@ SOFTWARE.
                             <th>Can Edit Preferred Transcripts</th>
                             <th>Can Pull T3 Variants</th>
                             <th>Can Edit Proband</th>
+                            <th>Can Edit Completed Proband</th>
                             <th>Can Edit Case Info</th>
                             <th>Can Pull GEL Report</th>
                             <th>Can Edit Relative Info</th>
@@ -106,6 +110,11 @@ SOFTWARE.
                                         {% else %}
                                             <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>
                                         {% endif %}
+                                    {% if group.grouppermissions.can_edit_completed_proband %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;" ><i class="fas fa-check"></i></td>
+                                        {% else %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>
+                                        {% endif %}
                                     {% if group.grouppermissions.can_edit_gelir %}
                                             <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;" ><i class="fas fa-check"></i></td>
                                         {% else %}
@@ -146,10 +155,14 @@ SOFTWARE.
                                         {% else %}
                                             <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>
                                         {% endif %}
-                                    <td><button type="button" class="btn btn-xs btn-danger js-edit-group"
+                                    <td><button type="button" class="btn btn-xs btn-primary js-edit-group"
                                                                               data-url="/edit_group/{{ group.grouppermissions.id }}">
                                                             Edit
-                                        </button></td>
+                                        </button>
+
+                                      <a  class="btn btn-xs btn-danger" href="/delete_group/{{ group.id }}"><i></i>Delete</a>
+
+                                    </td>
                                 </tr>
                     {% endfor %}
                     </tbody>
@@ -304,5 +317,25 @@ SOFTWARE.
         </div>
     </div>
 
-
+<div id="addGroupModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
+                    <h4 class="modal-title">Create a new Group</h4>
+                </div>
+                <div class="modal-body">
+                    <form action="/user_admin/" method="POST">
+                        {% csrf_token %}
+                        {% bootstrap_form add_group_form %}
+                        {% buttons %}
+                        <button type="submit" class="btn btn-primary">
+                            Add New Group
+                        </button>
+                        {% endbuttons %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

@@ -1005,6 +1005,8 @@ class GroupPermissions(models.Model):
     can_select_update_transcript = models.BooleanField(default=False, help_text="Indicates whether the group can update transcripts and select preferred Transcripts")
     pull_t3_variants = models.BooleanField(default=False, help_text="Indicates whether the group can Pull T3 Variants")
     can_edit_proband = models.BooleanField(default=False, help_text="Indicates whether the group can edit proband Information")
+    can_edit_completed_proband = models.BooleanField(default=False,
+                                                     help_text="Indicates whether the group can view & edit a Completed Proband")
     can_edit_gelir = models.BooleanField(default=False, help_text="Indicates whether the group can edit Case information")
     can_edit_mdt = models.BooleanField(default=False, help_text="Indicates whether the group can edit MDT questions")
     can_get_gel_report = models.BooleanField(default=False, help_text="Indicates whether the group can pull the GEL report")
