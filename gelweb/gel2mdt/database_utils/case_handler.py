@@ -314,12 +314,39 @@ class Case(object):
         return ig_obj, case_sv_list
 
     def parse_ig_strs(self, ig_obj, genome_build, case_str_list):
+        participant_id = self.json["proband"]
+        mother_id = None
+        father_id = None
+        family_members = self.family_members
+        for family_member in family_members:
+            if family_member["relation_to_proband"] == "Father":
+                father_id = family_member["gel_id"]
+            elif family_member["relation_to_proband"] == "Mother":
+                mother_id = family_member["gel_id"]
         for variant in ig_obj.shortTandemRepeats:
+            variant.proband_copies_a = None
+            variant.proband_copies_b = None
+            variant.maternal_copies_a = None
+            variant.maternal_copies_b = None
+            variant.paternal_copies_a = None
+            variant.paternal_copies_b = None
             interesting_variant = False
             for report_event in variant.reportEvents:
                 if report_event.tier:
                     variant.max_tier = report_event.tier
                     interesting_variant = True
+                    variant.mode_of_inheritance = report_event.modeOfInheritance
+                    variant.segregation_pattern = report_event.segregationPattern
+            for variant_call in variant.variantCalls:
+                if variant_call.participantId == participant_id:
+                    variant.proband_copies_a = variant_call.numberOfCopies[0].numberOfCopies
+                    variant.proband_copies_b = variant_call.numberOfCopies[1].numberOfCopies
+                if variant_call.participantId == mother_id:
+                    variant.maternal_copies_a = variant_call.numberOfCopies[0].numberOfCopies
+                    variant.maternal_copies_b = variant_call.numberOfCopies[1].numberOfCopies
+                if variant_call.participantId == father_id:
+                    variant.paternal_copies_a = variant_call.numberOfCopies[0].numberOfCopies
+                    variant.paternal_copies_b = variant_call.numberOfCopies[1].numberOfCopies
             if interesting_variant:
                 case_variant = CaseSTR(
                     chromosome=variant.coordinates.chromosome,
@@ -1666,6 +1693,14 @@ class CaseAttributeManager(object):
                                 'interpretation_report': ir_manager.case_model.entry,
                                 'str_variant': variant.str_variant_entry,
                                 'max_tier': variant.max_tier,
+                                'proband_copies_a': variant.proband_copies_a,
+                                'proband_copies_b': variant.proband_copies_b,
+                                'maternal_copies_a': variant.maternal_copies_a,
+                                'maternal_copies_b': variant.maternal_copies_b,
+                                'paternal_copies_a': variant.paternal_copies_a,
+                                'paternal_copies_b': variant.paternal_copies_b,
+                                'mode_of_inheritance': variant.mode_of_inheritance,
+                                'segregation_pattern': variant.segregation_pattern
                             })
         proband_strs = ManyCaseModel(ProbandSTR, proband_str_list, self.model_objects)
         return proband_strs
