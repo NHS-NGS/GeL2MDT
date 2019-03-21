@@ -39,30 +39,34 @@ from bokeh.plotting import figure
 from django.core.mail import EmailMessage
 from reversion.models import Version, Revision
 from protocols.reports_6_0_0 import InterpretedGenome, InterpretationRequestRD, CancerInterpretationRequest, ClinicalReport
+from django.db.utils import ProgrammingError
 
 
 def create_admin_group():
-    group, created = Group.objects.get_or_create(name='ADMIN GROUP')
-    if not hasattr(group, 'grouppermissions'):
-        group_permissions = GroupPermissions(group=group)
-        group_permissions.save()
-    permissions = group.grouppermissions
-    permissions.cancer = True
-    permissions.raredisease = True
-    permissions.view_pv = True
-    permissions.can_select_update_transcript = True
-    permissions.pull_t3_variants = True
-    permissions.can_edit_proband = True
-    permissions.can_edit_completed_proband = True
-    permissions.can_edit_gelir = True
-    permissions.can_edit_mdt = True
-    permissions.can_get_gel_report = True
-    permissions.can_edit_relative = True
-    permissions.can_edit_clinical_questions = True
-    permissions.start_mdt = True
-    permissions.can_edit_case_alert = True
-    permissions.can_edit_validation_list = True
-    permissions.save()
+    try:
+        group, created = Group.objects.get_or_create(name='ADMIN GROUP')
+        if not hasattr(group, 'grouppermissions'):
+            group_permissions = GroupPermissions(group=group)
+            group_permissions.save()
+        permissions = group.grouppermissions
+        permissions.cancer = True
+        permissions.raredisease = True
+        permissions.view_pv = True
+        permissions.can_select_update_transcript = True
+        permissions.pull_t3_variants = True
+        permissions.can_edit_proband = True
+        permissions.can_edit_completed_proband = True
+        permissions.can_edit_gelir = True
+        permissions.can_edit_mdt = True
+        permissions.can_get_gel_report = True
+        permissions.can_edit_relative = True
+        permissions.can_edit_clinical_questions = True
+        permissions.start_mdt = True
+        permissions.can_edit_case_alert = True
+        permissions.can_edit_validation_list = True
+        permissions.save()
+    except ProgrammingError:
+        pass # Models probably don't exist yet
 
 
 def get_gel_content(ir, ir_version):
