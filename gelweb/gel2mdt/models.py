@@ -279,12 +279,11 @@ class GELInterpretationReportQuerySet(models.QuerySet):
         allowed_gmcs = []
         user = User.objects.get(username=username)
         for group in user.groups.all():
-            if group.name == 'ADMIN_GROUP':
-                admin=True
-            for gmc in group.grouppermissions_set.all():
+            if group.name == 'ADMIN GROUP':
+                admin = True
+            for gmc in group.grouppermissions.gmc.all():
                 allowed_gmcs.append(gmc)
-
-        qs = self.filter(sample_type=sample_type)
+        qs = self.filter(sample_type=sample_type).prefetch_related('ir_family__participant_family__proband')
         if qs:
             # cases present
             qs_df = pd.DataFrame(list(qs.values())).sort_values(
@@ -298,7 +297,8 @@ class GELInterpretationReportQuerySet(models.QuerySet):
             if admin:
                 return self.filter(id__in=ids_of_latest_cases)
             else:
-                return self.filter(id__in=ids_of_latest_cases).filter(gmc__in=allowed_gmcs)
+                return self.filter(id__in=ids_of_latest_cases).filter(
+                    ir_family__participant_family__proband__gmc__in=allowed_gmcs)
         else:
             return qs
 
