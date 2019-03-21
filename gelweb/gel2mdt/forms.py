@@ -705,7 +705,7 @@ class ProbandCancerForm(forms.ModelForm):
         enable_form = False
         for group in self.user.groups.all():
             if hasattr(group, 'grouppermissions'):
-                if group.grouppermissions.can_edit_proband:
+                if group.grouppermissions.can_edit_clinical_questions:
                     enable_form = True
         if not enable_form:
             for field in self.fields:
