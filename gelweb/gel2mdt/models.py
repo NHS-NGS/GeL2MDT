@@ -274,6 +274,34 @@ class GELInterpretationReportQuerySet(models.QuerySet):
         else:
             return qs
 
+    def latest_cases_by_sample_type_and_user(self, sample_type, username):
+        admin = False
+        allowed_gmcs = []
+        user = User.objects.get(username=username)
+        for group in user.groups.all():
+            if group.name == 'ADMIN_GROUP':
+                admin=True
+            for gmc in group.grouppermissions_set.all():
+                allowed_gmcs.append(gmc)
+
+        qs = self.filter(sample_type=sample_type)
+        if qs:
+            # cases present
+            qs_df = pd.DataFrame(list(qs.values())).sort_values(
+                by=["ir_family_id", "archived_version"]
+            )
+            rm_dup_old = qs_df.drop_duplicates(
+                subset=["ir_family_id"],
+                keep="last"
+            )
+            ids_of_latest_cases = rm_dup_old["id"].tolist()
+            if admin:
+                return self.filter(id__in=ids_of_latest_cases)
+            else:
+                return self.filter(id__in=ids_of_latest_cases).filter(gmc__in=allowed_gmcs)
+        else:
+            return qs
+
     def latest_cases_by_user(self, username):
         qs = self.all()
         qs_df = pd.DataFrame(list(qs.values())).sort_values(

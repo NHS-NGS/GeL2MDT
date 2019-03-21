@@ -70,10 +70,17 @@ SOFTWARE.
                         {% for group in groups%}
                                 <tr>
                                     <td>{{ group.name }}</td>
-                                    <td> {% for gmc in group.grouppermissions.gmc.all %}
+
+                                    <td>
+                                        {% if group.name == 'ADMIN GROUP' %}
+                                        ALL
+                                        {% else %}
+                                        {% for gmc in group.grouppermissions.gmc.all %}
                                         {{gmc}}
                                     {% endfor %}
+                                        {% endif %}
                                     </td>
+
                                     {% if group.grouppermissions.raredisease %}
                                             <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;" ><i class="fas fa-check"></i></td>
                                         {% else %}

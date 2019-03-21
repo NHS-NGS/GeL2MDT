@@ -47,6 +47,8 @@ def create_admin_group():
         group_permissions = GroupPermissions(group=group)
         group_permissions.save()
     permissions = group.grouppermissions
+    permissions.cancer = True
+    permissions.raredisease = True
     permissions.view_pv = True
     permissions.can_select_update_transcript = True
     permissions.pull_t3_variants = True

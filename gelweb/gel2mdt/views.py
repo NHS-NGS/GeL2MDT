@@ -725,8 +725,8 @@ def edit_mdt(request, sample_type, mdt_id):
     :return: List of GELIR cases
     '''
 
-    gel_ir_list = GELInterpretationReport.objects.latest_cases_by_sample_type(
-        sample_type=sample_type
+    gel_ir_list = GELInterpretationReport.objects.latest_cases_by_sample_type_and_user(
+        sample_type=sample_type, username=request.user.username
     ).prefetch_related(*['ir_family', 'ir_family__participant_family__proband'])
     mdt_instance = MDT.objects.get(id=mdt_id)
     mdt_reports = MDTReport.objects.filter(MDT=mdt_instance)
