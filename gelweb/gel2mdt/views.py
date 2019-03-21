@@ -421,7 +421,7 @@ def proband_view(request, report_id):
 
     relatives = Relative.objects.filter(proband=report.ir_family.participant_family.proband)
     cancer_history_form = ProbandCancerForm(instance=report.ir_family.participant_family.proband, user=request.user)
-    proband_form = ProbandForm(instance=report.ir_family.participant_family.proband, user=request.user)
+    proband_form = ProbandForm(instance=report.ir_family.participant_family.proband, user=request.user, report=report)
     gelir_form = GELIRForm(instance=report, user=request.user)
     demogs_form = DemogsForm(instance=report.ir_family.participant_family.proband, user=request.user)
     proband_variants = ProbandVariant.objects.filter(interpretation_report=report)
@@ -644,7 +644,7 @@ def update_proband(request, report_id):
     '''
     report = GELInterpretationReport.objects.get(id=report_id)
     if request.method == "POST":
-        proband_form = ProbandForm(request.POST, user=request.user, instance=report.ir_family.participant_family.proband)
+        proband_form = ProbandForm(request.POST, user=request.user, report=report, instance=report.ir_family.participant_family.proband)
         gelir_form = GELIRForm(request.POST, user=request.user, instance=report)
         if proband_form.is_valid() and gelir_form.is_valid():
             proband_form.save()

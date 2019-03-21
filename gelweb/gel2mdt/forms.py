@@ -83,6 +83,7 @@ class ProbandForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
+        self.report = kwargs.pop('report', None)
         super(ProbandForm, self).__init__(*args, **kwargs)
         enable_form = False
         for group in self.user.groups.all():
@@ -90,7 +91,7 @@ class ProbandForm(forms.ModelForm):
                 if group.grouppermissions.can_edit_completed_proband:
                     enable_form = True
                 else:
-                    if self.instance.case_status != 'C':
+                    if self.report.case_status != 'C':
                         if group.grouppermissions.can_edit_proband:
                             enable_form = True
 
@@ -663,6 +664,7 @@ class GroupPermissionsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super(GroupPermissionsForm, self).__init__(*args, **kwargs)
+        self.fields['gmc'].required = False
         if not self.user.is_staff:
             for field in self.fields:
                 self.fields[field].disabled = True
