@@ -109,12 +109,12 @@ SOFTWARE.
                    <ul class="nav navbar-nav">
                         <li><a href="{% url 'audit' sample_type=sample_type %}" ><i class="fas fa-tachometer-alt"></i> Audit</a></li>
                         </ul>
-                    {% if user|has_group_permission:'view_validation_list' %}
+                    {% if user|has_group_permission:'can_edit_validation_list' %}
                     <ul class="nav navbar-nav">
                         <li><a href="{% url 'validation-list' sample_type=sample_type %}" ><i class="fas fa-check-circle"></i> Validation</a></li>
                         </ul>
                     {% endif %}
-                     {% if user|has_group_permission:'view_case_alert' %}
+                     {% if user|has_group_permission:'can_edit_case_alert' %}
                      <ul class="nav navbar-nav">
                         <li><a href="{% url 'case-alert' sample_type=sample_type %}" ><i class="fas fa-bell"></i> Case Alerts</a></li>
                         </ul>

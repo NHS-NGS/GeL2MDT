@@ -340,16 +340,17 @@ def proband_view(request, report_id):
         ir_family__participant_family=report.ir_family.participant_family).exclude(ir_family=report.ir_family)
 
     if request.method == "POST":
-        demogs_form = DemogsForm(request.POST, instance=report.ir_family.participant_family.proband)
-        case_assign_form = CaseAssignForm(request.POST, instance=report)
-        first_check_form = FirstCheckAssignForm(request.POST, instance=report)
-        second_check_form = SecondCheckAssignForm(request.POST, instance=report)
-        panel_form = PanelForm(request.POST)
-        clinician_form = ClinicianForm(request.POST)
+        demogs_form = DemogsForm(request.POST, user=request.user, instance=report.ir_family.participant_family.proband)
+        case_assign_form = CaseAssignForm(request.POST, user=request.user, instance=report)
+        first_check_form = FirstCheckAssignForm(request.POST, user=request.user, instance=report)
+        second_check_form = SecondCheckAssignForm(request.POST, user=request.user, instance=report)
+        panel_form = PanelForm(request.POST, user=request.user)
+        clinician_form = ClinicianForm(request.POST, user=request.user)
         add_clinician_form = AddClinicianForm(request.POST)
-        add_variant_form = AddVariantForm(request.POST)
-        add_comment_form = AddCommentForm(request.POST)
+        add_variant_form = AddVariantForm(request.POST, user=request.user)
+        add_comment_form = AddCommentForm(request.POST, user=request.user)
         variant_validation_form = VariantValidationForm(request.POST)
+        cancer_history_form = ProbandCancerForm(request.POST, user=request.user, instance=report.ir_family.participant_family.proband)
 
         if variant_validation_form.is_valid():
             validation_status = variant_validation_form.cleaned_data['validation_status']
@@ -415,23 +416,26 @@ def proband_view(request, report_id):
                          report=report,
                          variant=variant)
             messages.add_message(request, 25, 'Variant Added to Report')
+        if cancer_history_form.is_valid():
+            cancer_history_form.save()
+            messages.add_message(request, 25, 'Clinical History Updated')
 
     relatives = Relative.objects.filter(proband=report.ir_family.participant_family.proband)
-    proband_form = ProbandForm(instance=report.ir_family.participant_family.proband)
-    gelir_form = GELIRForm(instance=report)
-    demogs_form = DemogsForm(instance=report.ir_family.participant_family.proband)
+    cancer_history_form = ProbandCancerForm(instance=report.ir_family.participant_family.proband, user=request.user)
+    proband_form = ProbandForm(instance=report.ir_family.participant_family.proband, user=request.user)
+    gelir_form = GELIRForm(instance=report, user=request.user)
+    demogs_form = DemogsForm(instance=report.ir_family.participant_family.proband, user=request.user)
     proband_variants = ProbandVariant.objects.filter(interpretation_report=report)
     proband_mdt = MDTReport.objects.filter(interpretation_report=report)
     panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.ir_family)
-    panel_form = PanelForm()
-    case_assign_form = CaseAssignForm(instance=report)
-    first_check_form = FirstCheckAssignForm(instance=report)
-    second_check_form = SecondCheckAssignForm(instance=report)
-    clinician_form = ClinicianForm()
+    panel_form = PanelForm(user=request.user)
+    case_assign_form = CaseAssignForm(instance=report, user=request.user)
+    first_check_form = FirstCheckAssignForm(instance=report, user=request.user)
+    second_check_form = SecondCheckAssignForm(instance=report, user=request.user)
+    clinician_form = ClinicianForm(user=request.user)
     add_clinician_form = AddClinicianForm()
-    add_variant_form = AddVariantForm()
-    add_comment_form = AddCommentForm()
-    edit_comment_form = AddCommentForm()
+    add_variant_form = AddVariantForm(user=request.user)
+    add_comment_form = AddCommentForm(user=request.user)
 
     variants_for_reporting = RareDiseaseReport.objects.filter(
         proband_variant__interpretation_report__id=report.id,
@@ -476,7 +480,8 @@ def proband_view(request, report_id):
                                                     'report_fields': report_history_formatter.report_interesting_fields,
                                                     'proband_fields': report_history_formatter.proband_interesting_fields,
                                                     'other_cases': other_cases,
-                                                    'add_comment_form': add_comment_form})
+                                                    'add_comment_form': add_comment_form,
+                                                    'cancer_history_form': cancer_history_form})
 
 
 @login_required
@@ -490,9 +495,9 @@ def edit_relatives(request, relative_id):
     """
     data = {}
     relative = Relative.objects.get(id=relative_id)
-    relative_form = RelativeForm(instance=relative)
+    relative_form = RelativeForm(instance=relative, user=request.user)
     if request.method == 'POST':
-        relative_form = RelativeForm(request.POST, instance=relative)
+        relative_form = RelativeForm(request.POST, user=request.user, instance=relative)
         if relative_form.is_valid():
             relative_form.save()
             data['form_is_valid'] = True
@@ -645,8 +650,8 @@ def update_proband(request, report_id):
     '''
     report = GELInterpretationReport.objects.get(id=report_id)
     if request.method == "POST":
-        proband_form = ProbandForm(request.POST, instance=report.ir_family.participant_family.proband)
-        gelir_form = GELIRForm(request.POST, instance=report)
+        proband_form = ProbandForm(request.POST, user=request.user, instance=report.ir_family.participant_family.proband)
+        gelir_form = GELIRForm(request.POST, user=request.user, instance=report)
         if proband_form.is_valid() and gelir_form.is_valid():
             proband_form.save()
             gelir_form.save()
@@ -829,8 +834,8 @@ def mdt_view(request, mdt_id):
         first_check_percent = 0
         second_check_percent = 0
 
-    mdt_form = MdtForm(instance=mdt_instance)
-    sent_to_clinican_form = MdtSentToClinicianForm(instance=mdt_instance)
+    mdt_form = MdtForm(instance=mdt_instance, user=request.user)
+    sent_to_clinican_form = MdtSentToClinicianForm(instance=mdt_instance, user=request.user)
     clinicians = Clinician.objects.filter(mdt=mdt_id).values_list('name', flat=True)
     clinical_scientists = ClinicalScientist.objects.filter(mdt=mdt_id).values_list('name', flat=True)
     other_staff = OtherStaff.objects.filter(mdt=mdt_id).values_list('name', flat=True)
@@ -843,7 +848,7 @@ def mdt_view(request, mdt_id):
 
     if request.method == 'POST':
         mdt_form = MdtForm(request.POST, instance=mdt_instance)
-        sent_to_clinican_form = MdtSentToClinicianForm(request.POST, instance=mdt_instance)
+        sent_to_clinican_form = MdtSentToClinicianForm(request.POST, user=request.user, instance=mdt_instance)
         if mdt_form.is_valid():
             mdt_form.save()
         if sent_to_clinican_form.is_valid():
@@ -909,11 +914,17 @@ def mdt_proband_view(request, mdt_id, pk, important):
         VariantForm = modelformset_factory(CancerReport, form=CancerMDTForm, extra=0)
     variant_formset = VariantForm(queryset=proband_variant_reports)
 
-    proband_form = ProbandMDTForm(instance=report.ir_family.participant_family.proband)
+    proband_form = ProbandMDTForm(instance=report.ir_family.participant_family.proband, user=request.user)
     gelir_form = GELIRMDTForm(instance=report)
     panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.ir_family)
 
-    if mdt_instance.status == "C":
+    enable_form = False
+    for group in request.user.groups.all():
+        if hasattr(group, 'grouppermissions'):
+            if group.grouppermissions.can_edit_mdt:
+                enable_form = True
+
+    if mdt_instance.status == "C" or not enable_form:
         for form in variant_formset.forms:
             for field in form.__dict__["fields"]:
                 form.fields[field].widget.attrs['readonly'] = True
@@ -924,7 +935,7 @@ def mdt_proband_view(request, mdt_id, pk, important):
 
     if request.method == 'POST':
         variant_formset = VariantForm(request.POST)
-        proband_form = ProbandMDTForm(request.POST, instance=report.ir_family.participant_family.proband)
+        proband_form = ProbandMDTForm(request.POST, user=request.user, instance=report.ir_family.participant_family.proband)
         gelir_form = GELIRMDTForm(request.POST, instance=report)
         if variant_formset.is_valid() and proband_form.is_valid() and gelir_form.is_valid():
             variant_formset.save()
@@ -997,7 +1008,7 @@ def edit_mdt_proband(request, report_id):
             data['form_is_valid'] = False
             print(proband_form.errors)
     else:
-        proband_form = ProbandMDTForm(instance=report.ir_family.participant_family.proband)
+        proband_form = ProbandMDTForm(instance=report.ir_family.participant_family.proband, user=request.user)
 
     context = {'proband_form': proband_form,
                'report': report}
@@ -1428,7 +1439,7 @@ def case_alert(request, sample_type):
     gel_reports = GELInterpretationReport.objects.latest_cases_by_sample_type(
         sample_type=sample_type).prefetch_related('ir_family__participant_family__proband')
     matching_cases = {}
-    case_alert_form = AddCaseAlert()
+    case_alert_form = AddCaseAlert(user=request)
     for case in case_alerts:
         matching_cases[case.id] = []
         for report in gel_reports:
@@ -1448,7 +1459,7 @@ def case_alert(request, sample_type):
 @login_required
 def add_case_alert(request):
     if request.method == 'POST':
-        case_alert_form = AddCaseAlert(request.POST)
+        case_alert_form = AddCaseAlert(request.POST, user=request.user)
         if case_alert_form.is_valid():
             case_alert_form.save()
             messages.add_message(request, 25, 'Case Added!')
@@ -1461,9 +1472,9 @@ def add_case_alert(request):
 def edit_case_alert(request, case_alert_id):
     data = {}
     case_alert_instance = CaseAlert.objects.get(id=case_alert_id)
-    case_alert_form = AddCaseAlert(instance=case_alert_instance)
+    case_alert_form = AddCaseAlert(user=request.user, instance=case_alert_instance)
     if request.method == 'POST':
-        case_alert_form = AddCaseAlert(request.POST, instance=case_alert_instance)
+        case_alert_form = AddCaseAlert(request.POST, user=request.user, instance=case_alert_instance)
         if case_alert_form.is_valid():
             case_alert_form.save()
             data['form_is_valid'] = True
@@ -1523,9 +1534,9 @@ def delete_comment(request, comment_id):
 def edit_comment(request, comment_id):
     data = {}
     comment_instance = CaseComment.objects.get(id=comment_id)
-    edit_comment_form = AddCommentForm(instance=comment_instance)
+    edit_comment_form = AddCommentForm(instance=comment_instance, user=request.user)
     if request.method == 'POST':
-        edit_comment_form = AddCommentForm(request.POST, instance=comment_instance)
+        edit_comment_form = AddCommentForm(request.POST, user=request.user, instance=comment_instance)
         if edit_comment_form.is_valid():
             edit_comment_form.save()
             data['form_is_valid'] = True

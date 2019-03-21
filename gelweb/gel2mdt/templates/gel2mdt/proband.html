@@ -30,7 +30,9 @@
     {% endif %}
     <ul class="nav nav-tabs" data-options="deep_linking: true">
         <li class="active"><a data-toggle="tab" href="#proband">Proband</a></li>
+        {% if user|has_group_permission:'view_pv' %}
         <li><a data-toggle="tab" href="#variants">Variants</a></li>
+        {% endif %}
         <li><a data-toggle="tab" href="#history">History</a></li>
     </ul>
     {% block javascript %}
@@ -188,7 +190,13 @@
                     <div class="col-md-12">
 
                         <div class="panel panel-default">
-                            <div class="panel-heading">Clinical Information</div>
+                            <div class="panel-heading">Clinical Information
+                                {% if user|has_group_permission:'can_edit_clinical_questions' %}
+                                <a href=# data-toggle="modal" data-target="#clinicalHistoryModal" class="btn btn-md btn-danger"><i ></i> Add Clinical History</a>
+                                {% endif %}
+
+                             </div>
+
                             <div class="panel-body">
                                 <div class="col-md-3">
                                     {% bootstrap_label "Recruiting Disease" %}
@@ -268,7 +276,7 @@
                                     <div class="col-md-6">
 
                                         {% bootstrap_field proband_form.outcome label='Proband Outcome'%}
-                                        {% bootstrap_field proband_form.comment label='Proband Comment'%}
+                                        {% bootstrap_field proband_form.comment  label='Proband Comment'%}
 
                                     </div>
                                     <div class="col-md-6" style="height: 250px; overflow-y:scroll;">
@@ -608,6 +616,7 @@
                                                 <a href="https://cipapi.genomicsengland.nhs.uk/interpretationportal/#/participant/{{report.ir_family.ir_family_id}}" target="_blank">{{report.ir_family.ir_family_id}}</a>
                                             </div>
                                         </div>
+                                        {% if user|has_group_permission:'pull_t3_variants' %}
                                         {% if config_dict|get_item:'pull_T3' == 'False' %}
                                             <div class="col-md-2">
                                                 {% bootstrap_label "Pull Tier3 Variants" %}
@@ -616,6 +625,7 @@
                                                 </div>
                                             </div>
                                         {% endif %}
+                                         {% endif %}
                                         <div class="col-md-2">
                                             {% bootstrap_label "Add a new variant" %}
                                             <div class="block">
@@ -790,9 +800,13 @@
                                         {% endif %}
                                         {% if pv_items.transcript %}
                                             {% if report.sample_type == 'raredisease' %}
-                                            <td><a href="/edit_preferred_transcript/{{pv_items.transcript.gene_id}}/{{pv_items.transcript.genome_assembly.id}}" target="_blank"><i class="fas fa-external-link-alt"></i> {{pv_items.transcript.gene}}</a></td>
+                                                {% if user|has_group_permission:'can_select_update_transcript' %}
+                                                    <td><a href="/edit_preferred_transcript/{{pv_items.transcript.gene_id}}/{{pv_items.transcript.genome_assembly.id}}" target="_blank"><i class="fas fa-external-link-alt"></i> {{pv_items.transcript.gene}}</a></td>
+                                                {% else %}
+                                                    <td>{{pv_items.transcript.gene}}</td>
+                                                {% endif %}
                                             {% else %}
-                                            <td>{{pv_items.transcript.gene}}</td>
+                                                <td>{{pv_items.transcript.gene}}</td>
                                             {% endif %}
                                         {% else %}
                                         <td></td>
@@ -807,10 +821,15 @@
                                         {% endif %}
                                         <td>
                                             {% if gelir_form.case_status.value != "C" %}
-                                                <a href="/select_transcript/{{report.id}}/{{pv.id }}"><i class="fas fa-pencil-alt"></i></a></span> {{pv_items.transcript.name }}
-                                        {% else%}
+                                                {% if user|has_group_permission:'can_select_update_transcript' %}
+                                                    <a href="/select_transcript/{{report.id}}/{{pv.id }}"><i class="fas fa-pencil-alt"></i></a></span> {{pv_items.transcript.name }}
+                                                {% else%}
+                                                    {{pv_items.transcript.name }}
+                                                {% endif %}
+                                            {% else %}
                                             {{pv_items.transcript.name }}
-                                        {% endif %}
+                                                {% endif %}
+
                                         </td>
 
                                         <td style="word-wrap: break-word; min-width: 100px;max-width: 100px;">{{pv_items.transcript_variant.hgvs_c}}</td>
@@ -1255,6 +1274,53 @@
         </div>
     </div>
 
+<div id="clinicalHistoryModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
+                <h4 class="modal-title">Add Clinical History</h4>
+            </div>
+            <div class="modal-body">
+                <form action="/proband/{{ report.id }}" method="POST">
+                    {% csrf_token %}
+                    <div class="container-fluid" >
+                    <div class="row">
+                    <div class="col-md-5">
+                        {% bootstrap_field cancer_history_form.recruiting_disease %}
+                        {% bootstrap_field cancer_history_form.disease_subtype %}
+                        {% bootstrap_field cancer_history_form.disease_grade %}
+                        {% bootstrap_field cancer_history_form.disease_stage %}
+                    </div>
+                    <div class="col-md-7">
+                        {% bootstrap_field cancer_history_form.currently_in_clinical_trial %}
+                        {% bootstrap_field cancer_history_form.suitable_for_clinical_trial %}
+                        {% bootstrap_field cancer_history_form.current_clinical_trial_info %}
+                        {% bootstrap_field cancer_history_form.deceased %}
+
+                    </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            {% bootstrap_field cancer_history_form.previous_treatment %}
+                        </div>
+                        <div class="col-md-6">
+                            {% bootstrap_field cancer_history_form.previous_testing %}
+                        </div>
+                    </div>
+                        <div class="row">
+                     <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" >Save</button>
+                      </div>
+                    </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
     <div class="modal fade" id="modal-relative">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -1310,4 +1376,5 @@
             </div>
         </div>
     </div>
+
 {% endblock %}
