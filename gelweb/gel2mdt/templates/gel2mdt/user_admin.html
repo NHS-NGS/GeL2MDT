@@ -52,7 +52,6 @@ SOFTWARE.
                             <th>Can view Cancer</th>
                             <th>Can view Proband Variants</th>
                             <th>Can Edit Transcripts</th>
-                            <th>Can Edit Preferred Transcripts</th>
                             <th>Can Pull T3 Variants</th>
                             <th>Can Edit Proband</th>
                             <th>Can Edit Completed Proband</th>
@@ -90,12 +89,7 @@ SOFTWARE.
                                         {% else %}
                                             <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>
                                         {% endif %}
-                                    {% if group.grouppermissions.can_select_transcript %}
-                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;" ><i class="fas fa-check"></i></td>
-                                        {% else %}
-                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>
-                                        {% endif %}
-                                    {% if group.grouppermissions.update_preferred_transcript %}
+                                    {% if group.grouppermissions.can_select_update_transcript %}
                                             <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;" ><i class="fas fa-check"></i></td>
                                         {% else %}
                                             <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>
@@ -145,12 +139,12 @@ SOFTWARE.
                                         {% else %}
                                             <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>
                                         {% endif %}
-                                    {% if group.grouppermissions.can_view_case_alert %}
+                                    {% if group.grouppermissions.can_edit_case_alert %}
                                             <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;" ><i class="fas fa-check"></i></td>
                                         {% else %}
                                             <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>
                                         {% endif %}
-                                    {% if group.grouppermissions.can_view_validation_list %}
+                                    {% if group.grouppermissions.can_edit_validation_list %}
                                             <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;" ><i class="fas fa-check"></i></td>
                                         {% else %}
                                             <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>

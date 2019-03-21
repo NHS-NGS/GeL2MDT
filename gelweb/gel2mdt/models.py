@@ -469,10 +469,7 @@ class Proband(models.Model):
     discussion = models.TextField(blank=True)
     action = models.TextField(blank=True)
     total_samples = models.IntegerField(null=True, blank=True)
-    if config_dict['GMC'] != 'None':
-        gmc = models.CharField(max_length=255, choices=gmc_choices, default='Unknown', null=True, blank=True)
-    else:
-        gmc = models.CharField(max_length=255, null=True, blank=True)
+    gmc = models.CharField(max_length=255, null=True, blank=True)
     local_id = models.CharField(max_length=255, null=True, blank=True)
 
     deceased = models.NullBooleanField()

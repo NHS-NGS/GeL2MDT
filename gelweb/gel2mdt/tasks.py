@@ -41,6 +41,28 @@ from reversion.models import Version, Revision
 from protocols.reports_6_0_0 import InterpretedGenome, InterpretationRequestRD, CancerInterpretationRequest, ClinicalReport
 
 
+def create_admin_group():
+    group, created = Group.objects.get_or_create(name='ADMIN GROUP')
+    if not hasattr(group, 'grouppermissions'):
+        group_permissions = GroupPermissions(group=group)
+        group_permissions.save()
+    permissions = group.grouppermissions
+    permissions.view_pv = True
+    permissions.can_select_update_transcript = True
+    permissions.pull_t3_variants = True
+    permissions.can_edit_proband = True
+    permissions.can_edit_completed_proband = True
+    permissions.can_edit_gelir = True
+    permissions.can_edit_mdt = True
+    permissions.can_get_gel_report = True
+    permissions.can_edit_relative = True
+    permissions.can_edit_clinical_questions = True
+    permissions.start_mdt = True
+    permissions.can_edit_case_alert = True
+    permissions.can_edit_validation_list = True
+    permissions.save()
+
+
 def get_gel_content(ir, ir_version):
     '''
     Downloads and formats the GEL Clinical Report. Removes warning signs and inserts the genes in the panel
