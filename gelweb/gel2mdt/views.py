@@ -384,7 +384,6 @@ def proband_view(request, report_id):
     add_clinician_form = AddClinicianForm()
     add_variant_form = AddVariantForm()
     add_comment_form = AddCommentForm()
-    edit_comment_form = AddCommentForm()
 
     variants_for_reporting = RareDiseaseReport.objects.filter(
         proband_variant__interpretation_report__id=report.id,

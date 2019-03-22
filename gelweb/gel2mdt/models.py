@@ -758,6 +758,7 @@ class RareDiseaseReport(models.Model):
     ), default='NA')
     proband_variant = models.OneToOneField(ProbandVariant, on_delete=models.CASCADE, null=True)
     proband_sv = models.OneToOneField('ProbandSV', on_delete=models.CASCADE, null=True)
+    proband_str = models.OneToOneField('ProbandSTR', on_delete=models.CASCADE, null=True)
 
     class Meta:
         managed = True
