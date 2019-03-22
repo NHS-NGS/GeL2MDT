@@ -89,6 +89,7 @@ def delete_group(request, id):
 def edit_group(request, id):
     data = {}
     group = Group.objects.get(id=id)
+    print(group)
     group_form = GroupPermissionsForm(instance=group.grouppermissions, user=request.user)
     if request.method == 'POST':
         group_form = GroupPermissionsForm(request.POST, instance=group.grouppermissions, user=request.user)
@@ -886,10 +887,6 @@ def mdt_view(request, mdt_id):
     :param mdt_id: MDT ID
     :return: Main MDT page
     """
-    clinician = False
-    clinicians_emails = Clinician.objects.all().values_list('email', flat=True)
-    if request.user.email in clinicians_emails:
-        clinician = True
 
     mdt_instance = MDT.objects.get(id=mdt_id)
     report_list = MDTReport.objects.filter(MDT=mdt_instance).values_list('interpretation_report', flat=True)
@@ -899,6 +896,7 @@ def mdt_view(request, mdt_id):
     proband_variant_count = {}
     t3_proband_variant_count = {}
     sv_count = {}
+    str_count = {}
     first_check_count = 0
     second_check_count = 0
     for report in reports:
@@ -907,6 +905,8 @@ def mdt_view(request, mdt_id):
         pvs = ProbandVariant.objects.filter(interpretation_report=report)
         proband_sv_count = ProbandSV.objects.filter(interpretation_report=report).count()
         sv_count[report.id] = proband_sv_count
+        proband_str_count = ProbandSTR.objects.filter(interpretation_report=report).count()
+        str_count[report.id] = proband_str_count
         for pv in pvs:
             if pv.pvflag_set.all() and pv.max_tier == None:
                 proband_variant_count[report.id] += 1
@@ -939,7 +939,7 @@ def mdt_view(request, mdt_id):
             mdt_form.fields[field].widget.attrs['disabled'] = True
 
     if request.method == 'POST':
-        mdt_form = MdtForm(request.POST, instance=mdt_instance)
+        mdt_form = MdtForm(request.POST, instance=mdt_instance, user=request.user)
         sent_to_clinican_form = MdtSentToClinicianForm(request.POST, user=request.user, instance=mdt_instance)
         if mdt_form.is_valid():
             mdt_form.save()
@@ -952,6 +952,7 @@ def mdt_view(request, mdt_id):
     return render(request, 'gel2mdt/mdt_view.html', {'proband_variants': proband_variants,
                                                       'proband_variant_count': proband_variant_count,
                                                      'sv_count': sv_count,
+                                                     'str_count': str_count,
                                                      't3_proband_variant_count': t3_proband_variant_count,
                                                      'first_check_percent': first_check_percent,
                                                      'second_check_percent': second_check_percent,
@@ -960,8 +961,7 @@ def mdt_view(request, mdt_id):
                                                       'sent_to_clinican_form' : sent_to_clinican_form,
                                                       'mdt_id': mdt_id,
                                                       'attendees': attendees,
-                                                     'sample_type': mdt_instance.sample_type,
-                                                     'clinician': clinician})
+                                                     'sample_type': mdt_instance.sample_type})
 
 
 @login_required
@@ -974,10 +974,6 @@ def mdt_proband_view(request, mdt_id, pk, important):
     :param important: Either 1 or 0; Whether to display T3 or non T3 variants
     :return:
     '''
-    clinician = False
-    clinicians_emails = Clinician.objects.all().values_list('email', flat=True)
-    if request.user.email in clinicians_emails:
-        clinician = True
     mdt_instance = MDT.objects.get(id=mdt_id)
     report = GELInterpretationReport.objects.get(id=pk)
     proband_variants = []
@@ -1055,7 +1051,6 @@ def mdt_proband_view(request, mdt_id, pk, important):
         'panels': panels,
         'sample_type':report.sample_type,
         'gelir_form':gelir_form,
-        'clinician': clinician
     })
 
 @login_required
@@ -1067,10 +1062,6 @@ def mdt_cnv_view(request, mdt_id, pk):
     :param pk: GEL Interpretation report id
     :return:
     '''
-    clinician = False
-    clinicians_emails = Clinician.objects.all().values_list('email', flat=True)
-    if request.user.email in clinicians_emails:
-        clinician = True
     mdt_instance = MDT.objects.get(id=mdt_id)
     report = GELInterpretationReport.objects.get(id=pk)
     proband_svs = ProbandSV.objects.filter(interpretation_report=report)
@@ -1084,8 +1075,8 @@ def mdt_cnv_view(request, mdt_id, pk):
         VariantForm = modelformset_factory(RareDiseaseReport, form=RareDiseaseMDTForm, extra=0)
     variant_formset = VariantForm(queryset=proband_sv_reports)
 
-    proband_form = ProbandMDTForm(instance=report.ir_family.participant_family.proband)
-    gelir_form = GELIRMDTForm(instance=report)
+    proband_form = ProbandMDTForm(instance=report.ir_family.participant_family.proband, user=request.user)
+    gelir_form = GELIRMDTForm(instance=report, user=request.user)
     panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.ir_family)
 
     if mdt_instance.status == "C":
@@ -1099,8 +1090,8 @@ def mdt_cnv_view(request, mdt_id, pk):
 
     if request.method == 'POST':
         variant_formset = VariantForm(request.POST)
-        proband_form = ProbandMDTForm(request.POST, instance=report.ir_family.participant_family.proband)
-        gelir_form = GELIRMDTForm(request.POST, instance=report)
+        proband_form = ProbandMDTForm(request.POST, instance=report.ir_family.participant_family.proband, user=request.user)
+        gelir_form = GELIRMDTForm(request.POST, instance=report, user=request.user)
         if variant_formset.is_valid() and proband_form.is_valid() and gelir_form.is_valid():
             variant_formset.save()
             for form in variant_formset:
@@ -1126,9 +1117,74 @@ def mdt_cnv_view(request, mdt_id, pk):
         'panels': panels,
         'sample_type':report.sample_type,
         'gelir_form':gelir_form,
-        'clinician': clinician
     })
 
+@login_required
+def mdt_str_view(request, mdt_id, pk):
+    '''
+    MDT proband view where users can edit proband CNV specific questions at MDT
+    :param request:
+    :param mdt_id: MDT instance id
+    :param pk: GEL Interpretation report id
+    :return:
+    '''
+
+    mdt_instance = MDT.objects.get(id=mdt_id)
+    report = GELInterpretationReport.objects.get(id=pk)
+    proband_strs = ProbandSTR.objects.filter(interpretation_report=report)
+
+    for pv in proband_strs:
+        if mdt_instance.sample_type == 'raredisease':
+            pv.create_rare_disease_report()
+
+    if mdt_instance.sample_type == 'raredisease':
+        proband_str_reports = RareDiseaseReport.objects.filter(proband_str__in=proband_strs)
+        VariantForm = modelformset_factory(RareDiseaseReport, form=RareDiseaseMDTForm, extra=0)
+    variant_formset = VariantForm(queryset=proband_str_reports)
+
+    proband_form = ProbandMDTForm(instance=report.ir_family.participant_family.proband, user=request.user)
+    gelir_form = GELIRMDTForm(instance=report, user=request.user)
+    panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.ir_family)
+
+    if mdt_instance.status == "C":
+        for form in variant_formset.forms:
+            for field in form.__dict__["fields"]:
+                form.fields[field].widget.attrs['readonly'] = True
+                form.fields[field].widget.attrs['disabled'] = True
+        for field in proband_form.__dict__["fields"]:
+            proband_form.fields[field].widget.attrs['readonly'] = True
+            proband_form.fields[field].widget.attrs['disabled'] = True
+
+    if request.method == 'POST':
+        variant_formset = VariantForm(request.POST)
+        proband_form = ProbandMDTForm(request.POST, instance=report.ir_family.participant_family.proband, user=request.user)
+        gelir_form = GELIRMDTForm(request.POST, instance=report, user=request.user)
+        if variant_formset.is_valid() and proband_form.is_valid() and gelir_form.is_valid():
+            variant_formset.save()
+            for form in variant_formset:
+                pv = form.instance.proband_str
+                pv.validation_status = form.cleaned_data['requires_validation']
+                pv.save()
+            proband_form.save()
+            gelir_form.save()
+            messages.add_message(request, 25, 'Proband Updated')
+
+        return HttpResponseRedirect(f'/mdt_str_view/{mdt_id}/{pk}/')
+
+    for form in variant_formset:
+        p_str = form.instance.proband_str
+        form.initial["requires_validation"] = p_str.validation_status
+    return render(request, 'gel2mdt/mdt_str_view.html', {
+        'proband_strs': proband_strs,
+        'report': report,
+        'mdt_id': mdt_id,
+        'mdt_instance': mdt_instance,
+        'proband_form': proband_form,
+        'variant_formset': variant_formset,
+        'panels': panels,
+        'sample_type':report.sample_type,
+        'gelir_form':gelir_form,
+    })
 
 @login_required
 def edit_mdt_proband(request, report_id):

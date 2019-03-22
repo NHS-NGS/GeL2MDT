@@ -465,10 +465,15 @@ class MdtSentToClinicianForm(forms.ModelForm):
         if not enable_form:
             for field in self.fields:
                 self.fields[field].disabled = True
+        if self.instance.sample_type == 'raredisease':
+            self.fields['gtab_made'].widget = forms.HiddenInput()
+            self.fields['data_request_sent'].widget = forms.HiddenInput()
+            self.fields['gtab_sent'].widget = forms.HiddenInput()
+            self.fields['actions_sent'].widget = forms.HiddenInput()
 
     class Meta:
         model = MDT
-        fields = ['sent_to_clinician']
+        fields = ['sent_to_clinician', 'gtab_made', 'data_request_sent', 'gtab_sent', 'actions_sent']
 
 
 class ProbandMDTForm(forms.ModelForm):
@@ -568,6 +573,8 @@ class RareDiseaseMDTForm(forms.ModelForm):
             pv = self.instance.proband_variant
         elif self.instance.proband_sv:
             pv = self.instance.proband_sv
+        elif self.instance.proband_str:
+            pv = self.instance.proband_str
 
         pv.validation_status = selected_validation_status
         if not pv.validation_datetime_set:

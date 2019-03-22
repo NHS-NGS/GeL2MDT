@@ -1145,7 +1145,6 @@ class STRVariant(models.Model):
         app_label = 'gel2mdt'
 
 
-
 class ProbandSTR(models.Model):
     """
     Proband short tandem repeat variants
@@ -1183,6 +1182,15 @@ class ProbandSTR(models.Model):
         for gene in self.probandstrgene_set.all():
             if gene.selected:
                 return gene.gene.hgnc_name
+
+    def create_rare_disease_report(self):
+        if not hasattr(self, 'rarediseasereport'):
+            report = RareDiseaseReport(proband_str=self)
+            report.save()
+            return report
+        else:
+            return self.rarediseasereport
+
 
     class Meta:
         managed = True

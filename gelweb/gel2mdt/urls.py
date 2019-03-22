@@ -65,6 +65,7 @@ urlpatterns = [
     path('mdt_view/<int:mdt_id>', views.mdt_view, name='mdt-view'),
     path('mdt_proband_view/<int:mdt_id>/<int:pk>/<int:important>', views.mdt_proband_view, name='mdt-proband-view'),
     path('mdt_cnv_view/<int:mdt_id>/<int:pk>/', views.mdt_cnv_view, name='mdt-cnv-view'),
+    path('mdt_str_view/<int:mdt_id>/<int:pk>/', views.mdt_str_view, name='mdt-str-view'),
 
     path('add_ir_to_mdt/<int:mdt_id>/<int:irreport_id>', views.add_ir_to_mdt, name='add-ir-to-mdt'),
     path('remove_ir_from_mdt/<int:mdt_id>/<int:irreport_id>', views.remove_ir_from_mdt, name='remove-ir-from-mdt'),
