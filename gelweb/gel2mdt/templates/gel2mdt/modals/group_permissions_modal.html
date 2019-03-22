@@ -1,6 +1,6 @@
 {% load bootstrap3 %}
 
-<form method="post" action="/edit_group/{{ group.grouppermissions.id }}" class="js-save-group">
+<form method="post" action="/edit_group/{{ group.id }}" class="js-save-group">
       {% csrf_token %}
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">

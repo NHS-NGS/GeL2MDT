@@ -535,6 +535,7 @@ class CaseAttributeManager(object):
             clinician_details['hospital'] = self.case.ir_obj.workspace[0]
         else:
             clinician_details['hospital'] = 'unknown'
+        GMC.objects.get_or_create(name=clinician_details['hospital'])
         clinician = CaseModel(Clinician, {
             "name": clinician_details['name'],
             "email": "unknown",  # clinician email not on labkey

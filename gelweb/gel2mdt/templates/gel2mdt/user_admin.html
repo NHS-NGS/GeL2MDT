@@ -169,11 +169,11 @@ SOFTWARE.
                                             <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>
                                         {% endif %}
                                     <td><button type="button" class="btn btn-xs btn-primary js-edit-group"
-                                                                              data-url="/edit_group/{{ group.grouppermissions.id }}">
+                                                                              data-url="/edit_group/{{ group.id }}">
                                                             Edit
                                         </button>
 
-                                      <a  class="btn btn-xs btn-danger" href="/delete_group/{{ group.id }}"><i></i>Delete</a>
+                                      <a  class="btn btn-xs btn-danger" href="/delete_group/{{ group.id }}" onclick="return confirm('Are you sure?')"><i></i>Delete</a>
 
                                     </td>
                                 </tr>

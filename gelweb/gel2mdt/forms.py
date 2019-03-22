@@ -39,15 +39,7 @@ class UserForm(forms.ModelForm):
                     ('Other Staff', 'Other Staff'))
     role = forms.ChoiceField(choices=role_choices)
     config_dict = load_config.LoadConfig().load()
-    if config_dict['GMC'] != 'None':
-        choices = config_dict['GMC'].split(',')
-        gmc_choices = []
-        for choice in choices:
-            choice = choice.strip(' ')
-            gmc_choices.append((choice, choice))
-        hospital = forms.ChoiceField(choices=gmc_choices)
-    else:
-        hospital = forms.CharField()
+    hospital = forms.CharField()
 
     class Meta:
         model = User
@@ -64,16 +56,7 @@ class ProfileForm(forms.Form):
                     ('Other Staff', 'Other Staff'),
                     ('Unknown', 'Unknown'),)
     role = forms.ChoiceField(choices=role_choices, required=False)
-    config_dict = load_config.LoadConfig().load()
-    if config_dict['GMC'] != 'None':
-        choices = config_dict['GMC'].split(',')
-        gmc_choices = []
-        for choice in choices:
-            choice = choice.strip(' ')
-            gmc_choices.append((choice, choice))
-        hospital = forms.ChoiceField(choices=gmc_choices)
-    else:
-        hospital = forms.CharField()
+    hospital = forms.CharField()
 
 
 class ProbandForm(forms.ModelForm):
@@ -274,9 +257,15 @@ class DemogsForm(forms.ModelForm):
         if not enable_form:
             for field in self.fields:
                 self.fields[field].disabled = True
+
     class Meta:
         model = Proband
         fields = ['nhs_number', 'lab_number', 'forename', 'surname', 'date_of_birth', 'sex', 'local_id', 'gmc']
+
+    def save(self):
+        proband = self.instance
+        proband.save()
+        GMC.objects.get_or_create(name=proband.gmc)
 
 
 class PanelForm(forms.Form):
@@ -629,15 +618,7 @@ class AddNewAttendee(forms.Form):
     '''
     name = forms.CharField()
     config_dict = load_config.LoadConfig().load()
-    if config_dict['GMC'] != 'None':
-        choices = config_dict['GMC'].split(',')
-        gmc_choices = []
-        for choice in choices:
-            choice = choice.strip(' ')
-            gmc_choices.append((choice, choice))
-        hospital = forms.ChoiceField(choices=gmc_choices)
-    else:
-        hospital = forms.CharField()
+    hospital = forms.CharField()
     email = forms.EmailField()
     role = forms.ChoiceField(choices=(('Clinician', 'Clinician'),
                                       ('Clinical Scientist', 'Clinical Scientist'),
