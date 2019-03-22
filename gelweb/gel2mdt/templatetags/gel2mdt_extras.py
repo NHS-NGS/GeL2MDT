@@ -43,6 +43,17 @@ def get_item(dictionary, key):
 def sort_by(queryset, order):
     return queryset.order_by(order)
 
+
+@register.filter
+def has_group_permission(user, argument):
+    for group in user.groups.all():
+        if hasattr(group, 'grouppermissions'):
+            group_permission = group.grouppermissions
+            if getattr(group_permission, argument):
+                return True
+    return False
+
+
 @register.simple_tag
 def version_number():
     if not is_git_repo():

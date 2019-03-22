@@ -80,6 +80,25 @@ class ProbandForm(forms.ModelForm):
     '''
     Form used for allowing users edit proband information
     '''
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        self.report = kwargs.pop('report', None)
+        super(ProbandForm, self).__init__(*args, **kwargs)
+        enable_form = False
+        for group in self.user.groups.all():
+            if hasattr(group, 'grouppermissions'):
+                if group.grouppermissions.can_edit_completed_proband:
+                    enable_form = True
+                else:
+                    if self.report.case_status != 'C':
+                        if group.grouppermissions.can_edit_proband:
+                            enable_form = True
+
+        if not enable_form:
+            for field in self.fields:
+                self.fields[field].disabled = True
+
     class Meta:
         model = Proband
         fields = ['outcome', 'comment']
@@ -94,8 +113,17 @@ class VariantValidationForm(forms.ModelForm):
     Form used to change values used for variant validation tracking.
     """
     def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
         super(VariantValidationForm, self).__init__(*args, **kwargs)
         self.fields['validation_responsible_user'].required=False
+        enable_form = False
+        for group in self.user.groups.all():
+            if hasattr(group, 'grouppermissions'):
+                if group.grouppermissions.can_edit_validation_list:
+                    enable_form = True
+        if not enable_form:
+            for field in self.fields:
+                self.fields[field].disabled = True
 
     class Meta:
         model = ProbandVariant
@@ -110,11 +138,45 @@ class SVValidationForm(forms.ModelForm):
     Form used to change values used for variant validation tracking.
     """
     def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
         super(SVValidationForm, self).__init__(*args, **kwargs)
         self.fields['validation_responsible_user'].required=False
+        enable_form = False
+        for group in self.user.groups.all():
+            if hasattr(group, 'grouppermissions'):
+                if group.grouppermissions.can_edit_validation_list:
+                    enable_form = True
+        if not enable_form:
+            for field in self.fields:
+                self.fields[field].disabled = True
 
     class Meta:
         model = ProbandSV
+        fields = [
+            'validation_status',
+            'validation_responsible_user',
+        ]
+
+
+class STRValidationForm(forms.ModelForm):
+    """
+    Form used to change values used for variant validation tracking.
+    """
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(STRValidationForm, self).__init__(*args, **kwargs)
+        self.fields['validation_responsible_user'].required=False
+        enable_form = False
+        for group in self.user.groups.all():
+            if hasattr(group, 'grouppermissions'):
+                if group.grouppermissions.can_edit_validation_list:
+                    enable_form = True
+        if not enable_form:
+            for field in self.fields:
+                self.fields[field].disabled = True
+
+    class Meta:
+        model = ProbandSTR
         fields = [
             'validation_status',
             'validation_responsible_user',
@@ -125,6 +187,19 @@ class AddCommentForm(forms.ModelForm):
     '''
     Adds a new CaseComment in the Proband page
     '''
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(AddCommentForm, self).__init__(*args, **kwargs)
+        enable_form = False
+        for group in self.user.groups.all():
+            if hasattr(group, 'grouppermissions'):
+                if group.grouppermissions.can_edit_gelir:
+                    enable_form = True
+        if not enable_form:
+            for field in self.fields:
+                self.fields[field].disabled = True
+
     class Meta:
         model = CaseComment
         fields = ['comment']
@@ -137,6 +212,18 @@ class GELIRForm(forms.ModelForm):
     class Meta:
         model = GELInterpretationReport
         fields = ['case_status', 'mdt_status', 'pilot_case', 'case_sent', 'no_primary_findings', 'case_code']
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(GELIRForm, self).__init__(*args, **kwargs)
+        enable_form = False
+        for group in self.user.groups.all():
+            if hasattr(group, 'grouppermissions'):
+                if group.grouppermissions.can_edit_gelir:
+                    enable_form = True
+        if not enable_form:
+            for field in self.fields:
+                self.fields[field].disabled = True
 
     def save(self):
         gelir = self.instance
@@ -154,6 +241,18 @@ class RelativeForm(forms.ModelForm):
     '''
     Form used for allowing users edit Relative demographics
     '''
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(RelativeForm, self).__init__(*args, **kwargs)
+        enable_form = False
+        for group in self.user.groups.all():
+            if hasattr(group, 'grouppermissions'):
+                if group.grouppermissions.can_edit_relative:
+                    enable_form = True
+        if not enable_form:
+            for field in self.fields:
+                self.fields[field].disabled = True
+
     class Meta:
         model = Relative
         fields = ['forename', 'surname', 'date_of_birth', 'nhs_number',
@@ -164,6 +263,17 @@ class DemogsForm(forms.ModelForm):
     '''
     Form used for allowing users edit proband demographics
     '''
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(DemogsForm, self).__init__(*args, **kwargs)
+        enable_form = False
+        for group in self.user.groups.all():
+            if hasattr(group, 'grouppermissions'):
+                if group.grouppermissions.can_edit_proband:
+                    enable_form = True
+        if not enable_form:
+            for field in self.fields:
+                self.fields[field].disabled = True
     class Meta:
         model = Proband
         fields = ['nhs_number', 'lab_number', 'forename', 'surname', 'date_of_birth', 'sex', 'local_id', 'gmc']
@@ -173,6 +283,18 @@ class PanelForm(forms.Form):
     '''
     Form used for allowing users to add a panel to a proband
     '''
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(PanelForm, self).__init__(*args, **kwargs)
+        enable_form = False
+        for group in self.user.groups.all():
+            if hasattr(group, 'grouppermissions'):
+                if group.grouppermissions.can_edit_proband:
+                    enable_form = True
+        if not enable_form:
+            for field in self.fields:
+                self.fields[field].disabled = True
+
     panel = forms.ModelChoiceField(queryset=PanelVersion.objects.order_by('panel'))
 
 
@@ -180,6 +302,18 @@ class ClinicianForm(forms.Form):
     '''
     Form used for allowing users to change a probands clinician
     '''
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(ClinicianForm, self).__init__(*args, **kwargs)
+        enable_form = False
+        for group in self.user.groups.all():
+            if hasattr(group, 'grouppermissions'):
+                if group.grouppermissions.can_edit_proband:
+                    enable_form = True
+        if not enable_form:
+            for field in self.fields:
+                self.fields[field].disabled = True
+
     clinician = forms.ModelChoiceField(queryset=Clinician.objects.filter(added_by_user=True).order_by('name'))
 
 
@@ -212,6 +346,18 @@ class CaseAssignForm(forms.ModelForm):
     '''
     Form for specifying which user a case is assigned to
     '''
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(CaseAssignForm, self).__init__(*args, **kwargs)
+        enable_form = False
+        for group in self.user.groups.all():
+            if hasattr(group, 'grouppermissions'):
+                if group.grouppermissions.can_edit_gelir:
+                    enable_form = True
+        if not enable_form:
+            for field in self.fields:
+                self.fields[field].disabled = True
+
     assigned_user = UserChoiceField(queryset=User.objects.all().order_by('first_name'))
 
     class Meta:
@@ -224,10 +370,22 @@ class CaseAssignForm(forms.ModelForm):
         gelir.assigned_user = data['assigned_user']
         gelir.save(overwrite=True)
 
+
 class FirstCheckAssignForm(forms.ModelForm):
     '''
     Form for specifying which user performed the first check
     '''
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(FirstCheckAssignForm, self).__init__(*args, **kwargs)
+        enable_form = False
+        for group in self.user.groups.all():
+            if hasattr(group, 'grouppermissions'):
+                if group.grouppermissions.can_edit_gelir:
+                    enable_form = True
+        if not enable_form:
+            for field in self.fields:
+                self.fields[field].disabled = True
     first_check = UserChoiceField(queryset=User.objects.all().order_by('first_name'))
 
     class Meta:
@@ -240,10 +398,23 @@ class FirstCheckAssignForm(forms.ModelForm):
         gelir.first_check = data['first_check']
         gelir.save(overwrite=True)
 
+
 class SecondCheckAssignForm(forms.ModelForm):
     '''
     Form for specifying which user performed the second check
     '''
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(SecondCheckAssignForm, self).__init__(*args, **kwargs)
+        enable_form = False
+        for group in self.user.groups.all():
+            if hasattr(group, 'grouppermissions'):
+                if group.grouppermissions.can_edit_gelir:
+                    enable_form = True
+        if not enable_form:
+            for field in self.fields:
+                self.fields[field].disabled = True
+
     second_check = UserChoiceField(queryset=User.objects.all().order_by('first_name'))
 
     class Meta:
@@ -261,22 +432,61 @@ class MdtForm(forms.ModelForm):
     '''
     Form which edits MDT instance specific fields such as date and status
     '''
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(MdtForm, self).__init__(*args, **kwargs)
+        enable_form = False
+        for group in self.user.groups.all():
+            if hasattr(group, 'grouppermissions'):
+                if group.grouppermissions.can_edit_mdt:
+                    enable_form = True
+        if not enable_form:
+            for field in self.fields:
+                self.fields[field].disabled = True
+
     class Meta:
         model = MDT
         fields = ['description', 'date_of_mdt', 'status', 'sent_to_clinician']
+
 
 class MdtSentToClinicianForm(forms.ModelForm):
     '''
     Form for recording the whether the MDT list has been sent to the clinician
     '''
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(MdtSentToClinicianForm, self).__init__(*args, **kwargs)
+        self.fields['sent_to_clinician'].required = False
+        enable_form = False
+        for group in self.user.groups.all():
+            if hasattr(group, 'grouppermissions'):
+                if group.grouppermissions.can_edit_mdt:
+                    enable_form = True
+        if not enable_form:
+            for field in self.fields:
+                self.fields[field].disabled = True
+
     class Meta:
         model = MDT
         fields = ['sent_to_clinician']
+
 
 class ProbandMDTForm(forms.ModelForm):
     '''
     Form used in Proband View at MDT which allows users to fill in proband textfields
     '''
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(ProbandMDTForm, self).__init__(*args, **kwargs)
+        enable_form = False
+        for group in self.user.groups.all():
+            if hasattr(group, 'grouppermissions'):
+                if group.grouppermissions.can_edit_mdt:
+                    enable_form = True
+        if not enable_form:
+            for field in self.fields:
+                self.fields[field].disabled = True
+
     class Meta:
         model = Proband
         fields = ('discussion', 'action')
@@ -284,6 +494,7 @@ class ProbandMDTForm(forms.ModelForm):
             'discussion': Textarea(attrs={'rows': '3'}),
             'action': Textarea(attrs={'rows': '3'}),
         }
+
 
 class GELIRMDTForm(forms.ModelForm):
     '''
@@ -295,8 +506,17 @@ class GELIRMDTForm(forms.ModelForm):
         fields = ('case_status', 'case_code',)
 
     def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
         super(GELIRMDTForm, self).__init__(*args, **kwargs)
         self.fields['case_status'].required = False
+        enable_form = False
+        for group in self.user.groups.all():
+            if hasattr(group, 'grouppermissions'):
+                if group.grouppermissions.can_edit_gelir:
+                    enable_form = True
+        if not enable_form:
+            for field in self.fields:
+                self.fields[field].disabled = True
 
     def save(self):
         gelir = self.instance
@@ -447,21 +667,34 @@ class AddVariantForm(forms.ModelForm):
         widgets = {'reference': Textarea(attrs={'rows': '2'}),
                    'alternate': Textarea(attrs={'rows': '2'})}
 
-
-class GenomicsEnglandform(forms.Form):
-    """ Form for entering genomics england information to render a report to be used by the scientists """
-
-    interpretation_id = forms.IntegerField(label='Interpretation ID')
-    # Version number of the interpretation
-    ir_version = forms.IntegerField(label='Version')
-    report_version = forms.IntegerField(label='Clinical Report Version')
-
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(AddVariantForm, self).__init__(*args, **kwargs)
+        enable_form = False
+        for group in self.user.groups.all():
+            if hasattr(group, 'grouppermissions'):
+                if group.grouppermissions.can_edit_gelir:
+                    enable_form = True
+        if not enable_form:
+            for field in self.fields:
+                self.fields[field].disabled = True
 
 class GeneSearchForm(forms.Form):
     gene = forms.CharField(max_length=25, widget = forms.TextInput(attrs={'style': 'width:200px'}))
 
 
 class AddCaseAlert(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(AddCaseAlert, self).__init__(*args, **kwargs)
+        enable_form = False
+        for group in self.user.groups.all():
+            if hasattr(group, 'grouppermissions'):
+                if group.grouppermissions.can_edit_case_alert:
+                    enable_form = True
+        if not enable_form:
+            for field in self.fields:
+                self.fields[field].disabled = True
 
     def clean_gel_id(self):
         if self.cleaned_data['gel_id'].isdigit() and len(self.cleaned_data['gel_id']) >= 8:
@@ -473,3 +706,77 @@ class AddCaseAlert(forms.ModelForm):
     class Meta:
         model = CaseAlert
         fields = ['gel_id', 'comment', 'sample_type']
+
+
+class EditUserForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(EditUserForm, self).__init__(*args, **kwargs)
+        self.fields['is_active'].required = False
+        if not self.user.is_staff:
+            for field in self.fields:
+                self.fields[field].disabled = True
+
+    class Meta:
+        model = User
+        fields = ['is_active', 'groups']
+
+
+class GroupPermissionsForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(GroupPermissionsForm, self).__init__(*args, **kwargs)
+        self.fields['gmc'].required = False
+        if not self.user.is_staff:
+            for field in self.fields:
+                self.fields[field].disabled = True
+
+    class Meta:
+        model = GroupPermissions
+        exclude = ['group']
+
+
+class AddNewGroupForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(AddNewGroupForm, self).__init__(*args, **kwargs)
+        if not self.user.is_staff:
+            for field in self.fields:
+                self.fields[field].disabled = True
+
+    def save(self):
+        group = self.instance
+        group.save()
+        if not hasattr(group, 'grouppermissions'):
+            group_permissions = GroupPermissions(group=group)
+            group_permissions.save()
+
+    class Meta:
+        model = Group
+        fields = ['name']
+
+
+class ProbandCancerForm(forms.ModelForm):
+    '''
+    Form used for allowing users edit proband information
+    '''
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(ProbandCancerForm, self).__init__(*args, **kwargs)
+        enable_form = False
+        for group in self.user.groups.all():
+            if hasattr(group, 'grouppermissions'):
+                if group.grouppermissions.can_edit_clinical_questions:
+                    enable_form = True
+        if not enable_form:
+            for field in self.fields:
+                self.fields[field].disabled = True
+
+    class Meta:
+        model = Proband
+        fields = ['recruiting_disease', 'disease_subtype',
+                  'disease_stage', 'disease_grade', 'deceased',
+                  'previous_treatment', 'currently_in_clinical_trial',
+                  'current_clinical_trial_info', 'suitable_for_clinical_trial',
+                  'previous_testing']

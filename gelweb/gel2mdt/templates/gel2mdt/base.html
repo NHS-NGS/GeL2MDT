@@ -97,26 +97,39 @@ SOFTWARE.
                             </ul>
                         {% endif %}
 
+                   {% if user|has_group_permission:'start_mdt' %}
                    <ul class="nav navbar-nav">
                        <li><a href="{% url 'start-mdt' sample_type=sample_type %}" ><i class="fas fa-comments"></i> Start MDT</a></li>
                         </ul>
+                    {% endif %}
+
                     <ul class="nav navbar-nav">
                         <li><a href="{% url 'recent-mdt' sample_type=sample_type %}" ><i class="fas fa-history"></i> Recent MDTs</a></li>
                         </ul>
                    <ul class="nav navbar-nav">
                         <li><a href="{% url 'audit' sample_type=sample_type %}" ><i class="fas fa-tachometer-alt"></i> Audit</a></li>
                         </ul>
+                    {% if user|has_group_permission:'can_edit_validation_list' %}
                     <ul class="nav navbar-nav">
                         <li><a href="{% url 'validation-list' sample_type=sample_type %}" ><i class="fas fa-check-circle"></i> Validation</a></li>
                         </ul>
+                    {% endif %}
+                     {% if user|has_group_permission:'can_edit_case_alert' %}
                      <ul class="nav navbar-nav">
                         <li><a href="{% url 'case-alert' sample_type=sample_type %}" ><i class="fas fa-bell"></i> Case Alerts</a></li>
                         </ul>
                     {% endif %}
+                    {% endif %}
 
 
                 {% endblock %}
+
                 <ul class="nav navbar-nav navbar-right">
+                    {% if user.is_staff %}
+                    <ul class="nav navbar-nav">
+                        <li><a href="{% url 'user_admin' %}" ><i class="fas fa-wrench"></i> User Admin</a></li>
+                        </ul>
+                    {% endif %}
                     <li class="dropdown">
                         <a class="dropdown-toggle" 
                            data-toggle="dropdown"

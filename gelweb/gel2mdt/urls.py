@@ -29,7 +29,10 @@ from .api.api_urls import *
 
 urlpatterns = [
     path('', views.index, name='index'),
-
+    path('user_admin/', views.user_admin, name='user_admin'),
+    path('delete_group/<int:id>', views.delete_group, name='delete_group'),
+    path('edit_group/<int:id>', views.edit_group, name='edit_group'),
+    path('edit_user/<int:id>', views.edit_user, name='edit_user'),
     path('register/', views.register, name='register'),
     path('profile/', views.profile, name='profile'),
     path('profile/remove_case/<int:case_id>', views.remove_case, name='remove-case'),
@@ -43,7 +46,6 @@ urlpatterns = [
     path('update_proband/<int:report_id>', views.update_proband, name='update-proband'),
     path('update_demographics/<int:report_id>', views.update_demographics, name='update-demographics'),
     path('ajax_validation', views.ajax_variant_validation, name='ajax_validation'),
-    path('ajax_sv_validation', views.ajax_sv_validation, name='ajax_sv_validation'),
     path('<str:sample_type>/validation_list', views.validation_list, name='validation-list'),
 
     path('variant/<int:variant_id>', views.variant_view, name='variant-view'),

@@ -39,7 +39,6 @@ STATICFILES_DIRS = (
 
 INSTALLED_APPS = [
     'gel2mdt.apps.Gel2MdtConfig',
-    'gel2clin.apps.Gel2ClinConfig',
     'django.contrib.contenttypes',
     'django.contrib.admin',
     'django.contrib.auth',

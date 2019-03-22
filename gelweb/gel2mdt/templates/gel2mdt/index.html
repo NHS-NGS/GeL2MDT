@@ -22,7 +22,7 @@ SOFTWARE.
 {% extends 'gel2mdt/base.html' %}
 {% load bootstrap3 %}
 {% load static %}
-
+{% load gel2mdt_extras %}
 
 {% block content %}
 
@@ -31,18 +31,22 @@ SOFTWARE.
 
 <div  class="container-fluid"  >
 <div class="row">
+    {% if user|has_group_permission:'cancer' %}
     <div class="col-lg-6">
         <div class="thumbnail">
             <a href="/cancer-main">
                 <img src="{% static 'figures/cancer.jpg' %}" alt="Cancer" style="width:100%;  height: 30%"></a>
         </div>
     </div>
+    {% endif %}
+     {% if user|has_group_permission:'raredisease' %}
     <div class="col-lg-6">
         <div class="thumbnail">
             <a href="/rare-disease-main">
                 <img src="{% static 'figures/rare-diseases.jpg' %}" alt="Rare Disease" style="width:100%; height: 30%" ></a>
         </div>
     </div>
+    {% endif %}
 </div>
 </div>
 

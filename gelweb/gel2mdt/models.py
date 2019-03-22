@@ -274,6 +274,34 @@ class GELInterpretationReportQuerySet(models.QuerySet):
         else:
             return qs
 
+    def latest_cases_by_sample_type_and_user(self, sample_type, username):
+        admin = False
+        allowed_gmcs = []
+        user = User.objects.get(username=username)
+        for group in user.groups.all():
+            if group.name == 'ADMIN GROUP':
+                admin = True
+            for gmc in group.grouppermissions.gmc.all():
+                allowed_gmcs.append(gmc)
+        qs = self.filter(sample_type=sample_type).prefetch_related('ir_family__participant_family__proband')
+        if qs:
+            # cases present
+            qs_df = pd.DataFrame(list(qs.values())).sort_values(
+                by=["ir_family_id", "archived_version"]
+            )
+            rm_dup_old = qs_df.drop_duplicates(
+                subset=["ir_family_id"],
+                keep="last"
+            )
+            ids_of_latest_cases = rm_dup_old["id"].tolist()
+            if admin:
+                return self.filter(id__in=ids_of_latest_cases)
+            else:
+                return self.filter(id__in=ids_of_latest_cases).filter(
+                    ir_family__participant_family__proband__gmc__in=allowed_gmcs)
+        else:
+            return qs
+
     def latest_cases_by_user(self, username):
         qs = self.all()
         qs_df = pd.DataFrame(list(qs.values())).sort_values(
@@ -469,10 +497,7 @@ class Proband(models.Model):
     discussion = models.TextField(blank=True)
     action = models.TextField(blank=True)
     total_samples = models.IntegerField(null=True, blank=True)
-    if config_dict['GMC'] != 'None':
-        gmc = models.CharField(max_length=255, choices=gmc_choices, default='Unknown', null=True, blank=True)
-    else:
-        gmc = models.CharField(max_length=255, null=True, blank=True)
+    gmc = models.CharField(max_length=255, null=True, blank=True)
     local_id = models.CharField(max_length=255, null=True, blank=True)
 
     deceased = models.NullBooleanField()
@@ -566,7 +591,7 @@ class PreferredTranscript(models.Model):
         managed = True
         db_table = 'PreferredTranscript'
         unique_together = (('gene', 'genome_assembly'),)
-        app_label= 'gel2mdt'
+        app_label = 'gel2mdt'
 
         
 class TranscriptVariant(models.Model):
@@ -940,10 +965,10 @@ class MDT(models.Model):
         ('A', 'Active'), ('C', 'Completed')), default='A')
     gatb = models.NullBooleanField()
     sent_to_clinician = models.BooleanField(default=False)
-    # gtab_made = models.BooleanField(default=False)
-    # data_request_sent = models.BooleanField(default=False)
-    # gtab_sent = models.BooleanField(default=False)
-    # actions_sent = models.BooleanField(default=False)
+    gtab_made = models.BooleanField(default=False)
+    data_request_sent = models.BooleanField(default=False)
+    gtab_sent = models.BooleanField(default=False)
+    actions_sent = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.date_of_mdt)
@@ -1096,6 +1121,7 @@ class ProbandSVGene(models.Model):
         db_table = 'ProbandSVGene'
         app_label = 'gel2mdt'
 
+
 class STRVariant(models.Model):
     """
     Short tandem repeat variants
@@ -1108,12 +1134,17 @@ class STRVariant(models.Model):
     normal_threshold = models.IntegerField()
     pathogenic_threshold = models.IntegerField()
 
+    def __str__(self):
+        return f"{self.chromosome}:{self.str_start}-{self.str_end}"
+
     class Meta:
         managed = True
         unique_together = (('chromosome', 'str_start', 'str_end', 'genome_assembly', 
             'repeated_sequence', 'normal_threshold', 'pathogenic_threshold'),)
         db_table = 'STRVariant'
         app_label = 'gel2mdt'
+
+
 
 class ProbandSTR(models.Model):
     """
@@ -1128,10 +1159,6 @@ class ProbandSTR(models.Model):
     maternal_copies_b = models.IntegerField(null=True)
     paternal_copies_a = models.IntegerField(null=True)
     paternal_copies_b = models.IntegerField(null=True)
-    inheritance = models.CharField(
-        max_length=20,
-        choices=Inheritance.choices(),
-        default=Inheritance.unknown)
     mode_of_inheritance = models.CharField(max_length=128, null=True)
     segregation_pattern = models.CharField(max_length=128, null=True)
     requires_validation = models.BooleanField(db_column='Requires_Validation', default=False)
@@ -1152,6 +1179,12 @@ class ProbandSTR(models.Model):
     )
     validation_datetime_set = models.DateTimeField(null=True, default=None)
 
+    def __str__(self):
+        for gene in self.probandstrgene_set.all():
+            if gene.selected:
+                return gene.gene.hgnc_name
+
+
     class Meta:
         managed = True
         unique_together = (('str_variant', 'interpretation_report',),)
@@ -1170,4 +1203,49 @@ class ProbandSTRGene(models.Model):
         managed = True
         unique_together = (('proband_str', 'gene',),)
         db_table = 'ProbandSTRGene'
+        app_label = 'gel2mdt'
+
+
+class GMC(models.Model):
+    name = models.CharField(max_length=255)
+
+    class Meta:
+        managed = True
+        db_table = 'GMC'
+        app_label = 'gel2mdt'
+
+    def __str__(self):
+        return str(self.name)
+
+
+class GroupPermissions(models.Model):
+    gmc = models.ManyToManyField(GMC)
+    group = models.OneToOneField(Group, on_delete=models.CASCADE)
+    cancer = models.BooleanField(default=False, help_text="Indicates whether the group can view RareDisease Cases")
+    raredisease = models.BooleanField(default=False, help_text="Indicates whether the group can view Cancer Cases")
+
+    can_view_pvs = models.BooleanField(default=False, help_text="Indicates whether the group can view Proband Variants ")
+    can_view_svs = models.BooleanField(default=False, help_text="Indicates whether the group can view Proband Structural Variants ")
+    can_view_strs = models.BooleanField(default=False, help_text="Indicates whether the group can view Proband STRs")
+
+    can_select_update_transcript = models.BooleanField(default=False, help_text="Indicates whether the group can update transcripts and select preferred Transcripts")
+    pull_t3_variants = models.BooleanField(default=False, help_text="Indicates whether the group can Pull T3 Variants")
+    can_edit_proband = models.BooleanField(default=False, help_text="Indicates whether the group can edit proband Information")
+    can_edit_completed_proband = models.BooleanField(default=False,
+                                                     help_text="Indicates whether the group can view & edit a Completed Proband")
+    can_edit_gelir = models.BooleanField(default=False, help_text="Indicates whether the group can edit Case information")
+    can_edit_mdt = models.BooleanField(default=False, help_text="Indicates whether the group can edit MDT questions")
+    can_get_gel_report = models.BooleanField(default=False, help_text="Indicates whether the group can pull the GEL report")
+    can_edit_relative = models.BooleanField(default=False, help_text="Indicates whether the group can edit relative information")
+    can_edit_clinical_questions = models.BooleanField(default=False, help_text="Indicates whether the group can edit cancer clinical questions")
+    start_mdt = models.BooleanField(default=False, help_text="Indicates whether the group can start MDTs")
+    can_edit_case_alert = models.BooleanField(default=False, help_text="Indicates whether the group can view & edit Case Alerts")
+    can_edit_validation_list = models.BooleanField(default=False, help_text="Indicates whether the group can view & edit the validation list")
+
+    def __str__(self):
+        return str(self.group.name)
+
+    class Meta:
+        managed = True
+        db_table = 'GroupPermissions'
         app_label = 'gel2mdt'
