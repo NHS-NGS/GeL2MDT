@@ -40,6 +40,11 @@ def get_item(dictionary, key):
     return dictionary.get(key)
 
 @register.filter
+def count_dict(dictionary):
+    return len(dictionary.keys())
+
+
+@register.filter
 def sort_by(queryset, order):
     return queryset.order_by(order)
 

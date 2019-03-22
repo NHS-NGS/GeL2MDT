@@ -435,7 +435,6 @@ def proband_view(request, report_id):
     proband_variants = ProbandVariant.objects.filter(interpretation_report=report)
     proband_svs = ProbandSV.objects.filter(interpretation_report=report)
     proband_strs = ProbandSTR.objects.filter(interpretation_report=report)
-    print(proband_strs)
     proband_mdt = MDTReport.objects.filter(interpretation_report=report)
     panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.ir_family)
     panel_form = PanelForm(user=request.user)
