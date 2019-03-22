@@ -1184,12 +1184,12 @@ class ProbandSTR(models.Model):
             if gene.selected:
                 return gene.gene.hgnc_name
 
-
     class Meta:
         managed = True
         unique_together = (('str_variant', 'interpretation_report',),)
         db_table = 'ProbandSTR'
         app_label = 'gel2mdt'
+
 
 class ProbandSTRGene(models.Model):
     """

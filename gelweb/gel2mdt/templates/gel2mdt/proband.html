@@ -1266,6 +1266,8 @@
                                     <th>Tier</th>
                                     <th>TierA genes</th>
                                     <th>All genes in STR</th>
+                                    <th>Normal Threshold</th>
+                                    <th>Pathogenic Threshold</th>
                                     <th>Proband Copies</th>
                                     <th>Maternal Copies</th>
                                     <th>Paternal Copies</th>
@@ -1350,6 +1352,8 @@
                                             {{psg.gene}}
                                             {% endfor %}
                                         </td>
+                                        <td>{{proband_str.str_variant.normal_threshold}}</td>
+                                        <td>{{proband_str.str_variant.pathogenic_threshold}}</td>
                                         <td>{{proband_str.proband_copies_a}}, {{proband_str.proband_copies_b}}</td>
                                         <td>{{proband_str.maternal_copies_a}}, {{proband_str.maternal_copies_b}}</td>
                                         <td>{{proband_str.paternal_copies_a}}, {{proband_str.paternal_copies_b}}</td>

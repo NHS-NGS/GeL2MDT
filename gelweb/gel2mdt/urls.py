@@ -38,7 +38,6 @@ urlpatterns = [
     path('profile/remove_case/<int:case_id>', views.remove_case, name='remove-case'),
     path('cancer-main', views.cancer_main, name='cancer-main'),
     path('rare-disease-main', views.rare_disease_main, name='rare-disease-main'),
-    path('gel2me/', RedirectView.as_view(url='/', permanent=False), name='gel2me'),
     path('proband/<int:report_id>', views.proband_view, name='proband-view'),
     path('edit_relative/<int:relative_id>', views.edit_relatives, name='edit-relatives'),
     path('pull_t3_variants/<int:report_id>', views.pull_t3_variants, name='pull-t3-variants'),
@@ -50,6 +49,7 @@ urlpatterns = [
 
     path('variant/<int:variant_id>', views.variant_view, name='variant-view'),
     path('sv/<int:variant_id>', views.sv_view, name='sv-view'),
+    path('str/<int:variant_id>', views.str_view, name='str-view'),
 
     path('panel/<int:panelversion_id>', views.panel_view, name='panel'),
 

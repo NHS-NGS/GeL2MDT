@@ -714,6 +714,21 @@ def sv_view(request, variant_id):
     return render(request, 'gel2mdt/sv.html', {'sv': sv,
                                                     'proband_svs': proband_svs})
 
+
+@login_required
+def str_view(request, variant_id):
+    '''
+    Shows details about a particular SV and also probands it is present in
+    :param request:
+    :param variant_id: Variant ID
+    :return:
+    '''
+    str = STRVariant.objects.get(id=variant_id)
+    proband_strs = ProbandSTR.objects.filter(str_variant=str)
+
+    return render(request, 'gel2mdt/str.html', {'str': str,
+                                               'proband_strs': proband_strs})
+
 @login_required
 def update_proband(request, report_id):
     '''
@@ -1575,7 +1590,7 @@ def case_alert(request, sample_type):
     gel_reports = GELInterpretationReport.objects.latest_cases_by_sample_type(
         sample_type=sample_type).prefetch_related('ir_family__participant_family__proband')
     matching_cases = {}
-    case_alert_form = AddCaseAlert(user=request)
+    case_alert_form = AddCaseAlert(user=request.user)
     for case in case_alerts:
         matching_cases[case.id] = []
         for report in gel_reports:
