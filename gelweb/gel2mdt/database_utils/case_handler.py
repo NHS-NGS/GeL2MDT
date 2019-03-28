@@ -384,13 +384,16 @@ class Case(object):
                                                                                          variant_object_count,
                                                                                          case_variant_list)
             if ig_obj.structuralVariants:
-                ig_obj, case_sv_list = self.parse_ig_svs(ig_obj,
-                                                         genome_build,
-                                                         case_sv_list)
+                if int(ig_obj.softwareVersions['gel-tiering'].replace('.', '')) > 1000:
+                        ig_obj, case_sv_list = self.parse_ig_svs(ig_obj,
+                                                                 genome_build,
+                                                                 case_sv_list)
+
             if ig_obj.shortTandemRepeats:
-                ig_obj, case_str_list = self.parse_ig_strs(ig_obj,
-                                                           genome_build,
-                                                           case_str_list)
+                if int(ig_obj.softwareVersions['gel-tiering'].replace('.', '')) > 1000:
+                    ig_obj, case_str_list = self.parse_ig_strs(ig_obj,
+                                                               genome_build,
+                                                               case_str_list)
             self.ig_objs.append(ig_obj)
         for clinical_report in self.json['clinical_report']:
             cr_obj = ClinicalReport.fromJsonDict(clinical_report['clinical_report_data'])
