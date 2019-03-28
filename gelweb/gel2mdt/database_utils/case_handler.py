@@ -1550,15 +1550,18 @@ class CaseAttributeManager(object):
             if ig_obj.structuralVariants:
                 for variant in ig_obj.structuralVariants:
                     if variant.case_variant:
+                        variant.cnv_af = None
+                        variant.cnv_auc = None
                         for sv_entry in sv_entries:
                             if (variant.sv_region1_entry == sv_entry.sv_region1 and
                                     variant.sv_region2_entry == sv_entry.sv_region2 and
                                     variant.variantType == sv_entry.variant_type):
-                                for allele_freq in variant.variantAttributes.alleleFrequencies:
-                                    if allele_freq.population == 'CNV_AF':
-                                        variant.cnv_af = allele_freq.alternateFrequency
-                                    elif allele_freq.population == 'CNV_AUC':
-                                        variant.cnv_auc = allele_freq.alternateFrequency
+                                if variant.variantAttributes.alleleFrequencies:
+                                    for allele_freq in variant.variantAttributes.alleleFrequencies:
+                                        if allele_freq.population == 'CNV_AF':
+                                            variant.cnv_af = allele_freq.alternateFrequency
+                                        elif allele_freq.population == 'CNV_AUC':
+                                            variant.cnv_auc = allele_freq.alternateFrequency
                                 variant.sv_entry = sv_entry
                                 break
 
