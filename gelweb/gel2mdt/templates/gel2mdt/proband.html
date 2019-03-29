@@ -861,7 +861,7 @@
                                                         {% csrf_token %}
                                                         {% bootstrap_form pv_items.form %}
                                                         {% buttons %}
-                                                        <input value="Update" type="button" onclick="updateValidation(validationModal{{forloop.counter}});" class="btn btn-primary">
+                                                        <input value="Update" type="button" name='variant_validation' onclick="updateValidation(validationModal{{forloop.counter}});" class="btn btn-primary">
                                                         </input>
                                                         {% endbuttons %}
                                                     </form>
@@ -1063,7 +1063,7 @@
                         {% csrf_token %}
                         {% bootstrap_form case_assign_form %}
                         {% buttons %}
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" name="case_assign" class="btn btn-primary">
                             Update
                         </button>
                         {% endbuttons %}
@@ -1087,7 +1087,7 @@
                         {% csrf_token %}
                         {% bootstrap_form first_check_form %}
                         {% buttons %}
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" name="first_check" class="btn btn-primary">
                             Update
                         </button>
                         {% endbuttons %}
@@ -1111,7 +1111,7 @@
                         {% csrf_token %}
                         {% bootstrap_form second_check_form %}
                         {% buttons %}
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" name="second_check" class="btn btn-primary">
                             Update
                         </button>
                         {% endbuttons %}
@@ -1135,7 +1135,7 @@
                         {% csrf_token %}
                         {% bootstrap_form demogs_form %}
                         {% buttons %}
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" name="demog" class="btn btn-primary">
                             Update
                         </button>
                         {% endbuttons %}
@@ -1157,7 +1157,7 @@
                         {% csrf_token %}
                         {% bootstrap_form panel_form %}
                         {% buttons %}
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" name="panel" class="btn btn-primary">
                             Change
                         </button>
                         {% endbuttons %}
@@ -1179,7 +1179,7 @@
                         {% csrf_token %}
                         {% bootstrap_form clinician_form %}
                         {% buttons %}
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" name="change_clinician" class="btn btn-primary">
                             Change Clinician
                         </button>
                         {% endbuttons %}
@@ -1201,7 +1201,7 @@
                         {% csrf_token %}
                         {% bootstrap_form add_clinician_form %}
                         {% buttons %}
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" name="add_clinician" class="btn btn-primary">
                             Add New Clinician
                         </button>
                         {% endbuttons %}
@@ -1223,7 +1223,7 @@
                         {% csrf_token %}
                         {% bootstrap_form add_variant_form %}
                         {% buttons %}
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" name="add_variant" class="btn btn-primary">
                             Add New Variant
                         </button>
                         {% endbuttons %}
@@ -1245,7 +1245,7 @@
                         {% csrf_token %}
                         {% bootstrap_form add_comment_form %}
                         {% buttons %}
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" name="add_comment" class="btn btn-primary">
                             Add New Comment
                         </button>
                         {% endbuttons %}
