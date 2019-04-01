@@ -1,3 +1,8 @@
+## [0.6.2]- 2019-04-01
+
+### Changed
+- Fixed bug where changing the assigned user for a case deleted information from a number of demograhics fields
+
 ## [0.6.1]- 2019-02-26
 ### Added
 - Preferred transcript selection
