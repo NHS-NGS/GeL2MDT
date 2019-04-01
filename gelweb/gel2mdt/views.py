@@ -285,81 +285,93 @@ def proband_view(request, report_id):
         ir_family__participant_family=report.ir_family.participant_family).exclude(ir_family=report.ir_family)
 
     if request.method == "POST":
-        demogs_form = DemogsForm(request.POST, instance=report.ir_family.participant_family.proband)
-        case_assign_form = CaseAssignForm(request.POST, instance=report)
-        first_check_form = FirstCheckAssignForm(request.POST, instance=report)
-        second_check_form = SecondCheckAssignForm(request.POST, instance=report)
-        panel_form = PanelForm(request.POST)
-        clinician_form = ClinicianForm(request.POST)
-        add_clinician_form = AddClinicianForm(request.POST)
-        add_variant_form = AddVariantForm(request.POST)
-        add_comment_form = AddCommentForm(request.POST)
-        variant_validation_form = VariantValidationForm(request.POST)
+        if 'demog' in request.POST:
+            demogs_form = DemogsForm(request.POST, instance=report.ir_family.participant_family.proband)
+            if demogs_form.is_valid():
+                demogs_form.save()
+                messages.add_message(request, 25, 'Proband Updated')
+        if 'case_assign' in request.POST:
+            case_assign_form = CaseAssignForm(request.POST, instance=report)
+            if case_assign_form.is_valid():
+                case_assign_form.save()
+        if 'first_check_assign' in request.POST:
+            print(request.POST)
+            first_check_form = FirstCheckAssignForm(request.POST, instance=report)
+            if first_check_form.is_valid():
+                first_check_form.save()
+            else:
+                print(first_check_form.errors)
+        if 'second_check_assign' in request.POST:
+            second_check_form = SecondCheckAssignForm(request.POST, instance=report)
+            if second_check_form.is_valid():
+                second_check_form.save() 
+        if 'panel_assign' in request.POST:
+            panel_form = PanelForm(request.POST)
+            if panel_form.is_valid():
+                irfp, created = InterpretationReportFamilyPanel.objects.get_or_create(panel=panel_form.cleaned_data['panel'],
+                                                                                      ir_family=report.ir_family,
+                                                                                      defaults={
+                                                                                        'custom': True,
+                                                                                       'average_coverage':None,
+                                                                                       'proportion_above_15x':None,
+                                                                                       'genes_failing_coverage':None})
+                messages.add_message(request, 25, 'Panel Added')
+            else:
+                print(panel_form.errors())
+        if 'change_clinician' in request.POST:
+            clinician_form = ClinicianForm(request.POST)
+            if clinician_form.is_valid():
+                family = report.ir_family.participant_family
+                family.clinician = clinician_form.cleaned_data['clinician']
+                family.save()
+                messages.add_message(request, 25, 'Clinician Changed')
+        if 'add_clinician' in request.POST:
+            add_clinician_form = AddClinicianForm(request.POST)
+            if add_clinician_form.is_valid():
+                clinician, created = Clinician.objects.get_or_create(email=add_clinician_form.cleaned_data['email'],
+                                                                     defaults={
+                                                                         'name': add_clinician_form.cleaned_data['name'],
+                                                                         'hospital':add_clinician_form.cleaned_data['hospital'],
+                                                                         'added_by_user': True
+                                                                     })
+                messages.add_message(request, 25, 'Clinician Created')
+        if 'add_variant' in request.POST:
+            add_variant_form = AddVariantForm(request.POST)
+            if add_variant_form.is_valid():
+                variant = CaseVariant(add_variant_form.cleaned_data['chromosome'],
+                                      add_variant_form.cleaned_data['position'],
+                                      report_id,
+                                      1,
+                                      add_variant_form.cleaned_data['reference'],
+                                      add_variant_form.cleaned_data['alternate'],
+                                      str(report.assembly))
+                variant_entry, created = Variant.objects.get_or_create(chromosome=add_variant_form.cleaned_data['chromosome'],
+                                                                       position=add_variant_form.cleaned_data['position'],
+                                                                       genome_assembly=report.assembly,
+                                                                       reference=add_variant_form.cleaned_data['reference'],
+                                                                       alternate=add_variant_form.cleaned_data['alternate'],
+                                                                       defaults={'db_snp_id': add_variant_form.cleaned_data['db_snp_id']})
+                VariantAdder(variant_entry=variant_entry,
+                             report=report,
+                             variant=variant)
+                messages.add_message(request, 25, 'Variant Added to Report')
+        if 'add_comment' in request.POST:
+            add_comment_form = AddCommentForm(request.POST)
+            if add_comment_form.is_valid():
+                CaseComment.objects.create(interpretation_report=report,
+                                           comment=add_comment_form.cleaned_data['comment'],
+                                           user=request.user,
+                                           time=timezone.now())
+                messages.add_message(request, 25, 'Comment Added')
+        if 'variant_validation' in request.POST:
+            variant_validation_form = VariantValidationForm(request.POST)
+            if variant_validation_form.is_valid():
+                validation_status = variant_validation_form.cleaned_data['validation_status']
+                validation_user = variant_validation_form.cleaned_data['validation_responsible_user']
 
-        if variant_validation_form.is_valid():
-            validation_status = variant_validation_form.cleaned_data['validation_status']
-            validation_user = variant_validation_form.cleaned_data['validation_responsible_user']
-
-            pv.validation_status = validation_status
-            pv.validation_responsible_user = validation_user
-            pv.save()
-
-        if demogs_form.is_valid():
-            demogs_form.save()
-            messages.add_message(request, 25, 'Proband Updated')
-        if case_assign_form.is_valid():
-            case_assign_form.save()
-        if first_check_form.is_valid():
-            first_check_form.save()
-        if second_check_form.is_valid():
-            second_check_form.save() 
-        if add_comment_form.is_valid():
-            CaseComment.objects.create(interpretation_report=report,
-                                       comment=add_comment_form.cleaned_data['comment'],
-                                       user=request.user,
-                                       time=timezone.now())
-            messages.add_message(request, 25, 'Comment Added')
-
-        if panel_form.is_valid():
-            irfp, created = InterpretationReportFamilyPanel.objects.get_or_create(panel=panel_form.cleaned_data['panel'],
-                                                                                  ir_family=report.ir_family,
-                                                                                  defaults={
-                                                                                    'custom': True,
-                                                                                   'average_coverage':None,
-                                                                                   'proportion_above_15x':None,
-                                                                                   'genes_failing_coverage':None})
-            messages.add_message(request, 25, 'Panel Added')
-        if clinician_form.is_valid():
-            family = report.ir_family.participant_family
-            family.clinician = clinician_form.cleaned_data['clinician']
-            family.save()
-            messages.add_message(request, 25, 'Clinician Changed')
-        if add_clinician_form.is_valid():
-            clinician, created = Clinician.objects.get_or_create(email=add_clinician_form.cleaned_data['email'],
-                                                                 defaults={
-                                                                     'name': add_clinician_form.cleaned_data['name'],
-                                                                     'hospital':add_clinician_form.cleaned_data['hospital'],
-                                                                     'added_by_user': True
-                                                                 })
-            messages.add_message(request, 25, 'Clinician Created')
-        if add_variant_form.is_valid():
-            variant = CaseVariant(add_variant_form.cleaned_data['chromosome'],
-                                  add_variant_form.cleaned_data['position'],
-                                  report_id,
-                                  1,
-                                  add_variant_form.cleaned_data['reference'],
-                                  add_variant_form.cleaned_data['alternate'],
-                                  str(report.assembly))
-            variant_entry, created = Variant.objects.get_or_create(chromosome=add_variant_form.cleaned_data['chromosome'],
-                                                                   position=add_variant_form.cleaned_data['position'],
-                                                                   genome_assembly=report.assembly,
-                                                                   reference=add_variant_form.cleaned_data['reference'],
-                                                                   alternate=add_variant_form.cleaned_data['alternate'],
-                                                                   defaults={'db_snp_id': add_variant_form.cleaned_data['db_snp_id']})
-            VariantAdder(variant_entry=variant_entry,
-                         report=report,
-                         variant=variant)
-            messages.add_message(request, 25, 'Variant Added to Report')
+                pv.validation_status = validation_status
+                pv.validation_responsible_user = validation_user
+                pv.save()
 
     relatives = Relative.objects.filter(proband=report.ir_family.participant_family.proband)
     proband_form = ProbandForm(instance=report.ir_family.participant_family.proband)
