@@ -295,12 +295,9 @@ def proband_view(request, report_id):
             if case_assign_form.is_valid():
                 case_assign_form.save()
         if 'first_check_assign' in request.POST:
-            print(request.POST)
             first_check_form = FirstCheckAssignForm(request.POST, instance=report)
             if first_check_form.is_valid():
                 first_check_form.save()
-            else:
-                print(first_check_form.errors)
         if 'second_check_assign' in request.POST:
             second_check_form = SecondCheckAssignForm(request.POST, instance=report)
             if second_check_form.is_valid():
@@ -316,8 +313,6 @@ def proband_view(request, report_id):
                                                                                        'proportion_above_15x':None,
                                                                                        'genes_failing_coverage':None})
                 messages.add_message(request, 25, 'Panel Added')
-            else:
-                print(panel_form.errors())
         if 'change_clinician' in request.POST:
             clinician_form = ClinicianForm(request.POST)
             if clinician_form.is_valid():
