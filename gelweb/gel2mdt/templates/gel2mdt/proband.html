@@ -396,18 +396,21 @@
                                     <div class="col-md-12">
                                         {% if gelir_form.case_status.value != "C" %}
                                             </br>
-                                            <button type="submit" name="variant_update" class="btn btn-primary btn">Save</button>
+                                            <button type="submit" name="case_update" class="btn btn-primary btn">Save</button>
                                         {% elif user|has_group_permission:'can_edit_completed_proband' %}
                                             </br>
-                                            <button type="submit" name="variant_update" class="btn btn-primary btn">Save</button>
+                                            <button type="submit" name="case_update" class="btn btn-primary btn">Save</button>
                                         {% endif %}
 
 
-                                        {% if config_dict|get_item:'show_clinical_report' == 'True' %}
+                                        {% if sample_type == 'raredisease' %}
+
+                                        {% if user|has_group_permission:'can_edit_completed_proband' %}
                                             <span>
                                                 <a href="/genomics_england_report/{{report.id}}" class="btn btn-warning" role="button">Clinical Report</a>
                                             </span>
-                                        {% endif %} 
+                                        {% endif %}
+                                         {% endif %}
 
 
                                         <span style="float: right; margin: 0px 5px 0px 5px">
@@ -892,7 +895,7 @@
                                                         {% csrf_token %}
                                                         {% bootstrap_form pv_items.form %}
                                                         {% buttons %}
-                                                        <input value="Update" type="button" onclick="updateValidation(validationModal{{forloop.counter}});" class="btn btn-primary">
+                                                        <input value="Update" type="button" name='variant_validation' onclick="updateValidation(validationModal{{forloop.counter}});" class="btn btn-primary">
                                                         </input>
                                                         {% endbuttons %}
                                                     </form>
@@ -1578,7 +1581,7 @@
                         {% csrf_token %}
                         {% bootstrap_form case_assign_form %}
                         {% buttons %}
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" name="case_assign" class="btn btn-primary">
                             Update
                         </button>
                         {% endbuttons %}
@@ -1602,7 +1605,7 @@
                         {% csrf_token %}
                         {% bootstrap_form first_check_form %}
                         {% buttons %}
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" name="first_check_assign" class="btn btn-primary">
                             Update
                         </button>
                         {% endbuttons %}
@@ -1626,7 +1629,7 @@
                         {% csrf_token %}
                         {% bootstrap_form second_check_form %}
                         {% buttons %}
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" name="second_check_assign" class="btn btn-primary">
                             Update
                         </button>
                         {% endbuttons %}
@@ -1650,7 +1653,7 @@
                         {% csrf_token %}
                         {% bootstrap_form demogs_form %}
                         {% buttons %}
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" name="demog" class="btn btn-primary">
                             Update
                         </button>
                         {% endbuttons %}
@@ -1672,7 +1675,7 @@
                         {% csrf_token %}
                         {% bootstrap_form panel_form %}
                         {% buttons %}
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" name="panel_assign" class="btn btn-primary">
                             Change
                         </button>
                         {% endbuttons %}
@@ -1694,13 +1697,13 @@
                         {% csrf_token %}
                         {% bootstrap_form clinician_form %}
                         {% buttons %}
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" name="change_clinician" class="btn btn-primary">
                             Change Clinician
                         </button>
                         {% endbuttons %}
                     </form>
                 </div>
-            </div>
+            </div>fchange_clinician
         </div>
     </div>
 
@@ -1716,7 +1719,7 @@
                         {% csrf_token %}
                         {% bootstrap_form add_clinician_form %}
                         {% buttons %}
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" name="add_clinician" class="btn btn-primary">
                             Add New Clinician
                         </button>
                         {% endbuttons %}
@@ -1738,7 +1741,7 @@
                         {% csrf_token %}
                         {% bootstrap_form add_variant_form %}
                         {% buttons %}
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" name="add_variant" class="btn btn-primary">
                             Add New Variant
                         </button>
                         {% endbuttons %}
@@ -1760,7 +1763,7 @@
                         {% csrf_token %}
                         {% bootstrap_form add_comment_form %}
                         {% buttons %}
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" name="add_comment" class="btn btn-primary">
                             Add New Comment
                         </button>
                         {% endbuttons %}
@@ -1807,7 +1810,7 @@
                         <div class="row">
                      <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary" >Save</button>
+                        <button type="submit" name="cancer_history" class="btn btn-primary" >Save</button>
                       </div>
                     </div>
                     </div>
