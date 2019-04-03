@@ -1203,6 +1203,7 @@ def edit_mdt_proband(request, report_id):
     report = GELInterpretationReport.objects.get(id=report_id)
     if request.method == 'POST':
         proband_form = ProbandMDTForm(request.POST,
+                                      user=request.user,
                                       instance=report.ir_family.participant_family.proband)
         mdt_id = request.session.get('mdt_id')
         if proband_form.is_valid():
@@ -1213,21 +1214,46 @@ def edit_mdt_proband(request, report_id):
             reports = GELInterpretationReport.objects.filter(id__in=report_list)
             proband_variant_count = {}
             t3_proband_variant_count = {}
+            sv_count = {}
+            str_count = {}
+            first_check_count = 0
+            second_check_count = 0
             for report in reports:
                 proband_variant_count[report.id] = 0
                 t3_proband_variant_count[report.id] = 0
                 pvs = ProbandVariant.objects.filter(interpretation_report=report)
+                proband_sv_count = ProbandSV.objects.filter(interpretation_report=report).count()
+                sv_count[report.id] = proband_sv_count
+                proband_str_count = ProbandSTR.objects.filter(interpretation_report=report).count()
+                str_count[report.id] = proband_str_count
                 for pv in pvs:
-                    if pv.pvflag_set.all() or pv.max_tier < 3:
+                    if pv.pvflag_set.all() and pv.max_tier is None:
                         proband_variant_count[report.id] += 1
-                    else:
-                        t3_proband_variant_count[report.id] += 1
+                    if pv.max_tier or pv.max_tier == 0:
+                        if pv.pvflag_set.all() or pv.max_tier < 3:
+                            proband_variant_count[report.id] += 1
+                        else:
+                            t3_proband_variant_count[report.id] += 1
+                if report.second_check:
+                    second_check_count += 1
+                elif report.first_check:
+                    first_check_count += 1
+            try:
+                first_check_percent = (first_check_count / len(reports)) * 100
+                second_check_percent = (second_check_count / len(reports)) * 100
+            except ZeroDivisionError:
+                first_check_percent = 0
+                second_check_percent = 0
 
             data['html_mdt_list'] = render_to_string('gel2mdt/includes/mdt_proband_table.html', {
                 'reports': reports,
                 'proband_variant_count': proband_variant_count,
-                't3_proband_variant_count': t3_proband_variant_count,
-                'mdt_id': request.session['mdt_id']
+                'mdt_id': request.session['mdt_id'],
+                'sv_count': sv_count,
+                 'str_count': str_count,
+                 't3_proband_variant_count': t3_proband_variant_count,
+                 'first_check_percent': first_check_percent,
+                 'second_check_percent': second_check_percent,
             })
         else:
             data['form_is_valid'] = False
