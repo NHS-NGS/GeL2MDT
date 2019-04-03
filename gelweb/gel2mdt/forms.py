@@ -29,6 +29,16 @@ from django.forms import BaseFormSet
 from .models import *
 
 
+def has_group_permission(user, argument):
+    if user.groups.all():
+        for group in user.groups.all():
+            if hasattr(group, 'grouppermissions'):
+                group_permission = group.grouppermissions
+                if getattr(group_permission, argument):
+                    return True
+    return False
+
+
 class UserForm(forms.ModelForm):
     """
     User registration form
@@ -69,14 +79,14 @@ class ProbandForm(forms.ModelForm):
         self.report = kwargs.pop('report', None)
         super(ProbandForm, self).__init__(*args, **kwargs)
         enable_form = False
-        for group in self.user.groups.all():
-            if hasattr(group, 'grouppermissions'):
-                if group.grouppermissions.can_edit_completed_proband:
+        can_edit_completed_proband =  has_group_permission(self.user, 'can_edit_completed_proband')
+        can_edit_proband = has_group_permission(self.user, 'can_edit_proband')
+        if can_edit_completed_proband:
+            enable_form = True
+        else:
+            if self.report.case_status != 'C':
+                if can_edit_proband:
                     enable_form = True
-                else:
-                    if self.report.case_status != 'C':
-                        if group.grouppermissions.can_edit_proband:
-                            enable_form = True
 
         if not enable_form:
             for field in self.fields:
@@ -99,12 +109,7 @@ class VariantValidationForm(forms.ModelForm):
         self.user = kwargs.pop('user', None)
         super(VariantValidationForm, self).__init__(*args, **kwargs)
         self.fields['validation_responsible_user'].required=False
-        enable_form = False
-        for group in self.user.groups.all():
-            if hasattr(group, 'grouppermissions'):
-                if group.grouppermissions.can_edit_validation_list:
-                    enable_form = True
-        if not enable_form:
+        if not has_group_permission(self.user, 'can_edit_validation_list'):
             for field in self.fields:
                 self.fields[field].disabled = True
 
@@ -124,12 +129,7 @@ class SVValidationForm(forms.ModelForm):
         self.user = kwargs.pop('user', None)
         super(SVValidationForm, self).__init__(*args, **kwargs)
         self.fields['validation_responsible_user'].required=False
-        enable_form = False
-        for group in self.user.groups.all():
-            if hasattr(group, 'grouppermissions'):
-                if group.grouppermissions.can_edit_validation_list:
-                    enable_form = True
-        if not enable_form:
+        if not has_group_permission(self.user, 'can_edit_validation_list'):
             for field in self.fields:
                 self.fields[field].disabled = True
 
@@ -149,12 +149,7 @@ class STRValidationForm(forms.ModelForm):
         self.user = kwargs.pop('user', None)
         super(STRValidationForm, self).__init__(*args, **kwargs)
         self.fields['validation_responsible_user'].required=False
-        enable_form = False
-        for group in self.user.groups.all():
-            if hasattr(group, 'grouppermissions'):
-                if group.grouppermissions.can_edit_validation_list:
-                    enable_form = True
-        if not enable_form:
+        if not has_group_permission(self.user, 'can_edit_validation_list'):
             for field in self.fields:
                 self.fields[field].disabled = True
 
@@ -174,12 +169,7 @@ class AddCommentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super(AddCommentForm, self).__init__(*args, **kwargs)
-        enable_form = False
-        for group in self.user.groups.all():
-            if hasattr(group, 'grouppermissions'):
-                if group.grouppermissions.can_edit_gelir:
-                    enable_form = True
-        if not enable_form:
+        if not has_group_permission(self.user, 'can_edit_gelir'):
             for field in self.fields:
                 self.fields[field].disabled = True
 
@@ -200,10 +190,15 @@ class GELIRForm(forms.ModelForm):
         self.user = kwargs.pop('user', None)
         super(GELIRForm, self).__init__(*args, **kwargs)
         enable_form = False
-        for group in self.user.groups.all():
-            if hasattr(group, 'grouppermissions'):
-                if group.grouppermissions.can_edit_gelir:
+        can_edit_completed_proband = has_group_permission(self.user, 'can_edit_completed_proband')
+        can_edit_gelir = has_group_permission(self.user, 'can_edit_gelir')
+        if can_edit_completed_proband:
+            enable_form = True
+        else:
+            if self.instance.case_status != 'C':
+                if can_edit_gelir:
                     enable_form = True
+
         if not enable_form:
             for field in self.fields:
                 self.fields[field].disabled = True
@@ -227,12 +222,7 @@ class RelativeForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super(RelativeForm, self).__init__(*args, **kwargs)
-        enable_form = False
-        for group in self.user.groups.all():
-            if hasattr(group, 'grouppermissions'):
-                if group.grouppermissions.can_edit_relative:
-                    enable_form = True
-        if not enable_form:
+        if not has_group_permission(self.user, 'can_edit_relative'):
             for field in self.fields:
                 self.fields[field].disabled = True
 
@@ -249,12 +239,7 @@ class DemogsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super(DemogsForm, self).__init__(*args, **kwargs)
-        enable_form = False
-        for group in self.user.groups.all():
-            if hasattr(group, 'grouppermissions'):
-                if group.grouppermissions.can_edit_proband:
-                    enable_form = True
-        if not enable_form:
+        if not has_group_permission(self.user, 'can_edit_proband'):
             for field in self.fields:
                 self.fields[field].disabled = True
 
@@ -275,12 +260,7 @@ class PanelForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super(PanelForm, self).__init__(*args, **kwargs)
-        enable_form = False
-        for group in self.user.groups.all():
-            if hasattr(group, 'grouppermissions'):
-                if group.grouppermissions.can_edit_proband:
-                    enable_form = True
-        if not enable_form:
+        if not has_group_permission(self.user, 'can_edit_proband'):
             for field in self.fields:
                 self.fields[field].disabled = True
 
@@ -294,15 +274,9 @@ class ClinicianForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super(ClinicianForm, self).__init__(*args, **kwargs)
-        enable_form = False
-        for group in self.user.groups.all():
-            if hasattr(group, 'grouppermissions'):
-                if group.grouppermissions.can_edit_proband:
-                    enable_form = True
-        if not enable_form:
+        if not has_group_permission(self.user, 'can_edit_proband'):
             for field in self.fields:
                 self.fields[field].disabled = True
-
     clinician = forms.ModelChoiceField(queryset=Clinician.objects.filter(added_by_user=True).order_by('name'))
 
 
@@ -338,12 +312,7 @@ class CaseAssignForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super(CaseAssignForm, self).__init__(*args, **kwargs)
-        enable_form = False
-        for group in self.user.groups.all():
-            if hasattr(group, 'grouppermissions'):
-                if group.grouppermissions.can_edit_gelir:
-                    enable_form = True
-        if not enable_form:
+        if not has_group_permission(self.user, 'can_edit_gelir'):
             for field in self.fields:
                 self.fields[field].disabled = True
 
@@ -367,12 +336,7 @@ class FirstCheckAssignForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super(FirstCheckAssignForm, self).__init__(*args, **kwargs)
-        enable_form = False
-        for group in self.user.groups.all():
-            if hasattr(group, 'grouppermissions'):
-                if group.grouppermissions.can_edit_gelir:
-                    enable_form = True
-        if not enable_form:
+        if not has_group_permission(self.user, 'can_edit_gelir'):
             for field in self.fields:
                 self.fields[field].disabled = True
     first_check = UserChoiceField(queryset=User.objects.all().order_by('first_name'))
@@ -395,12 +359,7 @@ class SecondCheckAssignForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super(SecondCheckAssignForm, self).__init__(*args, **kwargs)
-        enable_form = False
-        for group in self.user.groups.all():
-            if hasattr(group, 'grouppermissions'):
-                if group.grouppermissions.can_edit_gelir:
-                    enable_form = True
-        if not enable_form:
+        if not has_group_permission(self.user, 'can_edit_gelir'):
             for field in self.fields:
                 self.fields[field].disabled = True
 
@@ -424,12 +383,7 @@ class MdtForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super(MdtForm, self).__init__(*args, **kwargs)
-        enable_form = False
-        for group in self.user.groups.all():
-            if hasattr(group, 'grouppermissions'):
-                if group.grouppermissions.can_edit_mdt:
-                    enable_form = True
-        if not enable_form:
+        if not has_group_permission(self.user, 'can_edit_mdt'):
             for field in self.fields:
                 self.fields[field].disabled = True
 
@@ -446,14 +400,10 @@ class MdtSentToClinicianForm(forms.ModelForm):
         self.user = kwargs.pop('user', None)
         super(MdtSentToClinicianForm, self).__init__(*args, **kwargs)
         self.fields['sent_to_clinician'].required = False
-        enable_form = False
-        for group in self.user.groups.all():
-            if hasattr(group, 'grouppermissions'):
-                if group.grouppermissions.can_edit_mdt:
-                    enable_form = True
-        if not enable_form:
+        if not has_group_permission(self.user, 'can_edit_mdt'):
             for field in self.fields:
                 self.fields[field].disabled = True
+
         if self.instance.sample_type == 'raredisease':
             self.fields['gtab_made'].widget = forms.HiddenInput()
             self.fields['data_request_sent'].widget = forms.HiddenInput()
@@ -472,12 +422,7 @@ class ProbandMDTForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super(ProbandMDTForm, self).__init__(*args, **kwargs)
-        enable_form = False
-        for group in self.user.groups.all():
-            if hasattr(group, 'grouppermissions'):
-                if group.grouppermissions.can_edit_mdt:
-                    enable_form = True
-        if not enable_form:
+        if not has_group_permission(self.user, 'can_edit_mdt'):
             for field in self.fields:
                 self.fields[field].disabled = True
 
@@ -503,12 +448,7 @@ class GELIRMDTForm(forms.ModelForm):
         self.user = kwargs.pop('user', None)
         super(GELIRMDTForm, self).__init__(*args, **kwargs)
         self.fields['case_status'].required = False
-        enable_form = False
-        for group in self.user.groups.all():
-            if hasattr(group, 'grouppermissions'):
-                if group.grouppermissions.can_edit_gelir:
-                    enable_form = True
-        if not enable_form:
+        if not has_group_permission(self.user, 'can_edit_gelir'):
             for field in self.fields:
                 self.fields[field].disabled = True
 
@@ -658,12 +598,7 @@ class AddVariantForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super(AddVariantForm, self).__init__(*args, **kwargs)
-        enable_form = False
-        for group in self.user.groups.all():
-            if hasattr(group, 'grouppermissions'):
-                if group.grouppermissions.can_edit_gelir:
-                    enable_form = True
-        if not enable_form:
+        if not has_group_permission(self.user, 'can_edit_gelir'):
             for field in self.fields:
                 self.fields[field].disabled = True
 
@@ -675,12 +610,7 @@ class AddCaseAlert(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super(AddCaseAlert, self).__init__(*args, **kwargs)
-        enable_form = False
-        for group in self.user.groups.all():
-            if hasattr(group, 'grouppermissions'):
-                if group.grouppermissions.can_edit_case_alert:
-                    enable_form = True
-        if not enable_form:
+        if not has_group_permission(self.user, 'can_edit_case_alert'):
             for field in self.fields:
                 self.fields[field].disabled = True
 
@@ -752,12 +682,7 @@ class ProbandCancerForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super(ProbandCancerForm, self).__init__(*args, **kwargs)
-        enable_form = False
-        for group in self.user.groups.all():
-            if hasattr(group, 'grouppermissions'):
-                if group.grouppermissions.can_edit_clinical_questions:
-                    enable_form = True
-        if not enable_form:
+        if not has_group_permission(self.user, 'can_edit_clinical_questions'):
             for field in self.fields:
                 self.fields[field].disabled = True
 

@@ -51,11 +51,12 @@ def sort_by(queryset, order):
 
 @register.filter
 def has_group_permission(user, argument):
-    for group in user.groups.all():
-        if hasattr(group, 'grouppermissions'):
-            group_permission = group.grouppermissions
-            if getattr(group_permission, argument):
-                return True
+    if user.groups.all():
+        for group in user.groups.all():
+            if hasattr(group, 'grouppermissions'):
+                group_permission = group.grouppermissions
+                if getattr(group_permission, argument):
+                    return True
     return False
 
 
