@@ -448,6 +448,7 @@ class GELIRMDTForm(forms.ModelForm):
         self.user = kwargs.pop('user', None)
         super(GELIRMDTForm, self).__init__(*args, **kwargs)
         self.fields['case_status'].required = False
+        self.fields['case_code'].required = False
         if not has_group_permission(self.user, 'can_edit_gelir'):
             for field in self.fields:
                 self.fields[field].disabled = True
@@ -456,6 +457,7 @@ class GELIRMDTForm(forms.ModelForm):
         gelir = self.instance
         data = self.cleaned_data
         gelir.case_status = data['case_status']
+        gelir.case_code = data['case_code']
         gelir.save(overwrite=True)
 
 

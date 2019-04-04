@@ -406,6 +406,7 @@ class Case(object):
             if cr_obj.variants:
                 for variant in cr_obj.variants:
                     variant_min_tier = None
+                    tier = None
                     for report_event in variant.reportEvents:
                         if self.json['sample_type'] == 'raredisease':
                             if report_event.tier:
