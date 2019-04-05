@@ -26,7 +26,7 @@ SOFTWARE.
 {% block content %}
 <div style="text-align:center">
     <h1>Select attendees for MDT
-        <form action="/mdt_view/{{ mdt_id }}" role="form" method="post">
+        <form action="/mdt_view/{{ mdt_id }}" role="form" >
         {% csrf_token %} {% bootstrap_button "Go to MDT" button_type="submit" button_class="btn-primary btn-primary" %}
         </form>
     <form action="/add_new_attendee/" role="form" >

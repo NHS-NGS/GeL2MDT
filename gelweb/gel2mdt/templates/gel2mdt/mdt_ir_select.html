@@ -25,7 +25,7 @@ SOFTWARE.
 {% block content %}
 <div class='container-fluid'>
 <div style="text-align:center">
-    <h1>Select samples for MDT <form action="/mdt_view/{{ mdt_id }}" role="form" method="post">
+    <h1>Select samples for MDT <form action="/mdt_view/{{ mdt_id }}" role="form">
         {% csrf_token %} {% bootstrap_button "Go to MDT" button_type="submit" button_class="btn-primary btn-primary" %}
     </form> </h1>
 </div>
