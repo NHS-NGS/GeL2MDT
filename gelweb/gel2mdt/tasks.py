@@ -69,6 +69,15 @@ def create_admin_group():
         permissions.save()
     except (ProgrammingError, OperationalError):
         pass # Models probably don't exist yet
+    try:
+        gmc_list = Proband.objects.all().values_list('gmc', flat=True)
+        gmc_list = set(gmc_list)
+        for gmc in gmc_list:
+            if gmc:
+                GMC.objects.get_or_create(name=gmc)
+    except (ProgrammingError, OperationalError):
+        pass # Models probably don't exist yet
+
 
 
 def get_gel_content(ir, ir_version):
