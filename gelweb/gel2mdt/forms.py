@@ -250,7 +250,8 @@ class DemogsForm(forms.ModelForm):
     def save(self):
         proband = self.instance
         proband.save()
-        GMC.objects.get_or_create(name=proband.gmc)
+        if proband.gmc:
+            GMC.objects.get_or_create(name=proband.gmc)
 
 
 class PanelForm(forms.Form):
