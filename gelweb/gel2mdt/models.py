@@ -1229,8 +1229,8 @@ class GMC(models.Model):
 class GroupPermissions(models.Model):
     gmc = models.ManyToManyField(GMC)
     group = models.OneToOneField(Group, on_delete=models.CASCADE)
-    cancer = models.BooleanField(default=False, help_text="Indicates whether the group can view RareDisease Cases")
-    raredisease = models.BooleanField(default=False, help_text="Indicates whether the group can view Cancer Cases")
+    cancer = models.BooleanField(default=False, help_text="Indicates whether the group can view Cancer Cases")
+    raredisease = models.BooleanField(default=False, help_text="Indicates whether the group can view Rare Disease Cases")
 
     can_view_pvs = models.BooleanField(default=False, help_text="Indicates whether the group can view Proband Variants ")
     can_view_svs = models.BooleanField(default=False, help_text="Indicates whether the group can view Proband Structural Variants ")
