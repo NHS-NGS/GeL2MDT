@@ -405,7 +405,7 @@
 
                                         {% if sample_type == 'raredisease' %}
 
-                                        {% if user|has_group_permission:'can_edit_completed_proband' %}
+                                        {% if user|has_group_permission:'can_get_gel_report' %}
                                             <span>
                                                 <a href="/genomics_england_report/{{report.id}}" class="btn btn-warning" role="button">Clinical Report</a>
                                             </span>
