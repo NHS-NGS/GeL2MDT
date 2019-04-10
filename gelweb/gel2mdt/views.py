@@ -283,9 +283,17 @@ def cancer_main(request):
     :param request:
     :return:
     '''
-    gene_search_form = GeneSearchForm()
-    return render(request, 'gel2mdt/cancer_main.html', {'sample_type': 'cancer',
-                                                        'gene_search_form': gene_search_form})
+    can_view_cancer = False
+    for group in request.user.groups.all():
+        if hasattr(group, 'grouppermissions'):
+            if group.grouppermissions.cancer:
+                can_view_cancer = True
+    if can_view_cancer:
+        gene_search_form = GeneSearchForm()
+        return render(request, 'gel2mdt/cancer_main.html', {'sample_type': 'cancer',
+                                                            'gene_search_form': gene_search_form})
+    else:
+        return redirect('index')
 
 
 @login_required
@@ -296,9 +304,17 @@ def rare_disease_main(request):
     :param request:
     :return:
     '''
-    gene_search_form = GeneSearchForm()
-    return render(request, 'gel2mdt/rare_disease_main.html', {'sample_type': 'raredisease',
-                                                              'gene_search_form': gene_search_form})
+    can_view_raredisease = False
+    for group in request.user.groups.all():
+        if hasattr(group, 'grouppermissions'):
+            if group.grouppermissions.raredisease:
+                can_view_raredisease = True
+    if can_view_raredisease:
+        gene_search_form = GeneSearchForm()
+        return render(request, 'gel2mdt/rare_disease_main.html', {'sample_type': 'raredisease',
+                                                                  'gene_search_form': gene_search_form})
+    else:
+        return redirect('index')
 
 
 @login_required
