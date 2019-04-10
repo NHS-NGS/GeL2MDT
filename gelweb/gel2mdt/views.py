@@ -345,6 +345,8 @@ def proband_view(request, report_id):
             if demogs_form.is_valid():
                 demogs_form.save()
                 messages.add_message(request, 25, 'Proband Updated')
+            else:
+                messages.add_message(request, 40, demogs_form.errors)
         if 'case_assign' in request.POST:
             case_assign_form = CaseAssignForm(request.POST, user=request.user, instance=report)
             if case_assign_form.is_valid():

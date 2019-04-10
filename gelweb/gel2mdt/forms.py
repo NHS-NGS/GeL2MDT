@@ -247,6 +247,13 @@ class DemogsForm(forms.ModelForm):
         model = Proband
         fields = ['nhs_number', 'lab_number', 'forename', 'surname', 'date_of_birth', 'sex', 'local_id', 'gmc']
 
+    def clean_gmc(self):
+        if not self.cleaned_data['gmc']:
+            raise forms.ValidationError("You must set a GMC code")
+        else:
+            gmc = self.cleaned_data['gmc'].strip()
+            return gmc
+
     def save(self):
         proband = self.instance
         proband.save()
