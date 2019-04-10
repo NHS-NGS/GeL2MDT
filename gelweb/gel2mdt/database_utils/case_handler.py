@@ -544,7 +544,7 @@ class CaseAttributeManager(object):
         if self.case.ir_obj.workspace:
             clinician_details['hospital'] = self.case.ir_obj.workspace[0]
         else:
-            clinician_details['hospital'] = 'unknown'
+            clinician_details['hospital'] = 'Unknown'
         GMC.objects.get_or_create(name=clinician_details['hospital'])
         clinician = CaseModel(Clinician, {
             "name": clinician_details['name'],

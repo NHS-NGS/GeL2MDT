@@ -31,7 +31,7 @@
     <ul class="nav nav-tabs" data-options="deep_linking: true">
         <li class="active"><a data-toggle="tab" href="#proband">Proband</a></li>
         {% if user|has_group_permission:'can_view_pvs' %}
-        <li><a data-toggle="tab" href="#variants">Variants  <span class="badge" >{{pv_dict|count_dict}}</span> </a></li>
+        <li><a data-toggle="tab" href="#variants">SNVs / Indels  <span class="badge" >{{pv_dict|count_dict}}</span> </a></li>
         {% endif %}
         {% if sample_type == 'raredisease' %}
         {% if user|has_group_permission:'can_view_svs' %}
@@ -198,7 +198,7 @@
                         <div class="panel panel-default">
                             <div class="panel-heading">Clinical Information
                                 {% if user|has_group_permission:'can_edit_clinical_questions' %}
-                                <a href=# data-toggle="modal" data-target="#clinicalHistoryModal" class="btn btn-md btn-danger"><i ></i> Add Clinical History</a>
+                                <a href=# data-toggle="modal" data-target="#clinicalHistoryModal" class="btn btn-md btn-danger"><i ></i> Update Clinical History</a>
                                 {% endif %}
 
                              </div>

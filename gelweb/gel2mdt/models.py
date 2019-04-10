@@ -497,7 +497,7 @@ class Proband(models.Model):
     discussion = models.TextField(blank=True)
     action = models.TextField(blank=True)
     total_samples = models.IntegerField(null=True, blank=True)
-    gmc = models.CharField(max_length=255, null=True, blank=True, default='unknown')
+    gmc = models.CharField(max_length=255, blank=True, default='Unknown')
     local_id = models.CharField(max_length=255, null=True, blank=True)
 
     deceased = models.NullBooleanField()
