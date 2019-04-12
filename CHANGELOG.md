@@ -1,3 +1,11 @@
+## [0.7.0]- 2019-04-12
+### Added
+- CNV and STR compatibility
+- User admin functionality
+
+### Changed
+- Removed clinican specific views (replaced by user admin)
+
 ## [0.6.2]- 2019-04-01
 
 ### Changed
