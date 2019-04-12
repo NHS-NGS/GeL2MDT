@@ -34,6 +34,27 @@ class CaseVariant:
         self.alt = alt
         self.genome_build = genome_build
 
+class CaseCNV:
+    def __init__(self, chromosome, sv_start, sv_end, case_id, sv_type, genome_build):
+        self.chromosome = chromosome
+        self.sv_start = sv_start
+        self.sv_end = sv_end
+        self.case_id = case_id
+        self.sv_type = sv_type
+        self.genome_build = genome_build
+
+class CaseSTR:
+    def __init__(self, chromosome, str_start, str_end, repeated_sequence, normal_threshold, pathogenic_threshold, case_id, genome_build):
+        self.chromosome = chromosome
+        self.str_start = str_start
+        self.str_end = str_end
+        self.repeated_sequence = repeated_sequence
+        self.normal_threshold = normal_threshold
+        self.pathogenic_threshold = pathogenic_threshold
+        self.case_id = case_id
+        self.genome_build = genome_build
+
+
 class CaseTranscript:
     def __init__(self, case_id, variant_count, gene_ensembl_id, gene_hgnc_name, gene_hgnc_id, transcript_name, transcript_canonical,
                  transcript_strand, proband_transcript_variant_effect, transcript_variant_af_max, variant_polyphen,

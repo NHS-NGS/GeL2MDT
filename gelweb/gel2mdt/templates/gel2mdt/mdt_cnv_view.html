@@ -23,6 +23,7 @@ SOFTWARE.
 {% load bootstrap3 %}
 {% load static %}
 
+
 {% block content %}
 {% block javascript %}
   <script src="{% static 'js/custom.js' %}"></script>
@@ -111,7 +112,6 @@ SOFTWARE.
                                             <td> {% bootstrap_field proband_form.discussion %} </td>
                                             <td> {% bootstrap_field proband_form.action %} </td>
                                             <td> {% bootstrap_field gelir_form.case_status %} </td>
-                                            <td> {% bootstrap_field gelir_form.case_code %} </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -127,16 +127,11 @@ SOFTWARE.
 
     <div class="table-responsive">
         <table width="100%" class="table table-striped table-bordered table-hover"  >
-            {% if sample_type == 'raredisease' %}
             <thead style='font-size: 70%' align="center">
                 <tr>
-                    <th>Variant ID</th>
+                    <th>CNV ID</th>
                     <th>Tier</th>
-                    <th>Flag</th>
                     <th>Gene</th>
-                    <th>HGVSc</th>
-                    <th>HGVSp</th>
-                    <th>Genotype</th>
                     <th>Validation Required?</th>
                     <th>Classification</th>
                     <th>Contribution to Phenotype</th>
@@ -154,16 +149,14 @@ SOFTWARE.
                                             {{ form.id }}
 
                                                 <tr>
-                                                    <td  ><a href="/variant/{{form.instance.proband_variant.variant.id}}">{{form.instance.proband_variant.variant.id}}</a></td>
-                                                    <td>{{form.instance.proband_variant.max_tier}}</td>
-                                                    <td style="word-wrap: break-word; min-width: 75px;max-width: 75px;">{% for flag in form.instance.proband_variant.pvflag_set.all %}
-                                                        {{flag}};
-                                                    {% endfor %}
+                                                    <td  ><a href="/sv/{{form.instance.proband_sv.sv.id}}">{{form.instance.proband_sv.sv}}</a></td>
+                                                    <td>{{form.instance.proband_sv.max_tier}}</td>
+                                                    <td>{% for psg in form.instance.proband_sv.probandsvgene_set.all %}
+                                                        {% if psg.selected %}
+                                                        {{psg.gene}}
+                                                        {% endif %}
+                                                        {% endfor %}
                                                     </td>
-                                                    <td >{{form.instance.proband_variant.get_transcript.gene}}</td>
-                                                    <td  style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{form.instance.proband_variant.get_transcript_variant.hgvs_c}}</td>
-                                                    <td style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{form.instance.proband_variant.get_transcript_variant.hgvs_p}}</td>
-                                                    <td>{{form.instance.proband_variant.zygosity}}</td>
                                                     <td>{{ form.requires_validation }}</td>
                                                     <td>{{ form.classification }}</td>
                                                     <td> {{ form.contribution_to_phenotype }}</td>
@@ -182,48 +175,6 @@ SOFTWARE.
                                                 </tr>
                                             {% endfor %}
                                         </tbody>
-            {% elif sample_type == 'cancer' %}
-            <thead style='font-size: 70%' align="center">
-                <tr>
-                    <th>Variant ID</th>
-                    <th>Tier</th>
-                    <th>Gene</th>
-                    <th>HGVSc</th>
-                    <th>HGVSp</th>
-                    <th>Genotype</th>
-                    <th>Classification</th>
-                    <th>Variant Use</th>
-                    <th>Action Type</th>
-                    <th>Validated?</th>
-                    <th>Validated Assay Type</th>
-                    <th>Requires Validation?</th>
-                </tr>
-            </thead>
-                                        <tbody style='font-size: 75%' >
-                                            {% for form in variant_formset.forms %}
-                                            {{ form.id }}
-
-                                                <tr>
-                                                    <td  ><a href="/variant/{{form.instance.proband_variant.variant.id}}">{{form.instance.proband_variant.variant.id}}</a></td>
-                                                    <td>{{form.instance.proband_variant.max_tier}}</td>
-                                                    <td >{{form.instance.proband_variant.get_transcript.gene}}</td>
-                                                    <td  style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{form.instance.proband_variant.get_transcript_variant.hgvs_c}}</td>
-                                                    <td style="word-wrap: break-word; min-width: 150px;max-width: 150px;">{{form.instance.proband_variant.get_transcript_variant.hgvs_p}}</td>
-                                                    <td>{{form.instance.proband_variant.zygosity}}</td>
-                                                    <td>{{ form.classification }}</td>
-                                                    <td> {{ form.variant_use }}</td>
-                                                    <td>{{ form.action_type }}
-                                                    </td>
-                                                    <td>{{form.validated }}
-                                                    </td>
-                                                    <td>{{  form.validated_assay_type  }}
-                                                    <td>{{ form.requires_validation }}</td>
-                                                    </td>
-                                                </tr>
-                                            {% endfor %}
-                                        </tbody>
-            {% endif %}
-
                                     </table>
                                 </div>
 

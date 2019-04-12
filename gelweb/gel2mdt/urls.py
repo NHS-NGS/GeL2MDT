@@ -29,13 +29,15 @@ from .api.api_urls import *
 
 urlpatterns = [
     path('', views.index, name='index'),
-
+    path('user_admin/', views.user_admin, name='user_admin'),
+    path('delete_group/<int:id>', views.delete_group, name='delete_group'),
+    path('edit_group/<int:id>', views.edit_group, name='edit_group'),
+    path('edit_user/<int:id>', views.edit_user, name='edit_user'),
     path('register/', views.register, name='register'),
     path('profile/', views.profile, name='profile'),
     path('profile/remove_case/<int:case_id>', views.remove_case, name='remove-case'),
     path('cancer-main', views.cancer_main, name='cancer-main'),
     path('rare-disease-main', views.rare_disease_main, name='rare-disease-main'),
-    path('gel2me/', RedirectView.as_view(url='/', permanent=False), name='gel2me'),
     path('proband/<int:report_id>', views.proband_view, name='proband-view'),
     path('edit_relative/<int:relative_id>', views.edit_relatives, name='edit-relatives'),
     path('pull_t3_variants/<int:report_id>', views.pull_t3_variants, name='pull-t3-variants'),
@@ -46,6 +48,8 @@ urlpatterns = [
     path('<str:sample_type>/validation_list', views.validation_list, name='validation-list'),
 
     path('variant/<int:variant_id>', views.variant_view, name='variant-view'),
+    path('sv/<int:variant_id>', views.sv_view, name='sv-view'),
+    path('str/<int:variant_id>', views.str_view, name='str-view'),
 
     path('panel/<int:panelversion_id>', views.panel_view, name='panel'),
 
@@ -60,6 +64,8 @@ urlpatterns = [
     path('<str:sample_type>/edit_mdt/<int:mdt_id>', views.edit_mdt, name='edit-mdt'),
     path('mdt_view/<int:mdt_id>', views.mdt_view, name='mdt-view'),
     path('mdt_proband_view/<int:mdt_id>/<int:pk>/<int:important>', views.mdt_proband_view, name='mdt-proband-view'),
+    path('mdt_cnv_view/<int:mdt_id>/<int:pk>/', views.mdt_cnv_view, name='mdt-cnv-view'),
+    path('mdt_str_view/<int:mdt_id>/<int:pk>/', views.mdt_str_view, name='mdt-str-view'),
 
     path('add_ir_to_mdt/<int:mdt_id>/<int:irreport_id>', views.add_ir_to_mdt, name='add-ir-to-mdt'),
     path('remove_ir_from_mdt/<int:mdt_id>/<int:irreport_id>', views.remove_ir_from_mdt, name='remove-ir-from-mdt'),

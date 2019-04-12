@@ -97,7 +97,7 @@ class PollAPI(object):
                 False),
             "ensembl": (
                 "https://rest.ensembl.org/{endpoint}",
-                False),
+                True),
             "mutalyzer": (
                 "https://mutalyzer.nl/json/{endpoint}",
                 False),
@@ -151,6 +151,9 @@ class PollAPI(object):
                 self.get_auth_headers()
                 continue
             elif (self.headers_required) and (self.headers is None) and (self.api == 'genenames'):
+                self.get_headers()
+                continue
+            elif (self.headers_required) and (self.headers is None) and (self.api == 'ensembl'):
                 self.get_headers()
                 continue
             elif (self.headers_required) and (self.headers is not None):

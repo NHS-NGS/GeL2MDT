@@ -90,11 +90,9 @@ class MultipleCaseAdder(object):
             self.list_of_cases = self.fetch_test_data()
             self.cases_to_poll = None
             print("Fetched test data.")
-            self.cases_to_add = self.check_cases_to_add()
-            self.cases_to_update = self.check_cases_to_update()  #
-            self.cases_to_skip = set(self.list_of_cases) - \
-                                 set(self.cases_to_add) - \
-                                 set(self.cases_to_update)
+            self.cases_to_add = self.list_of_cases
+            self.cases_to_update = []
+            self.cases_to_skip = []
             self.update_database()
         elif sample:
             interpretation_list_poll = InterpretationList(sample_type=sample_type, sample=sample)
@@ -378,6 +376,13 @@ class MultipleCaseAdder(object):
             (PVFlag, True),
             (TranscriptVariant, True),
             (ProbandTranscriptVariant, True),
+            (SVRegion, True),
+            (SV, True),
+            (ProbandSV, True),
+            (ProbandSVGene, True),
+            (STRVariant, True),
+            (ProbandSTR, True),
+            (ProbandSTRGene, True),
             #(ReportEvent, True)
         )
 
@@ -600,6 +605,13 @@ class MultipleCaseAdder(object):
             PVFlag: ['id', "proband_variant", "flag_name"],
             ProbandTranscriptVariant: ['id',"transcript", "proband_variant"],
             ReportEvent: ['id',"proband_variant", "re_id"],
+            SVRegion: ['id', 'chromosome', 'sv_start', 'sv_end', "genome_assembly"],
+            SV: ['id', 'sv_region1', 'sv_region2', 'variant_type'],
+            ProbandSV: ['id', "sv", "interpretation_report"],
+            ProbandSVGene: ['id', "proband_sv", 'gene'],
+            STRVariant: ['id', 'chromosome', 'str_start', 'str_end', "genome_assembly", "repeated_sequence", "normal_threshold", "pathogenic_threshold"],
+            ProbandSTR: ['id', "str_variant", "interpretation_report"],
+            ProbandSTRGene: ['id', "proband_str", 'gene'],
         }
         return lookup_dict[model_type]
 

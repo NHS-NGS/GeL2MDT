@@ -28,7 +28,7 @@ from django.utils.dateparse import parse_date
 import time
 from ..models import *
 from ..api_utils.poll_api import PollAPI
-from ..vep_utils.run_vep_batch import CaseVariant, CaseTranscript
+from ..vep_utils.run_vep_batch import CaseVariant, CaseCNV, CaseSTR
 from ..config import load_config
 import re
 import copy
@@ -150,7 +150,7 @@ class Case(object):
 
         self.ig_objs = []  # List of interpreteted genome objects
         self.clinical_report_objs = []  # ClinicalReport objects
-        self.variants = self.get_case_variants()
+        self.variants, self.svs, self.strs = self.get_case_variants()
         self.transcripts = []  # set by MCM with a call to vep_utils
         self.demographics = None
         self.clinicians = None
@@ -242,72 +242,171 @@ class Case(object):
             analysis_panels = self.ir_obj.pedigree.analysisPanels
         return analysis_panels
 
+    def parse_ig_variants(self, ig_obj, genome_build, variant_object_count, case_variant_list):
+        for variant in ig_obj.variants:
+            # Sort out tiers first
+            variant_min_tier = None
+            tier = None
+            for report_event in variant.reportEvents:
+                if self.json['sample_type'] == 'raredisease':
+                    if report_event.tier:
+                        tier = int(report_event.tier[-1])
+                elif self.json['sample_type'] == 'cancer':
+                    if report_event.domain:
+                        tier = int(report_event.domain[-1])
+                if variant_min_tier is None:
+                    variant_min_tier = tier
+                elif tier < variant_min_tier:
+                    variant_min_tier = tier
+            variant.max_tier = variant_min_tier
+
+            interesting_variant = False
+            if ig_obj.interpretationService == 'Exomiser':
+                for report_event in variant.reportEvents:
+                    if report_event.score >= 0.95:
+                        interesting_variant = False
+            elif ig_obj.interpretationService == 'genomics_england_tiering':
+                if not self.pullt3:
+                    if variant.max_tier < 3:
+                        interesting_variant = True
+                else:
+                    interesting_variant = True
+            else:
+                interesting_variant = True  # CIP variants all get pulled
+
+            if interesting_variant:
+                variant_object_count += 1
+                case_variant = CaseVariant(
+                    chromosome=variant.variantCoordinates.chromosome,
+                    position=variant.variantCoordinates.position,
+                    ref=variant.variantCoordinates.reference,
+                    alt=variant.variantCoordinates.alternate,
+                    case_id=self.request_id,
+                    variant_count=str(variant_object_count),
+                    genome_build=genome_build
+                )
+                case_variant_list.append(case_variant)
+                variant.case_variant = case_variant
+            else:
+                variant.case_variant = False
+        return ig_obj, case_variant_list, variant_object_count
+
+    def parse_ig_svs(self, ig_obj, genome_build, case_sv_list):
+        if int(ig_obj.softwareVersions['gel-tiering'].replace('.', '')) <= 1000:
+            for variant in ig_obj.structuralVariants:
+                variant.case_variant = False
+            return ig_obj, case_sv_list
+        for variant in ig_obj.structuralVariants:
+            interesting_variant = False
+            for report_event in variant.reportEvents:
+                if report_event.tier:
+                    variant.max_tier = report_event.tier
+                    interesting_variant = True
+            if interesting_variant:
+                case_variant = CaseCNV(
+                    chromosome=variant.coordinates.chromosome,
+                    sv_start=variant.coordinates.start,
+                    sv_end=variant.coordinates.end,
+                    sv_type=variant.variantType,
+                    case_id=self.request_id,
+                    genome_build=genome_build
+                )
+                case_sv_list.append(case_variant)
+                variant.case_variant = case_variant
+            else:
+                variant.case_variant = False
+        return ig_obj, case_sv_list
+
+    def parse_ig_strs(self, ig_obj, genome_build, case_str_list):
+        if int(ig_obj.softwareVersions['gel-tiering'].replace('.', '')) <= 1000:
+            for variant in ig_obj.shortTandemRepeats:
+                variant.case_variant = False
+            return ig_obj, case_str_list
+        participant_id = self.json["proband"]
+        mother_id = None
+        father_id = None
+        family_members = self.family_members
+        for family_member in family_members:
+            if family_member["relation_to_proband"] == "Father":
+                father_id = family_member["gel_id"]
+            elif family_member["relation_to_proband"] == "Mother":
+                mother_id = family_member["gel_id"]
+        for variant in ig_obj.shortTandemRepeats:
+            variant.proband_copies_a = None
+            variant.proband_copies_b = None
+            variant.maternal_copies_a = None
+            variant.maternal_copies_b = None
+            variant.paternal_copies_a = None
+            variant.paternal_copies_b = None
+            interesting_variant = False
+            for report_event in variant.reportEvents:
+                if report_event.tier:
+                    variant.max_tier = report_event.tier
+                    interesting_variant = True
+                    variant.mode_of_inheritance = report_event.modeOfInheritance
+                    variant.segregation_pattern = report_event.segregationPattern
+            for variant_call in variant.variantCalls:
+                if variant_call.participantId == participant_id:
+                    variant.proband_copies_a = variant_call.numberOfCopies[0].numberOfCopies
+                    variant.proband_copies_b = variant_call.numberOfCopies[1].numberOfCopies
+                if variant_call.participantId == mother_id:
+                    variant.maternal_copies_a = variant_call.numberOfCopies[0].numberOfCopies
+                    variant.maternal_copies_b = variant_call.numberOfCopies[1].numberOfCopies
+                if variant_call.participantId == father_id:
+                    variant.paternal_copies_a = variant_call.numberOfCopies[0].numberOfCopies
+                    variant.paternal_copies_b = variant_call.numberOfCopies[1].numberOfCopies
+            if interesting_variant:
+                case_variant = CaseSTR(
+                    chromosome=variant.coordinates.chromosome,
+                    str_start=variant.coordinates.start,
+                    str_end=variant.coordinates.end,
+                    repeated_sequence=variant.shortTandemRepeatReferenceData.repeatedSequence,
+                    normal_threshold=variant.shortTandemRepeatReferenceData.normal_number_of_repeats_threshold,
+                    pathogenic_threshold=variant.shortTandemRepeatReferenceData.pathogenic_number_of_repeats_threshold,
+                    case_id=self.request_id,
+                    genome_build=genome_build
+                )
+                case_str_list.append(case_variant)
+                variant.case_variant = case_variant
+            else:
+                variant.case_variant = False
+        return ig_obj, case_str_list
+
     def get_case_variants(self):
         """
         Create CaseVariant objects for each variant listed in the json,
         then return a list of all CaseVariants for construction of
         CaseTranscripts using VEP.
         """
-        json_variants = []
         case_variant_list = []
+        case_sv_list = []
+        case_str_list = []
         # go through each variant in the json
         variant_object_count = 0
         genome_build = self.json['assembly']
         for ig in self.json['interpreted_genome']:
             ig_obj = InterpretedGenome.fromJsonDict(ig['interpreted_genome_data'])
             if ig_obj.variants:
-                for variant in ig_obj.variants:
-                    # Sort out tiers first
-                    variant_min_tier = None
-                    tier = None
-                    for report_event in variant.reportEvents:
-                        if self.json['sample_type'] == 'raredisease':
-                            if report_event.tier:
-                                tier = int(report_event.tier[-1])
-                        elif self.json['sample_type'] == 'cancer':
-                            if report_event.domain:
-                                tier = int(report_event.domain[-1])
-                        if variant_min_tier is None:
-                            variant_min_tier = tier
-                        elif tier < variant_min_tier:
-                            variant_min_tier = tier
-                    variant.max_tier = variant_min_tier
+                ig_obj, case_variant_list, variant_object_count = self.parse_ig_variants(ig_obj,
+                                                                                         genome_build,
+                                                                                         variant_object_count,
+                                                                                         case_variant_list)
+            if ig_obj.structuralVariants:
+                ig_obj, case_sv_list = self.parse_ig_svs(ig_obj,
+                                                         genome_build,
+                                                         case_sv_list)
 
-                    interesting_variant = False
-                    if ig_obj.interpretationService == 'Exomiser':
-                        for report_event in variant.reportEvents:
-                            if report_event.score >= 0.95:
-                                interesting_variant = False
-                    elif ig_obj.interpretationService == 'genomics_england_tiering':
-                        if not self.pullt3:
-                            if variant.max_tier < 3:
-                                interesting_variant = True
-                        else:
-                            interesting_variant = True
-                    else:
-                        interesting_variant = True  # CIP variants all get pulled
-
-                    if interesting_variant:
-                        variant_object_count += 1
-                        case_variant = CaseVariant(
-                            chromosome=variant.variantCoordinates.chromosome,
-                            position=variant.variantCoordinates.position,
-                            ref=variant.variantCoordinates.reference,
-                            alt=variant.variantCoordinates.alternate,
-                            case_id=self.request_id,
-                            variant_count=str(variant_object_count),
-                            genome_build=genome_build
-                        )
-                        case_variant_list.append(case_variant)
-                        variant.case_variant = case_variant
-                    else:
-                        variant.case_variant = False
+            if ig_obj.shortTandemRepeats:
+                ig_obj, case_str_list = self.parse_ig_strs(ig_obj,
+                                                           genome_build,
+                                                           case_str_list)
             self.ig_objs.append(ig_obj)
         for clinical_report in self.json['clinical_report']:
             cr_obj = ClinicalReport.fromJsonDict(clinical_report['clinical_report_data'])
             if cr_obj.variants:
                 for variant in cr_obj.variants:
                     variant_min_tier = None
+                    tier = None
                     for report_event in variant.reportEvents:
                         if self.json['sample_type'] == 'raredisease':
                             if report_event.tier:
@@ -335,7 +434,7 @@ class Case(object):
                     variant.case_variant = case_variant
             self.clinical_report_objs.append(cr_obj)
 
-        return case_variant_list
+        return case_variant_list, case_sv_list, case_str_list
 
 
 class CaseAttributeManager(object):
@@ -402,6 +501,20 @@ class CaseAttributeManager(object):
             case_model = self.get_report_events()
         elif self.model_type == ToolOrAssemblyVersion:
             case_model = self.get_tool_and_assembly_versions()
+        elif self.model_type == SVRegion:
+            case_model = self.get_sv_regions()
+        elif self.model_type == SV:
+            case_model = self.get_svs()
+        elif self.model_type == ProbandSV:
+            case_model = self.get_proband_svs()
+        elif self.model_type == ProbandSVGene:
+            case_model = self.get_proband_sv_genes()
+        elif self.model_type == STRVariant:
+            case_model = self.get_str_variants()
+        elif self.model_type == ProbandSTR:
+            case_model = self.get_proband_strs()
+        elif self.model_type == ProbandSTRGene:
+            case_model = self.get_proband_str_genes()
 
         return case_model
 
@@ -431,7 +544,8 @@ class CaseAttributeManager(object):
         if self.case.ir_obj.workspace:
             clinician_details['hospital'] = self.case.ir_obj.workspace[0]
         else:
-            clinician_details['hospital'] = 'unknown'
+            clinician_details['hospital'] = 'Unknown'
+        GMC.objects.get_or_create(name=clinician_details['hospital'])
         clinician = CaseModel(Clinician, {
             "name": clinician_details['name'],
             "email": "unknown",  # clinician email not on labkey
@@ -765,6 +879,24 @@ class CaseAttributeManager(object):
                 else:
                     gene['EnsembleGeneIds'] = gene['EnsembleGeneIds'][0]
 
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.structuralVariants:
+                for variant in ig_obj.structuralVariants:
+                    for report_event in variant.reportEvents:
+                        for gene in report_event.genomicEntities:
+                            if gene.type == 'gene':
+                                if gene.ensemblId != "NO_GENE_ASSOCIATED":
+                                    gene_list.append({'EnsembleGeneIds': gene.ensemblId,
+                                                      'GeneSymbol': gene.geneSymbol})
+            if ig_obj.shortTandemRepeats:
+                for variant in ig_obj.shortTandemRepeats:
+                    for report_event in variant.reportEvents:
+                        for gene in report_event.genomicEntities:
+                            if gene.type == 'gene':
+                                if gene.ensemblId != "NO_GENE_ASSOCIATED":
+                                    gene_list.append({'EnsembleGeneIds': gene.ensemblId,
+                                                      'GeneSymbol': gene.geneSymbol})
+
         self.case.gene_manager.load_genes()
 
         for transcript in self.case.transcripts:
@@ -779,7 +911,6 @@ class CaseAttributeManager(object):
         for gene in tqdm(gene_list, desc=self.case.request_id):
             gene['HGNC_ID'] = None
             if gene['EnsembleGeneIds']:
-                # tqdm.write(gene["EnsembleGeneIds"])
                 polled = self.case.gene_manager.fetch_searched(gene['EnsembleGeneIds'])
                 if polled == 'Not_found':
                     gene['HGNC_ID'] = None
@@ -1351,6 +1482,287 @@ class CaseAttributeManager(object):
 
         return tools_and_assemblies
 
+    def get_sv_regions(self):
+        '''
+        Loop over all CNVs and lump in all the regions
+        :return:
+        '''
+        sv_region_list = []
+        genome_assembly = None
+        tool_models = [
+            case_model.entry
+            for case_model in self.case.attribute_managers[ToolOrAssemblyVersion].case_model.case_models]
+        for tool in tool_models:
+            if tool.tool_name == 'genome_build':
+                genome_assembly = tool
+
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.structuralVariants:
+                for variant in ig_obj.structuralVariants:
+                    if variant.case_variant:
+                        tiered_variant = {
+                            "genome_assembly": genome_assembly,
+                            "chromosome": variant.case_variant.chromosome,
+                            "sv_start": variant.case_variant.sv_start,
+                            "sv_end": variant.case_variant.sv_end,
+                        }
+                        sv_region_list.append(tiered_variant)
+
+        sv_regions = ManyCaseModel(SVRegion, sv_region_list, self.model_objects)
+        return sv_regions
+
+    def get_svs(self):
+        '''
+        Loop again over the SVs and match up the SVRegions,
+        Then loop again and add them to a MVM list
+        :return:
+        '''
+        sv_region_entries = [sv_region.entry for sv_region in
+                             self.case.attribute_managers[SVRegion].case_model.case_models]
+
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.structuralVariants:
+                for variant in ig_obj.structuralVariants:
+                    if variant.case_variant:
+                        for sv_region_entry in sv_region_entries:
+                            if (variant.case_variant.chromosome == sv_region_entry.chromosome and
+                                int(variant.case_variant.sv_start) == sv_region_entry.sv_start and
+                                    int(variant.case_variant.sv_end) == sv_region_entry.sv_end):
+                                variant.sv_region1_entry = sv_region_entry
+                                variant.sv_region2_entry = None
+                                break  # Stop, found what you need
+
+        sv_list = []
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.structuralVariants:
+                for variant in ig_obj.structuralVariants:
+                    if variant.case_variant:
+                        if variant.sv_region1_entry:
+                            sv_list.append({
+                                'sv_region1': variant.sv_region1_entry,
+                                'sv_region2': variant.sv_region2_entry,
+                                'variant_type': variant.variantType
+                            })
+        svs = ManyCaseModel(SV, sv_list, self.model_objects)
+        return svs
+
+    def get_proband_svs(self):
+        '''
+        Loop over CNVs to get SV entry, then loop again to get SampleSVs
+        :return:
+        '''
+        sv_entries = [sv.entry for sv in
+                      self.case.attribute_managers[SV].case_model.case_models]
+
+        ir_manager = self.case.attribute_managers[GELInterpretationReport]
+
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.structuralVariants:
+                for variant in ig_obj.structuralVariants:
+                    if variant.case_variant:
+                        variant.cnv_af = None
+                        variant.cnv_auc = None
+                        for sv_entry in sv_entries:
+                            if (variant.sv_region1_entry == sv_entry.sv_region1 and
+                                    variant.sv_region2_entry == sv_entry.sv_region2 and
+                                    variant.variantType == sv_entry.variant_type):
+                                if variant.variantAttributes.alleleFrequencies:
+                                    for allele_freq in variant.variantAttributes.alleleFrequencies:
+                                        if allele_freq.population == 'CNV_AF':
+                                            variant.cnv_af = allele_freq.alternateFrequency
+                                        elif allele_freq.population == 'CNV_AUC':
+                                            variant.cnv_auc = allele_freq.alternateFrequency
+                                variant.sv_entry = sv_entry
+                                break
+
+        proband_sv_list = []
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.structuralVariants:
+                for variant in ig_obj.structuralVariants:
+                    if variant.case_variant:
+                        if variant.sv_entry:
+                            proband_sv_list.append({
+                                'interpretation_report': ir_manager.case_model.entry,
+                                'sv': variant.sv_entry,
+                                'max_tier': variant.max_tier,
+                                'cnv_af': variant.cnv_af,
+                                'cnv_auc': variant.cnv_auc
+                            })
+        sample_svs = ManyCaseModel(ProbandSV, proband_sv_list, self.model_objects)
+        return sample_svs
+
+    def get_proband_sv_genes(self):
+
+        gene_entries = [gene.entry for gene in
+                        self.case.attribute_managers[Gene].case_model.case_models]
+        proband_sv_entries = [gene.entry for gene in
+                              self.case.attribute_managers[ProbandSV].case_model.case_models]
+        ir_manager = self.case.attribute_managers[GELInterpretationReport]
+
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.structuralVariants:
+                for variant in ig_obj.structuralVariants:
+                    if variant.case_variant:
+                        for proband_sv_entry in proband_sv_entries:
+                            if (variant.sv_entry == proband_sv_entry.sv and
+                                    ir_manager.case_model.entry == proband_sv_entry.interpretation_report):
+                                variant.proband_sv_entry = proband_sv_entry
+                                break
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.structuralVariants:
+                for variant in ig_obj.structuralVariants:
+                    if variant.case_variant:
+                        variant.genes = {}
+                        for report_event in variant.reportEvents:
+                            interesting_gene = False
+                            if report_event.tier == 'TIERA':
+                                interesting_gene = True
+                            for gene in report_event.genomicEntities:
+                                if gene.type == 'gene':
+                                    gene.gene_entry = None
+                                    for gene_entry in gene_entries:
+                                        if gene_entry.ensembl_id == gene.ensemblId:
+                                            if gene_entry not in variant.genes:
+                                                variant.genes[gene_entry] = interesting_gene
+                                            if interesting_gene:
+                                                variant.genes[gene_entry] = interesting_gene
+                                            break
+
+        proband_sv_gene_list = []
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.structuralVariants:
+                for variant in ig_obj.structuralVariants:
+                    if variant.case_variant:
+                        for gene_key in variant.genes:
+                            proband_sv_gene_list.append({
+                                'gene': gene_key,
+                                'proband_sv': variant.proband_sv_entry,
+                                'selected': variant.genes[gene_key]
+                            })
+        proband_sv_genes = ManyCaseModel(ProbandSVGene, proband_sv_gene_list, self.model_objects)
+        return proband_sv_genes
+
+    def get_str_variants(self):
+        '''
+        Loop over all STRs and lump in all the STR Variants
+        :return:
+        '''
+        genome_assembly = None
+        str_variant_list = []
+        tool_models = [
+            case_model.entry
+            for case_model in self.case.attribute_managers[ToolOrAssemblyVersion].case_model.case_models]
+        for tool in tool_models:
+            if tool.tool_name == 'genome_build':
+                genome_assembly = tool
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.shortTandemRepeats:
+                for variant in ig_obj.shortTandemRepeats:
+                    if variant.case_variant:
+                        tiered_variant = {
+                            "genome_assembly": genome_assembly,
+                            "chromosome": variant.case_variant.chromosome,
+                            "str_start": variant.case_variant.str_start,
+                            "str_end": variant.case_variant.str_end,
+                            "repeated_sequence" : variant.case_variant.repeated_sequence,
+                            "normal_threshold": variant.case_variant.normal_threshold,
+                            "pathogenic_threshold": variant.case_variant.pathogenic_threshold,
+                        }
+                        str_variant_list.append(tiered_variant)
+
+        str_variants = ManyCaseModel(STRVariant, str_variant_list, self.model_objects)
+        return str_variants
+
+    def get_proband_strs(self):
+        '''
+        Loop over STRs to get ProbandSTRs
+        :return:
+        '''
+        str_variant_entries = [str_variant.entry for str_variant in
+                      self.case.attribute_managers[STRVariant].case_model.case_models]
+
+        ir_manager = self.case.attribute_managers[GELInterpretationReport]
+
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.shortTandemRepeats:
+                for variant in ig_obj.shortTandemRepeats:
+                    if variant.case_variant:
+                        for str_variant_entry in str_variant_entries:
+                            if (variant.case_variant.chromosome == str_variant_entry.chromosome and
+                                    int(variant.case_variant.str_start) == str_variant_entry.str_start and
+                                    int(variant.case_variant.str_end) == str_variant_entry.str_end and
+                                    variant.case_variant.repeated_sequence == str_variant_entry.repeated_sequence and
+                                    int(variant.case_variant.normal_threshold) == str_variant_entry.normal_threshold and
+                                    int(variant.case_variant.pathogenic_threshold ) == str_variant_entry.pathogenic_threshold):
+                                variant.str_variant_entry = str_variant_entry
+                                break
+
+        proband_str_list = []
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.shortTandemRepeats:
+                for variant in ig_obj.shortTandemRepeats:
+                    if variant.case_variant:
+                        if variant.str_variant_entry:
+                            proband_str_list.append({
+                                'interpretation_report': ir_manager.case_model.entry,
+                                'str_variant': variant.str_variant_entry,
+                                'max_tier': variant.max_tier,
+                                'proband_copies_a': variant.proband_copies_a,
+                                'proband_copies_b': variant.proband_copies_b,
+                                'maternal_copies_a': variant.maternal_copies_a,
+                                'maternal_copies_b': variant.maternal_copies_b,
+                                'paternal_copies_a': variant.paternal_copies_a,
+                                'paternal_copies_b': variant.paternal_copies_b,
+                                'mode_of_inheritance': variant.mode_of_inheritance,
+                                'segregation_pattern': variant.segregation_pattern
+                            })
+        proband_strs = ManyCaseModel(ProbandSTR, proband_str_list, self.model_objects)
+        return proband_strs
+
+    def get_proband_str_genes(self):
+        gene_entries = [gene.entry for gene in
+                        self.case.attribute_managers[Gene].case_model.case_models]
+        proband_str_entries = [proband_str.entry for proband_str in
+                              self.case.attribute_managers[ProbandSTR].case_model.case_models]
+        ir_manager = self.case.attribute_managers[GELInterpretationReport]
+
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.shortTandemRepeats:
+                for variant in ig_obj.shortTandemRepeats:
+                    if variant.case_variant:
+                        for proband_str_entry in proband_str_entries:
+                            if (variant.str_variant_entry == proband_str_entry.str_variant and
+                                    ir_manager.case_model.entry == proband_str_entry.interpretation_report):
+                                variant.proband_str_entry = proband_str_entry
+                                break
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.shortTandemRepeats:
+                for variant in ig_obj.shortTandemRepeats:
+                    if variant.case_variant:
+                        variant.genes = {}
+                        for report_event in variant.reportEvents:
+                            for gene in report_event.genomicEntities:
+                                if gene.type == 'gene':
+                                    gene.gene_entry = None
+                                    for gene_entry in gene_entries:
+                                        if gene_entry.ensembl_id == gene.ensemblId:
+                                            if gene_entry not in variant.genes:
+                                                variant.genes[gene_entry] = True
+                                            break
+
+        proband_str_gene_list = []
+        for ig_obj in self.case.ig_objs:
+            if ig_obj.shortTandemRepeats:
+                for variant in ig_obj.shortTandemRepeats:
+                    if variant.case_variant:
+                        for gene_key in variant.genes:
+                            proband_str_gene_list.append({
+                                'gene': gene_key,
+                                'proband_str': variant.proband_str_entry,
+                                'selected': variant.genes[gene_key]
+                            })
+        proband_str_genes = ManyCaseModel(ProbandSTRGene, proband_str_gene_list, self.model_objects)
+        return proband_str_genes
 
 class CaseModel(object):
     """
@@ -1609,6 +2021,81 @@ class CaseModel(object):
                 tool_name=self.escaped_model_attributes["tool_name"],
                 version_number=self.escaped_model_attributes["version_number"]
             )
+        elif self.model_type == SVRegion:
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM SVRegion'
+            else:
+                table = 'SELECT * FROM "SVRegion"'
+            cmd = ''.join([
+                f" WHERE chromosome = '{self.escaped_model_attributes['chromosome']}'",
+                f" AND sv_start = {self.escaped_model_attributes['sv_start']}"
+                f" AND sv_end = '{self.escaped_model_attributes['sv_end']}'"
+                f" AND genome_assembly_id = {self.escaped_model_attributes['genome_assembly'].id}"])
+        elif self.model_type == SV:
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM SV'
+            else:
+                table = 'SELECT * FROM "SV"'
+            if self.escaped_model_attributes['sv_region2'] is None:
+                cmd = ''.join([
+                    f" WHERE sv_region1_id = {self.escaped_model_attributes['sv_region1'].id}",
+                    f" AND variant_type = '{self.escaped_model_attributes['variant_type']}'"
+                ])
+            else:
+                cmd = ''.join([
+                    f" WHERE sv_region1_id = {self.escaped_model_attributes['sv_region1'].id}",
+                    f" WHERE sv_region2_id = {self.escaped_model_attributes['sv_region2'].id}",
+                    f" AND variant_type = '{self.escaped_model_attributes['variant_type']}'"
+                ])
+        elif self.model_type == ProbandSV:
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM ProbandSV'
+            else:
+                table = 'SELECT * FROM "ProbandSV"'
+            cmd = ''.join([
+                f" WHERE interpretation_report_id = {self.escaped_model_attributes['interpretation_report'].id}",
+                f" AND sv_id = {self.escaped_model_attributes['sv'].id}",
+            ])
+        elif self.model_type == ProbandSVGene:
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM ProbandSVGene'
+            else:
+                table = 'SELECT * FROM "ProbandSVGene"'
+            cmd = ''.join([
+                f" WHERE proband_sv_id = {self.escaped_model_attributes['proband_sv'].id}",
+                f" AND gene_id = '{self.escaped_model_attributes['gene'].id}'"
+            ])
+        elif self.model_type == STRVariant:
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM STRVariant'
+            else:
+                table = 'SELECT * FROM "STRVariant"'
+            cmd = ''.join([
+                f" WHERE chromosome = '{self.escaped_model_attributes['chromosome']}'",
+                f" AND str_start = '{self.escaped_model_attributes['str_start']}'"
+                f" AND str_end = '{self.escaped_model_attributes['str_end']}'"
+                f" AND repeated_sequence = '{self.escaped_model_attributes['repeated_sequence']}'"
+                f" AND normal_threshold = '{self.escaped_model_attributes['normal_threshold']}'"
+                f" AND pathogenic_threshold = '{self.escaped_model_attributes['pathogenic_threshold']}'"
+                f" AND genome_assembly_id = {self.escaped_model_attributes['genome_assembly'].id}"])
+        elif self.model_type == ProbandSTR:
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM ProbandSTR'
+            else:
+                table = 'SELECT * FROM "ProbandSTR"'
+            cmd = ''.join([
+                f" WHERE interpretation_report_id = {self.escaped_model_attributes['interpretation_report'].id}",
+                f" AND str_variant_id = {self.escaped_model_attributes['str_variant'].id}",
+            ])
+        elif self.model_type == ProbandSTRGene:
+            if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+                table = 'SELECT * FROM ProbandSTRGene'
+            else:
+                table = 'SELECT * FROM "ProbandSTRGene"'
+            cmd = ''.join([
+                f" WHERE proband_str_id = {self.escaped_model_attributes['proband_str'].id}",
+                f" AND gene_id = '{self.escaped_model_attributes['gene'].id}'"
+            ])
 
         sql =  ''.join([
             table,

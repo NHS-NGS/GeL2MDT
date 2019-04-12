@@ -40,8 +40,25 @@ def get_item(dictionary, key):
     return dictionary.get(key)
 
 @register.filter
+def count_dict(dictionary):
+    return len(dictionary.keys())
+
+
+@register.filter
 def sort_by(queryset, order):
     return queryset.order_by(order)
+
+
+@register.filter
+def has_group_permission(user, argument):
+    if user.groups.all():
+        for group in user.groups.all():
+            if hasattr(group, 'grouppermissions'):
+                group_permission = group.grouppermissions
+                if getattr(group_permission, argument):
+                    return True
+    return False
+
 
 @register.simple_tag
 def version_number():

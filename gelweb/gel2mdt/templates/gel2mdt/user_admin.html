@@ -1,0 +1,354 @@
+<!--Copyright (c) 2018 Great Ormond Street Hospital for Children NHS Foundation
+Trust & Birmingham Women's and Children's NHS Foundation Trust
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+{% extends 'gel2mdt/base.html' %}
+{% load bootstrap3 %}
+{% block content %}
+{% load static %}
+
+<ul class="nav nav-tabs" data-options="deep_linking: true">
+        <li class="active"><a data-toggle="tab" href="#groups">Groups</a></li>
+        <li><a data-toggle="tab" href="#users">Users</a></li>
+    </ul>
+
+ <div class="tab-content">
+        <div id="groups" class="tab-pane fade in active">
+            <div  class="container-fluid"  >
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Group Management
+               <a class="btn btn-primary" href="#" data-toggle="modal" data-target="#addGroupModal"><i></i>Create Group</a>
+
+
+            </div>
+            <!-- /.panel-heading -->
+            <div class="panel-body">
+                <table width="100%" class="table table-striped table-bordered table-hover" id="group-table" >
+                    <thead style='font-size: 75%'>
+                        <tr>
+                            <th>Name</th>
+                            <th>GMCs</th>
+                            <th>Can view RD</th>
+                            <th>Can view Cancer</th>
+                            <th>Can view Proband Variants</th>
+                            <th>Can view Proband CNVs</th>
+                            <th>Can view Proband STRs</th>
+                            <th>Can Edit Transcripts</th>
+                            <th>Can Pull T3 Variants</th>
+                            <th>Can Edit Proband</th>
+                            <th>Can Edit Completed Proband</th>
+                            <th>Can Edit Case Info</th>
+                            <th>Can Pull GEL Report</th>
+                            <th>Can Edit Relative Info</th>
+                            <th>Can Edit Clinical Questions(Cancer)</th>
+                            <th>Can Start MDTs</th>
+                            <th>Can Edit MDTs</th>
+                            <th>Can View & Edit Case Alerts</th>
+                            <th>Can View & Edit Validation List</th>
+                            <th>Edit</th>
+                        </tr>
+                    </thead>
+                    <tbody style='font-size: 75%'>
+                        {% for group in groups%}
+                                <tr>
+                                    <td>{{ group.name }}</td>
+
+                                    <td>
+                                        {% if group.name == 'ADMIN GROUP' %}
+                                        ALL
+                                        {% else %}
+                                        {% for gmc in group.grouppermissions.gmc.all %}
+                                        {{gmc}}
+                                    {% endfor %}
+                                        {% endif %}
+                                    </td>
+
+                                    {% if group.grouppermissions.raredisease %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;" ><i class="fas fa-check"></i></td>
+                                        {% else %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>
+                                        {% endif %}
+                                    {% if group.grouppermissions.cancer %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;" ><i class="fas fa-check"></i></td>
+                                        {% else %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>
+                                        {% endif %}
+                                    {% if group.grouppermissions.can_view_pvs %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;" ><i class="fas fa-check"></i></td>
+                                        {% else %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>
+                                        {% endif %}
+                                    {% if group.grouppermissions.can_view_svs %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;" ><i class="fas fa-check"></i></td>
+                                        {% else %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>
+                                        {% endif %}
+                                    {% if group.grouppermissions.can_view_strs %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;" ><i class="fas fa-check"></i></td>
+                                        {% else %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>
+                                        {% endif %}
+                                    {% if group.grouppermissions.can_select_update_transcript %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;" ><i class="fas fa-check"></i></td>
+                                        {% else %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>
+                                        {% endif %}
+                                    {% if group.grouppermissions.pull_t3_variants %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;" ><i class="fas fa-check"></i></td>
+                                        {% else %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>
+                                        {% endif %}
+                                    {% if group.grouppermissions.can_edit_proband %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;" ><i class="fas fa-check"></i></td>
+                                        {% else %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>
+                                        {% endif %}
+                                    {% if group.grouppermissions.can_edit_completed_proband %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;" ><i class="fas fa-check"></i></td>
+                                        {% else %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>
+                                        {% endif %}
+                                    {% if group.grouppermissions.can_edit_gelir %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;" ><i class="fas fa-check"></i></td>
+                                        {% else %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>
+                                        {% endif %}
+                                    {% if group.grouppermissions.can_get_gel_report %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;" ><i class="fas fa-check"></i></td>
+                                        {% else %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>
+                                        {% endif %}
+                                    {% if group.grouppermissions.can_edit_relative %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;" ><i class="fas fa-check"></i></td>
+                                        {% else %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>
+                                        {% endif %}
+                                    {% if group.grouppermissions.can_edit_clinical_questions %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;" ><i class="fas fa-check"></i></td>
+                                        {% else %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>
+                                        {% endif %}
+                                    {% if group.grouppermissions.start_mdt %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;" ><i class="fas fa-check"></i></td>
+                                        {% else %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>
+                                        {% endif %}
+                                    {% if group.grouppermissions.can_edit_mdt %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;" ><i class="fas fa-check"></i></td>
+                                        {% else %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>
+                                        {% endif %}
+                                    {% if group.grouppermissions.can_edit_case_alert %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;" ><i class="fas fa-check"></i></td>
+                                        {% else %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>
+                                        {% endif %}
+                                    {% if group.grouppermissions.can_edit_validation_list %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;" ><i class="fas fa-check"></i></td>
+                                        {% else %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>
+                                        {% endif %}
+                                    <td><button type="button" class="btn btn-xs btn-primary js-edit-group"
+                                                                              data-url="/edit_group/{{ group.id }}">
+                                                            Edit
+                                        </button>
+
+                                      <a  class="btn btn-xs btn-danger" href="/delete_group/{{ group.id }}" onclick="return confirm('Are you sure?')"><i></i>Delete</a>
+
+                                    </td>
+                                </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+            </div>
+        </div>
+      <div id="users" class="tab-pane fade">
+            <div class="container-fluid" >
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">User Management</div>
+                            <div class="panel-body">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-bordered table-hover" id="user-table">
+                            <thead style='font-size: 75%'>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>Email</th>
+                                    <th>Active</th>
+                                    <th>Groups</th>
+                                    <th>Edit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>{{user.username}}</td>
+                                    <td>{{user.first_name}}</td>
+                                    <td>{{user.last_name}}</td>
+                                    <td>{{user.email}}</td>
+                                    {% if user.is_active %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;" ><i class="fas fa-check"></i></td>
+                                        {% else %}
+                                            <td style="word-wrap: break-word; min-width: 50px;max-width: 50px;"><i class="fas fa-window-close"></i></td>
+                                        {% endif %}
+                                    <td> {% for group in user.groups.all %}
+                                        {{group}}
+                                    {% endfor %}
+                                    </td>
+                                    <td><button type="button" class="btn btn-xs btn-danger js-edit-user"
+                                                                              data-url="/edit_user/{{ user.id }}">
+                                                            Edit
+                                        </button></td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+      </div>
+ </div>
+
+ <script>
+      var grouploadForm = function () {
+    var btn = $(this);
+    $.ajax({
+      url: btn.attr("data-url"),
+      type: 'get',
+      dataType: 'json',
+      beforeSend: function () {
+        $("#modal-edit_group .modal-content").html("");
+        $("#modal-edit_group").modal("show");
+      },
+      success: function (data) {
+        $("#modal-edit_group .modal-content").html(data.html_form);
+      }
+    });
+  };
+
+   var groupsaveForm = function () {
+    var form = $(this);
+    $.ajax({
+      url: form.attr("action"),
+      data: form.serialize(),
+      type: form.attr("method"),
+      dataType: 'json',
+      success: function (data) {
+        if (data.form_is_valid) {
+          window.location.reload();
+          $("#modal-edit_group").modal("hide");
+
+        }
+        else {
+          $("#modal-edit_group .modal-content").html(data.html_form);
+        }
+      }
+    });
+    return false;
+  };
+   var userloadForm = function () {
+    var btn = $(this);
+    $.ajax({
+      url: btn.attr("data-url"),
+      type: 'get',
+      dataType: 'json',
+      beforeSend: function () {
+        $("#modal-edit_user .modal-content").html("");
+        $("#modal-edit_user").modal("show");
+      },
+      success: function (data) {
+        $("#modal-edit_user .modal-content").html(data.html_form);
+      }
+    });
+  };
+
+   var usersaveForm = function () {
+    var form = $(this);
+    $.ajax({
+      url: form.attr("action"),
+      data: form.serialize(),
+      type: form.attr("method"),
+      dataType: 'json',
+      success: function (data) {
+        if (data.form_is_valid) {
+          window.location.reload();
+          $("#modal-edit_user").modal("hide");
+
+        }
+        else {
+          $("#modal-edit_user .modal-content").html(data.html_form);
+        }
+      }
+    });
+    return false;
+  };
+   $("#group-table").on("click", ".js-edit-group", grouploadForm);
+  $("#modal-run").on("submit", ".js-save-group", groupsaveForm);
+   $("#user-table").on("click", ".js-edit-user", userloadForm);
+  $("#modal-run").on("submit", ".js-save-user", usersaveForm);
+    </script>
+    <div class="modal fade" id="modal-edit_group">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            </div>
+        </div>
+    </div>
+<div class="modal fade" id="modal-edit_user">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            </div>
+        </div>
+    </div>
+
+<div id="addGroupModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><i class="fas fa-window-close"></i></button>
+                    <h4 class="modal-title">Create a new Group</h4>
+                </div>
+                <div class="modal-body">
+                    <form action="/user_admin/" method="POST">
+                        {% csrf_token %}
+                        {% bootstrap_form add_group_form %}
+                        {% buttons %}
+                        <button type="submit" class="btn btn-primary">
+                            Add New Group
+                        </button>
+                        {% endbuttons %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

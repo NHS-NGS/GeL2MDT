@@ -39,6 +39,44 @@ from bokeh.plotting import figure
 from django.core.mail import EmailMessage
 from reversion.models import Version, Revision
 from protocols.reports_6_0_0 import InterpretedGenome, InterpretationRequestRD, CancerInterpretationRequest, ClinicalReport
+from django.db.utils import ProgrammingError, OperationalError
+
+
+def create_admin_group():
+    try:
+        group, created = Group.objects.get_or_create(name='ADMIN GROUP')
+        if not hasattr(group, 'grouppermissions'):
+            group_permissions = GroupPermissions(group=group)
+            group_permissions.save()
+        permissions = group.grouppermissions
+        permissions.cancer = True
+        permissions.raredisease = True
+        permissions.can_view_pvs = True
+        permissions.can_view_svs = True
+        permissions.can_view_strs = True
+        permissions.can_select_update_transcript = True
+        permissions.pull_t3_variants = True
+        permissions.can_edit_proband = True
+        permissions.can_edit_completed_proband = True
+        permissions.can_edit_gelir = True
+        permissions.can_edit_mdt = True
+        permissions.can_get_gel_report = True
+        permissions.can_edit_relative = True
+        permissions.can_edit_clinical_questions = True
+        permissions.start_mdt = True
+        permissions.can_edit_case_alert = True
+        permissions.can_edit_validation_list = True
+        permissions.save()
+    except (ProgrammingError, OperationalError):
+        pass # Models probably don't exist yet
+    try:
+        gmc_list = Proband.objects.all().values_list('gmc', flat=True)
+        gmc_list = set(gmc_list)
+        for gmc in gmc_list:
+            if gmc:
+                GMC.objects.get_or_create(name=gmc)
+    except (ProgrammingError, OperationalError):
+        pass # Models probably don't exist yet
 
 
 def get_gel_content(ir, ir_version):
@@ -50,9 +88,8 @@ def get_gel_content(ir, ir_version):
     :return: Beatitful soup version of the report
     '''
     # otherwise get uname and password from a file
-
     interpretation_reponse = PollAPI(
-        "cip_api", f'interpretation-request/{ir}/{ir_version}')
+        "cip_api", f'interpretation-request/{ir}/{ir_version}/')
     interp_json = interpretation_reponse.get_json_response()
     analysis_versions = []
     latest = None
@@ -64,32 +101,29 @@ def get_gel_content(ir, ir_version):
         except ValueError as e:
             latest = 1
 
-    try:
-        if latest == 1:
-            print('latest',  1)
-            html_report = PollAPI(
-                "cip_api_for_report", f"ClinicalReport/{ir}/{ir_version}/{latest}"
-            )
-            gel_content = html_report.get_json_response(content=True)
-        else:
-            while latest > 0:
-                print('latest', latest)
-                html_report = PollAPI(
-                    "cip_api_for_report", f"ClinicalReport/{ir}/{ir_version}/{latest}"
-                )
-                gel_content = html_report.get_json_response(content=True)
-                gel_json_content = json.loads(gel_content)
-                if gel_json_content['detail'].startswith('Not found') or gel_json_content['detail'].startswith(
-                        'Method \"GET\" not allowed'):
-                    latest -= 1
+    loop_over_reports = True
+    while loop_over_reports:
+        print('latest', latest)
+        html_report = PollAPI(
+            "cip_api", f"clinical-report/{ir}/{ir_version}/{latest}"
+        )
+        gel_content = html_report.get_json_response(content=True)
+        try:
+            gel_json_content = json.loads(gel_content)
+            if gel_json_content['detail'].startswith('Not found') or gel_json_content['detail'].startswith(
+                    'Method \"GET\" not allowed'):
+                if latest == 1:
+                    raise ValueError('No Clinical Report found for this case')
                 else:
-                    break
-    except JSONDecodeError as e:
-        print('JSONDecodeError')
+                    latest -= 1
+            else:
+                loop_over_reports = False
+        except JSONDecodeError:
+            loop_over_reports = False
 
     analysis_panels = {}
 
-    panel_app_panel_query_version = 'https://bioinfo.extge.co.uk/crowdsourcing/WebServices/get_panel/{panelhash}/?version={version}'
+    panel_app_panel_query_version = 'https://panelapp.genomicsengland.co.uk/api/v1/panels/{panelhash}/?version={version}'
     if 'pedigree' in interp_json['interpretation_request_data']['json_request']:
         if interp_json['interpretation_request_data']['json_request']['pedigree']['analysisPanels']:
             for panel_section in interp_json['interpretation_request_data']['json_request']['pedigree']['analysisPanels']:
@@ -98,9 +132,12 @@ def get_gel_content(ir, ir_version):
                 analysis_panels[panel_name] = {}
                 panel_details = requests.get(panel_app_panel_query_version.format(panelhash=panel_name, version=version),
                                              verify=False).json()
-                analysis_panels[panel_name][panel_details['result']['SpecificDiseaseName']] = []
-                for gene in panel_details['result']['Genes']:
-                    analysis_panels[panel_name][panel_details['result']['SpecificDiseaseName']].append(gene['GeneSymbol'])
+                analysis_panels[panel_name][panel_details['name']] = []
+                try:
+                    for gene in panel_details['genes']:
+                        analysis_panels[panel_name][panel_details['name']].append(gene['gene_data']['gene_symbol'])
+                except KeyError:
+                    pass
 
     gene_panels = {}
     for panel, details in analysis_panels.items():
@@ -223,7 +260,6 @@ class VariantAdder(object):
         self.transcript_entries = []
         self.proband_variant = None
         self.pv_flag = None
-
         self.run_vep()
         self.insert_genes()
         self.insert_transcripts()
@@ -575,6 +611,7 @@ def create_bokeh_barplot(names, values, title):
     plot.legend.orientation = "horizontal"
     plot.legend.location = "top_center"
     return plot
+
 
 class ReportHistoryFormatter:
     def __init__(self, report):

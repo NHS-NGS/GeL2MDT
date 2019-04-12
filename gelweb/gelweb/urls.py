@@ -17,14 +17,14 @@ from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views
 from django.conf import settings
+from gel2mdt.tasks import create_admin_group
+
+create_admin_group()
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('gel2mdt.urls')),
-    path('clinician/', include(('gel2clin.urls', 'gel2clin'), namespace='gel2clin')),
     path('login/', views.login, name='login'),
     path('logout/', views.logout, name='logout', kwargs={'next_page': '/'}),
-
-
-
 ]
