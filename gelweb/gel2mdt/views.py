@@ -424,6 +424,7 @@ def proband_view(request, report_id):
                     reference=add_variant_form.cleaned_data['reference'],
                     alternate=add_variant_form.cleaned_data['alternate'],
                     defaults={'db_snp_id': add_variant_form.cleaned_data['db_snp_id']})
+
                 VariantAdder(variant_entry=variant_entry,
                              report=report,
                              variant=variant)
@@ -450,6 +451,7 @@ def proband_view(request, report_id):
                                                     instance=report.ir_family.participant_family.proband)
             if cancer_history_form.is_valid():
                 cancer_history_form.save()
+
 
     relatives = Relative.objects.filter(proband=report.ir_family.participant_family.proband)
     cancer_history_form = ProbandCancerForm(instance=report.ir_family.participant_family.proband, user=request.user)

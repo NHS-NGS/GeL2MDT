@@ -1,3 +1,10 @@
+## [0.6.2]- 2019-04-01
+
+### Changed
+- Customised the MDT export for cancer MDTs
+- Fixed bug on MDT page where MDT description was removed when marking MDT as sent to clinician
+- Fixed bug where changing the assigned user for a case deleted information from a number of demograhics fields
+
 ## [0.6.1]- 2019-02-26
 ### Added
 - Preferred transcript selection
