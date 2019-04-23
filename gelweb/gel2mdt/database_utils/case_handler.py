@@ -1094,9 +1094,10 @@ class CaseAttributeManager(object):
         has_germline_variant = False
         if self.case.json['sample_type'] == 'cancer':
             for ig_obj in self.case.ig_objs:
-                alleleorigins = [variant.variantAttributes.alleleOrigins[0] for variant in ig_obj.variants]
-                if "germline_variant" in alleleorigins:
-                    has_germline_variant = True
+                if ig_obj.variants:
+                    alleleorigins = [variant.variantAttributes.alleleOrigins[0] for variant in ig_obj.variants]
+                    if "germline_variant" in alleleorigins:
+                        has_germline_variant = True
 
         ir = CaseModel(GELInterpretationReport, {
             "ir_family": ir_family.entry,
