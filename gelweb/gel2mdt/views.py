@@ -749,10 +749,10 @@ def str_view(request, variant_id):
     :param variant_id: Variant ID
     :return:
     '''
-    str = STRVariant.objects.get(id=variant_id)
-    proband_strs = ProbandSTR.objects.filter(str_variant=str)
+    str_variant = STRVariant.objects.get(id=variant_id)
+    proband_strs = ProbandSTR.objects.filter(str_variant=str_variant)
 
-    return render(request, 'gel2mdt/str.html', {'str': str,
+    return render(request, 'gel2mdt/str.html', {'str': str_variant,
                                                'proband_strs': proband_strs})
 
 @login_required
