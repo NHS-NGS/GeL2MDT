@@ -494,9 +494,9 @@ def proband_view(request, report_id):
                        'raredisease_report': RareDiseaseReport.objects.filter(proband_sv=sv).first()}
 
     str_dict = {}
-    for str in proband_strs:
-        str_dict[str] = {'form': STRValidationForm(instance=str, user=request.user),
-                         'raredisease_report': RareDiseaseReport.objects.filter(proband_str=str).first()}
+    for proband_str in proband_strs:
+        str_dict[proband_str] = {'form': STRValidationForm(instance=proband_str, user=request.user),
+                         'raredisease_report': RareDiseaseReport.objects.filter(proband_str=proband_str).first()}
 
     can_edit_completed = False
     for group in request.user.groups.all():
