@@ -33,7 +33,7 @@ SOFTWARE.
         @page {
             size: {{ pagesize|default:"A4" }};
             margin: 1.1cm 1.5cm;
-            margin-bottom: 75px;
+            margin-bottom: 75px;}
     </style>
 
     <body style="font-size: 10pt;">
@@ -51,7 +51,7 @@ SOFTWARE.
                         </strong>
                     </td>
                     <td>
-                        <img style="float:right; margin: 5px 0; width: 90%;" src="file:///home/theo/Documents/gel2mdt/gelweb/gelweb/static_files/figures/bwh-logo.png" />
+                        <img style="float:right; margin: 5px 0; width: 90%;" src="file:///home/estone/Projects/GeL2MDT/gelweb/gel2mdt/static/figures/bwh-logo.png" />
                     </td>
                 </tr>
             </table>
@@ -113,6 +113,8 @@ SOFTWARE.
 
             {% if outcome == "positive" %}
                 <p style="margin: 5px 0; font-size: 12pt;"><strong>Variant Details</strong></p>
+                {% if reported_variants %}
+                <p style="margin: 5px 0; font-size: 10pt;">SNVs / Indels</p>
                 <small>
                     <table style="margin: 5px;" class="table table-bordered table-condensed" style="font-size:10px;">
                         <thead>
@@ -129,11 +131,41 @@ SOFTWARE.
                             {% for variant in reported_variants %}
                                 <tr>
                                     <td>{{variant.proband_variant.get_transcript.gene}}</td>
-                                    <td>{{variant.proband_variant.zygosity}}</td>
                                     <td>
-                                        {{variant.proband_variant.inheritance}} <br>
-                                        (mat: {{variant.proband_variant.maternal_zygosity}}, <br>
-                                        pat: {{variant.proband_variant.paternal_zygosity}})
+                                        {% if variant.proband_variant.zygosity == "reference_homozygous" %}
+                                            Wild type
+                                        {% elif variant.proband_variant.zygosity == "alternate_homozygous" %}
+                                            Homozygous
+                                        {% else %}
+                                            {{variant.proband_variant.zygosity|capfirst}}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if variant.proband_variant.inheritance == "inherited" %}
+                                            {% if variant.proband_variant.zygosity == "alternate_homozygous" and variant.proband_variant.maternal_zygosity == "heterozygous" and variant.proband_variant.paternal_zygosity == "heterozygous" %}
+                                                Bi-parental
+                                            {% elif variant.proband_variant.zygosity == "alternate_homozygous" and variant.proband_variant.maternal_zygosity == "alternate_homozygous" %}
+                                                Maternal
+                                            {% elif variant.proband_variant.zygosity == "alternate_homozygous" and variant.proband_variant.paternal_zygosity == "alternate_homozygous" %}
+                                                Paternal
+                                            {% elif variant.proband_variant.zygosity == "heterozygous" and variant.proband_variant.maternal_zygosity == "heterozygous" and variant.proband_variant.paternal_zygosity == "heterozygous" %}
+                                                Maternal or Paternal
+                                            {% elif variant.proband_variant.zygosity == "heterozygous" and variant.proband_variant.maternal_zygosity == "heterozygous" %}
+                                                Maternal
+                                            {% elif variant.proband_variant.zygosity == "heterozygous" and variant.proband_variant.paternal_zygosity == "heterozygous" %}
+                                                Paternal
+                                            {% elif variant.proband_variant.zygosity == "heterozygous" and variant.proband_variant.maternal_zygosity == "alternate_homozygous" %}
+                                                Maternal
+                                            {% elif variant.proband_variant.zygosity == "heterozygous" and variant.proband_variant.paternal_zygosity == "alternate_homozygous" %}
+                                                Paternal
+                                            {% else %}
+                                                Inherited
+                                            {% endif %}
+                                        {% elif variant.proband_variant.inheritance == "de_novo" %}
+                                            De novo
+                                        {% else %}
+                                            Unknown
+                                        {% endif %}
                                     </td>
                                     <td>
                                         {{variant.proband_variant.get_transcript_variant.hgvs_c}}
@@ -159,6 +191,101 @@ SOFTWARE.
                         </tbody>
                     </table>
                 </small>
+                {% endif %}
+                {% if reported_svs %}
+                <p style="margin: 5px 0; font-size: 10pt;">CNVs</p>
+                <small>
+                    <table style="margin: 5px;" class="table table-bordered table-condensed" style="font-size:10px;">
+                        <thead>
+                            <tr>
+                                <th>Position ({{build}})</th>
+                                <th>Variant type</th>
+                                <th>Implicated TierA genes</th>
+                                <th>CNV AF</th>
+                                <th>CNV AUC</th>
+                                <th>Classification</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for variant in reported_svs %}
+                                <tr>
+                                    <td> {{ variant.proband_sv.sv }}</td>
+                                    <td>{{variant.proband_sv.sv.variant_type|capfirst}}</td>
+                                    <td>
+                                        {% for psg in variant.proband_sv.probandsvgene_set.all %}
+                                            {% if psg.selected %}
+                                                {{psg.gene}}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </td>
+                                    <td>
+                                        {{ variant.proband_sv.cnv_af }}
+                                    </td>
+                                    <td>
+                                        {{ variant.proband_sv.cnv_auc }}
+                                    </td>
+                                    <td>
+                                        {% if variant.classification == "5" %}
+                                            Pathogenic
+                                        {% elif variant.classification == "4" %}
+                                            Likely Pathogenic
+                                        {% elif variant.classification == "3" %}
+                                            Variant of Uncertain Significance
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </small>
+                {% endif %}
+                {% if reported_strs %}
+                <p style="margin: 5px 0; font-size: 10pt;">STRs</p>
+                <small>
+                    <table style="margin: 5px;" class="table table-bordered table-condensed" style="font-size:10px;">
+                        <thead>
+                            <tr>
+                                <th>Position ({{build}})</th>
+                                <th>Implicated TierA genes</th>
+                                <th>Repeated sequence</th>
+                                <th>Normal / Pathogenic thresholds</th>
+                                <th>Proband copies</th>
+                                <th>Classification</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for variant in reported_strs %}
+                                <tr>
+                                    <td>{{ variant.proband_str.str_variant }}</td>
+                                    <td>
+                                        {% for psg in variant.proband_str.probandstrgene_set.all %}
+                                            {% if psg.selected %}
+                                                {{psg.gene}}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </td>
+                                    <td>{{variant.proband_str.str_variant.repeated_sequence}}</td>              
+                                    <td>
+                                        {{variant.proband_str.str_variant.normal_threshold}} / {{variant.proband_str.str_variant.pathogenic_threshold}}
+                                    </td>
+                                    <td>
+                                        {{variant.proband_str.proband_copies_a}}, {{variant.proband_str.proband_copies_b}}
+                                    </td>
+                                    <td>
+                                        {% if variant.classification == "5" %}
+                                            Pathogenic
+                                        {% elif variant.classification == "4" %}
+                                            Likely Pathogenic
+                                        {% elif variant.classification == "3" %}
+                                            Variant of Uncertain Significance
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </small>
+                {% endif %}
             {% endif %}
 
             <p style="margin: 5px 0; font-size: 12pt;"><strong>Test Methodology</strong></p>

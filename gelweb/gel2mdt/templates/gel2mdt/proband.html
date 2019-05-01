@@ -437,39 +437,107 @@
                             </div>
 
                             <div class="modal-body">
-                                        {% if variants_for_reporting %}
-                                <table class="table table-bordered table-condensed">
-                                    <thead>
-                                        <tr>
-                                            <th><i class="fas fa-plus-circle"></i></th>
-                                            <th>Gene</th>
-                                            <th>HGVS description</th>
-                                            <th>Classification</th>
-                                            </th>
-                                    </thead>
-                                    <tbody>
-                                        {% for variant in variants_for_reporting %}
+                                {% if variants_for_reporting or svs_for_reporting or strs_for_reporting %}
+                                {% if variants_for_reporting %}
+                                    <h5>SNVs / Indels</h5>
+                                    <table class="table table-bordered table-condensed">
+                                        <thead>
+                                            <tr>
+                                                <th><i class="fas fa-plus-circle"></i></th>
+                                                <th>Gene</th>
+                                                <th>HGVS description</th>
+                                                <th>Classification</th>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for variant in variants_for_reporting %}
+                                                <tr>
+                                                <td><div class="checkbox">
+                                                        <label><input type="checkbox" name="reportVariantChoice" value="{{variant.id}}"></label>
+                                                    </div></td>
+                                                    <td>{{variant.proband_variant.get_transcript.gene}}</td>
+                                                    <td>
+                                                        {{variant.proband_variant.get_transcript_variant.hgvs_c}}
+                                                        {% if variant.proband_variant.get_transcript_variant.hgvs_p %}
+                                                            <br>
+                                                            {{variant.proband_variant.get_transcript_variant.hgvs_p}}
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>{{variant.classification}}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                    </table>
+                                {% endif %}
+                                {% if svs_for_reporting %}
+                                    <h5>CNVs</h5>
+                                    <table class="table table-bordered table-condensed">
+                                        <thead>
+                                            <tr>
+                                                <th><i class="fas fa-plus-circle"></i></th>
+                                                <th>TeirA Genes</th>
+                                                <th>Description</th>
+                                                <th>Classification</th>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for variant in svs_for_reporting %}
                                             <tr>
                                             <td><div class="checkbox">
                                                     <label><input type="checkbox" name="reportVariantChoice" value="{{variant.id}}"></label>
                                                 </div></td>
-                                                <td>{{variant.proband_variant.get_transcript.gene}}</td>
                                                 <td>
-                                                    {{variant.proband_variant.get_transcript_variant.hgvs_c}}
-                                                    {% if variant.proband_variant.get_transcript_variant.hgvs_p %}
-                                                        <br>
-                                                        {{variant.proband_variant.get_transcript_variant.hgvs_p}}
-                                                    {% endif %}
+                                                    {% for psg in variant.proband_sv.probandsvgene_set.all %}
+                                                        {% if psg.selected %}
+                                                            {{psg.gene}}
+                                                        {% endif %}
+                                                    {% endfor %}
                                                 </td>
+                                                <td>{{ variant.proband_sv.sv }}: {{variant.proband_sv.sv.variant_type}}</td>
                                                 <td>{{variant.classification}}</td>
                                             </tr>
                                             {% endfor %}
-                                    </tbody>
-                                </table>
+                                        </tbody>
+                                    </table>
+                                {% endif %}
+                                {% if strs_for_reporting %}
+                                    <h5>STRs</h5>
+                                    <table class="table table-bordered table-condensed">
+                                        <thead>
+                                            <tr>
+                                                <th><i class="fas fa-plus-circle"></i></th>
+                                                <th>TeirA Genes</th>
+                                                <th>Description</th>
+                                                <th>Classification</th>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for variant in strs_for_reporting %}
+                                            <tr>
+                                            <td><div class="checkbox">
+                                                    <label><input type="checkbox" name="reportVariantChoice" value="{{variant.id}}"></label>
+                                                </div></td>
+                                                <td>
+                                                    {% for psg in variant.proband_str.probandstrgene_set.all %}
+                                                        {% if psg.selected %}
+                                                            {{psg.gene}}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </td>
+                                                <td>{{ variant.proband_str.str_variant }}: {{variant.proband_str.str_variant.repeated_sequence}} x {{variant.proband_str.proband_copies_a}}, {{variant.proband_str.proband_copies_b}}</td>
+                                                <td>{{variant.classification}}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    {% endif %}
+                                    </table>
                                 <a target="_blank" id="btnSendVariants" class="btn btn-active" role="button">Generate</a>
                                 {%else%}
                                     <p>No class 3, 4, or 5 variants which have passed validation found for this patient.</p>
-                                    {% endif %}
+                                {% endif %}
                             </div>
                         </div>
                     </div>

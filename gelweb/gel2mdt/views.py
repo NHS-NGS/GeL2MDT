@@ -479,6 +479,18 @@ def proband_view(request, report_id):
         proband_variant__validation_status="P"
     )
 
+    svs_for_reporting = RareDiseaseReport.objects.filter(
+        proband_sv__interpretation_report__id=report.id,
+        classification__in=('3','4','5'),
+        proband_sv__validation_status="P"
+    )
+
+    strs_for_reporting = RareDiseaseReport.objects.filter(
+        proband_str__interpretation_report__id=report.id,
+        classification__in=('3','4','5'),
+        proband_str__validation_status="P"
+    )
+
     pv_dict = {}
     for pv in proband_variants:
         pv_dict[pv] = {'form' : VariantValidationForm(instance=pv, user=request.user),
@@ -526,6 +538,8 @@ def proband_view(request, report_id):
                                                     'sample_type': report.sample_type,
                                                     'add_variant_form': add_variant_form,
                                                     'variants_for_reporting': variants_for_reporting,
+                                                    'svs_for_reporting': svs_for_reporting,
+                                                    'strs_for_reporting': strs_for_reporting,
                                                     'gelir_form': gelir_form,
                                                     'report_history': report_history,
                                                     'proband_history': proband_history,
@@ -1598,11 +1612,23 @@ def report(request, report_id, outcome):
 
     if outcome == "positive":
         reported_variant_ids = request.GET.getlist('rdr')
-        reported_variants = RareDiseaseReport.objects.filter(
+        rd_reports = RareDiseaseReport.objects.filter(
             id__in=reported_variant_ids
         )
+        reported_variants = []
+        reported_svs = []
+        reported_strs = []
+        for rd_report in rd_reports:
+            if rd_report.proband_variant:
+                reported_variants.append(rd_report)
+            if rd_report.proband_sv:
+                reported_svs.append(rd_report)
+            if rd_report.proband_str:
+                reported_strs.append(rd_report)
     else:
         reported_variants = None
+        reported_svs = None
+        reported_strs = None
 
     return render_to_pdf_response(
         request=request,
@@ -1612,6 +1638,8 @@ def report(request, report_id, outcome):
             'build': genome_build,
             'report': report,
             'reported_variants': reported_variants,
+            'reported_svs': reported_svs,
+            'reported_strs': reported_strs,
             'panels': panel_genes
         }
     )
