@@ -200,3 +200,6 @@ NOTEBOOK_ARGUMENTS = [
     '--no-browser',
     '--allow-root'
 ]
+
+# Max number of parameters that may be received via GET or POST
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 1500
