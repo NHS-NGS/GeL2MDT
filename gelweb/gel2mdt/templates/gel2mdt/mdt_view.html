@@ -182,6 +182,11 @@ SOFTWARE.
     $(document).ready(function() {
         $('#mdt-proband-table').DataTable({
             dom: 'lBfrtip',
+            "lengthMenu": [[5, 10, 20, -1], [5, 10, 20, "All"]],
+            "order": [[ 0, "desc" ]],
+            "scrollY": "400px",
+            "scrollX": true,
+            "scrollCollapse": true,
             buttons: [ {
                 extend: 'excelHtml5',
                 title: "MDT_{{mdt_id}}"
