@@ -145,8 +145,10 @@ SOFTWARE.
                                                 <th>Discussion</th>
                                                 <th>Action</th>
                                                 <th>Edit Important Variants</th>
+                                                {% if sample_type == 'raredisease' %}
                                                 <th>Edit CNVs</th>
                                                 <th>Edit STRs</th>
+                                                {% endif %}
                                                 <th>Edit T3 Variants</th>
                                                 <th>Disease Type</th>
                                                 {% if sample_type == 'cancer' %}
