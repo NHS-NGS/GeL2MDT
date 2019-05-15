@@ -1,3 +1,9 @@
+## [0.7.1] - 2019-05-15
+### Changed
+- Removed CNV and STR columns for cancer MDTs
+- increased upload limit from default
+- UI fixes for associated samples and MDT tables
+
 ## [0.7.0]- 2019-04-12
 ### Added
 - CNV and STR compatibility
