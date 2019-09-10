@@ -1,8 +1,7 @@
 # Base image
-FROM python:3.6
+FROM python:3.6-stretch
 
-# Maintainer
-MAINTAINER Patrick Lombard<patrick.lombard@gosh.nhs.uk>
+LABEL maintainer="Patrick Lombard<patrick.lombard@gosh.nhs.uk>"
 
 # Install prequisites (last four entries added by me - PD)
 RUN apt-get update && apt-get -y install \
@@ -19,21 +18,23 @@ RUN apt-get update && apt-get -y install \
     vim \
     mysql-server \
     default-libmysqlclient-dev \
-    software-properties-common
+    software-properties-common \
+    default-jdk \
+    default-jre \
+    maven \
+    python3-dev \
+    python3-pip \
+    python3-virtualenv \
+    libsasl2-dev \
+    libldap2-dev \
+    libssl-dev \
+    curl
 
-# RUN add-apt-repository ppa:webupd8team/java
-RUN add-apt-repository "deb http://ppa.launchpad.net/webupd8team/java/ubuntu xenial main"
-RUN echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" | debconf-set-selections
-RUN echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 seen true" | debconf-set-selections
-RUN apt-get update
-RUN apt-get install -y --allow-unauthenticated oracle-java8-installer maven \
-    python3-dev python3-pip python3-virtualenv \
-    libsasl2-dev libldap2-dev libssl-dev
-RUN apt-get install -y curl
-RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
-RUN apt-get install -y nodejs
-RUN apt-get install -y npm
-RUN npm install avrodoc -g
+# Install node
+RUN curl -sL https://deb.nodesource.com/setup_6.x | bash - && \
+    apt-get install -y nodejs npm && \
+    npm install avrodoc -g
+
 # Install VEP Perl dependencies
 RUN cpanm DBI
 
