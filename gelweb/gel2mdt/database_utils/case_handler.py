@@ -292,7 +292,7 @@ class Case(object):
         return ig_obj, case_variant_list, variant_object_count
 
     def parse_ig_svs(self, ig_obj, genome_build, case_sv_list):
-        if ig_obj.softwareVersions['gel-tiering'] != '1.0.0':
+        if ig_obj.softwareVersions['gel-tiering'] == '1.0.0':
             for variant in ig_obj.structuralVariants:
                 variant.case_variant = False
             return ig_obj, case_sv_list
@@ -318,7 +318,7 @@ class Case(object):
         return ig_obj, case_sv_list
 
     def parse_ig_strs(self, ig_obj, genome_build, case_str_list):
-        if ig_obj.softwareVersions['gel-tiering'] !=  '1.0.0':
+        if ig_obj.softwareVersions['gel-tiering'] ==  '1.0.0':
             for variant in ig_obj.shortTandemRepeats:
                 variant.case_variant = False
             return ig_obj, case_str_list
