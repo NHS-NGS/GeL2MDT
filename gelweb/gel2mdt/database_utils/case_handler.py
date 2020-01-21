@@ -292,10 +292,10 @@ class Case(object):
         return ig_obj, case_variant_list, variant_object_count
 
     def parse_ig_svs(self, ig_obj, genome_build, case_sv_list):
-        if int(ig_obj.softwareVersions['gel-tiering'].replace('.', '')) <= 1000:
-            for variant in ig_obj.structuralVariants:
-                variant.case_variant = False
-            return ig_obj, case_sv_list
+        # if int(ig_obj.softwareVersions['gel-tiering'].replace('.', '')) <= 1000:
+        #     for variant in ig_obj.structuralVariants:
+        #         variant.case_variant = False
+        #     return ig_obj, case_sv_list
         for variant in ig_obj.structuralVariants:
             interesting_variant = False
             for report_event in variant.reportEvents:
@@ -1159,9 +1159,10 @@ class CaseAttributeManager(object):
             if clinical_report.variants:
                 for variant in clinical_report.variants:
                     variant.dbsnp = None
-                    if variant.variantAttributes.variantIdentifiers.dbSnpId:
-                        if re.match('rs\d+', variant.variantAttributes.variantIdentifiers.dbSnpId):
-                            variant.dbsnp = variant.variantAttributes.variantIdentifiers.dbSnpId
+                    if variant.variantAttributes.variantIdentifiers:
+                        if variant.variantAttributes.variantIdentifiers.dbSnpId:
+                            if re.match('rs\d+', variant.variantAttributes.variantIdentifiers.dbSnpId):
+                                variant.dbsnp = variant.variantAttributes.variantIdentifiers.dbSnpId
                     cip_variant = {
                         "genome_assembly": genome_assembly,
                         "alternate": variant.case_variant.alt,
@@ -1325,8 +1326,9 @@ class CaseAttributeManager(object):
                             ig_variant.paternal_zygosity = call.zygosity
 
                     if call:
-                        if ig_variant.variantAttributes.alleleOrigins[0] == 'somatic_variant':
-                            ig_variant.somatic = True
+                        if ig_variant.variantAttributes.alleleOrigins:
+                            if ig_variant.variantAttributes.alleleOrigins[0] == 'somatic_variant':
+                                ig_variant.somatic = True
 
         for ig_variant in raw_proband_variants:
             proband_variant = {

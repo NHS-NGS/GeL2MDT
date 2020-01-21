@@ -23,8 +23,8 @@ import os
 import getpass
 import requests
 import json
-
 import labkey as lk
+from ..config import load_config
 
 
 class PollAPI(object):
@@ -82,12 +82,16 @@ class PollAPI(object):
         from the server_list, and format an url from the api's server and
         desired endpoint.
         """
+        self.config = load_config.LoadConfig().load()
         self.api = api
         self.endpoint = endpoint
-
+        if self.config['use_active_directory'] == "True":
+            cip_api_url = "https://cipapi-gms-beta.genomicsengland.nhs.uk/api/2/{endpoint}"
+        else:
+            cip_api_url = "https://cipapi.genomicsengland.nhs.uk/api/2/{endpoint}"
         self.server_list = {
             "cip_api": (
-                "https://cipapi.genomicsengland.nhs.uk/api/2/{endpoint}",
+                cip_api_url,
                 True),
             "cip_api_for_report": (
                 "https://cipapi.genomicsengland.nhs.uk/api/{endpoint}",
@@ -203,20 +207,32 @@ class PollAPI(object):
 
         self.token_url = self.server.format(endpoint=token_endpoint)
         self.get_credentials()
-        token_response = requests.post(
-            url=self.token_url,
-            json=dict(
-                username=os.environ["cip_api_username"],
-                password=os.environ["cip_api_password"]
-            ),
-        )
 
-        token_json = token_response.json()
-
+        if self.config['use_active_directory'] == "True":
+            token_response = requests.post(
+                url="https://login.microsoftonline.com/{tenant_id}/oauth2/token".format(
+                    tenant_id=os.environ["tenant_id"]),
+                data="grant_type=client_credentials",
+                headers={'Content-Type': "application/x-www-form-urlencoded",},
+                auth=(os.environ["client_id"], os.environ["client_secret"])
+            )
+            token_json = token_response.json()
+            token = token_json.get("access_token")
+        else:
+            token_response = requests.post(
+                url=self.token_url,
+                json=dict(
+                    username=os.environ["cip_api_username"],
+                    password=os.environ["cip_api_password"]
+                ),
+            )
+            token_json = token_response.json()
+            token = token_json.get("token")
+        
         self.headers = {
             "Accept": "application/json",
             "Authorization": "JWT {token}".format(
-                token=token_json.get("token"))}
+                token=token)}
 
     def get_headers(self):
         """
@@ -236,9 +252,9 @@ class PollAPI(object):
 
     def get_credentials(self):
         """
-        Sets CIP-API credentials as environment variables if not already set.
+        Sets AD/CIP-API credentials as environment variables if not already set.
 
-        Will look for CIP-API credentials in the execution shell's environment,
+        Will look for AD/CIP-API credentials in the execution shell's environment,
         typically set up in gel2mdt/DAILY_UPDATE.sh for automation. If not set,
         then the execution shell will prompt for a username and hidden password
         to be set as enviroment fields, which will then be destroyed once the
@@ -251,8 +267,16 @@ class PollAPI(object):
         Returns:
             None
         """
-        try:
-            user = os.environ["cip_api_username"]
-        except KeyError as e:
-            os.environ["cip_api_username"] = input("Enter username: ")
-            os.environ["cip_api_password"] = getpass.getpass("Enter password: ")
+        if self.config['use_active_directory'] == "True":
+            try:
+                user = os.environ["tenant_id"]
+            except KeyError as e:
+                os.environ["tenant_id"] = input("Enter Tenant ID: ")
+                os.environ["client_id"] = input("Enter Client ID: ")
+                os.environ["client_secret"] = getpass.getpass("Enter Client Secret: ")
+        else:
+            try:
+                user = os.environ["cip_api_username"]
+            except KeyError as e:
+                os.environ["cip_api_username"] = input("Enter username: ")
+                os.environ["cip_api_password"] = getpass.getpass("Enter password: ")
