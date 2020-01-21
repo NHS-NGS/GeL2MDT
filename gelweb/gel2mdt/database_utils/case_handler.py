@@ -292,10 +292,10 @@ class Case(object):
         return ig_obj, case_variant_list, variant_object_count
 
     def parse_ig_svs(self, ig_obj, genome_build, case_sv_list):
-        # if int(ig_obj.softwareVersions['gel-tiering'].replace('.', '')) <= 1000:
-        #     for variant in ig_obj.structuralVariants:
-        #         variant.case_variant = False
-        #     return ig_obj, case_sv_list
+        if int(ig_obj.softwareVersions['gel-tiering'].replace('.', '')) <= 1000:
+            for variant in ig_obj.structuralVariants:
+                variant.case_variant = False
+            return ig_obj, case_sv_list
         for variant in ig_obj.structuralVariants:
             interesting_variant = False
             for report_event in variant.reportEvents:
