@@ -1,3 +1,7 @@
+## [0.8.0]- 2020-03-16
+### Added
+- Active Directory functionality for new CIP-API (version 2.8.0). Note the current endpoint is the cipapi-gms-beta environment, and will need to change once the new CIP-API is in production at GeL.
+
 ## [0.7.1] - 2019-05-15
 ### Changed
 - Removed CNV and STR columns for cancer MDTs
