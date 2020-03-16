@@ -13,6 +13,7 @@ GMC=None
 pull_T3=False
 cip_as_id=True
 mergedVEP=True
+use_active_directory=False
 #These we anticipate would be rarely used options
 bypass_VEP=False
 remoteVEP=True
