@@ -87,7 +87,7 @@ class PollAPI(object):
         self.config = load_config.LoadConfig().load()
         self.api = api
         self.endpoint = endpoint
-        if self.config['use_active_directory'] == "True":
+        if self.config['beta_testing'] == "True":
             cip_api_url = "https://cipapi-gms-beta.genomicsengland.nhs.uk/api/2/{endpoint}"
         else:
             cip_api_url = "https://cipapi.genomicsengland.nhs.uk/api/2/{endpoint}"
