@@ -159,7 +159,7 @@ class PollAPI(object):
                 # get auth headers, do this every time, if token is already set method will check if it's expired
                 # and refresh if necessary
                 self.get_auth_headers()
-            if (self.headers_required) and (self.headers is None) and (self.api == 'genenames'):
+            elif (self.headers_required) and (self.headers is None) and (self.api == 'genenames'):
                 self.get_headers()
             elif (self.headers_required) and (self.headers is None) and (self.api == 'ensembl'):
                 self.get_headers()
