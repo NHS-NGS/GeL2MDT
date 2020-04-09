@@ -159,102 +159,103 @@ def write_mdt_export(mdt_instance, mdt_reports):
             proband_variants = ProbandVariant.objects.filter(interpretation_report=report.interpretation_report)
             panels = InterpretationReportFamilyPanel.objects.filter(ir_family=report.interpretation_report.ir_family)
             pv_output = []
-            for proband_variant in proband_variants:
-                transcript = proband_variant.get_transcript()
-                transcript_variant = proband_variant.get_transcript_variant()
-                if transcript and transcript_variant:
-                    hgvs_c = None
-                    hgvs_p = None
-                    hgvs_c_split = transcript_variant.hgvs_c.split(':')
-                    hgvs_p_split = transcript_variant.hgvs_p.split(':')
-                    if len(hgvs_c_split) > 1:
-                        hgvs_c = hgvs_c_split[1]
-                    if len(hgvs_p_split) > 1:
-                        hgvs_p = hgvs_p_split[1].replace('%3D', '=')
-                    pv_output.append({'variant': f'{transcript.gene}, '
-                                     f'{hgvs_c}, '
-                                     f'{hgvs_p}, ',
-                                     'inheritance': f'{proband_variant.inheritance}',
-                                     'proband_zygosity': f'{proband_variant.zygosity}',
-                                     'mat_zygosity': f'{proband_variant.maternal_zygosity}',
-                                     'pat_zygosity': f'{proband_variant.paternal_zygosity}',})
-            panel_names = []
-            for panel in panels:
-                panel_names.append(f'{panel.panel.panel.panel_name}_'
-                                   f'{panel.panel.version_number}')
+            if proband_variants.exists():
+                for proband_variant in proband_variants:
+                    transcript = proband_variant.get_transcript()
+                    transcript_variant = proband_variant.get_transcript_variant()
+                    if transcript and transcript_variant:
+                        hgvs_c = None
+                        hgvs_p = None
+                        hgvs_c_split = transcript_variant.hgvs_c.split(':')
+                        hgvs_p_split = transcript_variant.hgvs_p.split(':')
+                        if len(hgvs_c_split) > 1:
+                            hgvs_c = hgvs_c_split[1]
+                        if len(hgvs_p_split) > 1:
+                            hgvs_p = hgvs_p_split[1].replace('%3D', '=')
+                        pv_output.append({'variant': f'{transcript.gene}, '
+                                        f'{hgvs_c}, '
+                                        f'{hgvs_p}, ',
+                                        'inheritance': f'{proband_variant.inheritance}',
+                                        'proband_zygosity': f'{proband_variant.zygosity}',
+                                        'mat_zygosity': f'{proband_variant.maternal_zygosity}',
+                                        'pat_zygosity': f'{proband_variant.paternal_zygosity}',})
+                panel_names = []
+                for panel in panels:
+                    panel_names.append(f'{panel.panel.panel.panel_name}_'
+                                    f'{panel.panel.version_number}')
 
-            v_rows = row_count
-            for variant in pv_output:
-                worksheet.write('L' + str(v_rows), variant['variant'])
-                worksheet.write('M' + str(v_rows), variant['inheritance'])
-                worksheet.write('N' + str(v_rows), variant['proband_zygosity'])
-                worksheet.write('O' + str(v_rows), variant['mat_zygosity'])
-                worksheet.write('P' + str(v_rows), variant['pat_zygosity'])
-                worksheet.data_validation('Q' + str(v_rows),
-                    {'validate': 'list', 'source': ['Yes', 'No', 'Maybe']})
-                worksheet.data_validation('R' + str(v_rows),
-                    {'validate': 'list', 'source': ['Yes', 'No']})
-                v_rows += 1
+                v_rows = row_count
+                for variant in pv_output:
+                    worksheet.write('L' + str(v_rows), variant['variant'])
+                    worksheet.write('M' + str(v_rows), variant['inheritance'])
+                    worksheet.write('N' + str(v_rows), variant['proband_zygosity'])
+                    worksheet.write('O' + str(v_rows), variant['mat_zygosity'])
+                    worksheet.write('P' + str(v_rows), variant['pat_zygosity'])
+                    worksheet.data_validation('Q' + str(v_rows),
+                        {'validate': 'list', 'source': ['Yes', 'No', 'Maybe']})
+                    worksheet.data_validation('R' + str(v_rows),
+                        {'validate': 'list', 'source': ['Yes', 'No']})
+                    v_rows += 1
 
-            if row_count == v_rows - 1:
-                worksheet.write('A' + str(row_count),
-                                report.interpretation_report.ir_family.participant_family.proband.gel_id, vcenter_format)
-                worksheet.write('B' + str(row_count),
-                                report.interpretation_report.ir_family.ir_family_id, vcenter_format)
-                worksheet.write('C' + str(row_count),
-                                report.interpretation_report.ir_family.participant_family.proband.gmc, vcenter_format)
-                worksheet.write('D' + str(row_count),
-                    report.interpretation_report.ir_family.participant_family.proband.forename, vcenter_format)
-                worksheet.write('E' + str(row_count),
-                    report.interpretation_report.ir_family.participant_family.proband.surname, vcenter_format)
-                worksheet.write('F' + str(row_count),
-                    report.interpretation_report.ir_family.participant_family.proband.sex, vcenter_format)
-                worksheet.write('G' + str(row_count),
-                    report.interpretation_report.ir_family.participant_family.proband.date_of_birth.date(), vcenter_date_format)
-                worksheet.write('H' + str(row_count),
-                    report.interpretation_report.ir_family.participant_family.proband.nhs_number, vcenter_format)
-                worksheet.write('I' + str(row_count),
-                    report.interpretation_report.ir_family.participant_family.gel_family_id, vcenter_format)
-                worksheet.write('J' + str(row_count),
-                    report.interpretation_report.ir_family.participant_family.clinician.name, vcenter_format)
-                worksheet.write('K' + str(row_count),
-                    '\n'.join(panel_names), vcenter_format)
-            else:
-                worksheet.merge_range('A' + str(row_count) + ':A' + str(v_rows - 1),
-                                      report.interpretation_report.ir_family.participant_family.proband.gel_id,
-                                      vcenter_format)
-                worksheet.merge_range('B' + str(row_count) + ':B' + str(v_rows - 1),
-                                      report.interpretation_report.ir_family.ir_family_id,
-                                      vcenter_format)
-                worksheet.merge_range('C' + str(row_count) + ':C' + str(v_rows - 1),
-                                      report.interpretation_report.ir_family.participant_family.proband.gmc,
-                                      vcenter_format)
-                worksheet.merge_range('D' + str(row_count) + ':D' + str(v_rows-1),
-                    report.interpretation_report.ir_family.participant_family.proband.forename,
-                    vcenter_format)
-                worksheet.merge_range('E' + str(row_count) + ':E' + str(v_rows-1),
-                    report.interpretation_report.ir_family.participant_family.proband.surname,
-                    vcenter_format)
-                worksheet.merge_range('F' + str(row_count) + ':F' + str(v_rows-1),
-                    report.interpretation_report.ir_family.participant_family.proband.sex,
-                    vcenter_format)
-                worksheet.merge_range('G' + str(row_count) + ':G' + str(v_rows-1),
-                    report.interpretation_report.ir_family.participant_family.proband.date_of_birth.date(),
-                    vcenter_date_format)
-                worksheet.merge_range('H' + str(row_count) + ':H' + str(v_rows-1),
-                    report.interpretation_report.ir_family.participant_family.proband.nhs_number,
-                    vcenter_format)
-                worksheet.merge_range('I' + str(row_count) + ':I' + str(v_rows-1),
-                    report.interpretation_report.ir_family.participant_family.gel_family_id,
-                    vcenter_format)
-                worksheet.merge_range('J' + str(row_count) + ':J' + str(v_rows-1),
-                    report.interpretation_report.ir_family.participant_family.clinician.name,
-                    vcenter_format)
-                worksheet.merge_range('K' + str(row_count) + ':K' + str(v_rows-1),
-                    '\n'.join(panel_names),
-                    vcenter_format)
+                if row_count == v_rows - 1:
+                    worksheet.write('A' + str(row_count),
+                                    report.interpretation_report.ir_family.participant_family.proband.gel_id, vcenter_format)
+                    worksheet.write('B' + str(row_count),
+                                    report.interpretation_report.ir_family.ir_family_id, vcenter_format)
+                    worksheet.write('C' + str(row_count),
+                                    report.interpretation_report.ir_family.participant_family.proband.gmc, vcenter_format)
+                    worksheet.write('D' + str(row_count),
+                        report.interpretation_report.ir_family.participant_family.proband.forename, vcenter_format)
+                    worksheet.write('E' + str(row_count),
+                        report.interpretation_report.ir_family.participant_family.proband.surname, vcenter_format)
+                    worksheet.write('F' + str(row_count),
+                        report.interpretation_report.ir_family.participant_family.proband.sex, vcenter_format)
+                    worksheet.write('G' + str(row_count),
+                        report.interpretation_report.ir_family.participant_family.proband.date_of_birth.date(), vcenter_date_format)
+                    worksheet.write('H' + str(row_count),
+                        report.interpretation_report.ir_family.participant_family.proband.nhs_number, vcenter_format)
+                    worksheet.write('I' + str(row_count),
+                        report.interpretation_report.ir_family.participant_family.gel_family_id, vcenter_format)
+                    worksheet.write('J' + str(row_count),
+                        report.interpretation_report.ir_family.participant_family.clinician.name, vcenter_format)
+                    worksheet.write('K' + str(row_count),
+                        '\n'.join(panel_names), vcenter_format)
+                else:
+                    worksheet.merge_range('A' + str(row_count) + ':A' + str(v_rows - 1),
+                                        report.interpretation_report.ir_family.participant_family.proband.gel_id,
+                                        vcenter_format)
+                    worksheet.merge_range('B' + str(row_count) + ':B' + str(v_rows - 1),
+                                        report.interpretation_report.ir_family.ir_family_id,
+                                        vcenter_format)
+                    worksheet.merge_range('C' + str(row_count) + ':C' + str(v_rows - 1),
+                                        report.interpretation_report.ir_family.participant_family.proband.gmc,
+                                        vcenter_format)
+                    worksheet.merge_range('D' + str(row_count) + ':D' + str(v_rows-1),
+                        report.interpretation_report.ir_family.participant_family.proband.forename,
+                        vcenter_format)
+                    worksheet.merge_range('E' + str(row_count) + ':E' + str(v_rows-1),
+                        report.interpretation_report.ir_family.participant_family.proband.surname,
+                        vcenter_format)
+                    worksheet.merge_range('F' + str(row_count) + ':F' + str(v_rows-1),
+                        report.interpretation_report.ir_family.participant_family.proband.sex,
+                        vcenter_format)
+                    worksheet.merge_range('G' + str(row_count) + ':G' + str(v_rows-1),
+                        report.interpretation_report.ir_family.participant_family.proband.date_of_birth.date(),
+                        vcenter_date_format)
+                    worksheet.merge_range('H' + str(row_count) + ':H' + str(v_rows-1),
+                        report.interpretation_report.ir_family.participant_family.proband.nhs_number,
+                        vcenter_format)
+                    worksheet.merge_range('I' + str(row_count) + ':I' + str(v_rows-1),
+                        report.interpretation_report.ir_family.participant_family.gel_family_id,
+                        vcenter_format)
+                    worksheet.merge_range('J' + str(row_count) + ':J' + str(v_rows-1),
+                        report.interpretation_report.ir_family.participant_family.clinician.name,
+                        vcenter_format)
+                    worksheet.merge_range('K' + str(row_count) + ':K' + str(v_rows-1),
+                        '\n'.join(panel_names),
+                        vcenter_format)
 
-            row_count = v_rows
+                row_count = v_rows
 
     workbook.close()
     # rewind the buffer
