@@ -23,6 +23,8 @@ import os
 import getpass
 import requests
 import json
+import time
+import jwt
 import labkey as lk
 from ..config import load_config
 
@@ -85,7 +87,7 @@ class PollAPI(object):
         self.config = load_config.LoadConfig().load()
         self.api = api
         self.endpoint = endpoint
-        if self.config['use_active_directory'] == "True":
+        if self.config['beta_testing'] == "True":
             cip_api_url = "https://cipapi-gms-beta.genomicsengland.nhs.uk/api/2/{endpoint}"
         else:
             cip_api_url = "https://cipapi.genomicsengland.nhs.uk/api/2/{endpoint}"
@@ -119,6 +121,9 @@ class PollAPI(object):
         self.response_json = None  # set upon calling get_json_response()
         self.response_status = None
 
+        self.cipapi_token = None
+        self.cipapi_token_decoded = None
+
     def get_json_response(self, content=False):
         """
         Creates a request session which polls the desired API for JSON.
@@ -150,18 +155,16 @@ class PollAPI(object):
             # server/endpoint and the set headers. Finally, if headers are not
             # required, we can call the GET response immediately without
             # setting headers first.
-            if (self.headers_required) and (self.headers is None) and (self.api.startswith('cip_api')):
-                # get auth headers if we need them and they're not yet set
+            if (self.headers_required) and (self.api.startswith('cip_api')):
+                # get auth headers, do this every time, if token is already set method will check if it's expired
+                # and refresh if necessary
                 self.get_auth_headers()
-                continue
             elif (self.headers_required) and (self.headers is None) and (self.api == 'genenames'):
                 self.get_headers()
-                continue
             elif (self.headers_required) and (self.headers is None) and (self.api == 'ensembl'):
                 self.get_headers()
-                continue
-            elif (self.headers_required) and (self.headers is not None):
-                # auth headers required; have been set
+            if (self.headers_required) and (self.headers is not None):
+                # headers required; have been set
                 response = session.get(
                     url=self.url,
                     headers=self.headers)
@@ -186,6 +189,21 @@ class PollAPI(object):
 
                 return response.json()
 
+    def token_expired(self):
+        """
+        If a cipapi JWT token is set, this method will check it's expiry time.
+
+        If the token is expired, or within 60 seconds of expiry, the method will return True
+
+        Returns:
+            Boolean
+        """
+        if self.cipapi_token:
+            # Check if it's expired or within 60 seconds of expiry
+            if time.time() > (self.cipapi_token_decoded['exp'] - 60):
+                return True
+            return False
+
     def get_auth_headers(self):
         """
         Creates a CIP-API token, then creates Accept/Auth header accordingly.
@@ -207,32 +225,35 @@ class PollAPI(object):
 
         self.token_url = self.server.format(endpoint=token_endpoint)
         self.get_credentials()
+        # If self.headers not set, or token has expired, fetch a new token and set header
+        if not self.headers or self.token_expired():
+            if self.config['use_active_directory'] == "True":
+                token_response = requests.post(
+                    url="https://login.microsoftonline.com/{tenant_id}/oauth2/token".format(
+                        tenant_id=os.environ["tenant_id"]),
+                    data="grant_type=client_credentials",
+                    headers={'Content-Type': "application/x-www-form-urlencoded",},
+                    auth=(os.environ["client_id"], os.environ["client_secret"])
+                )
+                token_json = token_response.json()
+                self.cipapi_token = token_json.get("access_token")
+                self.cipapi_token_decoded = jwt.decode(self.cipapi_token, verify=False)
+            else:
+                token_response = requests.post(
+                    url=self.token_url,
+                    json=dict(
+                        username=os.environ["cip_api_username"],
+                        password=os.environ["cip_api_password"]
+                    ),
+                )
+                token_json = token_response.json()
+                self.cipapi_token = token_json.get("token")
+                self.cipapi_token_decoded = jwt.decode(self.cipapi_token, verify=False)
 
-        if self.config['use_active_directory'] == "True":
-            token_response = requests.post(
-                url="https://login.microsoftonline.com/{tenant_id}/oauth2/token".format(
-                    tenant_id=os.environ["tenant_id"]),
-                data="grant_type=client_credentials",
-                headers={'Content-Type': "application/x-www-form-urlencoded",},
-                auth=(os.environ["client_id"], os.environ["client_secret"])
-            )
-            token_json = token_response.json()
-            token = token_json.get("access_token")
-        else:
-            token_response = requests.post(
-                url=self.token_url,
-                json=dict(
-                    username=os.environ["cip_api_username"],
-                    password=os.environ["cip_api_password"]
-                ),
-            )
-            token_json = token_response.json()
-            token = token_json.get("token")
-        
-        self.headers = {
-            "Accept": "application/json",
-            "Authorization": "JWT {token}".format(
-                token=token)}
+            self.headers = {
+                "Accept": "application/json",
+                "Authorization": "JWT {token}".format(
+                    token=self.cipapi_token)}
 
     def get_headers(self):
         """
