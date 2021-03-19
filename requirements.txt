@@ -28,7 +28,7 @@ django-filter==1.1.0
 django-nose==1.4.5
 django-rest-framework==0.1.0
 django-reversion==2.0.13
-djangorestframework==3.7.7
+djangorestframework==3.11.2
 docutils==0.14
 entrypoints==0.2.3
 factory-boy==2.10.0
